@@ -81,7 +81,8 @@ The representation of the realm returned by the read operations e.g. `get` and `
 
 ## Procedures
 
-### bondy.realm.create(input_data) {.wamp-procedure}
+
+### bondy.realm.create(input_data) -> realm() {.wamp-procedure}
 Creates a new realm based on `input_data`. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
 Publishes an event under topic [bondy_realm_created](#bondy-realm-created){.uri} after the realm has been created.
@@ -90,7 +91,7 @@ Publishes an event under topic [bondy_realm_created](#bondy-realm-created){.uri}
 This call is only available to sessions attached to the Master Realm and with `wamp.call` permission on the uri or pattern matching the uri.
 :::
 
-### bondy.realm.get(uri) {.wamp-procedure}
+### bondy.realm.get(uri()) -> realm() {.wamp-procedure}
 
 Foo
 
@@ -148,11 +149,11 @@ Foo
 ```
 :::
 
-### bondy.realm.update(uri, data) {.wamp-procedure}
+### bondy.realm.update(uri(), input_data()) {.wamp-procedure}
 
 ### bondy.realm.list() {.wamp-procedure}
 
-### bondy.realm.delete(uri; force) {.wamp-procedure}
+### bondy.realm.delete(uri(); force=boolean()) {.wamp-procedure}
 ::: warning ADMIN AUTHORIZATION
 This call is only available when the session is attached to the Master Realm
 :::
