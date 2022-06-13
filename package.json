@@ -1,0 +1,19 @@
+{
+  "name": "bondy_docs",
+  "version": "1.0.0",
+  "description": "Bondy Documentation website",
+  "main": "index.js",
+  "repository": "https://github.com/bondy-io/bondy_docs.git",
+  "author": "Alejandro M. Ramallo",
+  "license": "CC BY-SA 4.0",
+  "private": false,
+  "devDependencies": {
+    "vitepress": "^1.0.0-alpha.1",
+    "vitepress-plugin-mermaid": "^0.0.9"
+  },
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs"
+  }
+}

@@ -1,0 +1,115 @@
+:root {
+    --vp-c-brand: #000000;
+    --vp-c-brand-light: #323232;
+    --vp-c-text-1: #656565;
+    --vp-button-alt-bg: hwb(0 89% 11%);
+    --vp-c-bg-alt: #f9f9f9;
+    /* --vp-font-family-base: 'Montserrat', sans-serif; */
+  }
+
+
+.dark {
+  --vp-c-brand: #FFFFFF;
+  --vp-c-brand-light: #656565;
+  --vp-button-alt-bg: hwb(0 89% 11%);
+  --vp-c-text-1: #656565;
+}
+
+
+.logo {
+    margin-right: 20px;
+    margin-left: -15px;
+    height: 55px !important;
+}
+
+
+.datatype{
+  background-color:#eeeeeef8;
+  border-left-color: #727272 !important;
+  border-left-style: solid;
+  border-left-width: 3px !important;
+  border:1px solid hsla(0,0%,46.3%,.3);
+  display:inline-block;
+  font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+  font-size:1.0rem !important;
+  font-weight:700;
+  margin-top:20px;
+  margin-bottom:20px;
+  min-width:320px;
+  padding:0.5em;
+  width:100%;
+  width:49100%8px;
+}
+
+.wamp-procedure{
+  background-color:#eeeeeef8;
+  border-left-color: #727272 !important;
+  border-left-style: solid;
+  border-left-width: 3px !important;
+  border:1px solid hsla(0,0%,46.3%,.3);
+  display:inline-block;
+  font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+  font-size:1.0rem !important;
+  font-weight:700;
+  margin-top:20px;
+  margin-bottom:20px;
+  min-width:320px;
+  padding:0.5em;
+  width:100%;
+  width:49100%8px;
+}
+
+.wamp-topic{
+  background-color:#eeeeeef8;
+  border-left-color: #727272 !important;
+  border-left-style: solid;
+  border-left-width: 3px !important;
+  border:1px solid hsla(0,0%,46.3%,.3);
+  display:inline-block;
+  font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+  font-size:1.0rem !important;
+  font-weight:700;
+  margin-top:20px;
+  margin-bottom:20px;
+  min-width:320px;
+  padding:0.5em;
+  width:100%;
+  width:49100%8px;
+}
+
+.wamp-procedure-since{
+  position:relative;
+  top:-55px;
+  left:93%;
+  font-size:0.9rem !important;
+}
+
+.uri {
+  font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+  font-size:0.95rem;
+}
+
+.table-of-contents {
+  font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+  font-size:0.9rem !important;
+}
+
+.definition > p {
+  /* color: #000000 !important; */
+  /* font-style: italic; */
+  font-size:1.2rem !important;
+}
+
+table.property-table > thead > tr > th {
+  font-size: 14px;
+  background-color: #858585f8;
+  line-height: 10px;
+  color: white;
+}
+
+table.property-table > tbody > tr > td {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+
