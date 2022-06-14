@@ -124,11 +124,39 @@ export default {
   function guidesSidebar() {
     return [
         {
-          text: 'Guides',
+          text: 'Getting Started',
+          collapsible: true,
           items: [
-            { text: 'Get Bondy', link: '/guides/get_bondy' },
-            { text: 'Getting Started', link: '/guides/getting_started'},
-
+            { text: 'Get Bondy', link: '/guides/getting_started/get_bondy' },
+            { text: 'Getting Started', link: '/guides/getting_started/index'}
+          ]
+        },
+        {
+          text: 'Configuration',
+          collapsible: true,
+          items: [
+            { text: 'Configuration Basics', link: '/guides/configuration/configuration_basics.md'}
+          ]
+        },
+        {
+          text: 'Administration',
+          collapsible: true,
+          items: [
+            { text: 'Simplifying realm management using prototypes', link: '/guides/administration/simplifying_realm_management_using_prototypes'}
+          ]
+        },
+        {
+          text: 'Security',
+          collapsible:true,
+          items: [
+            { text: 'TLS configuration', link: '/guides/security/tls_configuration'}
+          ]
+        },
+        {
+          text: 'Deployment',
+          collapsible: true,
+          items: [
+            { text: 'Running a cluster', link: '/guides/deployment/running_a_cluster'}
           ]
         }
     ]
@@ -142,8 +170,8 @@ export default {
           items: [
             { text: 'What is Bondy', link: '/concepts/what_is_bondy' },
             { text: 'WAMP', link: '/concepts/what_is_wamp' },
-            { text: 'Same Sign-on', link: '/concepts/same_sign_on' },
-            { text: 'Single Sign-one', link: '/concepts/single_sign_on' },
+            { text: 'Same Sign-on', link: ' j' },
+            { text: 'Single Sign-on', link: '/concepts/single_sign_on' },
           ]
         }
     ]
@@ -158,6 +186,13 @@ export default {
           items: [
             { text: 'Introduction', link: '/reference/wamp_api/index' },
             { text: 'Realm', link: '/reference/wamp_api/realm' },
+            { text: 'User', link: '/reference/wamp_api/user' },
+            { text: 'Source', link: '/reference/wamp_api/source' },
+            { text: 'Group', link: '/reference/wamp_api/group' },
+            { text: 'Grant', link: '/reference/wamp_api/grant' },
+            { text: 'Ticket', link: '/reference/wamp_api/ticket' },
+            { text: 'OAuth2 Token', link: '/reference/wamp_api/oauth2_token' },
+            { text: 'Cluster', link: '/reference/wamp_api/cluster' }
 
 
           ]
