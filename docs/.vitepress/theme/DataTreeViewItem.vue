@@ -7,17 +7,15 @@
             <span class="value-tag">{{ data.required ? 'REQUIRED' : '' }}</span>
             <span class="value-tag">{{ data.mutable ? '' : 'IMMUTABLE' }}</span>
             <div class="object-description">{{ data.description }}</div>
+            <div v-if="data.default" class="object-description value-default">
+            <i>Default: <code>{{ data.default }}</code></i>
+            </div>
           <button
             v-if="data.type === 'object' || data.arrayType === 'object' || data.arrayType === 'array'"
             class="property-toggle"
             :aria-expanded="state.open ? 'true' : 'false'"
             @click.stop="toggleOpen"
             >
-            <!-- <code>{{ data.key }}</code>
-            <span class="value-type">{{ data.type }}</span>
-            <span class="value-tag">{{ data.required ? 'REQUIRED' : '' }}</span>
-            <span class="value-tag">{{ data.mutable ? '' : 'IMMUTABLE' }}</span> -->
-            <!-- <span class="properties">{{ lengthString }}</span> -->
             <div :class="classes"></div>
             {{ state.open ? 'Hide properties' : 'Show properties'}}
         </button>
@@ -47,7 +45,10 @@
        <span class="value-type">{{ data.type }}</span>
        <span class="value-tag">{{ data.required ? 'REQUIRED' : '' }}</span>
        <span class="value-tag">{{ data.mutable ? '' : 'IMMUTABLE' }}</span>
-       <div class="value-description">{{ data.description }}</div>
+       <div class="value-description ">{{ data.description }}</div>
+        <div v-if="data.default" class="value-default">
+          <i>Default: {{ data.default }}</i>
+        </div>
 
     </div>
   </div>
@@ -93,6 +94,7 @@ export type ItemData = {
   required?: boolean;
   mutable?: boolean;
   description?: string;
+  default?: string,
   path: string;
   depth: number;
   length?: number;
@@ -234,6 +236,7 @@ export default defineComponent({
    margin-right: 10px;
 	 border-radius: 2px;
 	 white-space: nowrap;
+   color: var(--vp-c-text-code);
 
 }
 .value-description {
@@ -245,13 +248,24 @@ export default defineComponent({
   padding: 5px 5px 5px 10px;
   white-space: normal;
 }
+
+.value-default{
+  font-size: 15px;
+  border-radius: 2px;
+  font-weight: 400;
+  letter-spacing:0.15px;
+  margin-left: 10px;
+  padding: 0px 5px 5px 10px;
+  white-space: normal;
+}
+
 .object-description {
-     font-size: 16px;
-	 font-weight: 400;
-     letter-spacing:0.15px;
-	 border-radius: 2px;
-	 white-space: normal;
-	 padding: 5px 5px 5px 10px;
+border-radius: 2px;
+font-size: 16px;
+font-weight: 400;
+letter-spacing:0.15px;
+padding: 5px 5px 5px 10px;
+white-space: normal;
 }
  .value-key.can-select {
 	 cursor: pointer;

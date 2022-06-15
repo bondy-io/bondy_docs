@@ -110,6 +110,7 @@ export default defineComponent({
                     required: value.required ?? false,
                     mutable: value.mutable ?? true,
                     description: value.description ?? "",
+                    default: value.default,
                     depth,
                     path,
                     length: children.length,
@@ -123,6 +124,7 @@ export default defineComponent({
                     required: value.required ?? false,
                     mutable: value.mutable ?? true,
                     description: value.description ?? "",
+                    default: value.default,
                     path: includeKey ? `${path}${key}` : path.slice(0, -1),
                     depth
                 };
@@ -162,6 +164,7 @@ export default defineComponent({
                 required: value.required ?? false,
                 mutable: value.mutable ?? true,
                 description: value.description ?? "",
+                default: value.default,
                 path: includeKey ? `${path}${key}` : path.slice(0, -1),
                 depth
             };
