@@ -59,7 +59,7 @@ To leanr more about this topic review the [Sigle Sign-on page](/concepts/single_
 
 ## Types
 ### input_data(){.datatype}
-The object use to create a realm.
+The object used to create a realm. Notice this object contains more information than the actually create realm e.g. users, groups, etc.
 
 <DataTreeView :data="inputData" :maxDepth="10" />
 
@@ -85,7 +85,7 @@ The representation of the realm returned by the read operations e.g. `get` and `
 
 ### Create a realm
 ### bondy.realm.create(input_data) -> realm() {.wamp-procedure}
-Creates a new realm based on `input_data`. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
+Creates a new realm based on [`input_data`](#input-data). The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
 Publishes an event under topic [bondy_realm_created](#bondy-realm-created){.uri} after the realm has been created.
 
