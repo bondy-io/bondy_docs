@@ -82,7 +82,7 @@ This call is only available to sessions attached to the Master Realm and with `w
 <DataTreeView :data="createArgs" :maxDepth="10" />
 
 ##### Keyword Args
-No content.
+None.
 
 #### Result
 
@@ -91,15 +91,27 @@ No content.
 <DataTreeView :data="createResult" :maxDepth="10" />
 
 ##### Keyword Args
-No content.
+None.
 
 ### bondy.realm.get(uri()) -> [realm()] {.wamp-procedure}
 
 #### Call
 
 ##### Positional Args
+
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to retrieve.'
+		}
+	})"
+/>
+
 ##### Keyword Args
-No content.
+None.
 
 #### Result
 
@@ -109,7 +121,7 @@ The call result is a single positional argument containing  a realm:
 <DataTreeView :data="realm" :maxDepth="10" />
 
 ##### Keyword Args
-No content.
+None.
 
 #### Examples
 
@@ -480,9 +492,47 @@ No content.
 
 
 ### bondy.realm.delete(uri(); force=boolean()) {.wamp-procedure}
+Deletes the realm and all its associated objects.
+
+This call fails with an error if the realm has associated users. To override this behaviour use the `force` option.
 ::: warning ADMIN AUTHORIZATION
 This call is only available when the session is attached to the Master Realm
 :::
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to delete.'
+		}
+	})"
+/>
+
+##### Keyword Args
+
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'force':{
+			'type': 'boolean',
+			'required': false,
+			'default': false,
+			'description' : 'Force the deletion of the realm, even if the realm still has associated users.'
+		}
+	})"
+/>
+
+#### Result
+##### Positional Args
+None.
+
+##### Keyword Args
+None.
 
 ### bondy.realm.security.is_enabled(uri) {.wamp-procedure}
 Returns `true` if security is enabled for the realm identified with `uri`. Otherwise returns `false`.
