@@ -56,6 +56,7 @@
 </template>
 
 <script lang="ts">
+
 import {
   computed,
   defineComponent,
@@ -64,6 +65,7 @@ import {
   SetupContext,
 } from "vue";
 import { then, when } from "switch-ts";
+import { MarkdownIt } from "markdown-it";
 
 export interface SelectedData {
   key: string;
@@ -232,7 +234,7 @@ export default defineComponent({
 }
 .value-type {
      font-size: 15px;
-     font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+     font-family: var(--vp-font-family-mono);
 	 font-weight: 400;
 	 margin-left: 5px;
    margin-right: 10px;
@@ -291,7 +293,7 @@ export default defineComponent({
     font-size: 14px;
     color:#BD4B27;
     margin-right:5px;
-    font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+    font-family: var(--vp-font-family-mono);
 }
  .data-key {
      margin-left: 15px;

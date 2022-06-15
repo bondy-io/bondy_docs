@@ -18,6 +18,25 @@
   --vp-c-text-1: #656565;
 }
 
+h4 {
+  margin-top:30px;
+  margin-bottom:20px;
+  padding-top: 10px;
+  text-transform: uppercase;
+  font-family: var(--vp-font-family-mono);
+}
+
+h5 {
+  margin-top:20px;
+  margin-bottom:20px;
+  padding-top: 24px;
+  font-size: 13px;
+  text-transform: uppercase;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: black;
+}
+
 
 .logo {
     margin-right: 20px;
@@ -26,14 +45,15 @@
 }
 
 
+
 .datatype{
-  background-color:#eeeeeef8;
+  background-color:#f1f1f1;
   border-left-color: #727272 !important;
   border-left-style: solid;
-  border-left-width: 3px !important;
+  border-left-width: 2px !important;
   border:1px solid hsla(0,0%,46.3%,.3);
   display:inline-block;
-  font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+  font-family: var(--vp-font-family-mono);
   font-size:1.0rem !important;
   font-weight:700;
   margin-top:20px;
@@ -45,13 +65,13 @@
 }
 
 .wamp-procedure{
-  background-color:#eeeeeef8;
+  background-color:#f1f1f1;
   border-left-color: #727272 !important;
   border-left-style: solid;
-  border-left-width: 3px !important;
+  border-left-width: 2px !important;
   border:1px solid hsla(0,0%,46.3%,.3);
   display:inline-block;
-  font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+  font-family: var(--vp-font-family-mono);
   font-size:1.0rem !important;
   font-weight:700;
   margin-top:20px;
@@ -63,13 +83,13 @@
 }
 
 .wamp-topic{
-  background-color:#eeeeeef8;
+  background-color:#f1f1f1;
   border-left-color: #727272 !important;
   border-left-style: solid;
-  border-left-width: 3px !important;
+  border-left-width: 2px !important;
   border:1px solid hsla(0,0%,46.3%,.3);
   display:inline-block;
-  font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+  font-family: var(--vp-font-family-mono);
   font-size:1.0rem !important;
   font-weight:700;
   margin-top:20px;
@@ -88,12 +108,12 @@
 }
 
 .uri {
-  font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+  font-family: var(--vp-font-family-mono);
   font-size:0.95rem;
 }
 
 .table-of-contents {
-  font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+  font-family: var(--vp-font-family-mono);
   font-size:0.9rem !important;
 }
 

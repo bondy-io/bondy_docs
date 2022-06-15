@@ -64,7 +64,6 @@ export default defineComponent({
       if (value instanceof Object) {
         const schemaType = value.type;
 
-
         if(schemaType === undefined) {
             // root object
             const children =
