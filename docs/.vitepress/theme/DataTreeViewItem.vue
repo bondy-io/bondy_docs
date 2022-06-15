@@ -1,6 +1,6 @@
 <template>
   <div class="data-tree-item">
-    <div v-if="data.type === 'object' || data.type === 'array'">
+    <div v-if="data.type === 'object' || data.type === 'array'" :style="valueStyle">
       <div v-if="data.key != '/'" class="data-key">
             <code>{{ data.key }}</code>
             <span v-if="data.type === 'array'" class="value-type">{{ data.type + "[" + data.arrayType + "]" }}</span>
@@ -128,7 +128,8 @@ export default defineComponent({
   },
   setup(props: Props, context: SetupContext) {
     const state = reactive({
-      open: props.data.depth < props.maxDepth,
+      // open: props.data.depth < props.maxDepth,
+      open: props.data.depth < 1
     });
 
     function toggleOpen(): void {
