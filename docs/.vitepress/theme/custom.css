@@ -34,7 +34,7 @@ h5 {
   text-transform: uppercase;
   border-bottom-style: solid;
   border-bottom-width: 1px;
-  border-bottom-color: black;
+  border-bottom-color: #989898;
 }
 
 
@@ -62,6 +62,7 @@ h5 {
   padding:0.5em;
   width:100%;
   width:49100%8px;
+  color:#323232f5;
 }
 
 .wamp-procedure{
@@ -69,7 +70,7 @@ h5 {
   border-left-color: #727272 !important;
   border-left-style: solid;
   border-left-width: 2px !important;
-  border:1px solid hsla(0,0%,46.3%,.3);
+  border:1px solid rgba(147, 147, 147, 0.3);
   display:inline-block;
   font-family: var(--vp-font-family-mono);
   font-size:1.0rem !important;
@@ -80,6 +81,7 @@ h5 {
   padding:0.5em;
   width:100%;
   width:49100%8px;
+  color:#323232f5;
 }
 
 .wamp-topic{
@@ -98,6 +100,7 @@ h5 {
   padding:0.5em;
   width:100%;
   width:49100%8px;
+  color:#323232f5;
 }
 
 .wamp-procedure-since{
