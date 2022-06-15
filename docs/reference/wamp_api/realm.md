@@ -9,6 +9,8 @@ In Bondy a realm is represented by a control plane object.
 
 Realms (and the associated users, credentials, groups, sources and permissions) are persisted to disk and replicated across the cluster by Bondy's control plane data replication procedures.
 
+![Bondy Realm Diagram](/assets/realm_diagram.png)
+
 ### Realm Security
 
 A realm's security may be checked, enabled, or disabled by an administrator through the WAMP and HTTP APIs. This allows an administrator to change security settings of a realm on the whole cluster quickly without needing to change settings on a node-by-node basis.
