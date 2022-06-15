@@ -80,6 +80,9 @@ export default defineComponent({
             return {
                 key,
                 type: "object",
+                required: value.required ?? false,
+                mutable: value.mutable ?? true,
+                description: value.description ?? "",
                 depth,
                 path,
                 length: children.length,

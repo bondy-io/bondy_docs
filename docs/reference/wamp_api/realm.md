@@ -39,14 +39,14 @@ The following is the list of properties which a realm inherits from a prototype 
 - `sso_realm_uri`
 - `authmethods`
 
-In addition realms inherit Groups, Sources and Grants from their prototype.
+In addition **realms inherit Groups, Sources and Grants** from their prototype.
 
 The following are the inheritance rules:
 
 1. Users cannot be defined at the prototype i.e. no user inheritance.
 2. A realm has access to all groups defined in the prototype i.e. from a realm perspective the prototype groups operate in the same way as if they have been defined in the realm itself. This enables roles (users and groups) in a realm to be members of groups defined in the prototype.
-3. A group defined in a realm overrides any homonyms group in the prototype. This works at all levels of the group membership chain.
-4. The previous rule does not apply to the special group all'. Permissions granted to **all** are merged between a realm and its prototype.
+3. A group defined in a realm overrides any homonym group in the prototype. This works at all levels of the group membership chain.
+4. The previous rule does not apply to the special group `all`. Permissions granted to `all` are merged between a realm and its prototype.
 
 ## Same Sign-on
 Bondy SSO (Same Sign-on) is a feature that allows users to access multiple realms using just one set of credentials.
@@ -54,6 +54,8 @@ It is enabled by setting the realm's `sso_realm_uri` property during realm creat
 
 - It requires the user to authenticate when opening a session in a realm.
 - Changing credentials e.g. updating password can be performed while connected to any realm.
+
+To leanr more about this topic review the [Sigle Sign-on page](/concepts/single_sign_on).
 
 ## Types
 ### input_data(){.datatype}
@@ -66,14 +68,27 @@ The representation of the realm returned by the read operations e.g. `get` and `
 
 ## Procedures
 
+|Name|URI|
+|:---|:---|
+|[Create a realm](#create-a-realm)|`bondy.realm.create`
+|[Retrieve a realm](#retrieve-a-realm)|`bondy.realm.get`
+||`bondy.realm.update`|
+||`bondy.realm.list`|
+||`bondy.realm.delete`|
+||`bondy.realm.security.is_enabled`|
+||`bondy.realm.security.enable`|
+||`bondy.realm.security.disable`|
+||`bondy.realm.security.status`|
 
+
+### Create a realm
 ### bondy.realm.create(input_data) -> realm() {.wamp-procedure}
 Creates a new realm based on `input_data`. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
 Publishes an event under topic [bondy_realm_created](#bondy-realm-created){.uri} after the realm has been created.
 
-::: warning ADMIN AUTHORIZATION
-This call is only available to sessions attached to the Master Realm and with `wamp.call` permission on the uri or pattern matching the uri.
+::: warning AUTHORIZATION
+This call is only available to sessions attached to the **Master Realm** with `wamp.call` permission.
 :::
 
 #### Call
@@ -84,6 +99,7 @@ This call is only available to sessions attached to the Master Realm and with `w
 ##### Keyword Args
 None.
 
+
 #### Result
 
 ##### Positional Args
@@ -93,6 +109,7 @@ None.
 ##### Keyword Args
 None.
 
+### Retrieve a realm
 ### bondy.realm.get(uri()) -> [realm()] {.wamp-procedure}
 
 #### Call
