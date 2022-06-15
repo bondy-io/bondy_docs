@@ -59,7 +59,9 @@ To leanr more about this topic review the [Sigle Sign-on page](/concepts/single_
 
 ## Types
 ### input_data(){.datatype}
+The object use to create a realm.
 
+<DataTreeView :data="inputData" :maxDepth="10" />
 
 ### realm(){.datatype}
 The representation of the realm returned by the read operations e.g. `get` and `list`.
@@ -581,7 +583,7 @@ Realm security is `enabled` by default.
 
 
 <script>
-const realm = {
+const realmCommon = {
 	"uri": {
 		"type": "string",
 		"required": true,
@@ -607,19 +609,19 @@ const realm = {
 		"mutable": false,
 		"description": "If present, this it the URI of the the realm prototype this realm inherits some of its behaviour and features from."
 	},
-	"sso_realm_uri": {
-		"type": "string",
-		"required": false,
-		"mutable": false,
-		"description": "If present, this it the URI of the SSO Realm this realm is connected to. Once a realm has been associated with an SSO realm it cannot be changed.",
-		"default": "The realm's prototype value if the realm inherits from a prototype (see prototype_uri), otherwise undefined."
-	},
 	"is_sso_realm": {
 		"type": "boolean",
 		"required": true,
 		"mutable": true,
 		"description": "If true this realm is an SSO Realm. Once a realm has been designated as an SSO realm it cannot be changed.",
 		"default": "false"
+	},
+	"sso_realm_uri": {
+		"type": "string",
+		"required": false,
+		"mutable": false,
+		"description": "If present, this it the URI of the SSO Realm this realm is connected to. Once a realm has been associated with an SSO realm it cannot be changed.",
+		"default": "The realm's prototype value if the realm inherits from a prototype (see prototype_uri), otherwise undefined."
 	},
 	"allow_connections": {
 		"type": "boolean",
@@ -638,12 +640,6 @@ const realm = {
 			"type": "string",
 			"description": "Foo"
 		}
-	},
-	"security_status": {
-		"type": "string",
-		"required": false,
-		"mutable": true,
-		"description": "The string 'enabled' if enabled is true. Otherwise the string is 'disabled'."
 	},
 	"public_keys": {
 		"type": "array",
@@ -717,11 +713,87 @@ const realm = {
 };
 
 // TODO add other options
-const inputData = realm;
+const inputDataDelta = {
+	"is_security_enabled" : {
+		"type": "boolean",
+		"required": false,
+		"mutable": true,
+		"description": "Wether security is enabled or not."
+	},
+	"private_keys" :  {
+		"type": "array",
+		"required": false,
+		"mutable": true,
+		"description": "A list of private keys used for signing.",
+		"items": {
+			"type": "PrivateKey"
+		}
+	},
+	"encryption_keys" :  {
+		"type": "array",
+		"required": false,
+		"mutable": true,
+		"description": "A list of private keys used for encryption.",
+		"items": {
+			"type": "PrivateKey"
+		}
+	},
+	"users" :  {
+		"type": "array",
+		"required": false,
+		"mutable": true,
+		"description": "A list of user objects.",
+		"items": {
+			"type": "User"
+		}
+	},
+	"groups" :  {
+		"type": "array",
+		"required": false,
+		"mutable": true,
+		"description": "A list of group objects.",
+		"items": {
+			"type": "Group"
+		}
+	},
+	"sources" :  {
+		"type": "array",
+		"required": false,
+		"mutable": true,
+		"description": "A list of source objects.",
+		"items": {
+			"type": "Source"
+		}
+	},
+	"grants" :  {
+		"type": "array",
+		"required": false,
+		"mutable": true,
+		"description": "A list of grant objects.",
+		items: {
+			type : "Grant"
+		}
+	}
+};
+
+const inputData = {...realmCommon, ...inputDataDelta};
+
+const realmDelta = {
+	"security_status" :  {
+		"type": "string",
+		"required": false,
+		"mutable": true,
+		"description": "The string 'enabled' if enabled is true. Otherwise the string is 'disabled'."
+	}
+
+};
+const realm = {...realmCommon, ...realmDelta};
+
 
 export default {
 	data() {
         return {
+			inputData: JSON.stringify(inputData),
             realm: JSON.stringify(realm),
 			createArgs: JSON.stringify({
 				0: {
