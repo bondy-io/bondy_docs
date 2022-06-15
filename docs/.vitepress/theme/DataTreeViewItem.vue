@@ -5,7 +5,7 @@
             <code>{{ data.key }}</code>
             <span v-if="data.type === 'array'" class="value-type">{{ data.type + "[" + data.arrayType + "]" }}</span>
             <span v-else class="value-type">{{ data.type }}</span>
-            <span class="value-tag">{{ data.required ? 'REQUIRED' : '' }}</span>
+            <span class="value-tag red">{{ data.required ? 'REQUIRED' : '' }}</span>
             <span class="value-tag">{{ data.mutable ? '' : 'IMMUTABLE' }}</span>
             <div class="object-description">{{ data.description }}</div>
             <div v-if="data.default" class="object-default">
@@ -44,7 +44,7 @@
     >
        <span class="value-key"><code>{{ data.key }}</code></span>
        <span class="value-type">{{ data.type }}</span>
-       <span class="value-tag">{{ data.required ? 'REQUIRED' : '' }}</span>
+       <span class="value-tag red">{{ data.required ? 'REQUIRED' : '' }}</span>
        <span class="value-tag">{{ data.mutable ? '' : 'IMMUTABLE' }}</span>
        <div class="value-description ">{{ data.description }}</div>
         <div v-if="data.default" class="value-default">
@@ -291,10 +291,13 @@ export default defineComponent({
 }
 .value-tag{
     font-size: 14px;
-    color:#BD4B27;
-    margin-right:5px;
+    margin-right:10px;
     font-family: var(--vp-font-family-mono);
 }
+.red{
+ color:#BD4B27;
+}
+
  .data-key {
      margin-left: 15px;
      font-size: 16px;
