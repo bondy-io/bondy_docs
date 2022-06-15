@@ -175,7 +175,7 @@ export default defineComponent({
 
      if(props.data.depth > 1) {
         let margin = (props.data.depth - 1) *36;
-        let border = "border-left-color: #727272 !important;border-left-style: solid;border-left-width: 0.15px !important;";
+        let border = "border-left-color: #D2D2D2 !important;border-left-style: solid;border-left-width: 0.15px !important;";
         return `margin-left:${margin}px; ${border}`;
      } else {
          return '';
@@ -219,36 +219,36 @@ export default defineComponent({
     /* border-left-width: 1px; */
 }
 .value-key {
-     font-size: 16px;
-     /* margin-left: 10px; */
-	 border-radius: 2px;
-	 white-space: nowrap;
-	 padding: 5px 5px 5px 10px;
+  font-size: 16px;
+  border-radius: 2px;
+  white-space: nowrap;
+  padding: 5px 5px 5px 10px;
 }
 .value-type {
      font-size: 15px;
      font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
 	 font-weight: 400;
-	 margin-left: 0px;
+	 margin-left: 5px;
+   margin-right: 10px;
 	 border-radius: 2px;
 	 white-space: nowrap;
-	 padding: 5px 5px 5px 10px;
+
 }
 .value-description {
-     font-size: 16px;
-    font-weight: 400;
-    letter-spacing:0.15px;
-     margin-left: 10px;
-	 border-radius: 2px;
-	 white-space: nowrap;
-	 padding: 5px 5px 5px 10px;
+  border-radius: 2px;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing:0.15px;
+  margin-left: 10px;
+  padding: 5px 5px 5px 10px;
+  white-space: normal;
 }
 .object-description {
      font-size: 16px;
 	 font-weight: 400;
      letter-spacing:0.15px;
 	 border-radius: 2px;
-	 white-space: nowrap;
+	 white-space: normal;
 	 padding: 5px 5px 5px 10px;
 }
  .value-key.can-select {
