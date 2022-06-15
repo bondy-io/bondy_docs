@@ -3,12 +3,13 @@
     <div v-if="data.type === 'object' || data.type === 'array'">
       <div v-if="data.key != '/'" class="data-key">
             <code>{{ data.key }}</code>
-            <span class="value-type">{{ data.type }}</span>
+            <span v-if="data.type === 'array'" class="value-type">{{ data.type + "[" + data.arrayType + "]" }}</span>
+            <span v-else class="value-type">{{ data.type }}</span>
             <span class="value-tag">{{ data.required ? 'REQUIRED' : '' }}</span>
             <span class="value-tag">{{ data.mutable ? '' : 'IMMUTABLE' }}</span>
             <div class="object-description">{{ data.description }}</div>
-            <div v-if="data.default" class="object-description value-default">
-            <i>Default: <code>{{ data.default }}</code></i>
+            <div v-if="data.default" class="object-default">
+            <i>Default: {{ data.default }}</i>
             </div>
           <button
             v-if="data.type === 'object' || data.arrayType === 'object' || data.arrayType === 'array'"
@@ -260,12 +261,21 @@ export default defineComponent({
 }
 
 .object-description {
-border-radius: 2px;
-font-size: 16px;
-font-weight: 400;
-letter-spacing:0.15px;
-padding: 5px 5px 5px 10px;
-white-space: normal;
+  border-radius: 2px;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing:0.15px;
+  padding: 5px 5px 5px 10px;
+  white-space: normal;
+}
+
+.object-default{
+  font-size: 15px;
+  border-radius: 2px;
+  font-weight: 400;
+  letter-spacing:0.15px;
+  padding: 0px 5px 5px 10px;
+  white-space: normal;
 }
  .value-key.can-select {
 	 cursor: pointer;
@@ -279,6 +289,7 @@ white-space: normal;
 .value-tag{
     font-size: 14px;
     color:#BD4B27;
+    margin-right:5px;
     font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
 }
  .data-key {

@@ -120,7 +120,7 @@ export default defineComponent({
                 return {
                     key,
                     type: 'array',
-                    arrayTtype: value.items.type,
+                    arrayType: value.items.type,
                     required: value.required ?? false,
                     mutable: value.mutable ?? true,
                     description: value.description ?? "",
