@@ -63,22 +63,7 @@ It is enabled by setting the realm's `sso_realm_uri` property during realm creat
 ### realm(){.datatype}
 The representation of the realm returned by the read operations e.g. `get` and `list`.
 
-|Name|Type|Attrs|Description|
-|:---|---|---|---|
-|**uri**| `uri`|`required` `immutable`| The realm identifier|
-|**description**| `string`|| A textual description of the realm.|
-|**is_prototype**| boolean| immutable| If `true` this realm is a realm used as a prototype.Prototype realms cannot be used by themselves. Once a realm has been designated as a prototype it cannot be changed.<br><i>Default: `false`</i>|
-|**prototype_uri**|uri||If present, this it the URI of the the realm prototype this realm inherits some of its behaviour and features from|
-|**sso_realm_uri**|uri||If present, this it the URI of the SSO Realm this realm is connected to. Once a realm has been associated with an SSO realm it cannot be changed.<br><i>Default: the realm's prototype value if the realm inherits from a prototype (see `prototype_uri`), otherwise undefined.</i>|
-|**is_sso_realm**|boolean|immutable|If `true` this realm is an SSO Realm. Once a realm has been designated as an SSO realm it cannot be changed.<br><i>Default: `false`</i>|
-|**allow_connections**| boolean||If `true` this realm is allowing connections from clients. It is normally set to `false` when the realm is an SSO Realm. Prototype realms never allow connections.<br><i>Default: the realm's prototype value if the realm inherits from a prototype (see `prototype_uri`). Otherwise `true`.</i>|
-|**authmethods**| array(string)||The list of the authentication methods allowed by this realm.<br><i>Default: `[anonymous, trust, password, ticket, oauth2, wampcra, cryptosign]`</i>|
-|**security_status**|string||The string **enabled** if enabled is true. Otherwise the string is **disabled**.|
-|**public_keys**|array(value)||A list of [JWK](jwk) values.
-|**password_opts**|map||The password options to be used as default when adding users to the realm|
-
-
-{.property-table}
+<DataTreeView :data="realm" :maxDepth="10" />
 
 ## Procedures
 
@@ -92,14 +77,44 @@ Publishes an event under topic [bondy_realm_created](#bondy-realm-created){.uri}
 This call is only available to sessions attached to the Master Realm and with `wamp.call` permission on the uri or pattern matching the uri.
 :::
 
-### bondy.realm.get(uri()) -> realm() {.wamp-procedure}
+#### Call
 
-Foo
+##### Positional Args
+##### Keyword Args
+No content.
+
+#### Result
+
+##### Positional Args
+
+<DataTreeView :data="createResult" :maxDepth="10" />
+
+##### Keyword Args
+No content.
+
+### bondy.realm.get(uri()) -> [realm()] {.wamp-procedure}
+
+#### Call
+
+##### Positional Args
+##### Keyword Args
+No content.
+
+#### Result
+
+##### Positional Args
+The call result is a single positional argument containing  a realm:
+
+<DataTreeView :data="realm" :maxDepth="10" />
+
+##### Keyword Args
+No content.
 
 #### Examples
 
-::: details Realm created successfully | JSON
-```json
+::: details Realm created successfully [JSON]
+
+```javascript
 {
 	"uri": "com.example.test",
 	"description": "A test realm",
@@ -154,6 +169,315 @@ Foo
 
 ### bondy.realm.list() {.wamp-procedure}
 
+::: details Example Result [JSON]
+```javascript
+[
+    {
+        "authmethods": [
+            "wampcra",
+            "anonymous",
+            "password",
+            "trust"
+        ],
+        "description": "The Bondy Master realm",
+        "is_prototype": false,
+        "is_sso_realm": false,
+        "password_opts": {
+            "params": {
+                "iterations": 10000,
+                "kdf": "pbkdf2"
+            },
+            "protocol": "cra"
+        },
+        "public_keys": [
+            {
+                "crv": "P-256",
+                "kid": "128116552",
+                "kty": "EC",
+                "x": "3Nl3CmBWDBnOXLPnfdI-tJVZbG_0oGEINrEswDSaaQM",
+                "y": "mbistOgdGNfjGuM6E-IdUZ1r245-5H3-yL2BUm005Hg"
+            },
+            {
+                "crv": "P-256",
+                "kid": "19671252",
+                "kty": "EC",
+                "x": "T9hg9GOiJji9VILQyypKta0e3DKlhRrWnK_0aW36Cfk",
+                "y": "fnV4QAfattr-ky5xSvc87pM4wfnJcnKS_4EYjqknN48"
+            },
+            {
+                "crv": "P-256",
+                "kid": "39128489",
+                "kty": "EC",
+                "x": "YqI61nD4OpDb2r5dOgkddeClYVGBTXb-2jFSN01Mgq0",
+                "y": "sJ_Noey9m_mtFXJLBBdiCQ0xVyhlDKIIKCh8maeWRWc"
+            }
+        ],
+        "security_status": "enabled",
+        "uri": "com.leapsight.bondy"
+    },
+    {
+        "allow_connections": true,
+        "authmethods": [
+            "cryptosign",
+            "wampcra",
+            "ticket"
+        ],
+        "description": "A test realm",
+        "is_prototype": false,
+        "is_sso_realm": false,
+        "password_opts": {
+            "params": {
+                "iterations": 10000,
+                "kdf": "pbkdf2"
+            },
+            "protocol": "cra"
+        },
+        "public_keys": [
+            {
+                "crv": "P-256",
+                "kid": "33524152",
+                "kty": "EC",
+                "x": "o1cp0-BEer7-83IJnrLlQF2vMsC4-p865y_PYbUnh0U",
+                "y": "m4KH851AIVkxLPnyEPb-HAFPnI4HWzHZDH6uYODgUFg"
+            },
+            {
+                "crv": "P-256",
+                "kid": "33806473",
+                "kty": "EC",
+                "x": "_027ZsIM3qF4meq-NKkcMjfEFXrP_m9Rf4hvRJUFk24",
+                "y": "4onurxZAIxqOc4wGSx18Hb8_VM4tepVWoylwwLcYqOY"
+            },
+            {
+                "crv": "P-256",
+                "kid": "46076726",
+                "kty": "EC",
+                "x": "Td_a_OxHKaG9GN90mDN_ztmBoGRgxm37UAXEkv6ONeE",
+                "y": "CMLiG2fcHL-uM-VCvg54nflMw3IVtFOUWKIstMcUcEc"
+            }
+        ],
+        "security_status": "enabled",
+        "sso_realm_uri": "com.leapsight.sso",
+        "uri": "com.leapsight.test_1"
+    },
+    {
+        "allow_connections": true,
+        "authmethods": [
+            "cryptosign",
+            "wampcra",
+            "ticket"
+        ],
+        "description": "A test realm",
+        "is_prototype": false,
+        "is_sso_realm": false,
+        "password_opts": {
+            "params": {
+                "iterations": 10000,
+                "kdf": "pbkdf2"
+            },
+            "protocol": "cra"
+        },
+        "public_keys": [
+            {
+                "crv": "P-256",
+                "kid": "122308677",
+                "kty": "EC",
+                "x": "X1Re0aJaKBYBKavtHHzjVoOcMuB1Il3L--oVBCIVse8",
+                "y": "QEJEd36cyMYoh2mZvX6y1TQ1gYf0l89HIj8OZpj9gyE"
+            },
+            {
+                "crv": "P-256",
+                "kid": "134200500",
+                "kty": "EC",
+                "x": "Da6LJMUF91CXBcFbrbQONoviFaobF20o_XVj092LKMY",
+                "y": "OyIY99J789NHKfYlhlzK4X5Iux18Ghs5YaJ04vxUwXE"
+            },
+            {
+                "crv": "P-256",
+                "kid": "98270293",
+                "kty": "EC",
+                "x": "ElQOShI0xqJbAT5KJ1MgCMzzr7IlrP9DZFiv5uoQgqQ",
+                "y": "MK0COTzwvH9da4aKtAFkoWmvh7fgAUqW_8EXKj5-vCo"
+            }
+        ],
+        "security_status": "enabled",
+        "sso_realm_uri": "com.leapsight.sso",
+        "uri": "com.leapsight.test_2"
+    },
+    {
+        "allow_connections": false,
+        "authmethods": [
+            "cryptosign",
+            "wampcra"
+        ],
+        "description": "A test realm",
+        "is_prototype": false,
+        "is_sso_realm": true,
+        "password_opts": {
+            "params": {
+                "iterations": 10000,
+                "kdf": "pbkdf2"
+            },
+            "protocol": "cra"
+        },
+        "public_keys": [
+            {
+                "crv": "P-256",
+                "kid": "29257788",
+                "kty": "EC",
+                "x": "XH0ww1p6w-rEruIA82mkZOCD_zMDJIBfHVrU7AfV_m4",
+                "y": "140OhdeBqptXAt1TpTDubrVpkAt3z8Xe5Ca8rmQ_pUw"
+            },
+            {
+                "crv": "P-256",
+                "kid": "30467900",
+                "kty": "EC",
+                "x": "JT3ftrZmD3VyrvxsaRmgcsmaTKE-nrJ0zp5xCh0pnS8",
+                "y": "GVr32Te7dAGhKz-JHajksBio4DGfnBXgCRMvZqsQBGI"
+            },
+            {
+                "crv": "P-256",
+                "kid": "91434376",
+                "kty": "EC",
+                "x": "z1MBM-Kmv9m_MfpdJgTR-5SQRe1NCXFX7gBhuvse1_Y",
+                "y": "mMZ1AewL2hSGbUtcm2Z06U2_XymNT6D89SP5mvgIyT0"
+            }
+        ],
+        "security_status": "enabled",
+        "uri": "com.leapsight.sso"
+    },
+    {
+        "description": "A test realm",
+        "is_prototype": false,
+        "is_sso_realm": false,
+        "password_opts": {
+            "params": {
+                "iterations": 10000,
+                "kdf": "pbkdf2"
+            },
+            "protocol": "cra"
+        },
+        "prototype_uri": "com.leapsight.test.proto",
+        "public_keys": [
+            {
+                "crv": "P-256",
+                "kid": "109453414",
+                "kty": "EC",
+                "x": "fPuKjLMb2hyMN_AWX6qAbGbhBSguDICAq-UMBHyVDDE",
+                "y": "F2Oi9S_loNMWOWlnMn_LeQvAPI3AUXIPpn-VTt8YNck"
+            },
+            {
+                "crv": "P-256",
+                "kid": "70190073",
+                "kty": "EC",
+                "x": "ZbsvGGWnxq9grIDgEv35K44OtezAvCabRiRNYd1nRU4",
+                "y": "aLFBQyLPtGY5jNrOWu2tfDf_YK92KpsEtEKKzIFGZho"
+            },
+            {
+                "crv": "P-256",
+                "kid": "71347183",
+                "kty": "EC",
+                "x": "NcEOakYR-t9U3z5t4Ws3no3nk2YdhszaN-XpSgbgi3E",
+                "y": "GhbiXvLZPC8XOUWA-Zo0TKFpXr1Se8dNzrwWNloi1kQ"
+            }
+        ],
+        "security_status": "enabled",
+        "uri": "com.leapsight.test.inheritance"
+    },
+    {
+        "authmethods": [
+            "cryptosign",
+            "wampcra",
+            "anonymous",
+            "oauth2",
+            "password",
+            "trust",
+            "ticket"
+        ],
+        "description": "A test realm",
+        "is_prototype": false,
+        "is_sso_realm": false,
+        "password_opts": {
+            "params": {
+                "iterations": 10000,
+                "kdf": "pbkdf2"
+            },
+            "protocol": "cra"
+        },
+        "public_keys": [
+            {
+                "crv": "P-256",
+                "kid": "28821883",
+                "kty": "EC",
+                "x": "35dxB-NVWz4bXcC_XeV-ikfL6Vn3FgsAn6MZDwClOB8",
+                "y": "A99cPIU6x1Rxw4IyfcSyu6GxQ4KzQHaStdWP7QKUIVU"
+            },
+            {
+                "crv": "P-256",
+                "kid": "5640599",
+                "kty": "EC",
+                "x": "AEjB2EC5kchCFuylw7Qcna4ERPGzkogcoInYLEQI1Co",
+                "y": "5GoNsIhylGs4sogoLP7DOKrdU4OO2p-dwWDz3wVCYSA"
+            },
+            {
+                "crv": "P-256",
+                "kid": "81638418",
+                "kty": "EC",
+                "x": "jHJMWbqcWPemB7X-a1eZ1ctcoTAxdJqffp1Yil_Pbqc",
+                "y": "u5mQGe24nprq1rzVvXOMeqk7h7-43AYsMgWIaNxQZTM"
+            }
+        ],
+        "security_status": "enabled",
+        "uri": "com.leapsight.test"
+    },
+    {
+        "allow_connections": true,
+        "authmethods": [
+            "cryptosign",
+            "wampcra",
+            "ticket"
+        ],
+        "description": "A test prototype realm",
+        "is_prototype": true,
+        "is_sso_realm": false,
+        "password_opts": {
+            "params": {
+                "iterations": 10000,
+                "kdf": "pbkdf2"
+            },
+            "protocol": "cra"
+        },
+        "public_keys": [
+            {
+                "crv": "P-256",
+                "kid": "106052618",
+                "kty": "EC",
+                "x": "5sP3cIu6I3ZfGB7IfmifEByZ89sLk9d1RK712C_xwek",
+                "y": "crYZ5LqCJoHDicylRFQn6kG77L1IgelDysAk1nIceVM"
+            },
+            {
+                "crv": "P-256",
+                "kid": "4239631",
+                "kty": "EC",
+                "x": "_3BNiNCrxNqg4NBhRMIkci0zCBD7fB54y-l_VZ3GT3E",
+                "y": "B51Yq27FP7ttwFctWpeG6OK8GIMV6MRSBFDi00EZbhg"
+            },
+            {
+                "crv": "P-256",
+                "kid": "74648249",
+                "kty": "EC",
+                "x": "2Aj7LNfDi1lnc1Xqm5v1X0Lo6PDGbJXjaGnfUI-qZl4",
+                "y": "RqNo7Ye0Kdb3y4d08k_aumM5WhD0fkknJL2zn_9AUrI"
+            }
+        ],
+        "security_status": "enabled",
+        "sso_realm_uri": "com.leapsight.sso",
+        "uri": "com.leapsight.test.proto"
+    }
+]
+```
+:::
+
+
 ### bondy.realm.delete(uri(); force=boolean()) {.wamp-procedure}
 ::: warning ADMIN AUTHORIZATION
 This call is only available when the session is attached to the Master Realm
@@ -186,3 +510,156 @@ Realm security is `enabled` by default.
 ## Topics
 
 ### bondy.realm.created{.wamp-topic}
+
+
+<script>
+const realm = {
+	"uri": {
+		"type": "string",
+		"required": true,
+		"mutable": false,
+		"description": "The realm identifier"
+	},
+	"description": {
+		"type": "string",
+		"required": true,
+		"mutable": true,
+		"description": "A textual description of the realm."
+	},
+	"is_prototype": {
+		"type": "boolean",
+		"required": true,
+		"mutable": true,
+		"description": "If true this realm is a realm used as a prototype.Prototype realms cannot be used by themselves. Once a realm has been designated as a prototype it cannot be changed.",
+		"default": "false"
+	},
+	"prototype_uri": {
+		"type": "string",
+		"required": false,
+		"mutable": false,
+		"description": "If present, this it the URI of the the realm prototype this realm inherits some of its behaviour and features from."
+	},
+	"sso_realm_uri": {
+		"type": "string",
+		"required": false,
+		"mutable": false,
+		"description": "If present, this it the URI of the SSO Realm this realm is connected to. Once a realm has been associated with an SSO realm it cannot be changed.",
+		"default": "The realm's prototype value if the realm inherits from a prototype (see prototype_uri), otherwise undefined."
+	},
+	"is_sso_realm": {
+		"type": "boolean",
+		"required": true,
+		"mutable": true,
+		"description": "If true this realm is an SSO Realm. Once a realm has been designated as an SSO realm it cannot be changed.",
+		"default": "false"
+	},
+	"allow_connections": {
+		"type": "boolean",
+		"required": true,
+		"mutable": false,
+		"description": "If true this realm is allowing connections from clients. It is normally set to false when the realm is an SSO Realm. Prototype realms never allow connections.",
+		"default": "true"
+	},
+	"authmethods": {
+		"type": "array",
+		"required": true,
+		"mutable": true,
+		"description": "The list of the authentication methods allowed by this realm.",
+		"default": "['anonymous', 'trust', 'password', 'ticket', 'oauth2', 'wampcra', 'cryptosign']",
+		"items" : {
+			"type": "string",
+			"description": "Foo"
+		}
+	},
+	"security_status": {
+		"type": "string",
+		"required": false,
+		"mutable": true,
+		"description": "The string 'enabled' if enabled is true. Otherwise the string is 'disabled'."
+	},
+	"public_keys": {
+		"type": "array",
+		"required": false,
+		"mutable": true,
+		"description": "A list of JSON Web Keys (JWK) values.",
+		"items" : {
+			"type" : "object",
+			"description": "JWK",
+			"properties" : {
+				"crv": {
+					"type" : "string",
+					"description" : "The algorithm name"
+				},
+				"kid": {
+					"type" : "string",
+					"description" : "The key identifier"
+				},
+				"kty": {
+					"type" : "string",
+					"description" : "The algorithm family"
+				},
+				"x": {
+					"type" : "string",
+					"description" : "Curve value for X"
+				},
+				"y": {
+					"type" : "string",
+					"description" : "Curve value for Y"
+				}
+			}
+		}
+	},
+	"password_opts": {
+		"type": "object",
+		"required": true,
+		"mutable": false,
+		"description": "The password options that will be used as default when adding users to the realm.",
+		"properties" : {
+			"protocol" : {
+				"type": "string",
+				"required": true,
+				"description": "Either the value 'cra' or 'scram'.",
+				"default": "Defined by configuration parameter 'security.password.protocol'."
+			},
+			"params" : {
+				"type": "object",
+				"required": true,
+				"description": "The protocol-specific parameters",
+				"properties" : {
+					"kdf" : {
+						"type": "string",
+						"required": true,
+						"description": "The key derivation function to use. Either the value 'pbkdf2' or 'argoin2id13'.",
+						"default": "Defined by configuration parameter 'security.password.scram.kdf'."
+					},
+					"iterations" : {
+						"type": "integer",
+						"required": false,
+						"description": "The number of iterations to perform."
+					},
+					"memory" : {
+						"type": "integer",
+						"required": false,
+						"description": "The memory to use."
+					}
+				}
+			}
+		}
+	}
+};
+export default {
+	data() {
+        return {
+            realm: JSON.stringify(realm),
+			createResult: JSON.stringify({
+				0: {
+					"type": "object",
+					"description": "The created realm.",
+					"mutable": true,
+					"properties" : realm
+					}
+			})
+		}
+	}
+};
+</script>

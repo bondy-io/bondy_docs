@@ -5,26 +5,11 @@ Blabblabla
 
 <DataTreeView :data="session" :maxDepth="10" />
 
-`code`
 
 <script>
-
 export default {
     data() {
         return {
-            // session: `{
-            //     "name" : {
-            //         "description": "The name of the thing",
-            //         "type": "string",
-            //         "required": true,
-            //         "mutable": true
-            //     },
-            //     "thing" : {
-            //         "a": "foo",
-            //         "b": 100,
-            //         "c": true
-            //     }
-            // }`,
             session: `{
                 "name" : {
                     "description": "The name of the thing",
