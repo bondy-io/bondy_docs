@@ -4,8 +4,10 @@
     --vp-c-text-1: #656565;
     --vp-button-alt-bg: hwb(0 89% 11%);
     --vp-c-bg-alt: #f9f9f9;
-    --vp-c-text-code: black;
+    --vp-c-text-code: rgb(30, 30, 30);
     /* --vp-font-family-base: 'Montserrat', sans-serif; */
+    --vp-font-family-mono: 'SF Mono','Inconsolata','Menlo','Courier',monospace;
+    --vp-code-font-size: 15px;
   }
 
 

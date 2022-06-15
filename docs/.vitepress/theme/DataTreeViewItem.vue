@@ -1,6 +1,6 @@
 <template>
   <div class="data-tree-item">
-    <div v-if="data.type === 'object' || data.type.startsWith('array')">
+    <div v-if="data.type === 'object' || data.type === 'array'">
       <div v-if="data.key != '/'" class="data-key">
             <code>{{ data.key }}</code>
             <span class="value-type">{{ data.type }}</span>
@@ -8,6 +8,7 @@
             <span class="value-tag">{{ data.mutable ? '' : 'IMMUTABLE' }}</span>
             <div class="object-description">{{ data.description }}</div>
           <button
+            v-if="data.type === 'object' || data.arrayType === 'object' || data.arrayType === 'array'"
             class="property-toggle"
             :aria-expanded="state.open ? 'true' : 'false'"
             @click.stop="toggleOpen"
@@ -88,6 +89,7 @@ export type ValueTypes =
 export type ItemData = {
   key: string;
   type: string;
+  arrayType?: string;
   required?: boolean;
   mutable?: boolean;
   description?: string;

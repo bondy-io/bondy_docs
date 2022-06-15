@@ -105,7 +105,8 @@ export default defineComponent({
 
                 return {
                     key,
-                    type: 'array[' + value.items.type + ']',
+                    type: 'array',
+                    arrayType: value.items.type,
                     required: value.required ?? false,
                     mutable: value.mutable ?? true,
                     description: value.description ?? "",
@@ -117,7 +118,8 @@ export default defineComponent({
             } else {
                 return {
                     key,
-                    type: 'array[' + value.items.type + ']',
+                    type: 'array',
+                    arrayTtype: value.items.type,
                     required: value.required ?? false,
                     mutable: value.mutable ?? true,
                     description: value.description ?? "",
