@@ -9,11 +9,11 @@ In Bondy a realm is represented by a control plane object.
 
 Realms (and the associated users, credentials, groups, sources and permissions) are persisted to disk and replicated across the cluster by Bondy's control plane data replication procedures.
 
-#### Realm Security
+### Realm Security
 
 A realm's security may be checked, enabled, or disabled by an administrator through the WAMP and HTTP APIs. This allows an administrator to change security settings of a realm on the whole cluster quickly without needing to change settings on a node-by-node basis.
 
-#### Bondy Master Realm
+### Bondy Master Realm
 When you start Bondy for the first time it creates and stores the Bondy Master realm a.k.a `com.leapsight.bondy`. This realm is the root realm which allows an admin user to create, list, modify and delete other realms. The realm can be customised either through the `bondy.conf` file or dynamically using this API.
 
 However, the master realm has some limitations:
@@ -22,9 +22,8 @@ However, the master realm has some limitations:
 * It cannot use [Inheritance](#inheritance)
 * It cannot use [Same Sign-on](#same-sign-on)
 
-#### User Realms
+### User Realms
 As a Bondy administrator you can dynamically create any number of realms.
-
 
 ## Inheritance
 A **Prototype Realm** is a realm that acts as a prototype for the construction of other realms. A prototype realm is a normal realm whose property `is_prototype` has been set to true.
@@ -80,6 +79,8 @@ This call is only available to sessions attached to the Master Realm and with `w
 #### Call
 
 ##### Positional Args
+<DataTreeView :data="createArgs" :maxDepth="10" />
+
 ##### Keyword Args
 No content.
 
@@ -112,7 +113,7 @@ No content.
 
 #### Examples
 
-::: details Realm created successfully [JSON]
+::: details Result [JSON]
 
 ```javascript
 {
@@ -556,7 +557,7 @@ const realm = {
 	"allow_connections": {
 		"type": "boolean",
 		"required": true,
-		"mutable": false,
+		"mutable": true,
 		"description": "If true this realm is allowing connections from clients. It is normally set to false when the realm is an SSO Realm. Prototype realms never allow connections.",
 		"default": "true"
 	},
@@ -647,10 +648,22 @@ const realm = {
 		}
 	}
 };
+
+// TODO add other options
+const inputData = realm;
+
 export default {
 	data() {
         return {
             realm: JSON.stringify(realm),
+			createArgs: JSON.stringify({
+				0: {
+					"type": "object",
+					"description": "The realm configuration data",
+					"mutable": true,
+					"properties" : inputData
+					}
+			}),
 			createResult: JSON.stringify({
 				0: {
 					"type": "object",
