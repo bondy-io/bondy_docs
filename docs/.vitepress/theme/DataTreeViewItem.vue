@@ -34,7 +34,8 @@
     </div>
     <div
       v-else
-    :class="valueClasses"
+      :style="valueStyle"
+      :class="valueClasses"
       :role="canSelect ? 'button' : undefined"
       :tabindex="canSelect ? '0' : undefined"
       @click="onClick(data)"
@@ -157,6 +158,7 @@ export default defineComponent({
         .default(then("var(--jtv-valueKey-color)"));
     }
 
+
     const classes = computed((): unknown => {
       return {
         "chevron-arrow": true,
@@ -169,6 +171,16 @@ export default defineComponent({
         "can-select": props.canSelect,
       };
     });
+    const valueStyle = computed((): unknown => {
+
+     if(props.data.depth > 1) {
+        let margin = (props.data.depth - 1) *36;
+        let border = "border-left-color: #727272 !important;border-left-style: solid;border-left-width: 0.15px !important;";
+        return `margin-left:${margin}px; ${border}`;
+     } else {
+         return '';
+     }
+    });
     const lengthString = computed((): string => {
       const length = props.data.length;
       if (props.data.type === ItemType.ARRAY) {
@@ -176,11 +188,8 @@ export default defineComponent({
       }
       return length === 1 ? `(${length} property)` : `(${length} properties)`;
     });
-    const dataValue = computed((): string =>
-      props.data.value === undefined
-        ? "undefined"
-        : "Example: " + JSON.stringify(props.data.value)
-    );
+
+
     return {
       state,
       toggleOpen,
@@ -189,9 +198,9 @@ export default defineComponent({
       getKey,
       getValueColor,
       classes,
+      valueStyle,
       valueClasses,
       lengthString,
-      dataValue,
       ItemType,
     };
   },
@@ -204,14 +213,14 @@ export default defineComponent({
 }
 
 .data-tree-item:not(.root-item) {
-    margin-left: 25px;
+    /* margin-left: 25px; */
     border-left-color: #eaeaea;
     /* border-left-style: solid; */
     /* border-left-width: 1px; */
 }
 .value-key {
      font-size: 16px;
-     margin-left: 10px;
+     /* margin-left: 10px; */
 	 border-radius: 2px;
 	 white-space: nowrap;
 	 padding: 5px 5px 5px 10px;
@@ -229,7 +238,7 @@ export default defineComponent({
      font-size: 16px;
     font-weight: 400;
     letter-spacing:0.15px;
-     margin-left: 20px;
+     margin-left: 10px;
 	 border-radius: 2px;
 	 white-space: nowrap;
 	 padding: 5px 5px 5px 10px;
@@ -251,8 +260,13 @@ export default defineComponent({
  .value-key.can-select:focus {
 	 outline: 2px solid var(--jtv-hover-color);
 }
+.value-tag{
+    font-size: 14px;
+    color:#BD4B27;
+    font-family:SF Mono,Inconsolata,Menlo,Courier,monospace;
+}
  .data-key {
-     margin-left: 35px;
+     margin-left: 15px;
      font-size: 16px;
 	 align-items: center;
 	 background-color: transparent;
@@ -274,7 +288,7 @@ export default defineComponent({
     background-color: transparent;
     border-radius: 2px;
     border: 0;
-    color: inherit;
+    color: #BD4B27;
     cursor: pointer;
     display: flex;
     font-family: inherit;
