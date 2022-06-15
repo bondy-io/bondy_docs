@@ -4,6 +4,7 @@
     --vp-c-text-1: #656565;
     --vp-button-alt-bg: hwb(0 89% 11%);
     --vp-c-bg-alt: #f9f9f9;
+    --vp-c-text-code: black;
     /* --vp-font-family-base: 'Montserrat', sans-serif; */
   }
 
@@ -111,5 +112,4 @@ table.property-table > tbody > tr > td {
   font-size: 14px;
   line-height: 20px;
 }
-
 

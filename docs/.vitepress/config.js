@@ -186,6 +186,7 @@ export default {
           items: [
             { text: 'Introduction', link: '/reference/wamp_api/index' },
             { text: 'Realm', link: '/reference/wamp_api/realm' },
+            { text: 'Session', link: '/reference/wamp_api/session' },
             { text: 'User', link: '/reference/wamp_api/user' },
             { text: 'Source', link: '/reference/wamp_api/source' },
             { text: 'Group', link: '/reference/wamp_api/group' },
