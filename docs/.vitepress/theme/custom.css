@@ -55,7 +55,7 @@ h5 {
   display:inline-block;
   font-family: var(--vp-font-family-mono);
   font-size:1.0rem !important;
-  font-weight:700;
+  font-weight:500!important;
   margin-top:20px;
   margin-bottom:20px;
   min-width:320px;
@@ -74,8 +74,8 @@ h5 {
   display:inline-block;
   font-family: var(--vp-font-family-mono);
   font-size:1.0rem !important;
-  font-weight:700;
-  margin-top:20px;
+  font-weight:500!important;
+  margin-top:10px !important;
   margin-bottom:20px;
   min-width:320px;
   padding:0.5em;
@@ -93,7 +93,7 @@ h5 {
   display:inline-block;
   font-family: var(--vp-font-family-mono);
   font-size:1.0rem !important;
-  font-weight:700;
+  font-weight:500!important;
   margin-top:20px;
   margin-bottom:20px;
   min-width:320px;
