@@ -113,6 +113,10 @@ None.
 ##### Keyword Args
 None.
 
+#### Error
+
+[Timeout](/reference/wamp_api/errors/timeout)
+
 ### Retrieve a realm
 ### bondy.realm.get(uri()) -> [realm()] {.wamp-procedure}
 
