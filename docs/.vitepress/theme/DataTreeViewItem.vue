@@ -1,15 +1,20 @@
 <template>
   <div class="data-tree-item">
-    <div v-if="data.type === 'object' || data.type === 'array'" :style="valueStyle">
+    <div
+      v-if="data.type === 'object' || data.type === 'array'"
+      :style="valueStyle">
       <div v-if="data.key != '/'" class="data-key">
             <code>{{ data.key }}</code>
-            <span v-if="data.type === 'array'" class="value-type">{{ data.type + "[" + data.arrayType + "]" }}</span>
+            <span v-if="data.type === 'array'" class="value-type">
+              {{ data.type + "[" + data.arrayType + "]" }}
+            </span>
             <span v-else class="value-type">{{ data.type }}</span>
-            <span class="value-tag red">{{ data.required ? 'REQUIRED' : '' }}</span>
-            <span class="value-tag">{{ data.mutable ? '' : 'IMMUTABLE' }}</span>
+            <span v-if="data.required" class="value-tag red">REQUIRED</span>
+            <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
+            <span v-if="data.computed" class="value-tag">COMPUTED</span>
             <div class="object-description">{{ data.description }}</div>
             <div v-if="data.default" class="object-default">
-            <i>Default: {{ data.default }}</i>
+              <i>Default: {{ data.default }}</i>
             </div>
           <button
             v-if="data.type === 'object' || data.arrayType === 'object' || data.arrayType === 'array'"
@@ -42,14 +47,16 @@
       @keyup.enter="onClick(data)"
       @keyup.space="onClick(data)"
     >
-       <span class="value-key"><code>{{ data.key }}</code></span>
-       <span class="value-type">{{ data.type }}</span>
-       <span class="value-tag red">{{ data.required ? 'REQUIRED' : '' }}</span>
-       <span class="value-tag">{{ data.mutable ? '' : 'IMMUTABLE' }}</span>
-       <div class="value-description ">{{ data.description }}</div>
-        <div v-if="data.default" class="value-default">
-          <i>Default: {{ data.default }}</i>
-        </div>
+      <!-- Root -->
+      <span class="value-key"><code>{{ data.key }}</code></span>
+      <span class="value-type">{{ data.type }}</span>
+      <span v-if="data.required" class="value-tag red">REQUIRED</span>
+      <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
+      <span v-if="data.computed" class="value-tag">COMPUTED</span>
+      <div class="value-description ">{{ data.description }}</div>
+      <div v-if="data.default" class="value-default">
+        <i>Default: {{ data.default }}</i>
+      </div>
 
     </div>
   </div>
@@ -96,6 +103,7 @@ export type ItemData = {
   arrayType?: string;
   required?: boolean;
   mutable?: boolean;
+  computed?: boolean;
   description?: string;
   default?: string,
   path: string;
@@ -186,7 +194,7 @@ export default defineComponent({
         let border = "border-left-color: #D2D2D2 !important;border-left-style: solid;border-left-width: 0.15px !important;";
         return `margin-left:${margin}px; ${border}`;
      } else {
-         return '';
+        return '';
      }
     });
     const lengthString = computed((): string => {
@@ -195,6 +203,16 @@ export default defineComponent({
         return length === 1 ? `(${length} element)` : `(${length} elements)`;
       }
       return length === 1 ? `(${length} property)` : `(${length} properties)`;
+    });
+
+    const isImmutable = computed((): string => {
+      let isMutable = props.data.mutable ?? true;
+      let isComputed = props.data.computed ?? false;
+      if (isMutable == false || isComputed == true) {
+        return true;
+      } else {
+        return false;
+      }
     });
 
 
@@ -210,6 +228,7 @@ export default defineComponent({
       valueClasses,
       lengthString,
       ItemType,
+      isImmutable
     };
   },
 });
@@ -299,21 +318,21 @@ export default defineComponent({
 }
 
  .data-key {
-     margin-left: 15px;
-     font-size: 16px;
-	 align-items: center;
-	 background-color: transparent;
-	 border-radius: 2px;
-	 border: 0;
-	 color: inherit;
-	 cursor: pointer;
-	 display: block;
-	 font-family: inherit;
-	 font-size: inherit;
-	 font-weight: inherit;
-	 padding: 5px;
-	 white-space: nowrap;
-	 width: 100%;
+  margin-left: 15px;
+  font-size: 16px;
+  align-items: center;
+  background-color: transparent;
+  border-radius: 2px;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  padding: 5px;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .property-toggle{

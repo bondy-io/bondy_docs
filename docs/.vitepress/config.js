@@ -193,8 +193,8 @@ export default {
             { text: 'Grant', link: '/reference/wamp_api/grant' },
             { text: 'Ticket', link: '/reference/wamp_api/ticket' },
             { text: 'OAuth2 Token', link: '/reference/wamp_api/oauth2_token' },
-            { text: 'Cluster', link: '/reference/wamp_api/cluster' }
-
+            { text: 'Cluster', link: '/reference/wamp_api/cluster' },
+            { text: 'Errors', link: '/reference/wamp_api/errors/index' }
 
           ]
         }

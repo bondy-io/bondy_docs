@@ -1,11 +1,15 @@
 <!-- From https://github.com/seijikohara/json-tree-view-vue3/blob/main/src/components/JsonTreeView.vue -->
 <template>
+  <div class="wrapper-pre"></div>
+  <div class="wrapper">
   <DataTreeViewItem
     :class="[{ 'data-tree-item': true, dark: colorScheme === 'dark' }]"
     :data="parsed"
     :maxDepth="maxDepth"
     @selected="itemSelected"
   />
+  </div>
+  <div class="wrapper-post"></div>
 </template>
 
 <script lang="ts">
@@ -82,6 +86,7 @@ export default defineComponent({
                 type: "object",
                 required: value.required ?? false,
                 mutable: value.mutable ?? true,
+                computed: value.computed ?? false,
                 description: value.description ?? "",
                 depth,
                 path,
@@ -111,6 +116,7 @@ export default defineComponent({
                     arrayType: value.items.type,
                     required: value.required ?? false,
                     mutable: value.mutable ?? true,
+                    computed: value.computed ?? false,
                     description: value.description ?? "",
                     default: value.default,
                     depth,
@@ -125,6 +131,7 @@ export default defineComponent({
                     arrayType: value.items.type,
                     required: value.required ?? false,
                     mutable: value.mutable ?? true,
+                    computed: value.computed ?? false,
                     description: value.description ?? "",
                     default: value.default,
                     path: includeKey ? `${path}${key}` : path.slice(0, -1),
@@ -151,6 +158,7 @@ export default defineComponent({
                 type: 'object',
                 required: value.required ?? false,
                 mutable: value.mutable ?? true,
+                computed: value.computed ?? false,
                 description: value.description ?? "",
                 depth,
                 path,
@@ -165,6 +173,7 @@ export default defineComponent({
                 type: schemaType,
                 required: value.required ?? false,
                 mutable: value.mutable ?? true,
+                computed: value.computed ?? false,
                 description: value.description ?? "",
                 default: value.default,
                 path: includeKey ? `${path}${key}` : path.slice(0, -1),
@@ -223,5 +232,27 @@ export default defineComponent({
   --jtv-valueKey-color: #fdf6e3;
   --jtv-hover-color: rgba(255, 255, 255, 0.1);
   --jtv-arrow-color: #fdf6e3;
+}
+.wrapper-pre {
+  float:left;
+  height:1px;
+  width:20px;
+  border-style: solid hidden hidden hidden;
+  border-top-color: #D2D2D2 !important;
+  border-top-width: 1px !important;
+}
+.wrapper {
+  padding:10px;
+  border-left-color: #D2D2D2 !important;
+  border-style: hidden hidden hidden solid;
+  border-left-width: 1px !important;
+}
+.wrapper-post {
+  float:left;
+  height:1px;
+  width:20px;
+  border-style: hidden hidden solid hidden;
+  border-bottom-color: #D2D2D2 !important;
+  border-bottom-width: 1px !important;
 }
 </style>
