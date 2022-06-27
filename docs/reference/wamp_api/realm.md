@@ -1,7 +1,6 @@
 # Realm
 > Realms are routing and administrative domains that act as namespaces. All resources in Bondy belong to a Realm. Messages are routed separately for each individual realm so sessions attached to a realm won’t see message routed on another realm. {.definition}
 
-
 ## Description
 The realm is a central and fundamental concept in Bondy. It does not only serve as an authentication and authorization domain but also as a message routing domain. Bondy ensures no messages routed in one realm will leak into another realm.
 
@@ -57,16 +56,18 @@ It is enabled by setting the realm's `sso_realm_uri` property during realm creat
 - It requires the user to authenticate when opening a session in a realm.
 - Changing credentials e.g. updating password can be performed while connected to any realm.
 
-To leanr more about this topic review the [Sigle Sign-on page](/concepts/single_sign_on).
+To learn more about this topic review the [Single Sign-on page](/concepts/single_sign_on).
 
 ## Types
 ### input_data(){.datatype}
-The object used to create a realm. Notice this object contains more information than the actually create realm e.g. users, groups, etc.
+The object used to create or update a realm. Notice this object contains more information than the actually create realm e.g. users, groups, etc.
 
-<DataTreeView :data="inputData" :maxDepth="10" />
+The object represents as overview of the all realm properties but the available properties are detailed in each particular operation.
+
+<DataTreeView :data="inputCreateData" :maxDepth="10" />
 
 ### realm(){.datatype}
-The representation of the realm returned by the read operations e.g. `get` and `list`.
+The representation of the realm returned by the read or write operations e.g. `get`, `list`, `create` or `update`.
 
 <DataTreeView :data="realm" :maxDepth="10" />
 
@@ -76,20 +77,20 @@ The representation of the realm returned by the read operations e.g. `get` and `
 |:---|:---|
 |[Create a realm](#create-a-realm)|`bondy.realm.create`
 |[Retrieve a realm](#retrieve-a-realm)|`bondy.realm.get`
-||`bondy.realm.update`|
-||`bondy.realm.list`|
-||`bondy.realm.delete`|
-||`bondy.realm.security.is_enabled`|
-||`bondy.realm.security.enable`|
-||`bondy.realm.security.disable`|
-||`bondy.realm.security.status`|
+|[Update a realm](#update-a-realm)|`bondy.realm.update`|
+|[List all realms](#list-all-realms)|`bondy.realm.list`|
+|[Delete a realm](#delete-a-realm)|`bondy.realm.delete`|
+|[Retrieve if a realm security is enabled](#retrieve-if-a-realm-security-is-enabled)|`bondy.realm.security.is_enabled`|
+|[Enable realm security](#enable-realm-security)|`bondy.realm.security.enable`|
+|[Disable realm security](#disable-realm-security)|`bondy.realm.security.disable`|
+|[Retrieve a realm security status](#retrieve-a-realm-security-status)|`bondy.realm.security.status`|
 
 
 ### Create a realm
-### bondy.realm.create(input_data) -> realm() {.wamp-procedure}
-Creates a new realm based on [`input_data`](#input-data). The realm is persisted and asynchronously replicated to all the nodes in the cluster.
+### bondy.realm.create(input_data()) -> realm() {.wamp-procedure}
+Creates a new realm based on th provided data. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
-Publishes an event under topic [bondy_realm_created](#bondy-realm-created){.uri} after the realm has been created.
+Publishes an event under topic [bondy.realm.created](#bondy-realm-created){.uri} after the realm has been created.
 
 ::: warning AUTHORIZATION
 This call is only available to sessions attached to the **Master Realm** with `wamp.call` permission.
@@ -103,27 +104,85 @@ This call is only available to sessions attached to the **Master Realm** with `w
 ##### Keyword Args
 None.
 
-
 #### Result
 
-##### Positional Args
-
+##### Positional Results
 <DataTreeView :data="createResult" :maxDepth="10" />
 
-##### Keyword Args
+##### Keyword Results
 None.
 
-#### Error
+#### Errors
 
-[Timeout](/reference/wamp_api/errors/timeout)
+* [bondy.error.already_exists](/reference/wamp_api/errors/already_exists): when the provided uri already exists.
+* [bondy.error.missing_required_value](/reference/wamp_api/errors/missing_required_value): when a required value is not provided
+* [bondy.error.invalid_datatype](/reference/wamp_api/errors/invalid_datatype): when the data type is invalid
+* [bondy.error.invalid_value](/reference/wamp_api/errors/invalid_value): when the data value is invalid
+* [bondy.error.invalid_data](/reference/wamp_api/errors/invalid_data): when the data values are invalid
+* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): for example when the provided `sso_realm_uri` property value doesn't exist or there are some inconsistent property values.
+
+#### Examples
+
+::: details Success Call Creation
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.realm.create \
+'{
+    "uri":"com.leapsight.test_creation_1",
+    "description":"A test creation realm"
+}' | jq
+```
+- Response:
+```json
+{
+  "description": "A test creation realm",
+  "is_prototype": false,
+  "is_sso_realm": false,
+  "password_opts": {
+    "params": {
+      "iterations": 10000,
+      "kdf": "pbkdf2"
+    },
+    "protocol": "cra"
+  },
+  "public_keys": [
+    {
+      "crv": "P-256",
+      "kid": "123260399",
+      "kty": "EC",
+      "x": "cfhg9z_BOPDAEkYDcSFbpJ1jJVqLxTSlrCJDUYRkrxM",
+      "y": "zcdy7H1h1FDzwU8RFeuFxFMve9vCHUFnCOpdbMJfc4o"
+    },
+    {
+      "crv": "P-256",
+      "kid": "130260278",
+      "kty": "EC",
+      "x": "EDPzrOPJofWS1pm6WTI1oaNeJ7ITPz6ZjeTzXyl_8sM",
+      "y": "Ki46MYcsXNb19XwoqMMenWboBAdILYjY2eOBkaAkeyQ"
+    },
+    {
+      "crv": "P-256",
+      "kid": "57089265",
+      "kty": "EC",
+      "x": "x_i6fqY3YkzSBi60pDOPe6nS-fxcQ4AjkrTUOjyPvhM",
+      "y": "8oFJ9bernMMFzcrDBS07QiuL8fIeuqMXT-GrvwKKDZc"
+    }
+  ],
+  "security_status": "enabled",
+  "uri": "com.leapsight.test_creation_1"
+}
+```
+:::
 
 ### Retrieve a realm
-### bondy.realm.get(uri()) -> [realm()] {.wamp-procedure}
+### bondy.realm.get(uri()) -> realm() {.wamp-procedure}
+Retrieves the requested realm uri.
 
 #### Call
 
 ##### Positional Args
-
 <DataTreeView
 	:maxDepth="10"
 	:data="JSON.stringify({
@@ -140,75 +199,120 @@ None.
 
 #### Result
 
-##### Positional Args
-The call result is a single positional argument containing  a realm:
+##### Positional Results
+The call result is a single positional argument containing a realm:
 
 <DataTreeView :data="realm" :maxDepth="10" />
 
-##### Keyword Args
+##### Keyword Results
 None.
+
+#### Errors
+
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
 
 #### Examples
 
-::: details Result [JSON]
-
-```javascript
+::: details Success Call Getting
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.realm.get "com.leapsight.test_creation_1" | jq
+```
+- Response
+```json
 {
-	"uri": "com.example.test",
-	"description": "A test realm",
-	"security_status": "enabled",
-	"sso_realm_uri": null,
-	"is_sso_realm": false,
-	"allow_connections": true,
-	"authmethods": [
-		"cryptosign",
-		"wampcra",
-		"anonymous",
-		"oauth2",
-		"password",
-		"trust",
-		"ticket"
-	],
-	"password_opts": {
-      "params": {
-          "iterations": 10000,
-          "kdf": "pbkdf2"
-      },
-      "protocol": "cra"
+  "description": "A test creation realm",
+  "is_prototype": false,
+  "is_sso_realm": false,
+  "password_opts": {
+    "params": {
+      "iterations": 10000,
+      "kdf": "pbkdf2"
+    },
+    "protocol": "cra"
   },
-	"public_keys": [
-		{
-			"crv": "P-256",
-			"kid": "39904946",
-			"kty": "EC",
-			"x": "jHJMWbqcWPemB7X-a1eZ1ctcoTAxdJqffp1Yil_Pbqc",
-			"y": "u5mQGe24nprq1rzVvXOMeqk7h7-43AYsMgWIaNxQZTM"
-		},
-		{
-			"crv": "P-256",
-			"kid": "77311347",
-			"kty": "EC",
-			"x": "AEjB2EC5kchCFuylw7Qcna4ERPGzkogcoInYLEQI1Co",
-			"y": "5GoNsIhylGs4sogoLP7DOKrdU4OO2p-dwWDz3wVCYSA"
-		},
-		{
-			"crv": "P-256",
-			"kid": "92027690",
-			"kty": "EC",
-			"x": "35dxB-NVWz4bXcC_XeV-ikfL6Vn3FgsAn6MZDwClOB8",
-			"y": "A99cPIU6x1Rxw4IyfcSyu6GxQ4KzQHaStdWP7QKUIVU"
-		}
-	]
+  "public_keys": [
+    {
+      "crv": "P-256",
+      "kid": "123260399",
+      "kty": "EC",
+      "x": "cfhg9z_BOPDAEkYDcSFbpJ1jJVqLxTSlrCJDUYRkrxM",
+      "y": "zcdy7H1h1FDzwU8RFeuFxFMve9vCHUFnCOpdbMJfc4o"
+    },
+    {
+      "crv": "P-256",
+      "kid": "130260278",
+      "kty": "EC",
+      "x": "EDPzrOPJofWS1pm6WTI1oaNeJ7ITPz6ZjeTzXyl_8sM",
+      "y": "Ki46MYcsXNb19XwoqMMenWboBAdILYjY2eOBkaAkeyQ"
+    },
+    {
+      "crv": "P-256",
+      "kid": "57089265",
+      "kty": "EC",
+      "x": "x_i6fqY3YkzSBi60pDOPe6nS-fxcQ4AjkrTUOjyPvhM",
+      "y": "8oFJ9bernMMFzcrDBS07QiuL8fIeuqMXT-GrvwKKDZc"
+    }
+  ],
+  "security_status": "enabled",
+  "uri": "com.leapsight.test_creation_1"
 }
 ```
 :::
 
-### bondy.realm.update(uri(), input_data()) {.wamp-procedure}
+### Update a realm
+### bondy.realm.update(uri(), input_data()) -> realm() {.wamp-procedure}
+Updates the data of the provided realm uri. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
+Publishes an event under topic [bondy.realm.updated](#bondy-realm-updated){.uri} after the realm has been updated.
+
+#### Call
+
+##### Positional Args
+<DataTreeView :data="updateArgs" :maxDepth="10" />
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+<DataTreeView :data="updateResult" :maxDepth="10" />
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [bondy.error.missing_required_value](/reference/wamp_api/errors/missing_required_value): when a required value is not provided
+* [bondy.error.invalid_datatype](/reference/wamp_api/errors/invalid_datatype): when the data type is invalid
+* [bondy.error.invalid_value](/reference/wamp_api/errors/invalid_value): when the data value is invalid
+* [bondy.error.invalid_data](/reference/wamp_api/errors/invalid_data): when the data values are invalid
+* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): for example when the provided `sso_realm_uri` property value doesn't exist or there are some inconsistent property values.
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
+
+#### Examples
+
+::: details Success Call Update
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.realm.update \
+"com.leapsight.test_creation_1" '{"description":"A test updating realm"}' | jq
+```
+- Response:
+```json
+```
+:::
+
+### List all realms
 ### bondy.realm.list() {.wamp-procedure}
 
-::: details Example Result [JSON]
-```javascript
+::: details Example Result
+```json
 [
     {
         "authmethods": [
@@ -553,18 +657,107 @@ This call is only available when the session is attached to the Master Realm
 />
 
 #### Result
-##### Positional Args
+
+##### Positional Results
 None.
 
-##### Keyword Args
+##### Keyword Results
 None.
 
+### Retrieve if a realm security is enabled
 ### bondy.realm.security.is_enabled(uri) {.wamp-procedure}
 Returns `true` if security is enabled for the realm identified with `uri`. Otherwise returns `false`.
 Realm security is `enabled` by default.
 
-### bondy.realm.security.enable(uri) {.wamp-procedure}
+#### Call
 
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to retrieve if the security is enabled or not.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+The call result is a single positional argument containing `true` or `false`
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
+
+#### Examples
+
+::: details Success Call
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.realm.security.is_enabled "com.leapsight.test_creation_1"
+```
+- Response:
+```json
+true
+```
+:::
+
+### Enable realm security
+### bondy.realm.security.enable(uri) {.wamp-procedure}
+Enables the security for the realm identified with `uri`.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to enable the security.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
+
+#### Examples
+
+::: details Success Call
+- Request
+```bash
+/wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.realm.security.enable "com.leapsight.test_creation_1"
+```
+:::
+
+### Disable realm security
 ### bondy.realm.security.disable(uri) {.wamp-procedure}
 Disables security for the realm identified with `uri`.
 
@@ -577,36 +770,123 @@ Users, groups, and other security resources remain available for configuration w
 
 Realm security is enabled by default.
 
+#### Call
 
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to disable the security.'
+		}
+	})"
+/>
 
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
+
+#### Examples
+
+::: details Success Call
+- Request
+```bash
+/wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.realm.security.disable "com.leapsight.test_creation_1"
+```
+:::
+
+### Retrieve a realm security status
 ### bondy.realm.security.status(uri) {.wamp-procedure}
 Returns the security status (`enabled` or `disabled`) for the realm identified by `uri`.
 Realm security is `enabled` by default.
 
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to retrieve if the security status.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+The call result is a single positional argument containing the string `enabled` or `disabled`.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
+
+#### Examples
+
+::: details Success Call
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.realm.security.status "com.leapsight.test_creation_1"
+```
+- Response:
+```json
+"enabled"
+```
+:::
+
 ## Topics
 
 ### bondy.realm.created{.wamp-topic}
-
+### bondy.realm.updated{.wamp-topic}
+### bondy.realm.deleted{.wamp-topic}
 
 <script>
-const realmCommon = {
-	"uri": {
+const realmUri = {
+    "uri": {
 		"type": "string",
 		"required": true,
 		"mutable": false,
 		"description": "The realm identifier"
-	},
+	}
+};
+const realmData = {
 	"description": {
 		"type": "string",
 		"required": true,
 		"mutable": true,
-		"description": "A textual description of the realm."
+		"description": "A textual description of the realm.",
+        "default": ""
 	},
 	"is_prototype": {
 		"type": "boolean",
 		"required": true,
 		"mutable": true,
-		"description": "If true this realm is a realm used as a prototype.Prototype realms cannot be used by themselves. Once a realm has been designated as a prototype it cannot be changed.",
+		"description": "If true this realm is a realm used as a prototype. Prototype realms cannot be used by themselves. Once a realm has been designated as a prototype it cannot be changed.",
 		"default": "false"
 	},
 	"prototype_uri": {
@@ -634,7 +914,7 @@ const realmCommon = {
 		"required": true,
 		"mutable": true,
 		"description": "If true this realm is allowing connections from clients. It is normally set to false when the realm is an SSO Realm. Prototype realms never allow connections.",
-		"default": "true"
+		"default": undefined
 	},
 	"authmethods": {
 		"type": "array",
@@ -643,108 +923,17 @@ const realmCommon = {
 		"description": "The list of the authentication methods allowed by this realm.",
 		"default": "['anonymous', 'trust', 'password', 'ticket', 'oauth2', 'wampcra', 'cryptosign']",
 		"items" : {
-			"type": "string",
-			"description": "Foo"
+			"type": "string"
 		}
 	},
-	"public_keys": {
-		"type": "array",
-		"required": false,
-		"mutable": true,
-		"description": "A list of JSON Web Keys (JWK) values.",
-		"items" : {
-			"type" : "object",
-			"description": "JWK",
-			"properties" : {
-				"crv": {
-					"type" : "string",
-					"description" : "The algorithm name"
-				},
-				"kid": {
-					"type" : "string",
-					"description" : "The key identifier"
-				},
-				"kty": {
-					"type" : "string",
-					"description" : "The algorithm family"
-				},
-				"x": {
-					"type" : "string",
-					"description" : "Curve value for X"
-				},
-				"y": {
-					"type" : "string",
-					"description" : "Curve value for Y"
-				}
-			}
-		}
-	},
-	"password_opts": {
-		"type": "object",
-		"required": true,
-		"mutable": false,
-		"description": "The password options that will be used as default when adding users to the realm.",
-		"properties" : {
-			"protocol" : {
-				"type": "string",
-				"required": true,
-				"description": "Either the value 'cra' or 'scram'.",
-				"default": "Defined by configuration parameter 'security.password.protocol'."
-			},
-			"params" : {
-				"type": "object",
-				"required": true,
-				"description": "The protocol-specific parameters",
-				"properties" : {
-					"kdf" : {
-						"type": "string",
-						"required": true,
-						"description": "The key derivation function to use. Either the value 'pbkdf2' or 'argoin2id13'.",
-						"default": "Defined by configuration parameter 'security.password.scram.kdf'."
-					},
-					"iterations" : {
-						"type": "integer",
-						"required": false,
-						"description": "The number of iterations to perform."
-					},
-					"memory" : {
-						"type": "integer",
-						"required": false,
-						"description": "The memory to use."
-					}
-				}
-			}
-		}
-	}
-};
-
-// TODO add other options
-const inputDataDelta = {
-	"is_security_enabled" : {
+    "security_enabled" : {
 		"type": "boolean",
 		"required": false,
 		"mutable": true,
-		"description": "Wether security is enabled or not."
+		"description": "Wether security is enabled or not.",
+        "default": undefined
 	},
-	"private_keys" :  {
-		"type": "array",
-		"required": false,
-		"mutable": true,
-		"description": "A list of private keys used for signing.",
-		"items": {
-			"type": "PrivateKey"
-		}
-	},
-	"encryption_keys" :  {
-		"type": "array",
-		"required": false,
-		"mutable": true,
-		"description": "A list of private keys used for encryption.",
-		"items": {
-			"type": "PrivateKey"
-		}
-	},
-	"users" :  {
+    "users" :  {
 		"type": "array",
 		"required": false,
 		"mutable": true,
@@ -776,38 +965,54 @@ const inputDataDelta = {
 		"required": false,
 		"mutable": true,
 		"description": "A list of grant objects.",
-		items: {
-			type : "Grant"
+		"items": {
+			"type": "Grant"
+		}
+	},
+    "private_keys" :  {
+		"type": "array",
+		"required": false,
+		"mutable": true,
+		"description": "A list of private keys used for signing.",
+		"items": {
+			"type": "PrivateKey"
+		}
+	},
+	"encryption_keys" :  {
+		"type": "array",
+		"required": false,
+		"mutable": true,
+		"description": "A list of private keys used for encryption.",
+		"items": {
+			"type": "PrivateKey"
 		}
 	}
 };
 
-const inputData = {...realmCommon, ...inputDataDelta};
+const inputCreateData = {...realmUri, ...realmData};
+const inputUpdateData = {...realmData};
 
-const realmDelta = {
-	"security_status" :  {
+const realm = {...realmUri, ...realmData,
+    "security_status" :  {
 		"type": "string",
 		"required": false,
 		"mutable": true,
 		"description": "The string 'enabled' if enabled is true. Otherwise the string is 'disabled'."
 	}
-
 };
-const realm = {...realmCommon, ...realmDelta};
-
 
 export default {
 	data() {
         return {
-			inputData: JSON.stringify(inputData),
+			inputCreateData: JSON.stringify(inputCreateData),
             realm: JSON.stringify(realm),
 			createArgs: JSON.stringify({
 				0: {
 					"type": "object",
 					"description": "The realm configuration data",
 					"mutable": true,
-					"properties" : inputData
-					}
+					"properties" : inputCreateData
+				}
 			}),
 			createResult: JSON.stringify({
 				0: {
@@ -815,7 +1020,29 @@ export default {
 					"description": "The created realm.",
 					"mutable": true,
 					"properties" : realm
-					}
+				}
+			}),
+            inputUpdateData: JSON.stringify(inputUpdateData),
+            updateArgs: JSON.stringify({
+                0: {
+                    "type": "string",
+                    "required": true,
+                    "description" : "The URI of the realm you want to update."
+                },
+				1: {
+					"type": "object",
+					"description": "The realm configuration data",
+					"mutable": true,
+					"properties" : inputUpdateData
+				}
+			}),
+			updateResult: JSON.stringify({
+				0: {
+					"type": "object",
+					"description": "The updated realm.",
+					"mutable": true,
+					"properties" : realm
+				}
 			})
 		}
 	}

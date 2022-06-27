@@ -1,7 +1,11 @@
+# bondy.error.timeout
+>
+
+## Description
 
 
-##### Positional Args
+##### Positional Results
 
 
-##### Keyword Args
+##### Keyword Results
 None.
