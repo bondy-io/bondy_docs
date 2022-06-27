@@ -50,13 +50,7 @@ The representation of the user returned by the read or write operations e.g. `ge
 ### bondy.user.deleted{.wamp-topic}
 
 <script>
-const userData = {
-	"username": {
-		"type": "string",
-		"required": true,
-		"mutable": false,
-		"description": "The user identifier."
-	},
+const authorizationData = {
 	"password": {
 		"type": "string",
 		"required": false,
@@ -66,11 +60,20 @@ const userData = {
 	"authorized_keys": {
 		"type": "array",
 		"required": false,
-		"mutable": false,
+		"mutable": true,
 		"description": "The authorized keys.",
         "items": {
 			"type": "string"
 		}
+	}
+};
+
+const userData = {
+	"username": {
+		"type": "string",
+		"required": true,
+		"mutable": false,
+		"description": "The user identifier."
 	},
 	"groups" :  {
 		"type": "array",
@@ -104,10 +107,32 @@ const userData = {
     }
 };
 
-const inputCreateData = {...userData};
-const inputUpdateData = {...userData};
+const inputCreateData = {...userData, ...authorizationData};
+const inputUpdateData = {...userData, ...authorizationData};
 
-const user = {...userData};
+const user = {...userData,
+	"authorized_keys": {
+		"type": "array",
+		"required": false,
+		"mutable": true,
+		"description": "The authorized keys.",
+        "items": {
+			"type": "string"
+		}
+	},
+	"has_password" :  {
+		"type": "boolean",
+		"required": true,
+		"mutable": true,
+		"description": "If the user has a password."
+	},
+	"has_authorized_keys" :  {
+		"type": "boolean",
+		"required": true,
+		"mutable": true,
+		"description": "If the user has an authorized keys."
+	}
+};
 
 export default {
 	data() {

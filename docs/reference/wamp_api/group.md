@@ -38,6 +38,28 @@ The representation of the group returned by the read or write operations e.g. `g
 
 <script>
 const groupData = {
+	"name": {
+		"type": "string",
+		"required": true,
+		"mutable": false,
+		"description": "The group identifier."
+	},
+	"groups" :  {
+		"type": "array",
+		"required": false,
+		"mutable": true,
+		"description": "A list of group names.",
+		"items": {
+			"type": "string"
+		}
+	},
+	"meta": {
+        "type": "map",
+        "required": true,
+		"mutable": true,
+		"description": "Group metadata.",
+        "default": {}
+    }
 };
 
 const inputCreateData = {...groupData};
