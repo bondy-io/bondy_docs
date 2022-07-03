@@ -85,10 +85,9 @@ The representation of the realm returned by the read or write operations e.g. `g
 |[Disable realm security](#disable-realm-security)|`bondy.realm.security.disable`|
 |[Retrieve a realm security status](#retrieve-a-realm-security-status)|`bondy.realm.security.status`|
 
-
 ### Create a realm
 ### bondy.realm.create(input_data()) -> realm() {.wamp-procedure}
-Creates a new realm based on th provided data. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
+Creates a new realm based on the provided data. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
 Publishes an event under topic [bondy.realm.created](#bondy-realm-created){.uri} after the realm has been created.
 
@@ -301,17 +300,81 @@ None.
 ./wick --url ws://localhost:18080/ws \
 --realm com.leapsight.bondy \
 call bondy.realm.update \
-"com.leapsight.test_creation_1" '{"description":"A test updating realm"}' | jq
+"com.leapsight.test_creation_1" '{"description":"A test updating realm", "allow_connections": false}' | jq
 ```
 - Response:
 ```json
+{
+  "allow_connections": false,
+  "description": "A test updating realm",
+  "is_prototype": false,
+  "is_sso_realm": false,
+  "password_opts": {
+    "params": {
+      "iterations": 10000,
+      "kdf": "pbkdf2"
+    },
+    "protocol": "cra"
+  },
+  "public_keys": [
+    {
+      "crv": "P-256",
+      "kid": "123260399",
+      "kty": "EC",
+      "x": "cfhg9z_BOPDAEkYDcSFbpJ1jJVqLxTSlrCJDUYRkrxM",
+      "y": "zcdy7H1h1FDzwU8RFeuFxFMve9vCHUFnCOpdbMJfc4o"
+    },
+    {
+      "crv": "P-256",
+      "kid": "130260278",
+      "kty": "EC",
+      "x": "EDPzrOPJofWS1pm6WTI1oaNeJ7ITPz6ZjeTzXyl_8sM",
+      "y": "Ki46MYcsXNb19XwoqMMenWboBAdILYjY2eOBkaAkeyQ"
+    },
+    {
+      "crv": "P-256",
+      "kid": "57089265",
+      "kty": "EC",
+      "x": "x_i6fqY3YkzSBi60pDOPe6nS-fxcQ4AjkrTUOjyPvhM",
+      "y": "8oFJ9bernMMFzcrDBS07QiuL8fIeuqMXT-GrvwKKDZc"
+    }
+  ],
+  "security_status": "enabled",
+  "uri": "com.leapsight.test_creation_1"
+}
 ```
 :::
 
 ### List all realms
-### bondy.realm.list() {.wamp-procedure}
+### bondy.realm.list() -> [realm()] {.wamp-procedure}
+Lists all configured realms.
 
-::: details Example Result
+#### Call
+
+##### Positional Args
+None.
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+The call result is a single positional argument containing a list of all realms:
+
+<DataTreeView :data="listResult" :maxDepth="10" />
+
+##### Keyword Results
+None.
+
+::: details Success Call
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.realm.list | jq
+```
+- Response:
 ```json
 [
     {
@@ -914,7 +977,7 @@ const realmData = {
 		"required": true,
 		"mutable": true,
 		"description": "If true this realm is allowing connections from clients. It is normally set to false when the realm is an SSO Realm. Prototype realms never allow connections.",
-		"default": undefined
+		"default": "undefined"
 	},
 	"authmethods": {
 		"type": "array",
@@ -931,7 +994,7 @@ const realmData = {
 		"required": false,
 		"mutable": true,
 		"description": "Wether security is enabled or not.",
-        "default": undefined
+        "default": "undefined"
 	},
     "users" :  {
 		"type": "array",
@@ -1042,6 +1105,17 @@ export default {
 					"description": "The updated realm.",
 					"mutable": true,
 					"properties" : realm
+				}
+			}),
+			listResult: JSON.stringify({
+				0: {
+					"type": "array",
+					"description": "The realms you want to retrieve.",
+					"items" : {
+						"type": "object",
+						"description": "The realm.",
+						"properties": realm
+					}
 				}
 			})
 		}
