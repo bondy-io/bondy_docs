@@ -13,6 +13,8 @@
 * [bondy.error.invalid_datatype](/reference/wamp_api/errors/invalid_datatype): when the data type is invalid.
 * [bondy.error.invalid_value](/reference/wamp_api/errors/invalid_value): when the data value is invalid.
 * [bondy.error.missing_required_value](/reference/wamp_api/errors/missing_required_value): when a required value is not provided.
+* [bondy.error.no_such_groups](/reference/wamp_api/errors/no_such_groups): when there is a group name that doesn't exist.
+* [bondy.error.no_such_users](/reference/wamp_api/errors/no_such_users): when there is a username that doesn't exist.
 * [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the resource with the provided identifier doesn't exist.
 * [bondy.error.not_in_session]():
 * [bondy.error.operation_failed]():
