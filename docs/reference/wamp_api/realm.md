@@ -75,8 +75,8 @@ The representation of the realm returned by the read or write operations e.g. `g
 
 |Name|URI|
 |:---|:---|
-|[Create a realm](#create-a-realm)|`bondy.realm.create`
-|[Retrieve a realm](#retrieve-a-realm)|`bondy.realm.get`
+|[Create a realm](#create-a-realm)|`bondy.realm.create`|
+|[Retrieve a realm](#retrieve-a-realm)|`bondy.realm.get`|
 |[Update a realm](#update-a-realm)|`bondy.realm.update`|
 |[List all realms](#list-all-realms)|`bondy.realm.list`|
 |[Delete a realm](#delete-a-realm)|`bondy.realm.delete`|
@@ -122,7 +122,7 @@ None.
 
 #### Examples
 
-::: details Success Call Creation
+::: details Success Call
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \
@@ -212,7 +212,7 @@ None.
 
 #### Examples
 
-::: details Success Call Getting
+::: details Success Call
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \
@@ -294,7 +294,7 @@ None.
 
 #### Examples
 
-::: details Success Call Update
+::: details Success Call
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \
@@ -682,11 +682,12 @@ call bondy.realm.list | jq
 ```
 :::
 
-
+### Delete a realm
 ### bondy.realm.delete(uri(); force=boolean()) {.wamp-procedure}
 Deletes the realm and all its associated objects.
 
 This call fails with an error if the realm has associated users. To override this behaviour use the `force` option.
+
 ::: warning ADMIN AUTHORIZATION
 This call is only available when the session is attached to the Master Realm
 :::
@@ -726,6 +727,30 @@ None.
 
 ##### Keyword Results
 None.
+
+#### Errors
+
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
+* [bondy.error.active_users](/reference/wamp_api/errors/active_users): when there are associated users and the `force` option is false.
+
+#### Examples
+
+::: details Success Call
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.realm.delete "com.leapsight.test_creation_1"
+```
+:::
+::: details Success Call with force option
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.realm.delete "com.leapsight.test_creation_1" --kwarg force=true
+```
+:::
 
 ### Retrieve if a realm security is enabled
 ### bondy.realm.security.is_enabled(uri) {.wamp-procedure}
@@ -925,8 +950,49 @@ call bondy.realm.security.status "com.leapsight.test_creation_1"
 ## Topics
 
 ### bondy.realm.created{.wamp-topic}
+##### Positional Results
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'description' : 'The URI of the realm you have created.'
+		}
+	})"
+/>
+
+##### Keyword Results
+None.
+
 ### bondy.realm.updated{.wamp-topic}
+##### Positional Results
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'description' : 'The URI of the realm you have updated.'
+		}
+	})"
+/>
+
+##### Keyword Results
+None.
+
 ### bondy.realm.deleted{.wamp-topic}
+##### Positional Results
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'description' : 'The URI of the realm you have deleted.'
+		}
+	})"
+/>
+
+##### Keyword Results
+None.
 
 <script>
 const realmUri = {
