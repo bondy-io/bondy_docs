@@ -21,7 +21,7 @@ The representation of the group returned by the read or write operations e.g. `g
 
 |Name|URI|
 |:---|:---|
-|[Add a group to a realm](#add-a-group-to-a-realm)|`bondy.group.add`
+|[Add a group to a realm](#add-a-group-to-a-realm)|`bondy.group.add`|
 ||`bondy.group.add_group`|
 ||`bondy.group.add_groups`|
 ||`bondy.group.delete`|
@@ -65,7 +65,7 @@ None.
 
 #### Examples
 
-::: details Success Call Simple Creation
+::: details Success Call
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \
@@ -84,7 +84,7 @@ call bondy.group.add \
 }
 ```
 :::
-::: details Success Call with Groups Creation
+::: details Success Call with Groups
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \
@@ -148,7 +148,7 @@ None.
 
 #### Examples
 
-::: details Success Call Getting
+::: details Success Call
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \

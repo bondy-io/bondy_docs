@@ -3,6 +3,7 @@
 
 #### Bondy Error Uris
 
+* [bondy.error.active_users](/reference/wamp_api/errors/active_sers): when the provided resource has associated users.
 * [bondy.error.already_exists](/reference/wamp_api/errors/already_exists): when the provided resource identifier already exists.
 * [bondy.error.badmap]():
 * [bondy.error.bad_gateway]():

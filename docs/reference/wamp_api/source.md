@@ -21,7 +21,7 @@ The representation of the source returned by the read or write operations e.g. `
 
 |Name|URI|
 |:---|:---|
-|[Add a source to a realm](#add-a-source-to-a-realm)|`bondy.source.add`
+|[Add a source to a realm](#add-a-source-to-a-realm)|`bondy.source.add`|
 |[Remove a source from a realm](#remove-a-source-from-a-realm)|`bondy.source.delete`|
 |[Retrieve a source from a realm](#retrieve-a-source-from-a-realm)|`bondy.source.get`|
 |[List all sources from a realm](#list-all-sources-from-a-realm)|`bondy.source.list`|
@@ -60,7 +60,7 @@ None.
 
 #### Examples
 
-::: details Success Call Simple Creation
+::: details Success Call
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \
@@ -137,16 +137,13 @@ None.
 
 #### Examples
 
-::: details Success Call Simple Deletion
+::: details Success Call
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \
 --realm com.leapsight.bondy \
 call bondy.source.delete \
-"com.leapsight.test_creation_1" ["user_2"] "0.0.0.0/0" | jq
-```
-- Response:
-```json
+"com.leapsight.test_creation_1" ["user_2"] "0.0.0.0/0"
 ```
 :::
 

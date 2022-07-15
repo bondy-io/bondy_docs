@@ -27,8 +27,8 @@ The representation of the user returned by the read or write operations e.g. `ge
 
 |Name|URI|
 |:---|:---|
-|[Add a user to a realm](#add-a-user-to-a-realm)|`bondy.user.add`
-||`bondy.user.add_alias`
+|[Add a user to a realm](#add-a-user-to-a-realm)|`bondy.user.add`|
+||`bondy.user.add_alias`|
 ||`bondy.user.add_group`|
 ||`bondy.user.add_groups`|
 ||`bondy.user.change_password`|
@@ -78,7 +78,7 @@ None.
 
 #### Examples
 
-::: details Success Call Simple Creation
+::: details Success Call
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \
@@ -102,7 +102,7 @@ call bondy.user.add \
 }
 ```
 :::
-::: details Success Call with Groups Creation
+::: details Success Call with Groups
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \
@@ -171,7 +171,7 @@ None.
 
 #### Examples
 
-::: details Success Call Getting
+::: details Success Call
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \
