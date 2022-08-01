@@ -68,7 +68,7 @@ None.
 call bondy.source.add \
 "com.leapsight.test_creation_1" \
 '{
-	"usernames":["user_2"],
+	"usernames":["user_1"],
 	"authmethod":"password",
 	"cidr":"0.0.0.0/0"
 }' | jq
@@ -86,7 +86,7 @@ call bondy.source.add \
 :::
 
 ### Remove a source from a realm
-### bondy.source.delte(realm_uri(), usernames() | all | anonymous, cidr()) -> source() {.wamp-procedure}
+### bondy.source.delete(realm_uri(), [username()] | all | anonymous, cidr()) -> source() {.wamp-procedure}
 Removes an existing source from the provided realm uri.
 
 Publishes an event under topic [bondy.source.deleted](#bondy-source-deleted){.uri} after the source has been removed.
@@ -143,7 +143,7 @@ None.
 ./wick --url ws://localhost:18080/ws \
 --realm com.leapsight.bondy \
 call bondy.source.delete \
-"com.leapsight.test_creation_1" ["user_2"] "0.0.0.0/0"
+"com.leapsight.test_creation_1" '["user_1"]' "0.0.0.0/0"
 ```
 :::
 
@@ -332,6 +332,10 @@ call bondy.source.match "com.leapsight.test_creation_1" "user_1" | jq
 :::
 
 ## Topics
+
+::: info TODO
+Not implemented.
+:::
 
 ### bondy.source.added{.wamp-topic}
 ### bondy.source.deleted{.wamp-topic}

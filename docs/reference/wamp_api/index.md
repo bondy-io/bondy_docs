@@ -21,3 +21,6 @@ Creating, retrieving and managing [groups](/reference/wamp_api/group) within a r
 
 ### Source
 Creating, retrieving and managing authentication methods and available [sources](/reference/wamp_api/source) within a realm.
+
+### Edge
+Configuring an [edge](/reference/wamp_api/edge) (**Bondy Edge Router**).
