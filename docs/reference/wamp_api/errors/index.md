@@ -24,4 +24,5 @@
 
 #### Wamp Error Uris
 
-* [wamp.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when the given argument type or value is invalid.
+* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when the given argument type or value is invalid.
+* [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the given authid does not exist.

@@ -1,8 +1,26 @@
 # Edge
-> Generally speaking an edge router is a router located at a network boundary or on-premises (office, home) that enables and internal network to connect to external networks.
+> Generally speaking an edge router is a router located at a network boundary or on-premises (office, home) that enables an internal network to connect to external networks.
 
 ## Description
 A **Bondy Edge router (edge or edge node)** is an operational mode that enables Bondy to act as an edge router i.e. it connects to a Bondy remote cluster not as another cluster node but as an edge node, a special mode which allows it to extend the capabilities of Bondy routing to a subset of realms.
+
+### Synchronization
+Edge connection establishing requires the synchronization of realm state between edge and remote.
+
+Edge will synchronize:
+- **Realm configuration state**
+    - Realm private keys should not be replicated.
+        - So we would replicate only the realm's public signing (EC) and encryption (RSA) public keys.
+    - The realm's prototype (if it is used by the edge's realm)
+        - We need to copy the realm and its prototype which will have most of the group, source and grant definitions.
+    - User data
+        - User passwords should NOT be replicated (only authorized_keys i.e. cryptosign public keys)
+    - Group data
+    - Source data
+    - Grant data
+- **Realm registry state**
+    - Registrations
+    - Subscriptions
 
 The api described below is to be able to configure the proper Bondy Edge router.
 

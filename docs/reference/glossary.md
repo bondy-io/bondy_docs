@@ -28,3 +28,11 @@ Merkle Trees is a hash tree where leaves are hashes of the values of individual 
 :::
 
 This feature helps to recover data loss in the event of disk corruption.
+
+## Entropy
+
+In a distributed system like Bondy Edge, conflicts between object replicas stored on the edge nodes and remote nodes are an expected by product of node failure, concurrent client updates, physical data loss and corruption, and other events that distributed systems are built to handle. 
+
+These conflicts occur when objects are either:
+- **missing**, as when one node holds a replica of the object and another node does not, or
+- **divergent**, as when the values of an existing object differ across nodes.

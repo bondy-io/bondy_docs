@@ -300,12 +300,36 @@ None.
 ./wick --url ws://localhost:18080/ws \
 --realm com.leapsight.bondy \
 call bondy.realm.update \
-"com.leapsight.test_creation_1" '{"description":"A test updating realm", "allow_connections": false}' | jq
+"com.leapsight.test_creation_1" \
+'{
+    "description": "A test updating realm",
+    "allow_connections": true,
+    "authmethods": ["cryptosign","wampcra","ticket"],
+    "grants": [
+        {
+            "permissions" : [
+                "wamp.subscribe",
+                "wamp.unsubscribe",
+                "wamp.call",
+                "wamp.cancel",
+                "wamp.publish"
+            ],
+            "uri" : "",
+            "match" : "prefix",
+            "roles" : "all"
+        }
+    ]
+}' | jq
 ```
 - Response:
 ```json
 {
-  "allow_connections": false,
+  "allow_connections": true,
+  "authmethods": [
+    "cryptosign",
+    "wampcra",
+    "ticket"
+  ],
   "description": "A test updating realm",
   "is_prototype": false,
   "is_sso_realm": false,
@@ -319,24 +343,24 @@ call bondy.realm.update \
   "public_keys": [
     {
       "crv": "P-256",
-      "kid": "123260399",
+      "kid": "35794812",
       "kty": "EC",
-      "x": "cfhg9z_BOPDAEkYDcSFbpJ1jJVqLxTSlrCJDUYRkrxM",
-      "y": "zcdy7H1h1FDzwU8RFeuFxFMve9vCHUFnCOpdbMJfc4o"
+      "x": "Q4ONdVUBv-C-XEaTGbAN7A0pDsLqtYWkbQcJeSVtz60",
+      "y": "cQAI_QemFKuW_4bsJc0kVfhOdDo1yxQVnIkTDuK2sPA"
     },
     {
       "crv": "P-256",
-      "kid": "130260278",
+      "kid": "67154376",
       "kty": "EC",
-      "x": "EDPzrOPJofWS1pm6WTI1oaNeJ7ITPz6ZjeTzXyl_8sM",
-      "y": "Ki46MYcsXNb19XwoqMMenWboBAdILYjY2eOBkaAkeyQ"
+      "x": "kvvohf8yBoPvY8LzWG3mBaa4y3pjMoMamuO81RRix5E",
+      "y": "cUBFbCyFfU60-BuQx8eaG9VfbZYrj-4Ip9zbvRJtQ0E"
     },
     {
       "crv": "P-256",
-      "kid": "57089265",
+      "kid": "67318382",
       "kty": "EC",
-      "x": "x_i6fqY3YkzSBi60pDOPe6nS-fxcQ4AjkrTUOjyPvhM",
-      "y": "8oFJ9bernMMFzcrDBS07QiuL8fIeuqMXT-GrvwKKDZc"
+      "x": "GLwRYxvqT18LXKoIXGOYRKHM-CJzycno2OKn1-0pBZM",
+      "y": "_GBlnw0VneuhLOkw7hWVB2dNfnpHL53m6pgBThVB_b0"
     }
   ],
   "security_status": "enabled",
@@ -1049,8 +1073,8 @@ const realmData = {
 		"type": "array",
 		"required": true,
 		"mutable": true,
-		"description": "The list of the authentication methods allowed by this realm.",
-		"default": "['anonymous', 'trust', 'password', 'ticket', 'oauth2', 'wampcra', 'cryptosign']",
+		"description": "The list of the authentication methods allowed by this realm. Allowed values: 'anonymous', 'trust', 'password', 'ticket', 'oauth2', 'wampcra', 'cryptosign'",
+		"default": [],
 		"items" : {
 			"type": "string"
 		}
@@ -1077,7 +1101,31 @@ const realmData = {
 		"mutable": true,
 		"description": "A list of group objects.",
 		"items": {
-			"type": "Group"
+			"type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "required": true,
+                    "mutable": false,
+                    "description": "The group identifier."
+                },
+                "groups" :  {
+                    "type": "array",
+                    "required": false,
+                    "mutable": true,
+                    "description": "A list of group names.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "meta": {
+                    "type": "map",
+                    "required": true,
+                    "mutable": true,
+                    "description": "Group metadata.",
+                    "default": {}
+                }
+            }
 		}
 	},
 	"sources" :  {
@@ -1095,7 +1143,65 @@ const realmData = {
 		"mutable": true,
 		"description": "A list of grant objects.",
 		"items": {
-			"type": "Grant"
+			"type": "object",
+            "properties": {
+                "permissions": {
+                    "type": "array",
+                    "required": true,
+                    "mutable": true,
+                    "description": "A list of permissions. Allowed values: 'wamp.register','wamp.unregister','wamp.subscribe','wamp.unsubscribe','wamp.call','wamp.cancel','wamp.publish'",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "roles": {
+                    "type": "array",
+                    "required": true,
+                    "mutable": true,
+                    "description": "A list of group names.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "uri": {
+                    "type": "string",
+                    "required": true,
+		            "mutable": true,
+                    "description": ""
+                },
+                "match": {
+                    "type": "string",
+                    "required": true,
+                    "mutable": true,
+                    "description": "Allowed values: 'exact', 'prefix', 'wildcard'"
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "uri": {
+                                "type": "string",
+                                "required": true,
+                                "mutable": true,
+                                "description": ""
+                            },
+                            "match": {
+                                "type": "string",
+                                "required": true,
+                                "mutable": true,
+                                "description": "Allowed values: 'exact', 'prefix', 'wildcard'"
+                            }
+                        }
+                    }
+                },
+                "meta": {
+                    "type": "map",
+                    "required": false,
+                    "mutable": true,
+                    "description": "Grant metadata."
+                }
+            }
 		}
 	},
     "private_keys" :  {
