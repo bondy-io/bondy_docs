@@ -59,14 +59,14 @@ It is enabled by setting the realm's `sso_realm_uri` property during realm creat
 To learn more about this topic review the [Single Sign-on page](/concepts/single_sign_on).
 
 ## Types
-### input_data(){.datatype}
+### input_data{.datatype}
 The object used to create or update a realm. Notice this object contains more information than the actually create realm e.g. users, groups, etc.
 
 The object represents as overview of the all realm properties but the available properties are detailed in each particular operation.
 
 <DataTreeView :data="inputCreateData" :maxDepth="10" />
 
-### realm(){.datatype}
+### realm{.datatype}
 The representation of the realm returned by the read or write operations e.g. `get`, `list`, `create` or `update`.
 
 <DataTreeView :data="realm" :maxDepth="10" />
@@ -86,7 +86,7 @@ The representation of the realm returned by the read or write operations e.g. `g
 |[Retrieve a realm security status](#retrieve-a-realm-security-status)|`bondy.realm.security.status`|
 
 ### Create a realm
-### bondy.realm.create(input_data()) -> realm() {.wamp-procedure}
+### bondy.realm.create(input_data) -> result(realm){.wamp-procedure}
 Creates a new realm based on the provided data. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
 Publishes an event under topic [bondy.realm.created](#bondy-realm-created){.uri} after the realm has been created.
@@ -176,7 +176,7 @@ call bondy.realm.create \
 :::
 
 ### Retrieve a realm
-### bondy.realm.get(uri()) -> realm() {.wamp-procedure}
+### bondy.realm.get(uri) -> result(realm){.wamp-procedure}
 Retrieves the requested realm uri.
 
 #### Call
@@ -186,7 +186,7 @@ Retrieves the requested realm uri.
 	:maxDepth="10"
 	:data="JSON.stringify({
 		'0':{
-			'type': 'string',
+			'type': 'uri',
 			'required': true,
 			'description' : 'The URI of the realm you want to retrieve.'
 		}
@@ -262,7 +262,7 @@ call bondy.realm.get "com.leapsight.test_creation_1" | jq
 :::
 
 ### Update a realm
-### bondy.realm.update(uri(), input_data()) -> realm() {.wamp-procedure}
+### bondy.realm.update(uri, input_data) -> <br>result(realm) {.wamp-procedure}
 Updates the data of the provided realm uri. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
 Publishes an event under topic [bondy.realm.updated](#bondy-realm-updated){.uri} after the realm has been updated.
@@ -370,7 +370,7 @@ call bondy.realm.update \
 :::
 
 ### List all realms
-### bondy.realm.list() -> [realm()] {.wamp-procedure}
+### bondy.realm.list() -> result([realm]) {.wamp-procedure}
 Lists all configured realms.
 
 #### Call
@@ -707,7 +707,7 @@ call bondy.realm.list | jq
 :::
 
 ### Delete a realm
-### bondy.realm.delete(uri(); force=boolean()) {.wamp-procedure}
+### bondy.realm.delete(uri; force=boolean -> result() {.wamp-procedure}
 Deletes the realm and all its associated objects.
 
 This call fails with an error if the realm has associated users. To override this behaviour use the `force` option.
@@ -723,7 +723,7 @@ This call is only available when the session is attached to the Master Realm
 	:maxDepth="10"
 	:data="JSON.stringify({
 		'0':{
-			'type': 'string',
+			'type': 'uri',
 			'required': true,
 			'description' : 'The URI of the realm you want to delete.'
 		}
@@ -777,7 +777,7 @@ call bondy.realm.delete "com.leapsight.test_creation_1" --kwarg force=true
 :::
 
 ### Retrieve if a realm security is enabled
-### bondy.realm.security.is_enabled(uri) {.wamp-procedure}
+### bondy.realm.security.is_enabled(uri) -> results(boolean) {.wamp-procedure}
 Returns `true` if security is enabled for the realm identified with `uri`. Otherwise returns `false`.
 Realm security is `enabled` by default.
 
@@ -788,7 +788,7 @@ Realm security is `enabled` by default.
 	:maxDepth="10"
 	:data="JSON.stringify({
 		'0':{
-			'type': 'string',
+			'type': 'uri',
 			'required': true,
 			'description' : 'The URI of the realm you want to retrieve if the security is enabled or not.'
 		}
@@ -826,7 +826,7 @@ true
 :::
 
 ### Enable realm security
-### bondy.realm.security.enable(uri) {.wamp-procedure}
+### bondy.realm.security.enable(uri) -> result() {.wamp-procedure}
 Enables the security for the realm identified with `uri`.
 
 #### Call
@@ -836,7 +836,7 @@ Enables the security for the realm identified with `uri`.
 	:maxDepth="10"
 	:data="JSON.stringify({
 		'0':{
-			'type': 'string',
+			'type': 'uri',
 			'required': true,
 			'description' : 'The URI of the realm you want to enable the security.'
 		}
@@ -870,7 +870,7 @@ call bondy.realm.security.enable "com.leapsight.test_creation_1"
 :::
 
 ### Disable realm security
-### bondy.realm.security.disable(uri) {.wamp-procedure}
+### bondy.realm.security.disable(uri) -> result() {.wamp-procedure}
 Disables security for the realm identified with `uri`.
 
 ::: danger Danger
@@ -889,7 +889,7 @@ Realm security is enabled by default.
 	:maxDepth="10"
 	:data="JSON.stringify({
 		'0':{
-			'type': 'string',
+			'type': 'uri',
 			'required': true,
 			'description' : 'The URI of the realm you want to disable the security.'
 		}
@@ -923,7 +923,7 @@ call bondy.realm.security.disable "com.leapsight.test_creation_1"
 :::
 
 ### Retrieve a realm security status
-### bondy.realm.security.status(uri) {.wamp-procedure}
+### bondy.realm.security.status(uri) -> 'enabled' | 'disabled' {.wamp-procedure}
 Returns the security status (`enabled` or `disabled`) for the realm identified by `uri`.
 Realm security is `enabled` by default.
 
@@ -934,7 +934,7 @@ Realm security is `enabled` by default.
 	:maxDepth="10"
 	:data="JSON.stringify({
 		'0':{
-			'type': 'string',
+			'type': 'uri',
 			'required': true,
 			'description' : 'The URI of the realm you want to retrieve if the security status.'
 		}
@@ -979,7 +979,7 @@ call bondy.realm.security.status "com.leapsight.test_creation_1"
 	:maxDepth="10"
 	:data="JSON.stringify({
 		'0':{
-			'type': 'string',
+			'type': 'uri',
 			'description' : 'The URI of the realm you have created.'
 		}
 	})"
@@ -994,7 +994,7 @@ None.
 	:maxDepth="10"
 	:data="JSON.stringify({
 		'0':{
-			'type': 'string',
+			'type': 'uri',
 			'description' : 'The URI of the realm you have updated.'
 		}
 	})"
@@ -1009,7 +1009,7 @@ None.
 	:maxDepth="10"
 	:data="JSON.stringify({
 		'0':{
-			'type': 'string',
+			'type': 'uri',
 			'description' : 'The URI of the realm you have deleted.'
 		}
 	})"
@@ -1043,7 +1043,7 @@ const realmData = {
 		"default": "false"
 	},
 	"prototype_uri": {
-		"type": "string",
+		"type": "uri",
 		"required": false,
 		"mutable": false,
 		"description": "If present, this it the URI of the the realm prototype this realm inherits some of its behaviour and features from."
@@ -1056,7 +1056,7 @@ const realmData = {
 		"default": "false"
 	},
 	"sso_realm_uri": {
-		"type": "string",
+		"type": "uri",
 		"required": false,
 		"mutable": false,
 		"description": "If present, this it the URI of the SSO Realm this realm is connected to. Once a realm has been associated with an SSO realm it cannot be changed.",
@@ -1134,7 +1134,7 @@ const realmData = {
 		"mutable": true,
 		"description": "A list of source objects.",
 		"items": {
-			"type": "Source"
+			"type": "source"
 		}
 	},
 	"grants" :  {
@@ -1210,7 +1210,7 @@ const realmData = {
 		"mutable": true,
 		"description": "A list of private keys used for signing.",
 		"items": {
-			"type": "PrivateKey"
+			"type": "private_key"
 		}
 	},
 	"encryption_keys" :  {
@@ -1219,7 +1219,7 @@ const realmData = {
 		"mutable": true,
 		"description": "A list of private keys used for encryption.",
 		"items": {
-			"type": "PrivateKey"
+			"type": "private_key"
 		}
 	}
 };
@@ -1260,7 +1260,7 @@ export default {
             inputUpdateData: JSON.stringify(inputUpdateData),
             updateArgs: JSON.stringify({
                 0: {
-                    "type": "string",
+                    "type": "uri",
                     "required": true,
                     "description" : "The URI of the realm you want to update."
                 },

@@ -355,7 +355,7 @@ const sourceData = {
 		"type": "string",
 		"required": true,
 		"mutable": true,
-		"description": "A restricted IP/mask or {IP, mask} tuple",
+		"description": "A restricted IP/mask",
         "default": "0.0.0.0/0"
 	},
 	"authmethod" :  {
