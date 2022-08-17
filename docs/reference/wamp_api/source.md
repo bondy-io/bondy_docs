@@ -266,7 +266,7 @@ None.
 
 #### Examples
 
-::: details Success realm Call Matching
+::: details Success Call realm matching
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \
@@ -309,7 +309,7 @@ call bondy.source.match "com.leapsight.test_creation_1" | jq
 ]
 ```
 :::
-::: details Success realm and username Call Matching
+::: details Success Call realm and username matching
 - Request
 ```bash
 ./wick --url ws://localhost:18080/ws \

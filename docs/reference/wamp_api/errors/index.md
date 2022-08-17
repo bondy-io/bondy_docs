@@ -7,6 +7,7 @@
 * [bondy.error.already_exists](/reference/wamp_api/errors/already_exists): when the provided resource identifier already exists.
 * [bondy.error.badmap]():
 * [bondy.error.bad_gateway]():
+* [bondy.error.bad_signature](/reference/wamp_api/errors/bad_signature): when the provided password doesn't match with the previous one.
 * [bondy.error.http_gateway.invalid_expression]():
 * [bondy.error.inconsistency_error]():
 * [bondy.error.internal_error](/reference/wamp_api/errors/internal_error): when there is an internal or unexpected error.
@@ -20,6 +21,7 @@
 * [bondy.error.not_in_session]():
 * [bondy.error.operation_failed]():
 * [bondy.error.timeout](/reference/wamp_api/errors/timeout): when the operation execution can't be performed in the provided timeout.
+* [bondy.error.unknown_group](/reference/wamp_api/errors/unknown_group): when the group with the provided name doesn't exist.
 
 
 #### Wamp Error Uris

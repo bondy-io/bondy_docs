@@ -24,15 +24,15 @@ The representation of the group returned by the read or write operations e.g. `g
 |[Add a group to a realm](#add-a-group-to-a-realm)|`bondy.group.add`|
 |[Add a group to a group](#add-a-group-to-a-group)|`bondy.group.add_group`|
 |[Add groups to a group](#add-groups-to-a-group)|`bondy.group.add_groups`|
-||`bondy.group.delete`|
+|[Delete a group from a realm](#delete-a-group-from-a-realm)|`bondy.group.delete`|
 |[Retrieve a group from a realm](#retrieve-a-group-from-a-realm)|`bondy.group.get`|
 |[List all groups from a realm](#list-all-groups-from-a-realm)|`bondy.group.list`|
-||`bondy.group.remove_group`|
-||`bondy.group.remove_groups`|
-||`bondy.group.update`|
+|[Remove a group from a group](#remove-a-group-from-a-group)|`bondy.group.remove_group`|
+|[Remove groups from a group](#remove-groups-from-a-group)|`bondy.group.remove_groups`|
+|[Update a group into a realm](#update-a-group-into-a-realm)|`bondy.group.update`|
 
 ### Add a group to a realm
-### bondy.user.add(realm_uri(), input_data()) -> group() {.wamp-procedure}
+### bondy.group.add(realm_uri(), input_data()) -> group() {.wamp-procedure}
 Creates a new group and add it on the provided realm uri.
 
 Publishes an event under topic [bondy.group.added](#bondy-group-added){.uri} after the group has been created.
@@ -107,7 +107,7 @@ call bondy.group.add \
 :::
 
 ### Add a group to a group
-### bondy.user.add_group(realm_uri(), name(), name()) {.wamp-procedure}
+### bondy.group.add_group(realm_uri(), name(), name()) {.wamp-procedure}
 Adds an existing group name to another existing group name.
 
 #### Call
@@ -173,7 +173,7 @@ call bondy.group.get "com.leapsight.test_creation_1" "group_1" | jq
 :::
 
 ### Add groups to a group
-### bondy.user.add_groups(realm_uri(), name(), [name()]) {.wamp-procedure}
+### bondy.group.add_groups(realm_uri(), name(), [name()]) {.wamp-procedure}
 Adds a list of existing group names to another existing group name.
 
 #### Call
@@ -190,12 +190,12 @@ Adds a list of existing group names to another existing group name.
 		'1':{
 			'type': 'string',
 			'required': true,
-			'description' : 'The name of the group you want to add a group name.'
+			'description' : 'The name of the group you want to add a group names.'
 		},
 		'2':{
 			'type': 'array',
 			'required': true,
-			'description' : 'The group name to add.',
+			'description' : 'The group names to add.',
 			'items': {
 				'type': 'string'
 			}
@@ -226,7 +226,7 @@ None.
 ```bash
 ./wick --url ws://localhost:18080/ws \
 --realm com.leapsight.bondy \
-call bondy.group.add_group \
+call bondy.group.add_groups \
 "com.leapsight.test_creation_1" "group_1" '["group_2","group3"]'
 ```
 - Checking the updated group Response
@@ -238,6 +238,58 @@ call bondy.group.get "com.leapsight.test_creation_1" "group_1" | jq
 ```
 - Response
 ```json
+```
+:::
+
+### Delete a group from a realm
+### bondy.group.delete(realm_uri(), name()) {.wamp-procedure}
+Deletes an existing group from the provided realm uri.
+
+Publishes an event under topic [bondy.group.deleted](#bondy-group-deleted){.uri} after the group has been deleted.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to modify the group.'
+		},
+		'1':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The name of the group you want to delete.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [bondy.error.unknown_group](/reference/wamp_api/errors/unknown_group): when the provided group name is not found.
+
+#### Examples
+
+::: details Success Call
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.group.delete \
+"com.leapsight.test_creation_1" "group_3"
 ```
 :::
 
@@ -259,7 +311,7 @@ Retrieves the requested group name on the provided realm uri.
 		'1':{
 			'type': 'string',
 			'required': true,
-			'description' : 'The group name of the user you want to retrieve.'
+			'description' : 'The group name of the group you want to retrieve.'
 		}
 	})"
 />
@@ -371,7 +423,198 @@ call bondy.group.list \
   }
 ]
 ```
-::: 
+:::
+
+### Remove a group from a group
+### bondy.group.remove_group(realm_uri(), name(), name()) {.wamp-procedure}
+Removes an existing group name from another existing group name.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to modify the group.'
+		},
+		'1':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The name of the group you want to remove a group name.'
+		},
+		'2':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The group name to remove.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
+* [bondy.error.no_such_groups](/reference/wamp_api/errors/no_such_groups): when the provided group name doesn't exist.
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided group name is not found.
+
+#### Examples
+
+::: details Success Call
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.group.remove_group \
+"com.leapsight.test_creation_1" "group_1" "group_2"
+```
+- Checking the updated group Response
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.group.get "com.leapsight.test_creation_1" "group_1" | jq
+```
+- Response
+```json
+```
+:::
+
+### Remove groups from a group
+### bondy.group.remove_groups(realm_uri(), name(), [name()]) {.wamp-procedure}
+Removes a list of existing group names from another existing group name.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to modify the group.'
+		},
+		'1':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The name of the group you want to remove a group names.'
+		},
+		'2':{
+			'type': 'array',
+			'required': true,
+			'description' : 'The group names to remove.',
+			'items': {
+				'type': 'string'
+			}
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
+* [bondy.error.no_such_groups](/reference/wamp_api/errors/no_such_groups): when any of the provided group names doesn't exist.
+
+#### Examples
+
+::: details Success Call
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.group.remove_groups \
+"com.leapsight.test_creation_1" "group_1" '["group_2","group3"]'
+```
+- Checking the updated group Response
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.group.get "com.leapsight.test_creation_1" "group_1" | jq
+```
+- Response
+```json
+```
+:::
+
+### Update a group into a realm
+### bondy.group.update(realm_uri(), name(), input_data()) -> group() {.wamp-procedure}
+Updates an existing group.
+
+Publishes an event under topic [bondy.group.updated](#bondy-group-updated){.uri} after the group has been updated.
+
+#### Call
+
+##### Positional Args
+<DataTreeView :data="updateArgs" :maxDepth="10" />
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+<DataTreeView :data="updateResult" :maxDepth="10" />
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
+* [bondy.error.invalid_datatype](/reference/wamp_api/errors/invalid_datatype): when the data type is invalid
+* [bondy.error.invalid_value](/reference/wamp_api/errors/invalid_value): when the data value is invalid
+* [bondy.error.invalid_data](/reference/wamp_api/errors/invalid_data): when the data values are invalid
+* [bondy.error.no_such_groups](/reference/wamp_api/errors/no_such_groups): when any of the provided group name doesn't exist.
+* [bondy.error.unknown_group](/reference/wamp_api/errors/unknown_group): when the provided realm uri is not found.
+
+#### Examples
+
+::: details Success Call
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.group.update \
+"com.leapsight.test_creation_1" "group_1" '{"groups":["group_2"]}' | jq
+```
+- Response:
+```json
+{
+  "groups": [
+    "group_2"
+  ],
+  "meta": {},
+  "name": "group_1",
+  "type": "group",
+  "version": "1.1"
+}
+```
+:::
 
 ## Topics
 
@@ -385,7 +628,7 @@ const groupData = {
 		"type": "string",
 		"required": true,
 		"mutable": false,
-		"description": "The group identifier."
+		"description": "The group identifier. This is always in lowercase."
 	},
 	"groups" :  {
 		"type": "array",
@@ -432,6 +675,32 @@ export default {
 				0: {
 					"type": "object",
 					"description": "The created group.",
+					"mutable": true,
+					"properties" : group
+				}
+			}),
+			updateArgs: JSON.stringify({
+				0:{ 
+					'type': 'string',
+					'required': true,
+					'description' : 'The URI of the realm you want to update a group.'
+				},
+				1:{
+					'type': 'string',
+					'required': true,
+					'description' : 'The name of the group you want to update.'
+				},
+				2: {
+					"type": "object",
+					"description": "The group configuration data",
+					"mutable": true,
+					"properties" : inputCreateData
+				}
+			}),
+			updateResult: JSON.stringify({
+				0: {
+					"type": "object",
+					"description": "The updated group.",
 					"mutable": true,
 					"properties" : group
 				}
