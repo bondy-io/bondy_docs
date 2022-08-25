@@ -132,6 +132,15 @@ export default {
           ]
         },
         {
+          text: 'Programming',
+          collapsible: true,
+          items: [
+            { text: 'General', link: '/guides/programming/general'},
+            { text: 'Remote Procedure Calls', link: '/guides/programming/rpc'},
+            { text: 'Publish and Subscribe', link: '/guides/programming/pub_sub'}
+          ]
+        },
+        {
           text: 'Configuration',
           collapsible: true,
           items: [
@@ -166,10 +175,20 @@ export default {
   function conceptsSidebar() {
     return [
         {
-          text: 'Concepts',
+          text: 'WAMP',
+          items: [
+            { text: 'Introduction to WAMP', link: '/concepts/wamp/introduction' },
+            { text: 'Getting started with WAMP', link: '/concepts/wamp/getting_started' },
+            { text: 'Communication Patterns', link: '/concepts/wamp/communication_patterns' },
+            { text: 'Under the Hood', link: '/concepts/wamp/under_the_hood' },
+            { text: 'Beyond the Basics', link: '/concepts/wamp/beyond_the_basics' },
+            { text: 'Security', link: '/concepts/wamp/security' },
+          ]
+        },
+        {
+          text: 'Bondy',
           items: [
             { text: 'What is Bondy', link: '/concepts/what_is_bondy' },
-            { text: 'WAMP', link: '/concepts/what_is_wamp' },
             { text: 'Same Sign-on', link: ' j' },
             { text: 'Single Sign-on', link: '/concepts/single_sign_on' },
           ]
