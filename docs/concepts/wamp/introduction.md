@@ -1,5 +1,37 @@
 # Introduction to WAMP
 
+>The Web Application Messaging Protocol (WAMP) is a routed protocol for distributed applications with all application components connecting to a WAMP Router that performs message routing between them. WAMP provides the two most important communication patterns for loosely couple distributed architectures: Publish-Subscribe and Routed Remote Procedure Calls.
+
+<ZoomImg src="/assets/wamp_routing.png"/>
+
+## How is WAMP different than other protocols?
+
+Five key features makes WAMP unique amongst alternative application messaging protocols:
+
+1. **Session-oriented**. All messages are routed within an established session. Sessions are authenticated and all messages are authorised.
+2. **Designed for multi-tenancy** through the use of Realms for both security and routing. Realms are virtual so it does not impose additional infrastructure requirements e.g. dedicated ports. Sessions are attached to a single Realm at a time.
+3. **Provides both application messaging patterns**, Publish-Subscribe (PubSub) and Routed Remote Procedure Calls (rRPC) a dynamic RPC variant where Caller and Callee are completely decoupled and no direct connection exists between them.
+4. **Provides a peer-to-peer programming model**, as any distributed application component can play any and the same roles simultaneously: RPC client (Caller), RPC server (Callee), Publisher and Subscriber. This is in contrast to protocols that distiguish between RPC Client and RPC Server, treating the client as dumb e.g. HTTP and gRPC.
+5. **Supports multiple-transports** and each client can choose which one to use. WAMP can run over any transport which is message-oriented, ordered, reliable, and bi-directional such as Websockets, TCP, Unix domain socket, etc.
+6. **Supports multiple serializations** and each session can choose which one to use.
+
+By combining these key features into a single infrastructure component, a WAMP Router can be used for the entire messaging requirements of a distributed systems including connected devices, browser and mobile apps and backend services, thus **reducing technology stack complexity, accidental complexity as well as networking overheads**.
+
+## Realms and Sessions
+
+
+<ZoomImg src="/assets/wamp_roles.png"/>
+
+
+## Peer-to-peer programming
+
+## Routed RPC
+
+
+
+
+---
+
 Web Application Messaging Protocol (WAMP)
 
 ## What is WAMP?
@@ -70,16 +102,3 @@ The clients send these messages using the two high-level primitives that are rou
 
 - **subscribe**: a client (*Subscriber*) notifies its interest in a topic, by providing the topic URI (or URI pattern).
 - **publish**: a client (*Publisher*) publishes events on a topic, by providing the topic URI.
-
-::: info SUMMARY: How is WAMP different than other protocols?
-
-Five key features makes WAMP unique amongst alternative application messaging protocols:
-
-1. **WAMP provides multi-tenancy** through the use of Realms for both security and routing. Realms are virtual so it does not impose additional infrastructure requirements e.g. dedicated ports.
-2. **WAMP provides both application messaging patterns,** Publish & Subscribe (PubSub) and Remote Procedure Calls (RPC).
-3. **WAMP offers routed RPC**, a dynamic RPC variant that enables a **peer-to-peer communication pattern,** as any distributed application component can act as both client (caller) and servers (callee).
-4. **WAMP offers multiple-transports** and each client can choose which one to use. WAMP can run over any transport which is message-oriented, ordered, reliable, and bi-directional such as Websockets, TCP, Unix domain socket, etc.
-5. **WAMP supports multiple serializations** and each client can choose which one to use.
-
-By combining these key features into a single infrastructure component, a WAMP Router can be used for the entire messaging requirements of all the components of distributed systems including connected devices, browser and mobile apps and backend services, thus **reducing technology stack complexity, accidental complexity as well as networking overheads**.
-:::
