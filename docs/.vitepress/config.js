@@ -60,6 +60,12 @@ export default {
 
   function nav() {
       return [
+
+        {
+          text: 'Concepts',
+          link: '/concepts/index',
+          activeMatch: '/guides/'
+        },
         {
           text: 'Tutorials',
           link: '/tutorials/index',
@@ -73,16 +79,15 @@ export default {
         {
           text: 'Reference',
           items: [
-            { text: 'Overview', link: '/reference/index.md', activeMatch: '/reference/'  },
+            {
+              text: 'Overview',
+              link: '/reference/index.md',
+              activeMatch: '/reference/'
+            },
             { text: 'WAMP API Reference', link: '/reference/wamp_api/index' },
             { text: 'HTTP API Reference', link: '/reference/http_api/index' },
             { text: 'Glossary', link: '/reference/glossary' },
           ]
-        },
-        {
-          text: 'Concepts',
-          link: '/concepts/index',
-          activeMatch: '/guides/'
         },
         {
           text: 'More',

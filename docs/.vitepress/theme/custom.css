@@ -1,7 +1,7 @@
 :root {
     --vp-c-brand: #000000;
     --vp-c-brand-light: #323232;
-    --vp-c-text-1: #656565;
+    --vp-c-text-1: #454545;
     --vp-button-alt-bg: hwb(0 89% 11%);
     --vp-c-bg-alt: #f9f9f9;
     --vp-c-text-code: rgb(30, 30, 30);
@@ -13,9 +13,9 @@
 
 .dark {
   --vp-c-brand: #FFFFFF;
-  --vp-c-brand-light: #656565;
+  --vp-c-brand-light: #454545;
   --vp-button-alt-bg: hwb(0 89% 11%);
-  --vp-c-text-1: #656565;
+  --vp-c-text-1: #454545;
 }
 
 h4 {
