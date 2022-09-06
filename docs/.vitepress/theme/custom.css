@@ -138,3 +138,9 @@ table.property-table > tbody > tr > td {
   line-height: 20px;
 }
 
+.custom-block{
+  font-size: 16px;
+  margin-top: 30px !important;
+  margin-bottom: 30px !important;
+}
+
