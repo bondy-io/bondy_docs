@@ -19,7 +19,6 @@ By combining these key features into a single infrastructure component, a WAMP R
 
 ## Realms and Sessions
 
-
 <ZoomImg src="/assets/wamp_roles.png"/>
 
 
@@ -52,7 +51,7 @@ In WAMP all clients are peers i.e. they can play all and the same roles.
 
 Routers define realms as administrative domains, and clients must specify which realm they want to join upon session establishment. Once joined, the realm will act as a namespace, preventing clients connected to a realm from accessing other realms  RPC procedures and PubSub topics. Clients connected to a realm cannot see messages from clients in another realm.
 
-<img alt="Realm Diagram" src="/assets/realm_diagram.png" width="70%" style="margin:auto; margin-top:50px; margin-bottom:50px"/>
+<ZoomImg src="/assets/realm_diagram.png"/>
 
 
 Realms also have permissions attached and can limit the clients to perform a subset of the operations available on the available procedures and topics either through exact, prefix or wildcard matching of their URIs.

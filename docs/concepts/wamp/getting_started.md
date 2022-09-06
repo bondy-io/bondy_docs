@@ -17,7 +17,7 @@ Five key features makes WAMP unique amongst alternative application messaging pr
 
 By combining these key features into a single infrastructure component, a WAMP Router can be used for the entire messaging requirements of all the components of distributed systems including connected devices, browser and mobile apps and backend services, thus **reducing technology stack complexity, accidental complexity as well as networking overheads**.
 
-<img alt="Realm Diagram" src="/assets/wamp_roles.png" width="70%" style="margin:auto; margin-top:50px; margin-bottom:50px"/>
+<ZoomImg src="/assets/wamp_roles.png"/>
 
 ## Establishing a Session
 
