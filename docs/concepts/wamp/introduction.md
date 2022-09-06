@@ -2,11 +2,19 @@
 
 >The Web Application Messaging Protocol (WAMP) is a routed protocol for distributed applications with all application agents connecting to a WAMP Router that performs message routing between them. WAMP unifies the two most important communication patterns under a single protocol: Publish-Subscribe and Routed Remote Procedure Calls.{.definition}
 
+In WAMP, agents that want to interact with each other, called WAMP clients, connect to a WAMP Router. The WAMP Router is in effect an **L7 application router**.
+
+The following diagram shows a number of connected (IoT) devices, browser-based and mobile applications, and backend services all interacting with each other using WAMP.  For that, they all have individual connections to the WAMP Router. Notice there is no difference between apps and services, they all embed the same WAMP Client library.
+
 <ZoomImg src="/assets/wamp_routing.png"/>
+
+::: info
+You will learn later on that these clients can be written in different programming languages, use different transports and use different message serialization formats.
+:::
 
 ## How is WAMP different than other protocols?
 
-Five key features makes WAMP unique amongst alternative application messaging protocols:
+Six key features makes WAMP unique amongst alternative application messaging protocols:
 
 1. **Session-oriented**. All messages are routed within an established session. Sessions are authenticated and all messages are authorised.
 2. **Designed for multi-tenancy** through the use of Realms for both security and routing. Realms are virtual so it does not impose additional infrastructure requirements e.g. dedicated ports. Sessions are attached to a single Realm at a time.
@@ -35,6 +43,13 @@ Realms also have permissions defined and can limit the clients to perform a subs
 Realms in Bondy can be statically defined (via configuration) or dinamically defined (via API). Learn more about realms in the [Realm API Reference documentation](/reference/wamp_api/realm).
 :::
 
+### Establishing a Session
+
+The typical data exchange workflow is:
+
+- Clients connect to the *Router* using a transport, serialisation format, authentication method of choice and WAMP roles that it will play, establishing a session onto a Realm.
+- The *Router* authenticates the clients and grants them permissions for the current Session.
+- Clients send messages (addressed to known procedure or topics) to the Router which routes them to the target clients.
 
 
 ## Publish-Subscribe
@@ -50,78 +65,57 @@ The following diagram shows on Publisher (A) and two Subscribers (B) and (C) exc
 
 <ZoomImg src="/assets/pubsub.png"/>
 
-### Delivery Guarantees
+- **subscribe**: a *Subscriber* (B) and (C) notifies its interest in a topic, by providing the topic URI (or URI pattern).
+- **publish**: a *Publisher* (A) publishes events on a topic, by providing the topic URI. The Router (using its Broker role) routes the event to all subscribers (in this case (B) and (C)).
 
-In WAMP there is no guarantee of message delivery. This is what literature refers to "fire and forget" and provides the same guarantee as the underlying trasport e.g. WebSockets or TCP/IP.
+::: info Delivery Guarantees
+In WAMP ther Router does not perform any additional effort to guarantee message delivery. This is what literature refers to as "fire and forget" and provides the same guarantee as the underlying trasport e.g. WebSockets or TCP/IP.
 
-::: info Bondy Delivery Guarantees
-Bondy, being a distributed router, makes additional efforts when it comes to inter-cluster message delivery, but from a client point-of-view it still offers the same guarantee as WAMP.
+WAMP offers a feature called Event History, in essence a session queue, that can store events while the Subscriber is offline.
 
-Future versions of Bondy will offer stronger end-to-end delivery guarantees.
+Bondy, being a distributed router, makes additional efforts when it comes to inter-cluster message delivery, but from a client point-of-view it still offers the same guarantee as WAMP and currently does not provide Event History.
+
+Future versions of Bondy will not only provide Event History but also additional queueing capabilities and even stronger end-to-end message delivery guarantees.
 :::
 
-### Routed Remote Procedure Calls (RPC)
-WAMP adapts and extends the
+## Routed Remote Procedure Calls (RPC)
+WAMP was designed to provide both RPC and PubSub, unlike other messaging protocols in which RPC is piggy-backed on top of PubSub.
+
+**RPCs in WAMP are routed and work bidirectionally**, unlike with traditional RPCs which are addressed directly and are strictly unidirectional (client-to-server).
+
+Registration of RPCs is with the WAMP router (actually the Dealer role played by the Router), and calls to procedures are similarly issued by WAMP clients to the WAMP router. This means that a Caller can issue all RPCs via the single connection to the WAMP router (the same connection it can use to do PubSub), and does not need to have any knowledge about what Callee is currently offering the procedure, where that Callee resides or how to address it. This can indeed change between calls, opening up the possibility for advanced features such as load-balancing or fail-over for procedure calls.
 
 The following diagram shows on Caller (A) making a call that is routed by the WAMP Router (Dealer) to the Callee (B) implementing the procedure.
 
 <ZoomImg src="/assets/rpc.png"/>
 
-::: info Client-Router vs Clients-Servers?
-You might have noticed that as compared to traditional RPC frameworks like CORBA and lately gRPC, in WAMP we do not talk about "RPC Clients" and "RPC Servers", we talk about Callers and Callees.
+- **register**: a *Callee* (B) exposes a procedure to be called remotely with an URI (also a URI pattern if Router provides this feature).
 
-This is not just a language preference, it denotes a fundamental WAMP feature: unlike with traditional RPCs, which are addressed directly from a client to server and are strictly unidirectional (client-to-server), RPCs in WAMP are routed by a middleware and work bidirectionally. This means any remote agent can be a client and server at the same time. The next section will explain this in detail.
+- **call**: a *Caller* (A) asks the *Router* to invoke procedure from (B) by providing the procedure URI.
 
-In WAMP we use the word "client" to refer to any agent or application component that connectes to the Router. WAMP clients can be Callers, Callees, Publishers, Subscribers or any combination of those 4 roles.
+
+::: info Not just a word choice
+This is an important concept to remark, in WAMP we do not talk about "RPC Clients" and "RPC Servers", we talk about Callers and Callees which are roles performed by a WAMP "client".
+
+Thus, in WAMP we use the word "client" to refer to any agent or application component that connects to a WAMP Router i.e. WAMP client library.
+
+This is not just a language choice, it denotes a fundamental WAMP feature, becuase RPCs in WAMP are routed and work bidirectionally, this means any WAMP client can be an RPC client or RPC server at the same time!
+
+In fact, as we will see in the next section, WAMP clients can play any of the 4 roles described in the previous sections (Caller, Callee, Publisher, Subscriber) or any combination of those at the same time.
 :::
 
 ## Peer-to-peer programming model
 
-In WAMP all clients are peers i.e. they can play all and the same roles.
+As we mentioned before, WAMP clients can play any of the 4 roles described in the previous sections (Caller, Callee, Publisher, Subscriber) or any combination of those at the same time.
+
+This, in effect, offers a Peer-to-peer programming model, where all WAMP clients are equal in that they can all play anyone of the WAMP client roles.
+
+This not only avoids the traditional distinction between RPC clients and RPC server, biut also allows architectures that are impossible with traditional RPC frameworks. For example, in WAMP a browser-based client can call procedures on another browser-based client or a mobile-based client!
+
+So we finally have a distributed systemns programming model that doesn't treat browsers and mobile phones as dumb terminals, which was the assumption behind mainstream protocols like HTTP and gRPC.
 
 
-### Routed RPC (Peer-to-Peer RPC)
-
-WAMP was designed to provide both RPC and PubSub, unlike other messaging protocols in which RPC are implemented on top of PubSub.
-
-**RPCs in WAMP are routed by a middleware and work bidirectionally**, unlike with traditional RPCs, which are addressed directly from a caller (client) to the callee offering the procedure (server) and are strictly unidirectional (client-to-server),
-
-Registration of RPCs is with the WAMP router, and calls to procedures are similarly issued to the WAMP router. This means first of all that a client can issue all RPCs via the single connection to the WAMP router, and does not need to have any knowledge what client is currently offering the procedure, where that client resides or how to address it. This can indeed change between calls, opening up the possibility for advanced features such as load-balancing or fail-over for procedure calls.
-
-This additionally means that all WAMP clients are equal in that they can offer procedures for calling. This avoids the traditional distinction between clients and server backends, and allows architectures where browser clients call procedures on other browser clients, **with an API that feels like peer to peer communication**. This is depicted in the diagram below where client can play all or a subset of 4 roles: Caller, Callee, Subscriber, Publisher.
-
-### Choice of transports
-
-### Choice of serializations
-
-Message serialization assumes integers, strings and ordered sequence types are available, and defaults to JSON as the most common format offering but allows Clients and Routers to use alternative serializations.
-
-## Session establishing Message Flows
-
-The typical data exchange workflow is:
-
-- Clients connect to the *Router* using a transport, serialisation format and authentication method of choice, establishing a session onto a realm.
-- The *Router* authenticates the clients and grants them permissions for the current session.
-- Clients send messages to the router which routes them to the targets using message URIs.
 
 
-## Routed RPC Message Flows
-The clients send these messages using the two high-level primitives that are routed RPC and PubSub, doing four core interactions:
 
-- **register**: a client (*Callee*) exposes a procedure to be called remotely with an URI (also a URI pattern if Router provides this feature).
 
-    ```bash
-    session.register("com.example.add", [], {}, fun(a, b){return a + b})
-    ```
-
-- **call**: a client (*Caller*) asks the *Router* to invoke procedure from another client by providing the procedure URI.
-
-    ```bash
-    Res = session.call("com.example.add", [3, 4])
-    // Res = 7
-    ```
-
-## Pub/Sub Message Flows
-
-- **subscribe**: a client (*Subscriber*) notifies its interest in a topic, by providing the topic URI (or URI pattern).
-- **publish**: a client (*Publisher*) publishes events on a topic, by providing the topic URI.
