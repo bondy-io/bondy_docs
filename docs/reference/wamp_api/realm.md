@@ -1,5 +1,5 @@
 # Realm
-> Realms are routing and administrative domains that act as namespaces. All resources in Bondy belong to a Realm. Messages are routed separately for each individual realm so sessions attached to a realm won’t see message routed on another realm. {.definition}
+> Realms are routing and administrative domains that act as namespaces. All resources in Bondy belong to a Realm. Messages are routed separately for each individual realm so sessions attached to a realm won’t see message routed on another realm. {.definition}
 
 ## Description
 The realm is a central and fundamental concept in Bondy. It does not only serve as an authentication and authorization domain but also as a message routing domain. Bondy ensures no messages routed in one realm will leak into another realm.
@@ -8,7 +8,7 @@ In Bondy a realm is represented by a control plane object.
 
 Realms (and the associated users, credentials, groups, sources and permissions) are persisted to disk and replicated across the cluster by Bondy's control plane data replication procedures.
 
-![Bondy Realm Diagram](/assets/realm_diagram.png)
+<ZoomImg src="/assets/realm_diagram.png"/>
 
 ### Realm Security
 
