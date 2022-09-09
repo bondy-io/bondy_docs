@@ -208,20 +208,70 @@ export default {
         {
           text: 'WAMP API Reference',
           items: [
-            { text: 'Introduction', link: '/reference/wamp_api/index' },
-            { text: 'Realm', link: '/reference/wamp_api/realm' },
-            { text: 'Session', link: '/reference/wamp_api/session' },
-            { text: 'User', link: '/reference/wamp_api/user' },
-            { text: 'Source', link: '/reference/wamp_api/source' },
-            { text: 'Group', link: '/reference/wamp_api/group' },
-            { text: 'Grant', link: '/reference/wamp_api/grant' },
-            { text: 'Ticket', link: '/reference/wamp_api/ticket' },
-            { text: 'OAuth2 Token', link: '/reference/wamp_api/oauth2_token' },
-            { text: 'Cluster', link: '/reference/wamp_api/cluster' },
-            { text: 'Errors', link: '/reference/wamp_api/errors/index' },
-            { text: 'Edge', link: '/reference/wamp_api/edge' }
+            { text: 'Introduction',
+              link: '/reference/wamp_api/index',
+              isFeature: false
+            }
           ]
-        }
+        },
+        {
+          text: 'Bondy Admin API',
+          items: [
+            { text: 'Realm',
+              link: '/reference/wamp_api/realm',
+              isFeature: true,
+              description:"Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status."
+            },
+            { text: 'Session',
+              link: '/reference/wamp_api/session',
+              isFeature: true
+            },
+            { text: 'User',
+              link: '/reference/wamp_api/user',
+              isFeature: true,
+              description:"Creating, retrieving and managing users within a realm."
+            },
+            { text: 'Source',
+              link: '/reference/wamp_api/source',
+              isFeature: true,
+              description:"Creating, retrieving and managing authentication methods and available sources within a realm."
+            },
+            { text: 'Group',
+              link: '/reference/wamp_api/group',
+              isFeature: true,
+              description:"Creating, retrieving and managing groups within a realm."
+            },
+            { text: 'Grant',
+              link: '/reference/wamp_api/grant',
+              isFeature: true
+            },
+            { text: 'Ticket',
+              link: '/reference/wamp_api/ticket',
+              isFeature: true
+            },
+            { text: 'OAuth2 Token',
+              link: '/reference/wamp_api/oauth2_token',
+              isFeature: true
+            },
+            { text: 'Cluster',
+              link: '/reference/wamp_api/cluster',
+              isFeature: true
+            },
+            { text: 'Bridge Relay',
+              link: '/reference/wamp_api/bridge_relay',
+              isFeature: true,
+              description: "Creating, retrieving and managing Bridge Relay (Edge) connections."
+            },
+            { text: 'Errors',
+              link: '/reference/wamp_api/errors/index' }
+          ]
+        },
+        {
+          text: 'WAMP Meta API',
+          items: [
+
+          ]
+        },
     ]
   }
 
@@ -230,7 +280,9 @@ export default {
         {
           text: 'HTTP API Reference',
           items: [
-            { text: 'Introduction', link: '/reference/index' },
+            { text: 'Introduction', link: '/reference/index',
+            isFeature: true
+          },
 
 
           ]

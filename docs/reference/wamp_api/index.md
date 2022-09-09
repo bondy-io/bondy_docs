@@ -1,26 +1,21 @@
-# WAMP API
-> The complete Bondy wamp api reference.
+<script setup>
+import { computed } from 'vue'
+import { useData } from 'vitepress'
 
-## Description
-A comprehensive reference of all Bondy and WAMP Meta APIs.
+const { theme } = useData()
 
-The following sections present the API organised by domain or topic.
+</script>
 
-::: info NOTE
-Some examples are using a [wick](https://github.com/s-things/wick#readme) that is a CLI tool to make WAMP RPCs and PubSub.
-:::
 
-### Realm
-Creating, retrieving and managing [realms](/reference/wamp_api/realm) and also enabling, disabling and checking per realm security status.
+# Introduction
+> Bondy enables the monitoring of certain administrative operations via WAMP Events and the management of certain resources via WAMP Procedures. These events and procedures include the ones defined by the [WAMP](/concepts/wamp/introduction) Meta API.
 
-### User
-Creating, retrieving and managing [users](/reference/wamp_api/user) within a realm.
+## Bondy Admin API
+<Features
+    class="VPHomeFeatures"
+    :features="theme.sidebar['/reference/wamp_api'][1].items.filter(function(item){return item.isFeature})"/>
 
-### Group
-Creating, retrieving and managing [groups](/reference/wamp_api/group) within a realm.
-
-### Source
-Creating, retrieving and managing authentication methods and available [sources](/reference/wamp_api/source) within a realm.
-
-### Edge
-Configuring an [edge](/reference/wamp_api/edge) (**Bondy Edge Router**).
+## WAMP Meta API
+<Features
+    class="VPHomeFeatures"
+    :features="theme.sidebar['/reference/wamp_api'][2].items.filter(function(item){return item.isFeature})"/>

@@ -1,5 +1,6 @@
-# Edge
+# Bridge Relay
 > Generally speaking an edge router is a router located at a network boundary or on-premises (office, home) that enables an internal network to connect to external networks.
+
 
 ## Description
 A **Bondy Edge router (edge or edge node)** is an operational mode that enables Bondy to act as an edge router i.e. it connects to a Bondy remote cluster not as another cluster node but as an edge node, a special mode which allows it to extend the capabilities of Bondy routing to a subset of realms.
