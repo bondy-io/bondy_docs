@@ -211,38 +211,33 @@ export default {
             { text: 'Introduction',
               link: '/reference/wamp_api/index',
               isFeature: false
-            }
-          ]
-        },
-        {
-          text: 'Bondy Admin API',
-          items: [
+            },
             { text: 'Realm',
               link: '/reference/wamp_api/realm',
               isFeature: true,
               description:"Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status."
-            },
-            { text: 'Session',
-              link: '/reference/wamp_api/session',
-              isFeature: true
             },
             { text: 'User',
               link: '/reference/wamp_api/user',
               isFeature: true,
               description:"Creating, retrieving and managing users within a realm."
             },
-            { text: 'Source',
-              link: '/reference/wamp_api/source',
-              isFeature: true,
-              description:"Creating, retrieving and managing authentication methods and available sources within a realm."
-            },
             { text: 'Group',
               link: '/reference/wamp_api/group',
               isFeature: true,
               description:"Creating, retrieving and managing groups within a realm."
             },
+            { text: 'Source',
+              link: '/reference/wamp_api/source',
+              isFeature: true,
+              description:"Creating, retrieving and managing authentication methods and available sources within a realm."
+            },
             { text: 'Grant',
               link: '/reference/wamp_api/grant',
+              isFeature: true
+            },
+            { text: 'Session',
+              link: '/reference/wamp_api/session',
               isFeature: true
             },
             { text: 'Ticket',
@@ -263,15 +258,11 @@ export default {
               description: "Creating, retrieving and managing Bridge Relay (Edge) connections."
             },
             { text: 'Errors',
-              link: '/reference/wamp_api/errors/index' }
+              link: '/reference/wamp_api/errors/index',
+              isFeature: false
+            }
           ]
-        },
-        {
-          text: 'WAMP Meta API',
-          items: [
-
-          ]
-        },
+        }
     ]
   }
 
