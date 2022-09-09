@@ -3,8 +3,78 @@
 
 Blabblabla
 
+
+## Types
+### session{.datatype}
+
 <DataTreeView :data="session" :maxDepth="10" />
 
+## Procedures
+
+|Name|URI|
+|:---|:---|
+|[Retrieve a session](#retrieve-a-realm)|`wamp.session.get`|
+
+
+### Retrieve a session
+### wamp.session.get(id) -> session() {.wamp-procedure}
+Retrieves information on a specific session
+
+#### Call
+##### Positional Args
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'id',
+            'description' : 'The session identifier.'
+        }
+    })"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+
+##### Keyword Results
+None.
+
+#### Errors
+
+## Topics
+
+### wamp.session.on_join{.wamp-topic}
+##### Positional Results
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'uri',
+            'description' : 'The URI of the realm you have created.'
+        }
+    })"
+/>
+
+##### Keyword Results
+None.
+
+### wamp.session.on_leave{.wamp-topic}
+##### Positional Results
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'uri',
+            'description' : 'The URI of the realm you have created.'
+        }
+    })"
+/>
+
+##### Keyword Results
+None.
 
 <script>
 export default {
@@ -16,56 +86,8 @@ export default {
                     "type": "string",
                     "required": true,
                     "mutable": true
-                },
-                "phones": {
-                    "description": "Tags for the product",
-                    "type": "array",
-                    "required": false,
-                    "mutable": true,
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "kind" : {
-                                "description": "The phone type",
-                                "type": "string",
-                                "required": true,
-                                "mutable": true
-                            },
-                            "value" : {
-                                "description": "The phone number",
-                                "type": "string",
-                                "required": true,
-                                "mutable": true
-                            }
-                        }
-                    }
-                },
-                "thing" : {
-                    "description": "foo",
-                    "type": "object",
-                    "required": true,
-                    "mutable": true,
-                    "properties" : {
-                        "a" : {
-                            "description": "Any string",
-                            "type": "string",
-                            "required": true,
-                            "mutable": true
-                        },
-                        "b" : {
-                            "description": "Any integer",
-                            "type": "integer",
-                            "required": true,
-                            "mutable": true
-                        },
-                        "c" : {
-                            "description": "Field c",
-                            "type": "boolean",
-                            "required": true,
-                            "mutable": true
-                        }
-                    }
                 }
+
             }`
         }
     }

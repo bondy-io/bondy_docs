@@ -1,8 +1,15 @@
 # Group
-> Group is a named collection of user identifiers. It can have permissions assigned to them directly or via the group membership, but cannot be authenticated.
+> Group is a named collection of user or group identifiers. It can have permissions assigned to them directly or via the group membership, but cannot be authenticated.
 
 ## Description
-There are some restrictions for the names due to reserved words like as `all` and `anonymous`.
+
+You can use user groups to specify permissions for a collection of users, which makes permissions easier to manage for those users. When you grant a permission to a group, all of the users (and groups) in the group are granted that permission (by transitive rule).
+
+::: warning Reserved Names
+The following names are reserved and Bondy will not allow them to be used as a value for the grops's `name` property: `all` and `anonymous`.
+:::
+
+<ZoomImg src="/assets/rbac.png"/>
 
 ## Types
 ### input_data(){.datatype}

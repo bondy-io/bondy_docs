@@ -1,14 +1,18 @@
 # User
-> A user is a role that is able to log into a Bondy Realm.
+> A user is an identity that is able to authenticate into a Bondy Realm.
 
 ## Description
-Users are persons or software systems with authorized access to a Realm. They can be authenticated and authorized; permissions (authorization) may be granted directly or via Group  membership.
+A User is a person or software agent who wants to access a Realm. It can be authenticated and authorized; permissions (authorization) may be granted directly or via [Group](/reference/wamp_api/group) membership.
 
-Users have attributes associated with themelves like usernames or alias, credentials (password or authorized keys) and metadata determined by the client applications.
+Users have attributes associated with themelves like `username` or `aliases`, credentials (`password` or `authorized keys`) and `metadata` determined by the client applications.
+
+When you create an user, you then have to grant it permissions by making it a member of a user [Group](/reference/wamp_api/group) that has appropriate permission attached (recommended), or by directly attaching permissions to the user. You also have to define one or more [Sources](/reference/wamp_api/source) which define the required authentication methods contextual to the user network location.
 
 ::: warning Reserved Names
 The following names are reserved and Bondy will not allow them to be used as a value for the user's username property: `all`, `anonymous`, `any`, `from`, `on`, `to`.
 :::
+
+<ZoomImg src="/assets/rbac.png"/>
 
 ### Aliasing
 Provides the ability for a user to authenticate using differents usernames (authid).

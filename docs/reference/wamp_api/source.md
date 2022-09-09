@@ -8,6 +8,7 @@ Sources are used to define authentication mechanisms. A user cannot be authentic
 
 Bondy security sources may be applied to a specific user, multiple users, or all users (using the keyword `all`).
 
+<ZoomImg src="/assets/rbac.png"/>
 
 ### Authentication Methods
 Bondy provides various methods of authentication (called `authmethods` in WAMP).
