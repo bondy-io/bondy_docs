@@ -1,8 +1,69 @@
 # Source
-> Source is used to define an authentication method and IP-based restrictions (CIDR). A user cannot be authenticated to a Realm  until a source is defined.
+> Source is an access control rule used to restrict access based for a user based on the combination of the incoming IP address (CIDR masks) and the authentication method being used.
 
 ## Description
-It can be used to restrict the user access based on authmethod and IP filtering.
+While user management enables you to control authorization with regard to users, security sources provide you with an interface for managing means of authentication. If you create users and grant them access to some or all of Bondy's functionality, you will then need to define security sources required for authentication.
+
+Sources are used to define authentication mechanisms. A user cannot be authenticated to Bondy until on or more sources are assigned to it.
+
+Bondy security sources may be applied to a specific user, multiple users, or all users (using the keyword `all`).
+
+
+### Authentication Methods
+Bondy provides various methods of authentication (called `authmethods` in WAMP).
+
+#### anonymous
+Anonymous authentication allows establishing a session without prompting the user for a username or credentials.
+
+#### cryptosign
+WAMP-Cryptosign is a WAMP authentication method based on public-private key cryptography. Specifically, it is based on Ed25519 digital signatures as described in [RFC8032](https://www.rfc-editor.org/info/rfc8032).
+
+#### wampcra
+WAMP Challenge-Response ("WAMP-CRA") authentication is a simple, secure authentication mechanism using a shared secret i.e. a password. The client and the router share a secret. The secret never travels the wire, hence WAMP-CRA can be used via non-TLS connections.
+
+<!-- #### wamp-scram
+The WAMP Salted Challenge Response Authentication Mechanism ("WAMP-SCRAM"), is a password-based authentication method where the shared secret is neither transmitted nor stored as cleartext. WAMP-SCRAM is based on RFC5802 (Salted Challenge Response Authentication Mechanism) and RFC7677 (SCRAM-SHA-256 and SCRAM-SHA-256-PLUS). -->
+
+#### ticket
+With Ticket-based authentication, the client needs to present the router an authentication "ticket". See the [Ticket](/reference/wamp_api/ticket) documentation page for more details.
+
+::: warning Important
+Bondy's Ticket-based authentication does not work on its own it requires a base authentication method for the user to obtain the ticket. The base method can be either `wampcra` or `cryptosign`. So keep this in mind when defining sources for a user as you will need to add both rules one for `ticket` and another one for the base method.
+:::
+
+#### oauth2
+With OAuth2-based authentication, the client needs to present the router an authentication "token". See the [OAuth2](/reference/wamp_api/oauth2) documentation page for more details.
+
+::: warning Important
+Bondy's Oauth2-based authentication does not work on its own it requires a base authentication method for the user to obtain the token. The base method can be either `wampcra` or `cryptosign`. So keep this in mind when defining sources for a user as you will need to add both rules one for `ticket` and another one for the base method.
+
+Obtaining an OAuth2 token requires the use of HTTP (Bondy HTTP Gateway). If you are using WAMP mainly, just use [`ticket`](#ticket)
+:::
+
+
+### How sources are applied
+
+As mentioned before, when managing security sources you always have the option of applying a source to either a single user, multiple users, or all users. If specific users and `all` have no sources in common, this presents no difficulty.
+
+But what happens if one source is applied to `all` and a different source is applied to a specific user? The short answer is that the more specifically assigned source—i.e. to the user—will be consider a user’s security source. We’ll illustrate that with the following example, in which the `cryptosign` source is assigned to `all`, but the `wampcra` source is assigned to `alice`:
+
+```json
+{
+	usernames: "all",
+	cidr: "127.0.0.1/32",
+	authmethod:'cryptosign'
+}
+```
+
+```json
+{
+	usernames: ["alice"],
+	cidr: "127.0.0.1/32",
+	authmethod:'wampcra'
+}
+```
+
+In this case is `alice` is authenticating and her peername matches the `127.0.0.1/32` IP range, Bondy will require her to use `wampcra` authentication method.
 
 ## Types
 ### input_data(){.datatype}
