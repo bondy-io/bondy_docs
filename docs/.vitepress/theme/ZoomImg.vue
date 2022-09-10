@@ -15,10 +15,14 @@ onMounted(() => {
 </script>
 
 <template>
-    <img ref="imgRef" :src="withBase(src)">
+    <img class="img" ref="imgRef" :src="withBase(src)">
 </template>
 
 <style>
+.img{
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
 .medium-zoom-overlay {
     z-index: 20;
 }
