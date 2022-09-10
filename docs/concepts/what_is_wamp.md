@@ -1,5 +1,5 @@
 # Web Application Messaging Protocol (WAMP)
->WAMP is an open standard for (soft) real-time message exchange amongst system components—applications, (micro-) services and connected devices—that eases the creation of loosely coupled distributed architectures.
+>WAMP is an open standard for (soft) real-time message exchange amongst system components—applications, (micro-) services and connected devices—that eases the creation of loosely coupled distributed architectures.{.definition}
 
 ## Introduction
 

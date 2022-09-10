@@ -1,16 +1,20 @@
 # Introduction to WAMP
 
->The Web Application Messaging Protocol (WAMP) is a routed protocol for distributed applications with all application agents connecting to a WAMP Router that performs message routing between them. WAMP unifies the two most important communication patterns under a single protocol: Publish-Subscribe and Routed Remote Procedure Calls.{.definition}
+>The Web Application Messaging Protocol (WAMP) is a routed protocol for polyglot distributed applications with all application agents connecting to a WAMP Router that performs message routing between them. WAMP unifies the two most important communication patterns under a single protocol: Publish-Subscribe and Routed Remote Procedure Calls.{.definition}
 
-In WAMP, agents that want to interact with each other, called WAMP clients, connect to a WAMP Router. The WAMP Router is in effect an **L7 application router**.
+In WAMP, agents that want to interact with each other, called WAMP clients, connect to a WAMP Router. The WAMP Router is in effect an **L7 application networking platform**.
 
-The following diagram shows a number of connected (IoT) devices, browser-based and mobile applications, and backend services all interacting with each other using WAMP.  For that, they all have individual connections to the WAMP Router. Notice there is no difference between apps and services, they all embed the same WAMP Client library.
+You will learn later on that these clients can be written in different programming languages, use different transports and use different message serialization formats.
+
+The following diagram shows a number of connected devices, browser-based, mobile applications and backend services all interacting with each other using WAMP. For that, they all have individual connections to the WAMP Router.
+
 
 <ZoomImg src="/assets/wamp_routing.png"/>
 
-::: info
-You will learn later on that these clients can be written in different programming languages, use different transports and use different message serialization formats.
+::: info Peer-to-peer programing model
+Notice there is no difference between apps and services, they are all equal peers, each being able to send and receive messages.
 :::
+
 
 ## How is WAMP different than other protocols?
 
@@ -21,15 +25,15 @@ Six key features makes WAMP unique amongst alternative application messaging pro
 3. **Provides both application messaging patterns**, Publish-Subscribe (PubSub) and Routed Remote Procedure Calls (rRPC) a dynamic RPC variant where Caller and Callee are completely decoupled and no direct connection exists between them.
 4. **Provides a peer-to-peer programming model**, as any distributed application component can play any and the same roles simultaneously: RPC client (Caller), RPC server (Callee), Publisher and Subscriber. This is in contrast to protocols that distiguish between RPC Client and RPC Server, treating the client as dumb e.g. HTTP and gRPC.
 5. **Supports multiple-transports** and each client can choose which one to use. WAMP can run over any transport which is message-oriented, ordered, reliable, and bi-directional such as Websockets, TCP, Unix domain socket, etc.
-6. **Supports multiple serializations** and each session can choose which one to use.
+6. **Supports multiple serializations** and each session can choose which one to use e.g. JSON, Msgpack, etc.
 
 By combining these key features into a single infrastructure component, a WAMP Router can be used for the entire messaging requirements of a distributed systems including connected devices, browser and mobile apps and backend services, thus **reducing technology stack complexity, accidental complexity as well as networking overheads**.
 
 ## Realms and Sessions
 
-Realms are routing and administrative domains that act as namespaces. All resources in Bondy belong to a Realm.
+> Realms are routing and administrative domains that act as namespaces. All resources in Bondy belong to a Realm. All messages flow within a Realm.
 
-For an application to be able to communicate with others using WAMP it needs to establish a session on the desired Realm. To establish a session the application will need to authenticate itself using the available authentication methods for the realm.
+WAMP is a session-oriented protocol. For an application to be able to communicate with others using WAMP it needs to establish a session on the desired Realm. To establish a session the application will need to authenticate itself using the available authentication methods for the realm (See the [Realm](/reference/wamp_api/realm) documentation page for more details about authentication methods).
 
 Once a session has been established the realm will act as a namespace, preventing clients connected to a realm from accessing other realms' resources, including the registered RPC procedures and PubSub topics.
 
@@ -53,7 +57,7 @@ The typical data exchange workflow is:
 
 
 ## Publish-Subscribe
-Publish-subscribe (PubSub) is a distributed application messaging pattern in which remote agents interact with each other indirectly through messages published to a named channel, called Topic. Topics are managed by a Broker, a role played by a WAMP Router (like Bondy).
+> Publish-subscribe (PubSub) is a distributed application messaging pattern in which remote agents interact with each other indirectly through messages published to a named channel, called Topic. Topics are managed by a Broker, a role played by a WAMP Router (like Bondy).
 
 An agent that wants to send a message, called Publisher, doesn't send the message directly to the interested agents, called Subscribers, but instead sends the message to a Topic, without knowledge of which Subscribers, if any, there may be.
 

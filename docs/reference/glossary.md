@@ -1,6 +1,6 @@
 # Glossary
 
-## Auth Method
+## Authmethod
 
 Below the list the supported authentication methods:
 
@@ -17,22 +17,26 @@ Below the list the supported authentication methods:
 
 ## Active Anti-entropy (AAE)
 
-AAE is a periodic automatic synchronisation protocol used by Bondy to remove inconsistencies between two data replicas. Bondy uses it to proactively identify and repair inconsistent or missing data. 
+AAE is a periodic automatic synchronisation protocol used by Bondy to remove inconsistencies between data replicas (aka [Entropy](#entropy)). Bondy uses it to proactively identify and repair inconsistent or missing data across all nodes in the cluster.
 
 Bondy uses a Push-Pull Anti-entropy strategy.
 
-The process can be initiated by either the edge or the remote node. When performed, the nodes tell each other about the keys and what versions they have (using Merkle Trees). If they notice a divergence then they start sending each other the differing keys. If a key has conflicting values then eventually when a client reads it out, it’ll notice and run the conflict resolution function.
+When performed, cluster nodes tell each other about the keys and what versions they have (using [Merkle Trees](#merkle-trees). If they notice a divergence then they start sending each other the differing keys. If a key has conflicting values Bondy will run a conflict resolution function (different entities in Bondy use different conflict resolution functions).
 
-:::info Merkle Trees
-Merkle Trees is a hash tree where leaves are hashes of the values of individual keys. Parent nodes are hashes of their respective children.
-:::
-
-This feature helps to recover data loss in the event of disk corruption.
+## Convergence
 
 ## Entropy
 
-In a distributed system like Bondy Edge, conflicts between object replicas stored on the edge nodes and remote nodes are an expected by product of node failure, concurrent client updates, physical data loss and corruption, and other events that distributed systems are built to handle. 
+In a distributed system like Bondy, conflicts between object replicas stored on different cluster nores are an expected by product of node failure, concurrent client updates, physical data loss and corruption, and other events that distributed systems are built to handle.
 
 These conflicts occur when objects are either:
+
 - **missing**, as when one node holds a replica of the object and another node does not, or
 - **divergent**, as when the values of an existing object differ across nodes.
+
+
+
+## Merkle Trees
+A Merkle Tree is a hash tree where leaves are hashes of the values of individual keys. Parent nodes are hashes of their respective children.
+
+This feature helps to recover data loss in the event of disk corruption.

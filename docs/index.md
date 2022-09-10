@@ -14,12 +14,12 @@ hero:
       link: https://github.com/leapsight/bondy
 
 features:
-  - title: Concepts
-    details: Learn about Bondy, its key concepts and run your first application.
-  - title: Tutorials
-    details: A hands-on introduction to Bondy for developers and devops engineers.
-  - title: Guides
+  - title: Get Started
+    details: A hands-on introduction to Bondy for developers and devop engineers through a series of tutorials.
+  - title: How-to Guides
     details: Learn how to perform common tasks and operations.
+  - title: Concepts
+    details: Learn about Bondy key concepts and topics.
   - title: Reference
     details: Access technical reference for APIs, tools and configuration.
 ---

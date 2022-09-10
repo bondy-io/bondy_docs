@@ -60,30 +60,25 @@ export default {
 
   function nav() {
       return [
-
+        {
+          text: 'Get Started',
+          link: '/tutorials/index',
+          activeMatch: '/tutorials/'
+        },
+        {
+          text: 'How-to Guides',
+          link: '/guides/index',
+          activeMatch: '/guides/'
+        },
         {
           text: 'Concepts',
           link: '/concepts/index',
           activeMatch: '/guides/'
         },
         {
-          text: 'Tutorials',
-          link: '/tutorials/index',
-          activeMatch: '/tutorials/'
-        },
-        {
-          text: 'Guides',
-          link: '/guides/index',
-          activeMatch: '/guides/'
-        },
-        {
           text: 'Reference',
           items: [
-            {
-              text: 'Overview',
-              link: '/reference/index.md',
-              activeMatch: '/reference/'
-            },
+            { text: 'Configuration', link: '/reference/configuration/index' },
             { text: 'WAMP API Reference', link: '/reference/wamp_api/index' },
             { text: 'HTTP API Reference', link: '/reference/http_api/index' },
             { text: 'Glossary', link: '/reference/glossary' },
@@ -104,6 +99,7 @@ export default {
     return {
       '/tutorials/': tutorialsSidebar(),
       '/guides/': guidesSidebar(),
+      '/reference/configuration': configurationSidebar(),
       '/reference/wamp_api': wampAPISidebar(),
       '/reference/http_api': httpAPISidebar(),
       '/concepts/': conceptsSidebar(),
@@ -179,6 +175,35 @@ export default {
   // Concepts Section
   function conceptsSidebar() {
     return [
+
+        {
+          text: 'Introduction',
+          items: [
+            { text: 'What is Bondy', link: '/concepts/what_is_bondy' },
+            { text: 'How is Bondy different', link: '/concepts/how_is_bondy_different' },
+            { text: 'Architecture', link: '/concepts/architecture' }
+
+          ]
+        },
+        {
+          text: 'Multi-tenant Security',
+          items: [
+            { text: 'Overview', link: '/concepts/index' },
+            { text: 'Realms', link: '/concepts/realm' },
+            { text: 'Identity', link: '/concepts/identity' },
+            { text: 'Authentication', link: '/concepts/authentication' },
+            { text: 'Authorization', link: '/concepts/authorization' },
+            { text: 'Same Sign-on', link: '/concepts/same_sign_on' },
+            { text: 'Single Sign-on', link: '/concepts/single_sign_on' },
+          ]
+        },
+        {
+          text: 'Clustering',
+          items: [
+            { text: 'Overview', link: '/concepts/index' },
+            { text: 'Data Replication', link: '/concepts/data_replication' },
+          ]
+        },
         {
           text: 'WAMP',
           items: [
@@ -191,17 +216,85 @@ export default {
           ]
         },
         {
-          text: 'Bondy',
-          items: [
-            { text: 'What is Bondy', link: '/concepts/what_is_bondy' },
-            { text: 'Same Sign-on', link: ' j' },
-            { text: 'Single Sign-on', link: '/concepts/single_sign_on' },
-          ]
+          text: 'HTTP Gateway',
+          items: []
         }
     ]
   }
 
   // Reference Section
+
+
+  function configurationSidebar() {
+    return [
+        {
+          text: 'General',
+          items: [
+            {
+              text: 'Overview',
+              link: '/reference/configuration/index.md',
+              isFeature: true
+            },
+            {
+              text: 'Configuration basics',
+              link: '/reference/configuration/basics.md',
+              isFeature: true
+            }
+          ]
+        },
+        {
+          text: 'Startup/Shutdown',
+          items: [
+            {
+              text: 'Configuration',
+              link: '/reference/configuration/startup_shutdown.md',
+              isFeature: true
+            }
+          ]
+        },
+        {
+          text: 'Clustering',
+          items: [
+            {
+              text: 'Configuration',
+              link: '/reference/configuration/cluster.md',
+              isFeature: true
+            }
+          ]
+        },
+        {
+          text: 'HTTP Gateway',
+          items: [
+            {
+              text: 'Configuration',
+              link: '/reference/configuration/http_gateway.md',
+              isFeature: true
+            }
+          ]
+        },
+        {
+          text: 'Broker Bridge',
+          items: [
+            {
+              text: 'Configuration',
+              link: '/reference/configuration/broker_bridge.md',
+              isFeature: true
+            }
+          ]
+        },
+        {
+          text: 'Bondy Edge (Bridge Relay)',
+          items: [
+            {
+              text: 'Configuration',
+              link: '/reference/configuration/bridge_relay.md',
+              isFeature: true
+            }
+          ]
+        }
+    ]
+  }
+
 
   function wampAPISidebar() {
     return [
@@ -271,11 +364,18 @@ export default {
         {
           text: 'HTTP API Reference',
           items: [
-            { text: 'Introduction', link: '/reference/index',
-            isFeature: true
-          },
+            {
+              text: 'Introduction',
+              link: '/reference/index',
+              isFeature: false
+            },
 
-
+            {
+              text: 'Realm',
+              link: '/reference/http_api/realm',
+              isFeature: true,
+              description:"Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status."
+            }
           ]
         }
     ]
