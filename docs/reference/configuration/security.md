@@ -117,11 +117,41 @@ DoS attack.
 
 ## Authentication: Ticket
 
+@[config](security.ticket.authmethods,enum,all,v0.9.0)
+
+Defines the a comma separated list of authentication methods that a
+user can use to establish a session that is allowed to issue tickets to be
+used with 'ticket' authentication.
+
+The possible values are the names of the authentication methods:
+- "cryptosign"
+- "password"
+- "ticket"
+- "tls"
+- "trust"
+- "wamp-scram"
+- "wampcra"
+
+The option also allows a single value "all" in which case all the methods
+above will be allowed.
+
+::: info Notice
+"anonymous" and "oauth2" methods are NOT allowed in this list as
+they are incompatible with the idea of tickets.
+:::
+
+@[config](security.ticket.allow_not_found,on|off,on,v0.9.0)
+
+Defines whether Bondy will allow a valid ticket to be used for
+authentication when a local copy of the ticket has not been found in
+storage. This might happen if the ticket data has not yet been syncrhonised
+to the node handling the authentication request.
+
+
 @[config](security.ticket.expiry_time,time_duration_units,30d,v0.9.0)
 
 The default expiration time on or after which authentication ticket
 MUST NOT be accepted for processing.
-
 
 
 @[config](security.ticket.max_expiry_time,time_duration_units,30d,v0.9.0)
@@ -152,36 +182,6 @@ stored.
 Controls whether client-SSO scope tickets are persistent. If enabled the
 ticket will be stored in Bondy's database. Otherwise the ticket is not
 stored.
-
-@[config](security.ticket.allow_not_found,on|off,on,v0.9.0)
-
-Defines whether Bondy will allow a valid ticket to be used for
-authentication when a local copy of the ticket has not been found in
-storage. This might happen if the ticket data has not yet been syncrhonised
-to the node handling the authentication request.
-
-@[config](security.ticket.authmethods,enum,all,v0.9.0)
-
-Defines the a comma separated list of authentication methods that a
-user can use to establish a session that is allowed to issue tickets to be
-used with 'ticket' authentication.
-
-The possible values are the names of the authentication methods:
-- "cryptosign"
-- "password"
-- "ticket"
-- "tls"
-- "trust"
-- "wamp-scram"
-- "wampcra"
-
-The option also allows a single value "all" in which case all the methods
-above will be allowed.
-
-::: info Notice
-"anonymous" and "oauth2" methods are NOT allowed in this list as
-they are incompatible with the idea of tickets.
-:::
 
 
 
