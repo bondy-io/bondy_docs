@@ -1,4 +1,5 @@
 # Configuration Basics
+> Bondy needs to be configured to your specific needs.{.definition}
 
 ## The `bondy.conf` file
 Bondy configuration file is used to set a wide variety of *static configuration options*. The file location depends on the installation method you've used as shown in the following table.
@@ -19,7 +20,7 @@ security.allow_anonymous_user = off
 ```
 
 ::: warning Notice
-Notice that for every option not provided by your configuration, Bondy will define a default value (also specified in the following sections).
+Notice that for every option not provided by your configuration, Bondy will define a default value (check the default value in each of the sections).
 :::
 
 
@@ -37,7 +38,7 @@ broker_bridge.config_file = $(platform_etc_dir)/broker_bridge_config.json
 
 ::: warning Notice
 These mechanism cannot be used to do OS environment variables substitution.
-However, Bondy provides a tool for OS variable substitution that is automatically used by the Bondy Docker image start script. To understand how to use OS environment variables substitution in Docker read [this](https://www.notion.so/Installing-Bondy-ae4e908297e44a02a82f1d4b7e7ff0b4) section, otherwise take a look at how the `start.sh` script uses it in the official docker images.
+However, Bondy provides a tool for OS variable substitution that is automatically used by the start script.
 :::
 
 ### Feature-specific configuration files
