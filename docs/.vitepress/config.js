@@ -297,6 +297,11 @@ export default {
               isFeature: true
             },
             {
+              text: 'Traffic Management',
+              link: '/reference/configuration/traffic_management.md',
+              isFeature: true
+            },
+            {
               text: 'Security',
               link: '/reference/configuration/security.md',
               isFeature: true

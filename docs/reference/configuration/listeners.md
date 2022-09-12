@@ -12,15 +12,78 @@
 
 ## Admin API HTTPS Listener
 
-| admin_api.https.acceptors_pool_size | integer | 200 | Admin REST API |
-| admin_api.https.backlog | integer | 4096 | Admin REST API |
-| admin_api.https.cacertfile | the path to a file | $(platform_etc_dir)/cacert.pem | Admin REST API |
-| admin_api.https.certfile | the path to a file | $(platform_etc_dir)/cert.pem | Admin REST API |
-| admin_api.https.enabled | on \| off | off | Admin REST API |
-| admin_api.https.keepalive | on \| off | off | Admin REST API |
-| admin_api.https.keyfile | the path to a file | $(platform_etc_dir)/key.pem | Admin REST API |
-| admin_api.https.max_connections | integer | 250000 | Admin REST API |
-| admin_api.https.nodelay | on \| off | on | Admin REST API |
+
+{mapping, "admin_api.http.enabled", "bondy.admin_api_http.enabled", [
+  {default, on},
+  {datatype, {flag, on, off}}
+]}.
+
+%% @doc http.port is the TCP port that Bondy uses for
+%% exposing the Admin Rest APIs.
+{mapping, "admin_api.http.port", "bondy.admin_api_http.port", [
+  {default, 18081},
+  {validators, ["port_number"]},
+  {datatype, integer},
+  hidden
+]}.
+
+%% The Cowboy acceptors_pool_size for the Admin API https listener
+{mapping, "admin_api.http.acceptors_pool_size", "bondy.admin_api_http.acceptors_pool_size", [
+  {datatype, integer},
+  {validators, ["pos_integer"]},
+  {default, 200}
+]}.
+
+%% The Cowboy max number of connections for the Admin API https listener
+{mapping, "admin_api.http.max_connections", "bondy.admin_api_http.max_connections", [
+  {datatype, integer},
+  {validators, ["pos_integer"]},
+  {default, 250000}
+]}.
+
+
+%% The maximum length that the queue of pending connections can grow to.
+{mapping, "admin_api.http.backlog", "bondy.admin_api_http.backlog", [
+{datatype, integer},
+{validators, ["pos_integer"]},
+{default, 1024}
+]}.
+
+%% Enables/disables periodic transmission on a connected socket when no other
+%% data is exchanged. If the other end does not respond, the connection is
+%% considered broken and an error message is sent to the controlling process.
+{mapping, "admin_api.http.keepalive", "bondy.admin_api_http.socket_opts.keepalive", [
+  {datatype, {flag, on, off}},
+  {default, off}
+]}.
+
+%% The minimum size of the send buffer to use for the socket.
+{mapping, "admin_api.http.sndbuf", "bondy.admin_api_http.socket_opts.sndbuf", [
+  {datatype, bytesize}
+]}.
+
+%% The minimum size of the receive buffer to use for the socket.
+{mapping, "admin_api.http.recbuf", "bondy.admin_api_http.socket_opts.recbuf", [
+  {datatype, bytesize}
+]}.
+
+%% The size of the user-level software buffer used by the driver.
+%% Not to be confused with options sndbuf and recbuf, which correspond to the
+%% Kernel socket buffers.
+%% It is recommended to have val(buffer) >= max(val(sndbuf),val(recbuf)) to
+%% avoid performance issues because of unnecessary copying.
+%% val(buffer) is automatically set to the above maximum when values sndbuf or
+%% recbuf are set.
+{mapping, "admin_api.http.buffer", "bondy.admin_api_http.socket_opts.buffer", [
+  {datatype, bytesize}
+]}.
+
+%% If Boolean == true, option TCP_NODELAY is turned on for the socket, which
+%% means that also small amounts of data are sent immediately.
+{mapping, "admin_api.http.nodelay", "bondy.admin_api_http.socket_opts.nodelay", [
+  {datatype, {flag, on, off}},
+  {default, on}
+]}.
 
 ## API Gateway HTTP Listener
 | api_gateway.config_file | The filename of a the API Gateway JSON configuration file,

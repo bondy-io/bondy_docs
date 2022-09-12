@@ -1,5 +1,8 @@
 # WAMP Features Configuration Reference
 
+## WAMP URIs
+
+@[config](wamp.uri.strictness,loose|strict,loose,v0.9.0)
 
 
 ## Call Timeout
@@ -12,7 +15,7 @@ property is not used. This value will be restricted by the
 
 
 
-@[config](wamp.max_call_timeout, duration_time_units,10m,v0.1.0)
+@[config](wamp.max_call_timeout,duration_time_units,10m,v0.1.0)
 
 The maximum timeout value for WAMP (RPC) Calls for the `CALL.Options.
 timeout` or the [`wamp.call_timeout`](#wamp.call_timeout) default.
@@ -26,15 +29,15 @@ According to WAMP, an unspecified timeout or a value of `0` disables the  featur
 
 @[config](wamp.message_retention.default_ttl,time_duration_units,0,v0.9.0)
 
-@[config](wamp.message_retention.enabled,on | off,on,v0.9.0)
+@[config](wamp.message_retention.enabled,on|off,on,v0.9.0)
 
-@[config](wamp.message_retention.max_memory, byte_size_units,1GB,v0.9.0)
+@[config](wamp.message_retention.max_memory,byte_size_units,1GB,v0.9.0)
 
 @[config](wamp.message_retention.max_message_size,byte_size_units,64KB,v0.9.0)
 
 @[config](wamp.message_retention.max_messages,integer,1000000,v0.9.0)
 
-@[config](wamp.message_retention.storage_type, ram | disk | ram_disk,ram,v0.9.0)
+@[config](wamp.message_retention.storage_type,ram|disk|ram_disk,ram,v0.9.0)
 
 
 

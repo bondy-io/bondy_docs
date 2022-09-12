@@ -53,9 +53,51 @@ Defines the minimum length for newly created passwords. The value
 should be at least 6 and at most 254.
 
 
-@[config](security.password.max_length,6..254, 6, v0.9.0)
+@[config](security.password.max_length,6..254,6,v0.9.0)
 
 Defines the maximum length for newly created passwords. The value should be at least 6 and at most 254.
+
+
+@[config](security.password.scram.kdf,pbkdf2|argon2id13,pbkdf2,v0.9.0)
+
+Defines the default key derivation function (KDF) to be used with SCRAM.
+
+
+@[config](security.password.cra.kdf,pbkdf2,pbkdf2,v0.9.0)
+
+Defines the default key derivation function (KDF) to be used with CRA. The only option is pbkdf2.
+
+
+@[config](security.password.pbkdf2.iterations,4096..65536,1000,v0.9.0)
+
+Defines the default number of iterations to be used with the pbkdf2 key
+derivation function. It should be an integer in the range 4096..65536.
+
+@[config](security.password.argon2id13.iterations, alias|4096..4294967295,moderate,v0.9.0)
+
+Defines the default iterations to be used with the argon2id13 key
+derivation function. It should be an integer in the range 4096..4294967295
+or one of the following named alias configuration:
+- `interactive` (2)
+- `moderate` (3)
+- `sensitive` (4)
+
+
+@[config](security.password.argon2id13.memory, alias|8192..1073741824,interactive,v0.9.0)
+
+Defines the default memory to be used with the argon2id13 key
+derivation function. It should be an integer in the range 8192..1073741824
+or a named alias configuration:
+- `interactive` (64MB)
+- `moderate` (256MB)
+- `sensitive` (1GB)
+
+::: info Notice
+The underlying library allows up to 4398046510080 (3.9 TB)
+but we have restricted this value to avoid a configuration error to enable a
+DoS attack.
+:::
+
 
 ## Authentication: OAuth2
 
@@ -74,6 +116,74 @@ Defines the maximum length for newly created passwords. The value should be at l
 
 
 ## Authentication: Ticket
+
+@[config](security.ticket.expiry_time,time_duration_units,30d,v0.9.0)
+
+The default expiration time on or after which authentication ticket
+MUST NOT be accepted for processing.
+
+
+
+@[config](security.ticket.max_expiry_time,time_duration_units,30d,v0.9.0)
+
+The maximum expiration time on or after which authentication ticket
+MUST NOT be accepted for processing.
+
+@[config](security.ticket.scope.local.persistence,on|off,on,v0.9.0)
+
+Controls whether local scope tickets are persistent. If enabled the
+ticket will be stored in Bondy's database. Otherwise the ticket is not
+stored.
+
+@[config](security.ticket.scope.sso.persistence,on|off,on,v0.9.0)
+
+Controls whether SSO scope tickets are persistent. If enabled the
+ticket will be stored in Bondy's database. Otherwise the ticket is not
+stored.
+
+@[config](security.ticket.scope.client_local.persistence,on|off,on,v0.9.0)
+
+Controls whether client-local scope tickets are persistent. If enabled
+the ticket will be stored in Bondy's database. Otherwise the ticket is not
+stored.
+
+@[config](security.ticket.scope.client_sso.persistence,on|off,on,v0.9.0)
+
+Controls whether client-SSO scope tickets are persistent. If enabled the
+ticket will be stored in Bondy's database. Otherwise the ticket is not
+stored.
+
+@[config](security.ticket.allow_not_found,on|off,on,v0.9.0)
+
+Defines whether Bondy will allow a valid ticket to be used for
+authentication when a local copy of the ticket has not been found in
+storage. This might happen if the ticket data has not yet been syncrhonised
+to the node handling the authentication request.
+
+@[config](security.ticket.authmethods,enum,all,v0.9.0)
+
+Defines the a comma separated list of authentication methods that a
+user can use to establish a session that is allowed to issue tickets to be
+used with 'ticket' authentication.
+
+The possible values are the names of the authentication methods:
+- "cryptosign"
+- "password"
+- "ticket"
+- "tls"
+- "trust"
+- "wamp-scram"
+- "wampcra"
+
+The option also allows a single value "all" in which case all the methods
+above will be allowed.
+
+::: info Notice
+"anonymous" and "oauth2" methods are NOT allowed in this list as
+they are incompatible with the idea of tickets.
+:::
+
+
 
 
 

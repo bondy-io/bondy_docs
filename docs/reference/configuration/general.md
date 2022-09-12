@@ -1,9 +1,10 @@
 # General Configuration Reference
 
 ## Node Identity
+
 @[config](nodename, string, 'bondy@127.0.0.1', v0.1.0)
 
- Name of the Erlang node.
+ Name of the Bondy node.
 
 @[config](distributed_cookie, string, bondy, v0.1.0)
 
