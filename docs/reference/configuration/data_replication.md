@@ -16,11 +16,11 @@
 
 ## Active Anti-entropy
 
-@[config](aae.enabled,on | off,on,v0.8.8)
+@[config](aae.enabled,on|off,on,v0.8.8)
 
 Controls whether the active anti-entropy subsystem is enabled. | on \| off | on
 
-@[config](aae.exchange_on_cluster_join,on | off, on)
+@[config](aae.exchange_on_cluster_join,on|off,on)
 
 @[config](aae.data_exchange_timeout,time_duration_units,1m)
 

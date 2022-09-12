@@ -2,7 +2,7 @@
 
 ## General
 
-@[config](security.allow_anonymous_user, on | off, on, v0.8.8)
+@[config](security.allow_anonymous_user,on|off,on,v0.8.8)
 
 Defines whether Bondy allows the `anonymous` user.
 
@@ -10,20 +10,20 @@ Defines whether Bondy allows the `anonymous` user.
 We strongly recommend disabling anonymous for production use or at least restrict the network locations from which an anonymous connection can be established. See [Source](/reference/wamp_api/source) API documentation reference.
 :::
 
-@[config](security.automatically_create_realms,on | off, off, v0.8.8)
+@[config](security.automatically_create_realms,on|off,off,v0.8.8)
 
 Defines whether Bondy creates a new realm when a session wants to attach to a non existing realm.
 
 ## Static Configuration
 
-@[config](security.config_file, path, '&#123;&#123;platform_etc_dir&#125;&#125;/security_config.json', v0.8.8)
+@[config](security.config_file,path,'&#123;&#123;platform_etc_dir&#125;&#125;/security_config.json',v0.8.8)
 
 The filename of a security JSON configuration file, which allows you to statically configure realms and its users, groups, sources and permissions. Bondy Security can be completely configured dynamically via API, read more about this in the Security section. This file is for those cases when you want to ensure a given configuration is applied every time Bondy restarts.
 
 ## Password options
 
 
-@[config](security.password.protocol, cra | scram, cra, v0.9.0)
+@[config](security.password.protocol,cra|scram,cra,v0.9.0)
 
 Defines the default password protocol to be used for new user password
 creation. Notice the user API allows a caller to define the protocol to be
@@ -31,7 +31,7 @@ used. This default is used when the caller does not specify a protocol.
 
 
 
-@[config](security.password.protocol.upgrade.enabled, on | off, off, v0.9.0)
+@[config](security.password.protocol.upgrade.enabled,on|off,off,v0.9.0)
 
 Controls whether a password protocol upgrade is performed during
 password migrations. A password migration occurs when Bondy changes the
@@ -47,7 +47,7 @@ protocol of an existing password to the protocol defined by the
 the `security.password.{SelectedProtocol}.{Option}` options.
 
 
-@[config](security.password.min_length,6..254, 6, v0.9.0)
+@[config](security.password.min_length,6..254,6,v0.9.0)
 
 Defines the minimum length for newly created passwords. The value
 should be at least 6 and at most 254.
@@ -73,7 +73,7 @@ Defines the default key derivation function (KDF) to be used with CRA. The only 
 Defines the default number of iterations to be used with the pbkdf2 key
 derivation function. It should be an integer in the range 4096..65536.
 
-@[config](security.password.argon2id13.iterations, alias|4096..4294967295,moderate,v0.9.0)
+@[config](security.password.argon2id13.iterations,alias|4096..4294967295,moderate,v0.9.0)
 
 Defines the default iterations to be used with the argon2id13 key
 derivation function. It should be an integer in the range 4096..4294967295
@@ -83,7 +83,7 @@ or one of the following named alias configuration:
 - `sensitive` (4)
 
 
-@[config](security.password.argon2id13.memory, alias|8192..1073741824,interactive,v0.9.0)
+@[config](security.password.argon2id13.memory,alias|8192..1073741824,interactive,v0.9.0)
 
 Defines the default memory to be used with the argon2id13 key
 derivation function. It should be an integer in the range 8192..1073741824
