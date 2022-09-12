@@ -47,6 +47,8 @@ export default {
               var since = '';
               if (args.length == 0) {
                 datatype = 'string';
+                defaultValue = 'N/A';
+                since = 'N/A';
               } else {
                 datatype = args.shift();
                 defaultValue = args.shift();
@@ -267,7 +269,7 @@ export default {
   function configurationSidebar() {
     return [
         {
-          text: 'Configuration Reference',
+          text: 'Introduction',
           items: [
             {
               text: 'Overview',
@@ -285,8 +287,23 @@ export default {
           text: 'Reference by Topic',
           items: [
             {
+              text: 'General',
+              link: '/reference/configuration/general.md',
+              isFeature: true
+            },
+            {
               text: 'Startup/Shutdown',
               link: '/reference/configuration/startup_shutdown.md',
+              isFeature: true
+            },
+            {
+              text: 'Security',
+              link: '/reference/configuration/security.md',
+              isFeature: true
+            },
+            {
+              text: 'HTTP/Websocket Listener',
+              link: '/reference/configuration/http_listener.md',
               isFeature: true
             },
             {
@@ -295,8 +312,8 @@ export default {
               isFeature: true
             },
             {
-              text: 'HTTP/Websocket Listener',
-              link: '/reference/configuration/http_listener.md',
+              text: 'Data Storage and Replication',
+              link: '/reference/configuration/data_replication.md',
               isFeature: true
             },
             {
