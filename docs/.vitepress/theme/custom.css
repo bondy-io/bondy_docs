@@ -247,12 +247,13 @@ table.property-table > tbody > tr > td {
 .custom-block.config-param > .meta{
   font-family: var(--vp-font-family-mono) !important;
   font-size:14px !important;
-  font-weight:500!important;
+  font-weight:500 !important;
 }
 
 .since-version{
+  margin-top: 5px;
   display: flex;
-  justify-content: right;
+  justify-content: space-between;
   font-family: var(--vp-font-family-mono) !important;
   font-size:14px !important;
   font-weight:500!important;

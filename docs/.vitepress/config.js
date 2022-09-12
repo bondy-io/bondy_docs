@@ -43,17 +43,19 @@ export default {
               let args = str.replace(/\s+/g, '').split(",");
               let param = args.shift();
               var datatype = 'string';
-              var defaultValue = 'N/A';
+              var defaultValue;
               var since = '';
               if (args.length == 0) {
                 datatype = 'string';
               } else {
                 datatype = args.shift();
                 defaultValue = args.shift();
+                defaultValue = defaultValue ? defaultValue : 'N/A';
                 since = args.shift();
+                since = since ? since : 'N/A';
               };
               return `
-              <h3 id="${param}" tabindex="-1"><span class="custom-block config-param"><span><span class="custom-block-title"><a class="header-anchor" href="#${param}" aria-hidden="true">#</a>${param}</span><span class="meta">&nbsp;::&nbsp;${datatype}</span></span><span class="meta">Default = ${defaultValue}</span></span><div class="since-version"><span>&#60;${since}&#62;</span></div></h3>`;
+              <h3 id="${param}" tabindex="-1"><span class="custom-block config-param"><span><span class="custom-block-title"><a class="header-anchor" href="#${param}" aria-hidden="true">#</a>${param}</span><span class="meta">&nbsp;::&nbsp;${datatype}</span></span></span><div class="since-version"><span class="meta">Default = ${defaultValue}</span><span>Since&nbsp;${since}</span></div></h3>`;
             }
           })
         }
