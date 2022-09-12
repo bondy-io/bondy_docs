@@ -19,6 +19,43 @@ export default {
           rightDelimiter: '}',
           allowedAttributed: ['id', 'class'],
           disable: false
+        },
+        config: (md) => {
+          md.use(require('markdown-it-footnote'))
+          md.use(require('markdown-it-task-lists'))
+          md.use(require('markdown-it-katex'))
+          md.use(require('markdown-it-custom-block'), {
+            uri (str) {
+              let args = str.replace(/\s+/g, '').split(",");
+              let uri = args.shift();
+              var badge;
+              var className;
+              if (args.length == 0) {
+                badge = 'PROC';
+                className = 'public';
+              } else {
+                badge = args.shift();
+                className = (args.shift() === 'private') ? 'private' : 'public';
+              };
+              return `<div class="custom-block uri ${className}"><a name="${uri}"></a><span class="custom-block uri ${className}">${badge}</span><p class="custom-block-title">${uri}</p></div>`;
+            },
+            config (str) {
+              let args = str.replace(/\s+/g, '').split(",");
+              let param = args.shift();
+              var datatype = 'string';
+              var defaultValue = 'N/A';
+              var since = '';
+              if (args.length == 0) {
+                datatype = 'string';
+              } else {
+                datatype = args.shift();
+                defaultValue = args.shift();
+                since = args.shift();
+              };
+              return `
+              <h3 id="${param}" tabindex="-1"><span class="custom-block config-param"><span><span class="custom-block-title"><a class="header-anchor" href="#${param}" aria-hidden="true">#</a>${param}</span><span class="meta">&nbsp;::&nbsp;${datatype}</span></span><span class="meta">Default = ${defaultValue}</span></span><div class="since-version"><span>&#60;${since}&#62;</span></div></h3>`;
+            }
+          })
         }
     },
 
@@ -228,7 +265,7 @@ export default {
   function configurationSidebar() {
     return [
         {
-          text: 'General',
+          text: 'Configuration Reference',
           items: [
             {
               text: 'Overview',
@@ -243,30 +280,41 @@ export default {
           ]
         },
         {
-          text: 'Startup/Shutdown',
+          text: 'Reference by Topic',
           items: [
             {
-              text: 'Configuration',
+              text: 'Startup/Shutdown',
               link: '/reference/configuration/startup_shutdown.md',
               isFeature: true
-            }
-          ]
-        },
-        {
-          text: 'Clustering',
-          items: [
+            },
             {
-              text: 'Configuration',
+              text: 'Cluster',
               link: '/reference/configuration/cluster.md',
+              isFeature: true
+            },
+            {
+              text: 'HTTP/Websocket Listener',
+              link: '/reference/configuration/http_listener.md',
+              isFeature: true
+            },
+            {
+              text: 'Bridge Relay (Edge)',
+              link: '/reference/configuration/bridge_relay.md',
               isFeature: true
             }
           ]
         },
+
         {
-          text: 'HTTP Gateway',
+          text: 'Protocols',
           items: [
             {
-              text: 'Configuration',
+              text: 'WAMP',
+              link: '/reference/configuration/wamp.md',
+              isFeature: true
+            },
+            {
+              text: 'HTTP Gateway',
               link: '/reference/configuration/http_gateway.md',
               isFeature: true
             }
@@ -279,19 +327,14 @@ export default {
               text: 'Configuration',
               link: '/reference/configuration/broker_bridge.md',
               isFeature: true
-            }
-          ]
-        },
-        {
-          text: 'Bondy Edge (Bridge Relay)',
-          items: [
+            },
             {
-              text: 'Configuration',
-              link: '/reference/configuration/bridge_relay.md',
+              text: 'Kafka Bridge',
+              link: '/reference/configuration/kafka_bridge.md',
               isFeature: true
             }
           ]
-        }
+        },
     ]
   }
 
