@@ -18,7 +18,7 @@
   "dependencies": {
     "medium-zoom": "^1.0.6",
     "switch-ts": "^1.0.9",
-    "markdown-it-container": "^3.0.0",
+    "markdown-it-custom-block": "^0.1.2",
     "markdown-it-katex": "^2.0.3",
     "markdown-it-footnote": "^3.0.2",
     "markdown-it-task-lists": "^2.1.1"
