@@ -26,6 +26,7 @@ Controls whether the active anti-entropy subsystem is enabled. | on \| off | on
 
 
 @[config](aae.exchange_timer,time_duration_units,1m,v0.8.8)
+
 Controls when will the AAE system will trigger the next AAE exchange.
 
 

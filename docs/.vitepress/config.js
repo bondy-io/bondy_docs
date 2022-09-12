@@ -302,8 +302,8 @@ export default {
               isFeature: true
             },
             {
-              text: 'HTTP/Websocket Listener',
-              link: '/reference/configuration/http_listener.md',
+              text: 'Listeners',
+              link: '/reference/configuration/listeners.md',
               isFeature: true
             },
             {
@@ -328,13 +328,13 @@ export default {
           text: 'Protocols',
           items: [
             {
-              text: 'WAMP',
+              text: 'WAMP Features',
               link: '/reference/configuration/wamp.md',
               isFeature: true
             },
             {
-              text: 'HTTP Gateway',
-              link: '/reference/configuration/http_gateway.md',
+              text: 'HTTP API Gateway',
+              link: '/reference/configuration/http_api_gateway.md',
               isFeature: true
             }
           ]
