@@ -8,7 +8,7 @@ const { theme } = useData()
 
 # Introduction
 
-> Bondy enables the monitoring of administrative operations via WAMP Events and the management of dynamic resources via WAMP Procedures. These events and procedures include the ones defined by the [WAMP](/concepts/wamp/introduction) Meta API.
+> Bondy enables the monitoring of administrative operations via WAMP Events and the management of dynamic resources via WAMP Procedures. These events and procedures include the ones defined by the [WAMP](/concepts/wamp/introduction) Meta API.{.definition}
 
 In Bondy, a Realm and all its entities are dynamically managed using a WAMP API. Some additional resource in Bondy can also be managed via the WAMP API.
 
