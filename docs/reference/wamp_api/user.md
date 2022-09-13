@@ -1,5 +1,5 @@
 # User
-> A user is an identity that is able to authenticate into a Bondy Realm.
+> A user is an identity that is able to authenticate into a Bondy Realm.{.definition}
 
 ## Description
 A User is a person or software agent who wants to access a Realm. It can be authenticated and authorized; permissions (authorization) may be granted directly or via [Group](/reference/wamp_api/group) membership.

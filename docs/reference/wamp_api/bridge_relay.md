@@ -1,5 +1,5 @@
 # Bridge Relay
-> Generally speaking an edge router is a router located at a network boundary or on-premises (office, home) that enables an internal network to connect to external networks.
+> Generally speaking an edge router is a router located at a network boundary or on-premises (office, home) that enables an internal network to connect to external networks.{.definition}
 
 
 ## Description

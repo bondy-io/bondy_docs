@@ -1,5 +1,5 @@
 # Group
-> Group is a named collection of user or group identifiers. It can have permissions assigned to them directly or via the group membership, but cannot be authenticated.
+> Group is a named collection of user or group identifiers. It can have permissions assigned to them directly or via the group membership, but cannot be authenticated.{.definition}
 
 ## Description
 
