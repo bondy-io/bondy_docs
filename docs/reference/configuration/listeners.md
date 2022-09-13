@@ -55,7 +55,7 @@ avoid performance issues because of unnecessary copying.
 
 @[config](admin_api.http.nodelay,on|off,on,v0.8.8)
 
-If `on`, option TCP_NODELAY is turned on for the socket, which
+If enabled, option TCP_NODELAY is turned on for the socket, which
 means that also small amounts of data are sent immediately.
 
 
@@ -112,7 +112,7 @@ avoid performance issues because of unnecessary copying.
 
 @[config](admin_api.https.nodelay,on|off,on,v0.8.8)
 
-If `on`, option TCP_NODELAY is turned on for the socket, which
+If enabled, option TCP_NODELAY is turned on for the socket, which
 means that also small amounts of data are sent immediately.
 
 @[config](admin_api.https.certfile,path,'$(platform_etc_dir)/keycert.pem',v0.8.8)
@@ -390,320 +390,225 @@ compression at the expense of memory usage.
 
 ## WAMP Rawsocket TCP Listener
 
+@[config](wamp.tcp.enabled,on|off,on,v0.8.0)
+
+@[config](wamp.tcp.port,integer,18082,v0.8.0)
+
+TCP port that Bondy uses for exposing the WAMP raw socket transport.
+
+@[config](wamp.tcp.acceptors_pool_size,integer,200,v0.8.0)
+
+The ranch acceptors_pool_size for the WAMP raw socket listener.
+
+@[config](wamp.tcp.max_connections,integer,100000,v0.8.0)
+
+The max number of concurrent connections for the WAMP raw socket.
 
 
-{mapping, "wamp.tcp.enabled", "bondy.wamp_tcp.enabled", [
-  {default, on},
-  {datatype, {flag, on, off}}
-]}.
-
-api_gateway.ssl.port is the TCP port that Bondy uses for
-exposing the WAMP raw socket transport
-{mapping, "wamp.tcp.port", "bondy.wamp_tcp.port", [
-  {default, 18082},
-  {datatype, integer}
-]}.
-
-
-The ranch acceptors_pool_size for the WAMP raw socket tcp listener
-{mapping, "wamp.tcp.acceptors_pool_size", "bondy.wamp_tcp.acceptors_pool_size", [
-  {datatype, integer},
-  {default, 200}
-]}.
-
-The ranch max number of connections for the WAMP raw socket tcp listener
-{mapping, "wamp.tcp.max_connections", "bondy.wamp_tcp.max_connections", [
-  {datatype, integer},
-  {default, 100000}
-]}.
+@[config](wamp.tcp.backlog,pos_integer,1024,v0.8.8)
 
 The maximum length that the queue of pending connections can grow to.
-{mapping, "wamp.tcp.backlog", "bondy.wamp_tcp.backlog", [
-  {datatype, integer},
-  {default, 1024}
-]}.
 
-TCP SOCKET OPTS
+@[config](wamp.tcp.keepalive,on|off,off,v0.8.8)
 
 Enables/disables periodic transmission on a connected socket when no other
 data is exchanged. If the other end does not respond, the connection is
 considered broken and an error message is sent to the controlling process.
-{mapping, "wamp.tcp.keepalive", "bondy.wamp_tcp.socket_opts.keepalive", [
-  {datatype, {flag, on, off}},
-  {default, on}
-]}.
+
+@[config](wamp.tcp.sndbuf,bytesize,N/A,v0.8.8)
 
 The minimum size of the send buffer to use for the socket.
-{mapping, "wamp.tcp.sndbuf", "bondy.wamp_tcp.socket_opts.sndbuf", [
-  {datatype, bytesize}
-]}.
+
+@[config](wamp.tcp.recbuf,bytesize,N/A,v0.8.8)
 
 The minimum size of the receive buffer to use for the socket.
-{mapping, "wamp.tcp.recbuf", "bondy.wamp_tcp.socket_opts.recbuf", [
-  {datatype, bytesize}
-]}.
+
+@[config](wamp.tcp.buffer,bytesize,N/A,v0.8.8)
 
 The size of the user-level software buffer used by the driver.
-Not to be confused with options sndbuf and recbuf, which correspond to the
+Not to be confused with options `sndbuf` and `recbuf`, which correspond to the
 Kernel socket buffers.
-It is recommended to have val(buffer) >= max(val(sndbuf),val(recbuf)) to
+
+It is recommended to have `val(buffer) >= max(val(sndbuf),val(recbuf))` to
 avoid performance issues because of unnecessary copying.
-val(buffer) is automatically set to the above maximum when values sndbuf or
-recbuf are set.
-{mapping, "wamp.tcp.buffer", "bondy.wamp_tcp.socket_opts.buffer", [
-  {datatype, bytesize}
-]}.
 
-If Boolean == true, option TCP_NODELAY is turned on for the socket, which
+`val(buffer)` is automatically set to the above maximum when values `sndbuf` or
+`recbuf` are set.
+
+@[config](wamp.tcp.http.nodelay,on|off,on,v0.8.8)
+
+If enabled, option TCP_NODELAY is turned on for the socket, which
 means that also small amounts of data are sent immediately.
-{mapping, "wamp.tcp.nodelay", "bondy.wamp_tcp.socket_opts.nodelay", [
-  {datatype, {flag, on, off}},
-  {default, on}
-]}.
 
+@[config](wamp.tcp.ping.enabled,on|off,on,v1.0.0)
 
 Defines if PING control message functionality is enabled or
 not.
+
 This option affects server (Bondy) initiated pings only. Some clients
 might also initiate ping requests and Bondy will always respond to those
 even if this option is turned off.
+
 This feature is useful to keep a connection alive and validate the
 connection is healthy.
+
 Enabling this feature implies having an additional timer per connection and
 this can be a considerable cost for servers that need to handle large
 numbers of connections. A better solution in most cases is to let the client
 handle pings.
-{mapping, "wamp.tcp.ping.enabled", "bondy.wamp_tcp.ping.enabled", [
-{default, on},
-{datatype, {flag, on, off}}
-]}.
 
-If wamp.tcp.ping.enabled is 'on', this parameter controls the
+@[config](wamp.tcp.ping.idle_timeout,time_duration_units,20s,v1.0.0)
+
+If `wamp.tcp.ping.enabled` is enabled, this parameter controls the
 maximum time interval that is permitted to elapse between the point at which
 the Client finishes transmitting a message and the point it starts sending
 the next.
-Notice this is not the same as wamp.tcp.idle_timeout.
-{mapping, "wamp.tcp.ping.idle_timeout", "bondy.wamp_tcp.ping.idle_timeout", [
-{default, "20s"},
-{datatype, {duration, ms}}
-]}.
+Notice this is not the same as `wamp.tcp.idle_timeout`.
 
-If wamp.tcp.ping.enabled is 'on', this parameter controls the
+@[config](wamp.tcp.ping.timeout,time_duration_units,10s,v1.0.0)
+
+If `wamp.tcp.ping.enabled` is enabled, this parameter controls the
 amount of time Bondy waits for a ping response from the client.
 Once that time has passed this counts as a fail attempt
-(see wamp.tcp.ping.max_attempts).
-{mapping, "wamp.tcp.ping.timeout", "bondy.wamp_tcp.ping.timeout", [
-{default, "10s"},
-{datatype, {duration, ms}}
-]}.
+(see `wamp.tcp.ping.max_attempts`)
 
-If wamp.tcp.ping.enabled is 'on', this parameter controls how many
+@[config](wamp.tcp.ping.max_attempts,integer,2,v1.0.0)
+
+If `wamp.tcp.ping.enabled` is enabled, this parameter controls how many
 missed pings are considered a timeout. Thus, after this number of attempts
 Bondy will drop the connection.
-{mapping, "wamp.tcp.ping.max_attempts", "bondy.wamp_tcp.ping.max_attempts",
-[
-  {default, 2},
-  {datatype, integer},
-  {validators, ["pos_integer"]}
-]
-}.
+
+@[config](wamp.tcp.idle_timeout,infinity|time_duration_units,8h,v1.0.0)
 
 Drops the connection after a period of inactivity. This option does not
-take effect when wamp.tcp.ping.enabled is 'on' and wamp.tcp.ping.
-interval times wamp.tcp.ping.max_attempts results in a value higher
+take effect when `wamp.tcp.ping.enabled` is `on` and `wamp.tcp.ping.
+interval` times `wamp.tcp.ping.max_attempts` results in a value higher
 than this option.
+
 Notice that for some clients using this option alone is not enough to keep
 a connection alive as the client will drop the connection due to inactivity.
 If the client supports tcp PING control messages, enabled them,
-otherwise e.g. web browsers set wamp.tcp.ping.enabled to on.
-{mapping, "wamp.tcp.idle_timeout", "bondy.wamp_tcp.idle_timeout", [
-{default, "8h"},
-{datatype, [{duration, ms}, {atom, infinity}]}
-]}.
+otherwise e.g. web browsers set `wamp.tcp.ping.enabled` to on.
 
 
 ## WAMP Rawsocket TLS Listener
 
 
+@[config](wamp.tls.enabled,on|off,on,v0.8.0)
 
-{mapping, "wamp.tls.enabled", "bondy.wamp_tls.enabled", [
-  {default, off},
-  {datatype, {flag, on, off}}
-]}.
+@[config](wamp.tls.port,integer,18082,v0.8.0)
+
+TCP port that Bondy uses for exposing the WAMP raw socket transport.
+
+@[config](wamp.tls.acceptors_pool_size,integer,200,v0.8.0)
+
+The ranch acceptors_pool_size for the WAMP raw socket listener.
+
+@[config](wamp.tls.max_connections,integer,100000,v0.8.0)
+
+The max number of concurrent connections for the WAMP raw socket.
 
 
-api_gateway.ssl.port is the TCP port that Bondy uses for
-exposing the WAMP raw socket transport
-{mapping, "wamp.tls.port", "bondy.wamp_tls.port", [
-  {default, 18085},
-  {datatype, integer}
-]}.
-
-The ranch acceptors_pool_size for the WAMP raw socket tcp listener
-{mapping, "wamp.tls.acceptors_pool_size", "bondy.wamp_tls.acceptors_pool_size", [
-  {datatype, integer},
-  {default, 200}
-]}.
-
-The ranch max number of connections for the WAMP raw socket tcp listener
-{mapping, "wamp.tls.max_connections", "bondy.wamp_tls.max_connections", [
-  {datatype, integer},
-  {default, 100000}
-]}.
+@[config](wamp.tls.backlog,pos_integer,1024,v0.8.8)
 
 The maximum length that the queue of pending connections can grow to.
-{mapping, "wamp.tls.backlog", "bondy.wamp_tls.backlog", [
-  {datatype, integer},
-  {default, 1024}
-]}.
 
-
+@[config](wamp.tls.keepalive,on|off,off,v0.8.8)
 
 Enables/disables periodic transmission on a connected socket when no other
 data is exchanged. If the other end does not respond, the connection is
 considered broken and an error message is sent to the controlling process.
-{mapping, "wamp.tls.keepalive", "bondy.wamp_tls.socket_opts.keepalive", [
-  {datatype, {flag, on, off}},
-  {default, on}
-]}.
+
+@[config](wamp.tls.sndbuf,bytesize,N/A,v0.8.8)
 
 The minimum size of the send buffer to use for the socket.
-{mapping, "wamp.tls.sndbuf", "bondy.wamp_tls.socket_opts.sndbuf", [
-  {datatype, bytesize}
-]}.
+
+@[config](wamp.tls.recbuf,bytesize,N/A,v0.8.8)
 
 The minimum size of the receive buffer to use for the socket.
-{mapping, "wamp.tls.recbuf", "bondy.wamp_tls.socket_opts.recbuf", [
-  {datatype, bytesize}
-]}.
+
+@[config](wamp.tls.buffer,bytesize,N/A,v0.8.8)
 
 The size of the user-level software buffer used by the driver.
-Not to be confused with options sndbuf and recbuf, which correspond to the
+Not to be confused with options `sndbuf` and `recbuf`, which correspond to the
 Kernel socket buffers.
-It is recommended to have val(buffer) >= max(val(sndbuf),val(recbuf)) to
+
+It is recommended to have `val(buffer) >= max(val(sndbuf),val(recbuf))` to
 avoid performance issues because of unnecessary copying.
-val(buffer) is automatically set to the above maximum when values sndbuf or
-recbuf are set.
-{mapping, "wamp.tls.buffer", "bondy.wamp_tls.socket_opts.buffer", [
-  {datatype, bytesize}
-]}.
 
-If Boolean == true, option TCP_NODELAY is turned on for the socket, which
+`val(buffer)` is automatically set to the above maximum when values `sndbuf` or
+`recbuf` are set.
+
+@[config](wamp.tls.http.nodelay,on|off,on,v0.8.8)
+
+If enabled, option TCP_NODELAY is turned on for the socket, which
 means that also small amounts of data are sent immediately.
-{mapping, "wamp.tls.nodelay", "bondy.wamp_tls.socket_opts.nodelay", [
-  {datatype, {flag, on, off}},
-  {default, on}
-]}.
 
+@[config](wamp.tls.ping.enabled,on|off,on,v1.0.0)
 
 Defines if PING control message functionality is enabled or
-not. This option affects server (Bondy) initiated pings only. Some clients
+not.
+
+This option affects server (Bondy) initiated pings only. Some clients
 might also initiate ping requests and Bondy will always respond to those
 even if this option is turned off.
+
 This feature is useful to keep a connection alive and validate the
 connection is healthy.
+
 Enabling this feature implies having an additional timer per connection and
 this can be a considerable cost for servers that need to handle large
 numbers of connections. A better solution in most cases is to let the client
 handle pings.
-{mapping, "wamp.tls.ping.enabled", "bondy.wamp_tls.ping.enabled", [
-{default, on},
-{datatype, {flag, on, off}}
-]}.
 
-If wamp.tls.ping.enabled is 'on', this parameter controls the interval
-in which Bondy sends WebSockets PING control messages.
-{mapping, "wamp.tls.ping.interval", "bondy.wamp_tls.ping.interval", [
-{default, "30s"},
-{datatype, {duration, ms}}
-]}.
+@[config](wamp.tls.ping.idle_timeout,time_duration_units,20s,v1.0.0)
 
-If wamp.tls.ping.enabled is 'on', this parameter controls the time
-Bondy will wait for a ping response. Once that time has passed this counts
-as a fail attempt (see max_attempts).
-{mapping, "wamp.tls.ping.timeout", "bondy.wamp_tls.ping.timeout", [
-{default, "10s"},
-{datatype, {duration, ms}}
-]}.
+If `wamp.tls.ping.enabled` is enabled, this parameter controls the
+maximum time interval that is permitted to elapse between the point at which
+the Client finishes transmitting a message and the point it starts sending
+the next.
+Notice this is not the same as `wamp.tls.idle_timeout`.
 
-If wamp.tls.ping.enabled is 'on', this parameter controls how many
+@[config](wamp.tls.ping.timeout,time_duration_units,10s,v1.0.0)
+
+If `wamp.tls.ping.enabled` is enabled, this parameter controls the
+amount of time Bondy waits for a ping response from the client.
+Once that time has passed this counts as a fail attempt
+(see `wamp.tls.ping.max_attempts`)
+
+@[config](wamp.tls.ping.max_attempts,integer,2,v1.0.0)
+
+If `wamp.tls.ping.enabled` is enabled, this parameter controls how many
 missed pings are considered a timeout. Thus, after this number of attempts
 Bondy will drop the connection.
-If the value is 'infinity' Bondy will never timeout based on missed pings.
-{mapping,
-"wamp.tls.ping.max_attempts",
-"bondy.wamp_tls.ping.max_attempts",
-[
-  {default, 3},
-  {datatype, [integer, {atom, infinity}]}
-]
-}.
+
+@[config](wamp.tls.idle_timeout,infinity|time_duration_units,8h,v1.0.0)
 
 Drops the connection after a period of inactivity. This option does not
-take effect when wamp.tls.ping.enabled is 'on' and wamp.tls.ping.
-interval times wamp.tls.ping.max_attempts results in a value higher
+take effect when `wamp.tls.ping.enabled` is `on` and `wamp.tls.ping.
+interval` times `wamp.tls.ping.max_attempts` results in a value higher
 than this option.
+
 Notice that for some clients using this option alone is not enough to keep
 a connection alive as the client will drop the connection due to inactivity.
-If the client supports tls PING control messages, enabled them,
-otherwise e.g. web browsers set wamp.tls.ping.enabled to on.
-{mapping, "wamp.tls.idle_timeout", "bondy.wamp_tls.idle_timeout", [
-{default, "8h"},
-{datatype, [{duration, ms}, {atom, infinity}]}
-]}.
+If the client supports tcp PING control messages, enabled them,
+otherwise e.g. web browsers set `wamp.tls.ping.enabled` to on.
 
-Default cert location for https can be overridden
-with the wamp.tls config variable, for example:
-{mapping, "wamp.tls.certfile", "bondy.wamp_tls.tls_opts.certfile", [
-  {datatype, file},
-  {default, "{{platform_etc_dir}}/keycert.pem"}
-]}.
 
-Default key location for https can be overridden with the
-%%wamp.tls config variable, for example:
-{mapping, "wamp.tls.keyfile", "bondy.wamp_tls.tls_opts.keyfile", [
-  {datatype, file},
-  {default, "{{platform_etc_dir}}/key.pem"}
-]}.
+@[config](wamp.tls.certfile,path,'$(platform_etc_dir)/keycert.pem',v0.8.8)
 
-Default signing authority location for https can be overridden
-with the wamp.tls config variable, for example:
-{mapping, "wamp.tls.cacertfile", "bondy.wamp_tls.tls_opts.cacertfile", [
-  {datatype, file},
-  {default, "{{platform_etc_dir}}/cacert.pem"}
-]}.
+Default cert location.
+
+@[config](wamp.tls.certfile,path,'$(platform_etc_dir)/key.pem',v0.8.8)
+
+Default key location.
+
+@[config](wamp.tls.certfile,cacertfile,'$(platform_etc_dir)/cacert.pem',v0.8.8)
+
+Default signing authority location.
+
+@[config](wamp.tls.versions,string,'$(platform_etc_dir)/cacert.pem',v0.8.8)
 
 A comma separate list of TLS protocol versions that will be supported
-At the moment Bondy only supports versions 1.2 and 1.3
-{mapping, "wamp.tls.versions", "bondy.wamp_tls.tls_opts.versions", [
-  {datatype, string},
-  {default, "1.3"}
-]}.
-
-
-{translation, "bondy.wamp_tls.tls_opts.versions",
-  fun(Conf) ->
-    case cuttlefish:conf_get("wamp.tls.versions", Conf) of
-        Value when is_list(Value) ->
-          try
-            [
-              begin
-                case string:strip(Version) of
-                  "1.2" -> 'tlsv1.2';
-                  "1.3" -> 'tlsv1.3';
-                  _ -> throw({invalid_version, Version})
-                end
-              end || Version <- string:split(Value, ",")
-            ]
-          catch
-            throw:{invalid_version, Version} ->
-              cuttlefish:invalid("invalid TLS version " ++ Version)
-          end;
-        _ ->
-            cuttlefish:invalid(
-              "value should be string containing valid comma separated version numbers e.g. \"1.2, 1.3\""
-            )
-    end
-  end
-}.
+At the moment Bondy only supports versions `1.2` and `1.3`.
 

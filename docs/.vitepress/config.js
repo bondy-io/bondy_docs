@@ -297,8 +297,8 @@ export default {
               isFeature: true
             },
             {
-              text: 'Traffic Management',
-              link: '/reference/configuration/traffic_management.md',
+              text: 'Network Listeners',
+              link: '/reference/configuration/listeners.md',
               isFeature: true
             },
             {
@@ -307,8 +307,13 @@ export default {
               isFeature: true
             },
             {
-              text: 'Network Listeners',
-              link: '/reference/configuration/listeners.md',
+              text: 'Traffic Management',
+              link: '/reference/configuration/traffic_management.md',
+              isFeature: true
+            },
+            {
+              text: 'Data Storage',
+              link: '/reference/configuration/data_storage.md',
               isFeature: true
             },
             {
@@ -317,8 +322,8 @@ export default {
               isFeature: true
             },
             {
-              text: 'Data Storage and Replication',
-              link: '/reference/configuration/data_replication.md',
+              text: 'Active Anti-entropy',
+              link: '/reference/configuration/aae.md',
               isFeature: true
             },
             {

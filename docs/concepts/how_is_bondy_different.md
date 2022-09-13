@@ -2,8 +2,14 @@
 > Bondy provides a unique combination of features which sets it apart from other application networking solutions and WAMP routers in terms of scalability, reliability, high-performance, development and operational simplicity.{.definition}
 
 
+## Self-sufficiency
+Bondy does not depend on any external system e.g. databases, as it would not be able to guarantee their availability.
+
 ## Distributed by design
 As opposed to existing WAMP Router implementations, Bondy was designed as a reliable distributed router, ensuring continued operation in the event of node or network failures through clustering and data replication.
+
+<ZoomImg src="/assets/bondy_architecture.png"/>
+
 
 ## Scalable
 Bondy is written in Erlang/OTP which provides the underlying operating system to handle concurrency and scalability requirements, allowing it to scale to thousands and even millions of concurrent connections on a single node. Its distributed architecture also allows for horizontal scaling by simply adding nodes to the cluster.
@@ -28,5 +34,6 @@ Bondy embeds a powerful API Gateway that can translate HTTP actions to WAMP rout
 
 ## Broker Bridge
 Bondy embeds a Broker Bridge that can manage a set of WAMP subscribers to re-publish WAMP events to an external non-WAMP system e.g. a message broker.
+
 
 

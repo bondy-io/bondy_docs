@@ -120,7 +120,6 @@ At the moment the only option is `fullmesh`.
 ## Automatic leave
 
 
-
 @[config](cluster.automatic_leave,on|off,off,v1.0.0)
 
 Defines whether a Bondy node should perform a cluster leave operation
