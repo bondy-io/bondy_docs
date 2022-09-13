@@ -284,12 +284,12 @@ table.property-table > tbody > tr > td {
 
 .tabs-component-tab {
     height: 100%;
-    color: #999;
     font-size: 14px;
     font-weight: 600;
     margin-top: 8px;
     margin-right: 0;
     list-style: none;
+    background-color: var(--vp-c-gray-light-5);
 }
 
 .tabs-component-tab:not(:last-child) {
@@ -301,6 +301,7 @@ table.property-table > tbody > tr > td {
 
 .tabs-component-tab.is-active {
     color: #000;
+    background-color: inherit;
 }
 
 .tabs-component-tab.is-disabled * {
@@ -330,7 +331,6 @@ table.property-table > tbody > tr > td {
         margin-bottom: -1px !important;
     }
     .tabs-component-tab {
-        background-color: #fff;
         border: solid 1px #ddd;
         border-radius: 3px 3px 0 0;
         margin-right: .5em;
