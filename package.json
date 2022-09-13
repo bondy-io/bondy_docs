@@ -4,7 +4,7 @@
   "description": "Bondy Documentation website",
   "main": "index.js",
   "repository": "https://github.com/bondy-io/bondy_docs.git",
-  "author": "Alejandro M. Ramallo",
+  "author": "Bondy Team",
   "license": "CC BY-SA 4.0",
   "private": false,
   "devDependencies": {
