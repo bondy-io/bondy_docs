@@ -307,7 +307,7 @@ export default {
               isFeature: true
             },
             {
-              text: 'Listeners',
+              text: 'Network Listeners',
               link: '/reference/configuration/listeners.md',
               isFeature: true
             },

@@ -42,7 +42,7 @@ Default key location for cluster TLS connection.
 
 
 
-## Peer Discovery
+## Peer Discovery / Automatic Join
 
 @[config](cluster.peer_discovery.enabled,on|off,off)
 
@@ -68,3 +68,61 @@ Defines the time duration Bondy will wait between polling attempts.
 @[config](cluster.peer_discovery.timeout,time_duration_units,5s)
 
 Defines the time duration Bondy will wait for a response for a polling attempt.
+
+
+@[config](cluster.peer_discovery.join_retry_interval,time_duration_units,5s,v1.0.0)
+
+The time the agent will wait to initiate the next join attempt. For this to
+take effect cluster.peer_discovery.automatic_join needs to be on.
+
+@[config](cluster.peer_discovery.config.$name,string,N/A,v1.0.0)
+
+The configuration for the selected strategy in `cluster.peer_discovery.type`. Refer to each strategy documentation.
+
+
+Example: The selected type requires two params `keyA` and `keyB`.
+
+```
+cluster.peer_discovery.config.keyA = valueA
+cluster.peer_discovery.config.keyB = valueB
+```
+
+
+
+
+@[config](cluster.peer_discovery.config.$name.$_,string,N/A,v1.0.0)
+
+The configuration for the selected strategy in `cluster.peer_discovery.type`. Refer to each strategy documentation.
+
+Example: The selecte type requires two params `keyA` and `keyB` where the latter takes an array of values.
+
+```
+cluster.peer_discovery.config.keyA = value1
+cluster.peer_discovery.config.keyB._ = value2
+cluster.peer_discovery.config.keyB._ = value3
+```
+
+
+## Sync
+
+@[config](cluster.lazy_tick_period,duration_time_units,1s,v1.0.0)
+
+
+@[config](cluster.exchange_tick_period,duration_time_units,10s,v1.0.0)
+
+
+@[config](cluster.topology,fullmesh|p2p,fullmesh,v1.0.0)
+
+::: warning Harcoded Value
+At the moment the only option is `fullmesh`.
+:::
+
+
+## Automatic leave
+
+
+
+@[config](cluster.automatic_leave,on|off,off,v1.0.0)
+
+Defines whether a Bondy node should perform a cluster leave operation
+automatically when it is being shutdown.

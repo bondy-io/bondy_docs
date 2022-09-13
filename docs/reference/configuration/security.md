@@ -8,6 +8,8 @@ Defines whether Bondy allows the `anonymous` user.
 
 ::: warning
 We strongly recommend disabling anonymous for production use or at least restrict the network locations from which an anonymous connection can be established. See [Source](/reference/wamp_api/source) API documentation reference.
+
+Notice that disabling the anonymous disables the `anonymous` authentication method as an option for Authentication and Authorization.
 :::
 
 @[config](security.automatically_create_realms,on|off,off,v0.8.8)
