@@ -33,3 +33,8 @@ Controls when will the AAE system will trigger the next AAE exchange.
 @[config](aae.hashtree_timer,time_duration_units,10s,v0.8.8)
 
 @[config](aae.hashtree_ttl,time_duration_units,1w,v0.8.8)
+
+::: warning Noticeen 5
+
+Not working at the moment
+:::

@@ -267,216 +267,125 @@ At the moment Bondy only supports versions `1.2` and `1.3`. Example: "1.2,1.3".
 Listener configuration is currently shared with the API Gateway. See
 :::
 
+@[config](wamp.websocket.ping.enabled, on|off,on,v1.0.0)
+
+
 Defines if Websockets PING control message functionality is
 enabled or not.
+
 This option affects server (Bondy) initiated pings only. Some clients
 might also initiate ping requests and Bondy will always respond to those
 even if this option is turned off.
+
 This feature is useful to keep a connection alive and validate the
 connection is healthy.
+
 Enabling this feature implies having an additional timer per connection and
 this can be a considerable cost for servers that need to handle large
 numbers of connections. A better solution in most cases is to let the client
 handle pings. However, notice web browsers will typically kill websocket
 connections after 60s and will not initiate PINGs.
-{mapping, "wamp.websocket.ping.enabled", "bondy.wamp_websocket.ping.enabled", [
-  {default, on},
-  {datatype, {flag, on, off}}
-]}.
 
-If wamp.websocket.ping.enabled is 'on', this parameter controls the
+@[config](wamp.websocket.ping.idle_timeout,time_duration_units,20s,v1.0.0)
+
+If `wamp.websocket.ping.enabled` is enabled, this parameter controls the
 maximum time interval that is permitted to elapse between the point at which
 the Client finishes transmitting a message and the point it starts sending
 the next.
 Notice this is not the same as wamp.websocket.idle_timeout.
-{mapping, "wamp.websocket.ping.idle_timeout", "bondy.wamp_websocket.ping.idle_timeout", [
-  {default, "20s"},
-  {datatype, {duration, ms}}
-]}.
+
+
+@[config](wamp.websocket.ping.timeout,time_duration_units,10s,v1.0.0)
 
 If wamp.websocket.ping.enabled is 'on', this parameter controls the
 amount of time Bondy waits for a ping response from the client.
 Once that time has passed this counts as a fail attempt
-(see wamp.websocket.ping.max_attempts).
-{mapping, "wamp.websocket.ping.timeout", "bondy.wamp_websocket.ping.timeout", [
-  {default, "10s"},
-  {datatype, {duration, ms}}
-]}.
+(see `wamp.websocket.ping.max_attempts`).
 
-If wamp.websocket.ping.enabled is 'on', this parameter controls how many
+@[config](wamp.websocket.ping.enabled,integer,2,v1.0.0)
+
+If `wamp.websocket.ping.enabled` is enabled, this parameter controls how many
 missed pings are allowed to timeout before Bondy closes the connection.
-{mapping,
-  "wamp.websocket.ping.max_attempts",
-"bondy.wamp_websocket.ping.max_attempts",
-  [
-    {default, 2},
-    {datatype, integer},
-    {validators, ["pos_integer"]}
-  ]
-}.
+
+@[config](wamp.websocket.idle_timeout,time_duration_units,8h,v1.0.0)
 
 Drops the connection after a period of inactivity. This option does not
-take effect when wamp.websocket.ping.enabled is 'on' and wamp.websocket.ping.
-interval times wamp.websocket.ping.max_attempts results in a value higher
-than this option.
-Notice that for some clients using this option alone is not enough to keep
+take effect when `wamp.websocket.ping.enabled` is enabled and `wamp.websocket.ping.interval` times `wamp.websocket.ping.max_attempts` results in a value higher than this option.
+
+::: warning Notice
+For some clients using this option alone is not enough to keep
 a connection alive as the client will drop the connection due to inactivity.
 If the client supports Websocket PING control messages, enabled them,
-otherwise e.g. web browsers set wamp.websocket.ping.enabled to on.
-{mapping, "wamp.websocket.idle_timeout", "bondy.wamp_websocket.idle_timeout", [
-  {default, "8h"},
-  {datatype, [{duration, ms}, {atom, infinity}]}
-]}.
+otherwise set `wamp.websocket.ping.enabled` to on.
 
+Web browsers don't typically support Websocket PING control messages.
+:::
+
+@[config](wamp.websocket.ping.enabled,'infinity'|integer,'infinity',v1.0.0)
 
 Maximum frame size allowed by this Websocket handler. Cowboy will close the
 connection when a client attempts to send a frame that goes over this limit.
 For fragmented frames this applies to the size of the reconstituted frame.
-%%
-A value of cero means un unbounded size (internally translated to 'infinity')
-{mapping, "wamp.websocket.max_frame_size", "bondy.wamp_websocket.max_frame_size", [
-  {default, infinity},
-  {datatype, [{atom, infinity}, integer]}
-]}.
 
-% {translation, "bondy.wamp_websocket.max_frame_size",
-%  fun(Conf) ->
-%   TheLimit = cuttlefish:conf_get("wamp.websocket.max_frame_size", Conf),
-%   case TheLimit of
-%       0 -> infinite;
-%       Int when is_integer(Int) andalso Int > 0 -> Int;
-%       _ ->
-%           This would have been caught earlier in datatype validation
-%           cuttlefish:invalid("should be a non negative integer")
-%   end
-%  end
-% }.
+A value of zero means un unbounded size (internally translated to 'infinity').
 
+@[config](wamp.websocket.compression_enabled,on|off,off,v1.0.0)
 
 Defines if Websocket compression (permessage-deflate extension) is enabled
 or not. If enabled it will be negotiated with supporting clients.
-{mapping, "wamp.websocket.compression_enabled", "bondy.wamp_websocket.compress", [
-  {default, off},
-  {datatype, {flag, on, off}}
-]}.
 
+@[config](wamp.websocket.deflate_opts.level,0..9,5,v1.0.0)
 
-Compression level to use. A value between 0 and 9
+Compression level to use. A value between 0 and 9.
+
 * 0 (none), gives no compression
-* 1 (best_speed) gives best speed
-* 9 (best_compression) gives best compression
-{mapping, "wamp.websocket.deflate.level", "bondy.wamp_websocket.deflate_opts.level", [
-  {default, 5},
-  {datatype, integer}
-]}.
+* 1 gives best speed
+* 9 gives best compression
 
-{translation, "bondy.wamp_websocket.deflate_opts.level",
- fun(Conf) ->
-  case cuttlefish:conf_get("wamp.websocket.deflate.level", Conf) of
-      Int when is_integer(Int) andalso Int >= 0 andalso Int =< 9 -> Int;
-      _ ->
-          This would have been caught earlier in datatype validation
-          cuttlefish:invalid(
-            "should be an integer between 0 and 9")
-  end
- end
-}.
+@[config](wamp.websocket.deflate.mem_level,1..9,8,v1.0.0)
 
 Specifies how much memory is to be allocated for the internal compression
 state. An integer between 1 and 9, where 1 uses minimum memory but is slow
 and reduces compression ratio while 9 uses maximum memory for optimal speed.
-{mapping, "wamp.websocket.deflate.mem_level", "bondy.wamp_websocket.deflate_opts.mem_level", [
-  {default, 8},
-  {datatype, integer}
-]}.
 
-{translation, "bondy.wamp_websocket.deflate_opts.mem_level",
- fun(Conf) ->
-  case cuttlefish:conf_get("wamp.websocket.deflate.mem_level", Conf) of
-      Int when is_integer(Int) andalso Int >= 1 andalso Int =< 9 -> Int;
-      _ ->
-          This would have been caught earlier in datatype validation
-          cuttlefish:invalid(
-            "should be an integer between 1 and 9")
-  end
- end
-}.
+@[config](wamp.websocket.deflate.strategy,enum,default,v1.0.0)
 
 Tunes the compression algorithm. Use the following values:
- -   default for normal data
- -   filtered for data produced by a filter (or predictor)
- -   huffman_only to force Huffman encoding only (no string match)
- -   rle to limit match distances to one (run-length encoding)
-%%
+ -   `default` for normal data
+ -   `filtered` for data produced by a filter (or predictor)
+ -   `huffman_only` to force Huffman encoding only (no string match)
+ -   `rle` to limit match distances to one (run-length encoding)
+
 Filtered data consists mostly of small values with a somewhat random
 distribution. In this case, the compression algorithm is tuned to compress
 them better. The effect of filtered is to force more Huffman coding and less
 string matching; it is somewhat intermediate between default and
 huffman_only. rle is designed to be almost as fast as huffman_only, but
 gives better compression for PNG image data.
-%%
+
 Strategy affects only the compression ratio, but not the correctness of the
 compressed output even if it is not set appropriately.
-{mapping, "wamp.websocket.deflate.strategy", "bondy.wamp_websocket.deflate_opts.strategy", [
-  {default, default},
-  {datatype, {enum, [default, filtered, huffman_only, rle]}}
-]}.
 
- Using no_takeover can severly limit the usefulness of compression.
-{mapping, "wamp.websocket.deflate.server_context_takeover", "bondy.wamp_websocket.deflate_opts.server_context_takeover", [
-  {default, takeover},
-  {datatype, {enum, [takeover, no_takeover]}}
-]}.
+@[config](wamp.websocket.deflate.server_context_takeover,takeover|no_takeover,takeover,v1.0.0)
 
- Using no_takeover can severly limit the usefulness of compression.
-{mapping, "wamp.websocket.deflate.client_context_takeover", "bondy.wamp_websocket.deflate_opts.client_context_takeover", [
-  {default, takeover},
-  {datatype, {enum, [takeover, no_takeover]}}
-]}.
+Using `no_takeover` can severly limit the usefulness of compression.
+
+@[config](wamp.websocket.deflate.client_context_takeover,takeover|no_takeover,takeover,v1.0.0)
+
+Using no_takeover can severly limit the usefulness of compression.
+
+@[config](wamp.websocket.deflate.server_max_window_bits,8..15,11,v1.0.0)
 
 The base two logarithm of the window size (the size of the history buffer).
 It is to be in the range 8 through 15. Larger values result in better
 compression at the expense of memory usage.
-{mapping, "wamp.websocket.deflate.server_max_window_bits", "bondy.wamp_websocket.deflate_opts.server_max_window_bits", [
-  {default, 11},
-  {datatype, integer}
-]}.
 
-{translation, "bondy.wamp_websocket.deflate_opts.server_max_window_bits",
- fun(Conf) ->
-  case cuttlefish:conf_get("wamp.websocket.deflate.server_max_window_bits", Conf) of
-      Int when is_integer(Int) andalso Int >= 8 andalso Int =< 15 -> Int;
-      _ ->
-          cuttlefish:invalid(
-            "should be an integer between 8 and 15")
-  end
- end
-}.
+
+@[config](wamp.websocket.deflate.client_max_window_bits,8..15,11,v1.0.0)
 
 The base two logarithm of the window size (the size of the history buffer).
 It is to be in the range 8 through 15. Larger values result in better
 compression at the expense of memory usage.
-{mapping, "wamp.websocket.deflate.client_max_window_bits", "bondy.wamp_websocket.deflate_opts.client_max_window_bits", [
-  {default, 11},
-  {datatype, integer}
-]}.
-
-{translation, "bondy.wamp_websocket.deflate_opts.client_max_window_bits",
- fun(Conf) ->
-  case cuttlefish:conf_get("wamp.websocket.deflate.client_max_window_bits", Conf) of
-      Int when is_integer(Int) andalso Int >= 8 andalso Int =< 15 -> Int;
-      _ ->
-          cuttlefish:invalid(
-            "should be an integer between 8 and 15")
-  end
- end
-}.
-
-
-
-
-
-
 
 
 ## WAMP Rawsocket TCP Listener

@@ -88,8 +88,6 @@ cluster.peer_discovery.config.keyB = valueB
 ```
 
 
-
-
 @[config](cluster.peer_discovery.config.$name.$_,string,N/A,v1.0.0)
 
 The configuration for the selected strategy in `cluster.peer_discovery.type`. Refer to each strategy documentation.
@@ -102,20 +100,21 @@ cluster.peer_discovery.config.keyB._ = value2
 cluster.peer_discovery.config.keyB._ = value3
 ```
 
-
-## Sync
-
-@[config](cluster.lazy_tick_period,duration_time_units,1s,v1.0.0)
-
-
-@[config](cluster.exchange_tick_period,duration_time_units,10s,v1.0.0)
-
+## Topology
 
 @[config](cluster.topology,fullmesh|p2p,fullmesh,v1.0.0)
 
-::: warning Harcoded Value
+::: warning
 At the moment the only option is `fullmesh`.
 :::
+
+## Membership View Sync
+
+@[config](cluster.lazy_tick_period,duration_time_units,1s,v1.0.0)
+
+* [ ] document
+
+@[config](cluster.exchange_tick_period,duration_time_units,10s,v1.0.0)
 
 
 ## Automatic leave
