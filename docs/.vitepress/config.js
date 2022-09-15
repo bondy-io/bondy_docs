@@ -89,7 +89,7 @@ export default {
         // The footer will displayed only when the page doesn't contain sidebar
         // due to design reason.
         footer: {
-            message: 'Released under  material licensed under the CC-BY-SA 4.0, provided as-is without any warranties. Bondy and Leapsight are registered trademarks.',
+            message: 'Except where otherwise noted, content on this site is licensed under a Creative Commons Attribution-ShareAlike (CC-BY-SA) 4.0 International license. Bondy and Leapsight are registered trademarks.',
             copyright: 'Copyright © 2022 Leapsight'
         },
 
@@ -108,6 +108,11 @@ export default {
 
   function nav() {
       return [
+        {
+          text: 'Why Bondy',
+          link: '/concepts/why_bondy',
+          activeMatch: '/tutorials/'
+        },
         {
           text: 'Get Started',
           link: '/tutorials/index',
@@ -227,6 +232,7 @@ export default {
         {
           text: 'Introduction',
           items: [
+            { text: 'Why Bondy', link: '/concepts/why_bondy' },
             { text: 'What is Bondy', link: '/concepts/what_is_bondy' },
             { text: 'How is Bondy different', link: '/concepts/how_is_bondy_different' },
             { text: 'Architecture', link: '/concepts/architecture' }

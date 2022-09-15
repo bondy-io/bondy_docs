@@ -12,57 +12,82 @@
   }
 
 
-
-
 /* Override vitepress default theme home */
 
-.VPHome {
-  background-image: url("/assets/home_bg_dark_3.png");
-  background-position: 100% 30%;
-  background-size: cover;
-  height: 1400px;
+@media (max-width: 600px) {
+/*  .VPHome {
+    background-image: url("/assets/home_bg_dark_3.png");
+    background-position: 100% 30%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 200px;
+  }*/
+/*  .VPHome .items {
+    padding-top: 100px;
+  }*/
 }
 
-.dark .VPHome {
-  background-image: url("/assets/home_bg_dark_3.png");
-}
+@media (min-width: 700px) {
+  .VPHome {
 
+    background-image: url("/assets/home_bg_dark_3.png");
+    background-position: 100% 30%;
+    background-size: cover;
+    height: 1371px;
+  }
 
-.VPHome .container {
-  display: flex;
-  flex-direction: column;
-}
+  .VPHome .items {
+    padding-top: 400px;
+  }
 
-.VPHome .main {
-  order: 2;
-  width: 100%;
-}
+  .VPHome .main .name{
+    display: none;
+  }
+
+  .VPHome .main .text{
+    display: none;
+  }
+
+  .VPHome .main .tagline{
+    display: none;
+/*    font-size: 20px;
+    padding-top: 350px;
+    max-width: 600px;
+    color: var(--vp-c-text-dark-1);*/
+  }
+
+  .VPHome .image-src{
+    position: relative;
+    top: 250px;
+    left: 55%;
+    max-width: 100%;
+  }
+
+  .VPHome .container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .VPHome .main {
+    order: 2;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
 /*.VPHome .tagline{
   background-color: var(--vp-c-bg-soft);
   opacity: 90%;
 }*/
 
-.VPHome .image {
-  order: 1;
-  width: 100%;
+  .VPHome .image {
+    order: 1;
+    width: 100%;
+  }
 }
 
-.VPHomeHero{
-  padding-top: 400px;
-}
-
-.VPHome .image-container {
-  /*height:  100%;*/
-  /*transform: translate(-32px, -32px);*/
-}
-
-.VPHome .image-src{
-  position: relative;
-  top: 250px;
-  left: 55%;
-  max-width: 100%;
-}
 
 .VPHome .VPBox {
   opacity: 90%;
@@ -102,8 +127,6 @@ h5 {
     margin-left: -15px;
     height: 55px !important;
 }
-
-
 
 .datatype{
   background-color:#f1f1f1;
