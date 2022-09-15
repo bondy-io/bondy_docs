@@ -8,6 +8,7 @@ import './custom.css'
 export default {
     ...DefaultTheme,
     enhanceApp({ app }) {
+        app.component('Tab', Tab)
         app.component('Tabs', Tabs)
         app.component('DataTreeView', DataTreeView)
         app.component('ZoomImg', ZoomImg)
