@@ -1,10 +1,11 @@
 ---
 layout: home
-
 hero:
-  name: Bondy
-  text: Empowering everyone to connect everything
-  tagline: Bondy is an open source application networking platform that connects all elements of a distributed application, from web and mobile apps to IoT devices and backend services, allowing everything to talk using one single, simple protocol.
+  // image:
+  //   src: /assets/logo_hero.png
+  // name: Bondy
+  // text: Empowering everyone to connect everything
+  // tagline: Bondy is an open source application networking platform that connects all elements of a distributed application, from web and mobile apps to IoT devices and backend services, allowing everything to talk using one single, simple protocol.
   actions:
     - theme: brand
       text: Get Started
@@ -22,4 +23,5 @@ features:
     details: Learn about Bondy key concepts and topics.
   - title: Reference
     details: Access technical reference for APIs, tools and configuration.
+
 ---

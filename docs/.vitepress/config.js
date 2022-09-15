@@ -6,7 +6,7 @@ export default {
     title: 'Bondy Docs',
     titleTemplate: false,
     // This will render as a <meta> tag in the page HTML.
-    description: 'Bondy Documentation',
+    description: 'Bondy Documentation Website',
     appearance: true,
     lastUpdated: true,
 
@@ -66,7 +66,13 @@ export default {
     themeConfig: {
         siteTitle: false,
         logo: '/assets/logo.png',
-        heroImage: '/assets/hero_white_s.png',
+        // logo: {
+        //   light: '/assets/logo.png',
+        //   dark: '/assets/logo.png',
+        //   // light: {src:'/assets/logo.png', alt:"Bondy"},
+        //   // dark: {src:'/assets/logo.png', alt:"Bondy"}
+        // },
+
         // Search
         algolia: {
             appId: '66TO7T25GX',
@@ -80,7 +86,8 @@ export default {
             // { icon: 'discord', link: '...' }
         ],
 
-        // The footer will displayed only when the page doesn't contain sidebar due to design reason.
+        // The footer will displayed only when the page doesn't contain sidebar
+        // due to design reason.
         footer: {
             message: 'Released under  material licensed under the CC-BY-SA 4.0, provided as-is without any warranties. Bondy and Leapsight are registered trademarks.',
             copyright: 'Copyright © 2022 Leapsight'
