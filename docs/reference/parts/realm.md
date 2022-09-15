@@ -54,8 +54,6 @@ A realm's security may be checked, enabled, or disabled by an administrator thro
 ## Same Sign-on (SSO)
 Bondy SSO (Same Sign-on) is a feature that allows users to access multiple realms using just one set of credentials.
 
-<ZoomImg src="/assets/sso.png"/>
-
 To use SSO one needs first create a realm (A) as an SSO realm (by setting its `is_sso_realm` property to `true`).
 
 Subsequently one or more realms can use realm A as their SSO Realm by respectively setting their property `sso_realm_uri` to the URI of realm A.
