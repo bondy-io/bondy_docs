@@ -186,7 +186,7 @@ export default {
           ]
         },
         {
-          text: 'Programming',
+          text: 'Programming with WAMP',
           collapsible: true,
           items: [
             { text: 'General', link: '/guides/programming/general'},
@@ -242,13 +242,41 @@ export default {
         {
           text: 'Multi-tenant Security',
           items: [
-            { text: 'Overview', link: '/concepts/index' },
-            { text: 'Realms', link: '/concepts/realm' },
-            { text: 'Identity', link: '/concepts/identity' },
-            { text: 'Authentication', link: '/concepts/authentication' },
-            { text: 'Authorization', link: '/concepts/authorization' },
-            { text: 'Same Sign-on', link: '/concepts/same_sign_on' },
-            { text: 'Single Sign-on', link: '/concepts/single_sign_on' },
+            {
+              text: 'Overview',
+              link: '/concepts/index',
+              isFeature: false
+            },
+            {
+              text: 'Realms',
+              link: '/concepts/realms',
+              isFeature: true
+            },
+            {
+              text: 'Identity Management',
+              link: '/concepts/identity_management',
+              isFeature: true
+            },
+            {
+              text: 'Authentication',
+              link: '/concepts/authentication',
+              isFeature: true
+            },
+            {
+              text: 'Authorization',
+              link: '/concepts/authorization',
+              isFeature: true
+            },
+            {
+              text: 'Same Sign-on',
+              link: '/concepts/same_sign_on',
+              isFeature: true
+            },
+            {
+              text: 'Single Sign-on',
+              link: '/concepts/single_sign_on',
+              isFeature: true
+            },
           ]
         },
         {
