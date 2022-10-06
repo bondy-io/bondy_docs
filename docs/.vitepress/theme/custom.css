@@ -365,6 +365,7 @@ table.property-table > tbody > tr > td {
 }
 
 .tabs-component-tab {
+    border: solid 1px #ddd;
     height: 100%;
     font-size: 14px;
     font-weight: 600;
@@ -378,11 +379,14 @@ table.property-table > tbody > tr > td {
     border-bottom: dotted 1px #ddd;
 }
 
+
+
 .tabs-component-tab:hover {
 }
 
 .tabs-component-tab.is-active {
     color: #000;
+    border-bottom: solid 1px #fff;
     background-color: inherit;
 }
 
@@ -404,6 +408,63 @@ table.property-table > tbody > tr > td {
 }
 
 
+/* Overrides for code tabs */
+
+.tabs-component.code > .tabs-component-panels .line-numbers-mode {
+  margin-bottom: 0px;
+}
+
+.tabs-component.code > .tabs-component-tabs{
+  margin-top: 5px;
+  padding-bottom: 10px;
+  border-bottom: solid 0.5px #3E3F49;
+}
+
+.tabs-component.code > .tabs-component-panels {
+    margin-top: -15px;
+}
+
+.tabs-component.code{
+    color: white;
+    border: solid 1px RGB(42, 45, 62);
+    border-radius: 10px;
+    background-color: RGB(42, 45, 62);
+}
+
+
+.tabs-component.code > ul > li.tabs-component-tab.is-active {
+    border-bottom: solid 0px RGB(42, 45, 62);
+    align-items: center;
+    color: white;
+    display: flex;
+    text-decoration: none;
+}
+
+.tabs-component.code > ul > li.tabs-component-tab{
+    color: #ddd;
+    background-color: RGB(42, 45, 62);
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-start;
+    border: solid 1px RGB(42, 45, 62);
+    border-radius: 6px;
+
+}
+
+.tabs-component.code > ul > li.tabs-component-tab.is-active > a{
+    color: #ddd;
+    background-color: RGB(42, 45, 62);
+    padding: 2px 2px 2px 2px;
+}
+
+.tabs-component.code > ul > li.tabs-component-tab > a{
+    color: #aaa;
+    background-color: RGB(42, 45, 62);
+    padding: 2px 2px 2px 2px;
+}
+
+
+
 @media (min-width: 700px) {
     .tabs-component-tabs {
         display: flex;
@@ -412,14 +473,13 @@ table.property-table > tbody > tr > td {
         border: 0;
         margin-bottom: -1px !important;
     }
+
     .tabs-component-tab {
-        border: solid 1px #ddd;
         border-radius: 3px 3px 0 0;
         margin-right: .5em;
     }
 
     .tabs-component-tab.is-active {
-        border-bottom: solid 1px #fff;
         z-index: 2;
     }
 
@@ -429,6 +489,14 @@ table.property-table > tbody > tr > td {
         border-radius: 0 6px 6px 6px;
         box-shadow: none;
         padding: 4em 2em;
+    }
+
+    .tabs-component.code > .tabs-component-panels {
+        background-color: RGB(42, 45, 62);
+        border: none;
+        border-radius: 0 6px 6px 6px;
+        box-shadow: none;
+        padding: 0em 0.0em;
     }
 }
 
