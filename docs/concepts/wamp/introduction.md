@@ -83,11 +83,11 @@ Future versions of Bondy will not only provide Event History but also additional
 :::
 
 ## Routed Remote Procedure Calls (RPC)
-WAMP was designed to provide both RPC and PubSub, unlike other messaging protocols in which RPC is piggy-backed on top of PubSub.
+WAMP was designed to provide both RPC and PubSub.
 
-**RPCs in WAMP are routed and work bidirectionally**, unlike with traditional RPCs which are addressed directly and are strictly unidirectional (client-to-server).
+**RPCs in WAMP are routed and work bidirectionally**, unlike traditional RPC frameworks which are addressed directly and are strictly unidirectional (client-to-server).
 
-Registration of RPCs is with the WAMP router (actually the Dealer role played by the Router), and calls to procedures are similarly issued by WAMP clients to the WAMP router. This means that a Caller can issue all RPCs via the single connection to the WAMP router (the same connection it can use to do PubSub), and does not need to have any knowledge about what Callee is currently offering the procedure, where that Callee resides or how to address it. This can indeed change between calls, opening up the possibility for advanced features such as load-balancing or fail-over for procedure calls.
+Registration of RPCs is with the WAMP router (actually the Dealer role played by the Router), and calls to procedures are similarly issued by WAMP clients to the WAMP Router. This means that a Caller can issue all RPCs via the single connection to the WAMP router (the same connection it can use to do PubSub), and does not need to have any knowledge about what Callee is currently offering the procedure, where that Callee resides or how to address it. This can indeed change between calls, opening up the possibility for advanced features such as load-balancing or fail-over for procedure calls.
 
 The following diagram shows on Caller (A) making a call that is routed by the WAMP Router (Dealer) to the Callee (B) implementing the procedure.
 
