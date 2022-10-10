@@ -19,6 +19,7 @@
 </tabs>
 
 ## Establishing a connection
+
 <client-only>
 <tabs cache-lifetime="1000" class="code">
 <tab name="Python">
@@ -51,7 +52,7 @@ class Connect:
             realm=REALM
         )
 
-        # Register the session callbacks
+        # Register session lifecycle callbacks
         self._component.on("join", self._on_join)
         self._component.on("leave", self._on_leave)
 
@@ -62,18 +63,9 @@ class Connect:
         print("Done.")
 
     def _on_join(self, session, details):
-        print(
-            f"Joined realm {details.realm} "
-            f"from session {details.session}"
-        )
         self._session = session
 
     def _on_leave(self, session, details):
-        print(
-            f"Left realm {session.realm} "
-            f"from session {session.session_id} "
-            f"because {details.message} ({details.reason})"
-        )
         self._session = None
 
 
@@ -110,31 +102,72 @@ if __name__ == "__main__":
 
 ## How Registrations Work
 
-<tabs cache-lifetime="1000">
-    <tab name="Python">
-        First tab content
-    </tab>
-    <tab name="JS">
-        Second tab content
-    </tab>
-    <tab name="Erlang">
-        Third tab content
-    </tab>
-</tabs>
+
 
 ## Basic Registrations
 
-<tabs cache-lifetime="1000">
-    <tab name="Python">
-        First tab content
-    </tab>
-    <tab name="JS">
-        Second tab content
-    </tab>
-    <tab name="Erlang">
-        Third tab content
-    </tab>
+Typically, you will place you procedure registration on the session's `on_join` callback, that way as soon as the session has been established your component will register the procedures it offers.
+
+In the following snippet we register the procedure `com.example.add` which takes two integers as arguments.
+
+<tabs cache-lifetime="1000" class="code">
+<tab name="Python">
+
+```python
+async def _on_join(self, session, details):
+    self._session = session
+    self._session.register(self.add, "com.example.add")
+
+
+# Call handler for procedure 'com.example.add'
+def add(self, x, y):
+    """Add 2 numbers."""
+
+    try:
+        z = float(x) + float(y)
+
+    except Exception as error:
+        print(f"Invalid input: {error.args[0]}")
+        raise
+
+    else:
+        return z
+```
+</tab>
+<tab name="JS">
+Second tab content
+</tab>
+<tab name="Erlang">
+Third tab content
+</tab>
 </tabs>
+
+## Making a Call
+
+<tabs cache-lifetime="1000" class="code">
+<tab name="Python">
+
+```python
+# The user provides and input for x and y
+try:
+    z = await self._session.call("com.example.add", x, y)
+
+except Exception as error:
+    print(f"RPC failed: {error.args[0]}")
+
+else:
+    print(f"{x} + {y} = {z}")
+
+```
+</tab>
+<tab name="JS">
+Second tab content
+</tab>
+<tab name="Erlang">
+Third tab content
+</tab>
+</tabs>
+
 
 ## Call Timeouts
 

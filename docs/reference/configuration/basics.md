@@ -1,5 +1,5 @@
 # Configuration Basics
-> Bondy needs to be configured to your specific needs.{.definition}
+> Learn about the Bondy configuration file, its syntax, variable replacement and OS-specific configuration.{.definition}
 
 ## The `bondy.conf` file
 Bondy configuration file is used to set a wide variety of *static configuration options*. The file location depends on the installation method you've used as shown in the following table.

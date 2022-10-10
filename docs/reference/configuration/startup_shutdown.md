@@ -1,5 +1,5 @@
 # Startup/Shutdown Configuration Reference
-> Bondy configuration options controlling serveral aspects of what happens during Bondy startup and shutdown.{.definition}
+> Configure options controlling serveral aspects of what happens during startup and shutdown.{.definition}
 
 ## Startup
 

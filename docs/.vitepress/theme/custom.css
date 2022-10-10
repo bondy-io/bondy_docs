@@ -12,87 +12,6 @@
   }
 
 
-/* Override vitepress default theme home */
-
-@media (max-width: 600px) {
-/*  .VPHome {
-    background-image: url("/assets/home_bg_dark_3.png");
-    background-position: 100% 30%;
-    background-size: cover;
-    background-repeat: no-repeat;
-    height: 200px;
-  }*/
-/*  .VPHome .items {
-    padding-top: 100px;
-  }*/
-}
-
-@media (min-width: 700px) {
-  .VPHome {
-
-    background-image: url("/assets/home_bg_dark_3.png");
-    background-position: 100% 30%;
-    background-size: cover;
-    height: 1371px;
-  }
-
-  .VPHome .items {
-    padding-top: 400px;
-  }
-
-  .VPHome .main .name{
-    display: none;
-  }
-
-  .VPHome .main .text{
-    display: none;
-  }
-
-  .VPHome .main .tagline{
-    display: none;
-/*    font-size: 20px;
-    padding-top: 350px;
-    max-width: 600px;
-    color: var(--vp-c-text-dark-1);*/
-  }
-
-  .VPHome .image-src{
-    position: relative;
-    top: 250px;
-    left: 55%;
-    max-width: 100%;
-  }
-
-  .VPHome .container {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .VPHome .main {
-    order: 2;
-    width: 100%;
-    max-width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-/*.VPHome .tagline{
-  background-color: var(--vp-c-bg-soft);
-  opacity: 90%;
-}*/
-
-  .VPHome .image {
-    order: 1;
-    width: 100%;
-  }
-}
-
-
-.VPHome .VPBox {
-  opacity: 85%;
-}
-
 .dark {
   --vp-c-brand: #FFFFFF;
   --vp-c-brand-light: #454545;
@@ -119,6 +38,20 @@ h5 {
   border-bottom-style: solid;
   border-bottom-width: 1px;
   border-bottom-color: #989898;
+}
+
+.VPHomeHero > div > div.main > p.text{
+  font-size: 36px !important;
+  line-height: 40px;
+}
+
+.VPHomeHero > div > div.main > p.tagline{
+  font-size: 19.2px !important;
+  line-height: 26px;
+}
+
+.VPImage {
+  max-width: 400px !important;
 }
 
 

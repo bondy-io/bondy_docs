@@ -1,10 +1,22 @@
-# General Configuration Reference
+
+# Node Configuration Reference
+> Configure the nodename, platform paths and Erlang VM parameters.{.definition}
+
 
 ## Node Identity
 
+A distributed Bondy system consists of a number of Bondy router instances communicating with each other. Each such instance is called a `node` and must be given a name.
+
+
 @[config](nodename,string,'bondy@127.0.0.1',v0.1.0)
 
- Name of the Bondy node.
+Name of the Bondy node.
+
+The format of the nodename is a string `name@host`:
+*  `name` is the name given by the user, while
+* `host` is the full host name.
+
+The nodename is the node unique identifier within a cluster and thus each nodename must be unique.
 
 @[config](distributed_cookie,string,bondy,v0.1.0)
 
@@ -12,13 +24,13 @@ This is the [Distributed Erlang magic cookie](https://www.erlang.org/doc/referen
 
 ## Paths
 
-@[config](platform_data_dir)
+@[config](platform_data_dir,path,'./data',v0.1.0)
 
-@[config](platform_etc_dir)
+@[config](platform_etc_dir,path,'./etc',v0.1.0)
 
-@[config](platform_log_dir)
+@[config](platform_log_dir,path,'./log',v0.1.0)
 
-@[config](platform_tmp_dir)
+@[config](platform_tmp_dir,path,'./tmp',v0.1.0)
 
 ## Erlang Virtual Machine
 

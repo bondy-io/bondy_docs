@@ -5,6 +5,9 @@ export default {
     lang: 'en-GB',
     title: 'Bondy Docs',
     titleTemplate: false,
+    head: [
+      ['meta', { property: 'og:description', content: 'Bondy Documentation Website' }],
+    ],
     // This will render as a <meta> tag in the page HTML.
     description: 'Bondy Documentation Website',
     appearance: true,
@@ -24,6 +27,26 @@ export default {
           md.use(require('markdown-it-footnote'))
           md.use(require('markdown-it-task-lists'))
           md.use(require('markdown-it-katex'))
+          md.use(require('markdown-it-container'), 'tabs', {
+            validate: function(params) {
+              return params.trim().match(/^tabs\s+(.*)$/);
+            },
+            render: function(tokens, idx) {
+              var tokens = tokens[idx].info.trim().match(/^tabs\s+(.*)$/);
+              return '<tabs cache-lifetime="1000">' + md.utils.escapeHtml(tokens[1]) + '</tabs>\n';
+            }
+          })
+          md.use(require('markdown-it-container'), 'tab', {
+            validate: function(params) {
+              return params.trim().match(/^tab\s+(.*)$/);
+            },
+            render: function(tokens, idx) {
+              var tokens = tokens[idx].info.trim().match(/^tab\s+(.*)$/);
+              var name  = md.utils.escapeHtml(tokens[1]);
+              var content  = md.utils.escapeHtml(tokens[2]);
+              return '<tab name="' + name + '">' + content + '</tab>\n';
+            }
+          })
           md.use(require('markdown-it-custom-block'), {
             uri (str) {
               let args = str.replace(/\s+/g, '').split(",");
@@ -40,6 +63,7 @@ export default {
               return `<div class="custom-block uri ${className}"><a name="${uri}"></a><span class="custom-block uri ${className}">${badge}</span><p class="custom-block-title">${uri}</p></div>`;
             },
             config (str) {
+              console.log(str);
               let args = str.replace(/\s+/g, '').split(",");
               let param = args.shift();
               var datatype = 'string';
@@ -83,7 +107,7 @@ export default {
         socialLinks: [
             { icon: 'github', link: 'https://github.com/bondy-io'},
             { icon: 'twitter', link: 'https://twitter.com/bondyIO' },
-            // { icon: 'discord', link: '...' }
+            { icon: 'discord', link: 'https://discord.gg/Ux9EVst4' }
         ],
 
         // The footer will displayed only when the page doesn't contain sidebar
@@ -108,13 +132,19 @@ export default {
 
   function nav() {
       return [
+        // {
+        //   text: 'Alt Home',
+        //   link: 'alt_index',
+        //   activeMatch: '/'
+        // },
+
         {
-          text: 'Why Bondy',
-          link: '/concepts/why_bondy',
-          activeMatch: '/tutorials/'
+          text: 'Concepts',
+          link: '/concepts/index',
+          activeMatch: '/guides/'
         },
         {
-          text: 'Get Started',
+          text: 'Tutorials',
           link: '/tutorials/index',
           activeMatch: '/tutorials/'
         },
@@ -124,42 +154,66 @@ export default {
           activeMatch: '/guides/'
         },
         {
-          text: 'Concepts',
-          link: '/concepts/index',
-          activeMatch: '/guides/'
-        },
-        {
           text: 'Reference',
           items: [
-            { text: 'Configuration', link: '/reference/configuration/index' },
-            { text: 'WAMP API Reference', link: '/reference/wamp_api/index' },
-            { text: 'HTTP API Reference', link: '/reference/http_api/index' },
-            { text: 'Glossary', link: '/reference/glossary' },
+            {
+              text: 'Configuration Reference',
+              link: '/reference/configuration/index',
+              activeMatch: '/reference/configuration'
+            },
+            {
+              text: 'WAMP API Reference',
+              link: '/reference/wamp_api/index',
+              activeMatch: '/reference/wamp_api'
+            },
+            {
+              text: 'HTTP API Reference',
+              link: '/reference/http_api/index',
+              activeMatch: '/reference/http_api'
+            },
+            {
+              text: 'Glossary',
+              link: '/reference/glossary',
+              activeMatch: '/reference/glossary'
+            },
           ]
         },
         {
-          text: 'More',
-          items: [
-            { text: 'Community', link: '/community/index.md', activeMatch: '/community/'  },
-            { text: 'The Team', link: 'https://bondy.io/team' },
-            { text: 'Commercial Support', link: 'https://bondy.io/commercial_support' }
-          ]
+          text: 'Resources',
+          items: resources()
         }
     ]
   }
 
   function sidebars() {
     return {
-      '/tutorials/': tutorialsSidebar(),
-      '/guides/': guidesSidebar(),
-      '/reference/configuration': configurationSidebar(),
-      '/reference/wamp_api': wampAPISidebar(),
-      '/reference/http_api': httpAPISidebar(),
-      '/concepts/': conceptsSidebar(),
+      '/tutorials/': [...tutorialsSidebar(), ...resourcesSidebar()],
+      '/guides/': [...guidesSidebar(), ...resourcesSidebar()],
+      '/reference/configuration': [...configurationSidebar(), ...resourcesSidebar()],
+      '/reference/wamp_api': [...wampAPISidebar(), ...resourcesSidebar()],
+      '/reference/http_api': [...httpAPISidebar(), ...resourcesSidebar()],
+      '/concepts/': [...conceptsSidebar(), ...resourcesSidebar()]
     }
   }
 
-  // Turorials Section
+  function resourcesSidebar() {
+    return [
+        {
+        text: 'Resources',
+        items: resources()
+      }
+    ]
+  }
+
+  function resources() {
+    return [
+          { text: 'Community Forum', link: 'https://discuss.bondy.io' },
+          { text: 'Commercial Support', link: 'https://bondy.io/commercial_support' },
+          { text: 'Github', link: 'https://github.com/Leapsight' }
+        ]
+  }
+
+  // Tutorials Section
 
   function tutorialsSidebar() {
     return [
@@ -310,66 +364,70 @@ export default {
   function configurationSidebar() {
     return [
         {
-          text: 'Introduction',
+          text: 'Configuration Reference',
           items: [
             {
               text: 'Overview',
-              link: '/reference/configuration/index.md',
-              isFeature: true
+              link: '/reference/configuration/index',
+              isFeature: false
             },
             {
               text: 'Configuration basics',
-              link: '/reference/configuration/basics.md',
+              description: 'Learn about the Bondy configuration file, its syntax, variable replacement and OS-specific configuration',
+              link: '/reference/configuration/basics',
               isFeature: true
             }
           ]
         },
         {
-          text: 'Reference by Topic',
+          text: 'Router Configuration',
           items: [
             {
-              text: 'General',
-              link: '/reference/configuration/general.md',
+              text: 'Node',
+              description: 'Configure the nodename, platform paths and Erlang VM parameters',
+              link: '/reference/configuration/node',
               isFeature: true
             },
             {
               text: 'Startup/Shutdown',
-              link: '/reference/configuration/startup_shutdown.md',
+              description: 'Configure options controlling serveral aspects of what happens during startup and shutdown',
+              link: '/reference/configuration/startup_shutdown',
               isFeature: true
             },
             {
               text: 'Network Listeners',
-              link: '/reference/configuration/listeners.md',
+              description: 'Configure the network listeners for the different protocols and gateways',
+              link: '/reference/configuration/listeners',
               isFeature: true
             },
             {
               text: 'Security',
-              link: '/reference/configuration/security.md',
+              link: '/reference/configuration/security',
               isFeature: true
             },
             {
               text: 'Traffic Management',
-              link: '/reference/configuration/traffic_management.md',
+              link: '/reference/configuration/traffic_management',
               isFeature: true
             },
             {
               text: 'Data Storage',
-              link: '/reference/configuration/data_storage.md',
+              link: '/reference/configuration/data_storage',
               isFeature: true
             },
             {
               text: 'Cluster',
-              link: '/reference/configuration/cluster.md',
+              link: '/reference/configuration/cluster',
               isFeature: true
             },
             {
               text: 'Active Anti-entropy',
-              link: '/reference/configuration/aae.md',
+              link: '/reference/configuration/aae',
               isFeature: true
             },
             {
               text: 'Bridge Relay (Edge)',
-              link: '/reference/configuration/bridge_relay.md',
+              link: '/reference/configuration/bridge_relay',
               isFeature: true
             }
           ]
@@ -380,12 +438,13 @@ export default {
           items: [
             {
               text: 'WAMP Features',
-              link: '/reference/configuration/wamp.md',
+              description: 'Configure several WAMP features like URI strictness, RPC timeouts and message retention',
+              link: '/reference/configuration/wamp',
               isFeature: true
             },
             {
               text: 'HTTP API Gateway',
-              link: '/reference/configuration/http_api_gateway.md',
+              link: '/reference/configuration/http_api_gateway',
               isFeature: true
             }
           ]
@@ -394,13 +453,13 @@ export default {
           text: 'Broker Bridge',
           items: [
             {
-              text: 'Configuration',
-              link: '/reference/configuration/broker_bridge.md',
+              text: 'General',
+              link: '/reference/configuration/broker_bridge',
               isFeature: true
             },
             {
               text: 'Kafka Bridge',
-              link: '/reference/configuration/kafka_bridge.md',
+              link: '/reference/configuration/kafka_bridge',
               isFeature: true
             }
           ]

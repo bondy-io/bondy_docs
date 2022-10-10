@@ -1,4 +1,18 @@
+<script setup>
+import { computed } from 'vue'
+import { useData } from 'vitepress'
+
+const { theme , page} = useData()
+</script>
+
+
 # Glossary
+
+<!-- {{page.headers.sort((a, b) => {
+    if(a.text > b.text) {return 1;}
+    if(a.text < b.text) {return -1;}
+    return 0;
+})}} -->
 
 ## Authmethod
 
@@ -34,9 +48,22 @@ These conflicts occur when objects are either:
 - **missing**, as when one node holds a replica of the object and another node does not, or
 - **divergent**, as when the values of an existing object differ across nodes.
 
-
-
 ## Merkle Trees
 A Merkle Tree is a hash tree where leaves are hashes of the values of individual keys. Parent nodes are hashes of their respective children.
 
 This feature helps to recover data loss in the event of disk corruption.
+
+## Mesh topology
+
+In a mesh topology there is no central connection point. Instead, each node is connected to at least one other node and usually to more than one. Each node is capable of sending messages to and receiving messages from other nodes. The nodes act as relays, passing on a message towards its final destination.
+
+There are two types of mesh topology:
+
+* full mesh topology
+* partial mesh topology
+
+
+## Service Mesh
+A service mesh is a dedicated network layer that sits above the service layer and enables service-to-service communication. Its communication channels rely on distributed APIs instead of centralized and discrete appliances.
+
+Messages are transported within the service mesh, but the messaging functions are performed alongside the services receiving the messages. Each instance is attached to a proxy that relays messages to and fro the service mesh. These proxies then perform many functions traditionally performed by middleware such as message routing and blocking, service discovery, load balancing, encryption, authentication, and authorization. They additionally support features such as discovery, failure handling, routing, circuit-breaking, and request tracing.

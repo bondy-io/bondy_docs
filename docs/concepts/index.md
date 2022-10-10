@@ -8,9 +8,7 @@ const { theme } = useData()
 # Concepts
 > Learn about Bondy key concepts and topics.{.definition}
 
-
-## Multi-tenant Security
-
-<Features
-    class="VPHomeFeatures"
-    :features="theme.sidebar['/concepts/'][1].items.filter(function(item){return item.isFeature})"/>
+<div v-for="section in theme.sidebar['/concepts/']">
+    <h2>{{section.text}}</h2>
+    <Features class="VPHomeFeatures" :features="section.items.filter(function(item){return item.isFeature})"/>
+</div>

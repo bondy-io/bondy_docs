@@ -14,13 +14,15 @@ Bondy is our contribution to solve the problem and it was born out of our own ne
 
 The computer software industry has a tendency to add vertical solutions as silos and build layers over layers without taking things away[^1].
 
-For example, new modern Remote Procedure Call (RPC) technologies like gRPC and new incarnations of the ubiquitous HTTP protocol still make a distinction between clients and servers. When the smart phones we have in our pockets are more powerful than the supercomputers of the 80s, those frameworks still treat the browser running on the them as dumb clients. These complicates the implement of several use cases in which it would be desirable for the "server" to call the "client".
+For example, new modern Remote Procedure Call (RPC) technologies like gRPC and new incarnations of the ubiquitous HTTP protocol still make a distinction between clients and servers. When the smart phones we have in our pockets are more powerful than the supercomputers of the 80s, those frameworks still treat the browser running on the them as dumb clients.
+
+These complicates the implement of several use cases in which it would be desirable for the "server" to call the "client".
 
 Fortunately, the advances in distributed computing over the last 10 years have given us a new horizon, one where we are able to treat our mobile devices as the system or record. I am referrying to peer-to-peer networking and local-first software[^2].
 
 But this will come at a cost.
 
-Moreover, these technologies implement a single application comunication pattern e.g. point-to-point RPCs or Publish-Subscribe (PubSub). If your application, needs both communication patterns, you need to adopt, learn and use two different client libraries and infrastructure components. Moreover, some protocols are not web-native so if you want to integrate say PubSub on your web-based app you might need to resort to a cloud based solution, again this means yet another protocol/client dependency.
+Moreover, these technologies implement a single application comunication pattern e.g. point-to-point RPCs or Publish-Subscribe (PubSub). If your application, needs both communication patterns, you need to adopt, learn and use two different client libraries and infrastructure components. Moreover, some protocols are not web-native so if you want to integrate say PubSub on your web-based app you might need to resort to integrate also a cloud based solution, again this means yet another protocol/client dependency.
 
 <!-- Frameworks pretend to solve this by adding yet more features, more adapters, more callbacks. Most of the time implemented using proprietary Software Development Kits (SDKs) in a specific programming language. This SDKs evolve over time and require those adapters to be rebuilt. Moreover sometimes those adapters have to be deployed within the infrastructure component, which complicates its maintenance, support and operating characteristics. -->
 

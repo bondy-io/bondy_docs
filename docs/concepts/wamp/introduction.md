@@ -103,7 +103,7 @@ This is an important concept to remark, in WAMP we do not talk about "RPC Client
 
 Thus, in WAMP we use the word "client" to refer to any agent or application component that connects to a WAMP Router i.e. WAMP client library.
 
-This is not just a language choice, it denotes a fundamental WAMP feature, becuase RPCs in WAMP are routed and work bidirectionally, this means any WAMP client can be an RPC client or RPC server at the same time!
+This is not just a language choice, it denotes a fundamental WAMP feature, because RPCs in WAMP are routed and work bidirectionally, this means any WAMP client can be an RPC client or RPC server at the same time!
 
 In fact, as we will see in the next section, WAMP clients can play any of the 4 roles described in the previous sections (Caller, Callee, Publisher, Subscriber) or any combination of those at the same time.
 :::
@@ -112,11 +112,14 @@ In fact, as we will see in the next section, WAMP clients can play any of the 4 
 
 As we mentioned before, WAMP clients can play any of the 4 roles described in the previous sections (Caller, Callee, Publisher, Subscriber) or any combination of those at the same time.
 
-This, in effect, offers a Peer-to-peer programming model, where all WAMP clients are equal in that they can all play anyone of the WAMP client roles.
+This, in effect, offers a Peer-to-peer programming model, where all WAMP clients have the same capabilities.
 
-This not only avoids the traditional distinction between RPC clients and RPC server, biut also allows architectures that are impossible with traditional RPC frameworks. For example, in WAMP a browser-based client can call procedures on another browser-based client or a mobile-based client!
+This not only avoids the traditional distinction between RPC clients and RPC server, but also allows architectures that are impossible with traditional RPC frameworks. For example, in WAMP, a browser-based client can call procedures on another browser-based client or a mobile client!
 
-So we finally have a distributed systemns programming model that doesn't treat browsers and mobile phones as dumb terminals, which was the assumption behind mainstream protocols like HTTP and gRPC.
+With WAMP we finally have a distributed systemns programming model that doesn't treat web browsers and smartphones as dumb terminals, which is the underlying (unspoken) assumption behind mainstream protocols like HTTP and gRPC. This is critical as smartphones today are 1,000 times more powerful than a supercomputer of the 80s[^1].
+
+
+[^1]: The Cray-2 Supercomputer delivered 1.9 GFLOPS in 1982 while the current  Apple A16 delivers 2,000 GFLOPS.
 
 
 
