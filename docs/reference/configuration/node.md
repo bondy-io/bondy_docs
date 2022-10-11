@@ -20,7 +20,13 @@ The nodename is the node unique identifier within a cluster and thus each nodena
 
 @[config](distributed_cookie,string,bondy,v0.1.0)
 
-This is the [Distributed Erlang magic cookie](https://www.erlang.org/doc/reference_manual/distributed.html#security). Bondy doesn't actually use distributed erlang in production, so this is not required to establish a cluster connection. However, if you want to connect Bondy via an Erlang remote shell e.g.`bondy remote_console`, you will need this parameter to be set.
+This is the [Distributed Erlang magic cookie](https://www.erlang.org/doc/reference_manual/distributed.html#security). Bondy doesn't actually use distributed Erlang for clustering, so this is not required for deploying a cluster.
+
+However, if you want to connect to Bondy via an Erlang remote shell—e.g. by executing `bondy remote_console` on the host, VM or container running Bondy—we will need this option to be set.
+
+:::warning Security
+We recommend changing this value a secret value to prevent unauthorised users to gain access to Bondy's underlying Erlang VM.
+:::
 
 ## Paths
 
@@ -34,9 +40,12 @@ This is the [Distributed Erlang magic cookie](https://www.erlang.org/doc/referen
 
 ## Erlang Virtual Machine
 
+The following are advanced params and require knowledge of the Erlang VM.
+Read more at: http://erlang.org/doc/man/erl.html.
+
 @[config](erlang.async_threads,0..1024,64,v0.1.0)
 
-Sets the number of threads in async thread pool. If thread support is available, the default is 64. More information at: http://erlang.org/doc/man/erl.html
+Sets the number of threads in async thread pool. If thread support is available, the default is 64.
 
 
 @[config](erlang.k)

@@ -412,13 +412,8 @@ export default {
               isFeature: true
             },
             {
-              text: 'Traffic Management',
-              link: '/reference/configuration/traffic_management',
-              isFeature: true
-            },
-            {
-              text: 'Data Storage',
-              link: '/reference/configuration/data_storage',
+              text: 'Overload Protection',
+              link: '/reference/configuration/overload_protection',
               isFeature: true
             },
             {
@@ -429,6 +424,11 @@ export default {
             {
               text: 'Active Anti-entropy',
               link: '/reference/configuration/aae',
+              isFeature: true
+            },
+            {
+              text: 'Data Storage',
+              link: '/reference/configuration/data_storage',
               isFeature: true
             },
             {

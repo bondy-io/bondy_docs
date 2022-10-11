@@ -20,18 +20,10 @@ Defines whether Bondy creates a new realm when a session wants to attach to a no
 We strongly recommend to disable this option and only enable it for development or testing purposes.
 :::
 
-## Static Configuration
-
-@[config](security.config_file,path,'&#123;&#123;platform_etc_dir&#125;&#125;/security_config.json',v0.8.8)
-
-The filename of a security JSON configuration file, which allows you to statically configure realms and its users, groups, sources and permissions.
-
-Bondy Security can be completely configured dynamically via API, read more about this in the Security section.
-
-This options is for those cases when you want to ensure a given configuration is applied every time Bondy restarts.
 
 ## Password options
 
+Options used by those authentication methods based on password.
 
 @[config](security.password.protocol,cra|scram,cra,v0.9.0)
 
@@ -53,7 +45,7 @@ the password.
 
 If this option is set to `on`, then Bondy will try to upgrade the password
 protocol of an existing password to the protocol defined by the
-`security.password.protocol` option using the defaul parameters defined in
+`security.password.protocol` option using the default parameters defined in
 the `security.password.{SelectedProtocol}.{Option}` options.
 
 
@@ -193,6 +185,15 @@ Controls whether client-SSO scope tickets are persistent. If enabled the
 ticket will be stored in Bondy's database. Otherwise the ticket is not
 stored.
 
+## Realm Static Configuration
+
+@[config](security.config_file,path,'&#123;&#123;platform_etc_dir&#125;&#125;/security_config.json',v0.8.8)
+
+The filename of a security JSON configuration file, which allows you to statically configure realms and its users, groups, sources and permissions.
+
+Bondy Security can be completely configured dynamically via API, read more about this in the Security section.
+
+This options is for those cases when you want to ensure a given configuration is applied every time Bondy restarts.
 
 
 
