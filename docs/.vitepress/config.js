@@ -373,8 +373,14 @@ export default {
             },
             {
               text: 'Configuration basics',
-              description: 'Learn about the Bondy configuration file, its syntax, variable replacement and OS-specific configuration',
+              description: 'Learn about the Bondy runtime configuration, the Bondy configuration file, its syntax, variable replacement and the required OS-specific configuration.',
               link: '/reference/configuration/basics',
+              isFeature: true
+            },
+            {
+              text: 'Quickstart Configuration',
+              description: 'The minimal configuration you must do for a quick start.',
+              link: '/reference/configuration/quickstart',
               isFeature: true
             }
           ]
