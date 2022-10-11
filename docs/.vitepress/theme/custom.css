@@ -42,16 +42,21 @@ h5 {
 
 .VPHomeHero > div > div.main > p.text{
   font-size: 36px !important;
-  line-height: 40px;
+  line-height: 45px;
 }
 
 .VPHomeHero > div > div.main > p.tagline{
   font-size: 19.2px !important;
-  line-height: 26px;
+  line-height: 30px;
 }
 
 .VPImage {
   max-width: 400px !important;
+}
+
+#VPContent > div > div.VPHero.has-image.VPHomeHero > div > div.image > div > img
+{
+  padding-top: 50px;
 }
 
 
