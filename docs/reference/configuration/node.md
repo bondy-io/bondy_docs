@@ -18,6 +18,10 @@ The format of the nodename is a string `name@host`:
 
 The nodename is the node unique identifier within a cluster and thus each nodename must be unique.
 
+:::danger DEPRECATED
+Use environment variable `BONDY_ERL_NODENAME` instead
+:::
+
 @[config](distributed_cookie,string,bondy,v0.1.0)
 
 This is the [Distributed Erlang magic cookie](https://www.erlang.org/doc/reference_manual/distributed.html#security). Bondy doesn't actually use distributed Erlang for clustering, so this is not required for deploying a cluster.
@@ -28,15 +32,36 @@ However, if you want to connect to Bondy via an Erlang remote shell—e.g. by ex
 We recommend changing this value a secret value to prevent unauthorised users to gain access to Bondy's underlying Erlang VM.
 :::
 
+:::danger DEPRECATED
+Use environment variable `BONDY_ERL_DISTRIBUTED_COOKIE` instead
+:::
+
+
 ## Paths
 
 @[config](platform_data_dir,path,'./data',v0.1.0)
 
+:::danger DEPRECATED
+Use environment variable `BONDY_DATA_DIR` instead
+:::
+
 @[config](platform_etc_dir,path,'./etc',v0.1.0)
+
+:::danger DEPRECATED
+Use environment variable `BONDY_DATA_ETC` instead
+:::
 
 @[config](platform_log_dir,path,'./log',v0.1.0)
 
+:::danger DEPRECATED
+Use environment variable `BONDY_DATA_LOG` instead
+:::
+
 @[config](platform_tmp_dir,path,'./tmp',v0.1.0)
+
+:::danger DEPRECATED
+Use environment variable `BONDY_DATA_TMP` instead
+:::
 
 ## Erlang Virtual Machine
 

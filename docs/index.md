@@ -5,7 +5,7 @@ hero:
   image: /assets/bondy_diagram.png
   text: Learn how to develop, deploy and manage distributed applications using Bondy.
   # text: Empowering everyone to connect everything
-  tagline: Bondy is an open source application networking platform connecting all elements of a distributed application. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple communication protocol.
+  tagline: Bondy is an open source application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple communication protocol.
   actions:
     - theme: brand
       text: Get Started
