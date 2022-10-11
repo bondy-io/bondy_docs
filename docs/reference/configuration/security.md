@@ -16,11 +16,19 @@ Notice that disabling the anonymous disables the `anonymous` authentication meth
 
 Defines whether Bondy creates a new realm when a session wants to attach to a non existing realm.
 
+::: warning
+We strongly recommend to disable this option and only enable it for development or testing purposes.
+:::
+
 ## Static Configuration
 
 @[config](security.config_file,path,'&#123;&#123;platform_etc_dir&#125;&#125;/security_config.json',v0.8.8)
 
-The filename of a security JSON configuration file, which allows you to statically configure realms and its users, groups, sources and permissions. Bondy Security can be completely configured dynamically via API, read more about this in the Security section. This file is for those cases when you want to ensure a given configuration is applied every time Bondy restarts.
+The filename of a security JSON configuration file, which allows you to statically configure realms and its users, groups, sources and permissions.
+
+Bondy Security can be completely configured dynamically via API, read more about this in the Security section.
+
+This options is for those cases when you want to ensure a given configuration is applied every time Bondy restarts.
 
 ## Password options
 
