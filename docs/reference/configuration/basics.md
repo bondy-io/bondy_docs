@@ -106,7 +106,7 @@ security.allow_anonymous_user = off
 
 
 ### Default values
-For every option not provided by your configuration, Bondy might define a default value (check the default value for each of the Configuration Reference sections).
+For every option not provided by your configuration, Bondy might define a default value (check the default value for each key in each Configuration Reference section).
 
 :::info How options and their defaults are documented
 
@@ -140,7 +140,7 @@ broker_bridge.config_file = $(platform_etc_dir)/bb_conf.json
 </tab>
 </tabs>
 
-### Custom environment variable substitution
+## User environment variable substitution
 
 If you want to use environment variables in the `bondy.conf` you have to rename the file to `bondy.conf.template`.
 
@@ -163,25 +163,6 @@ security.config_file = ${BONDY_SECURITY_CONF_FILE}
 ```
 </tab>
 </tabs>
-
-## Feature-specific configuration files
-
-Some features and/or subsystems in Bondy allow providing an additional JSON configuration file e.g. the Security subsystem.
-
-In those cases, we need to let Bondy know where to find those specific files. This is done in the `bondy.conf` under the desired section e.g. the following configuration file adds the location for the `security_conf.json` file to statically create one or more realms (incl. users, groups, permissions).
-
-<tabs cache-lifetime="1000" class="code">
-<tab name="bondy.conf">
-
-```text
-nodename = bondy@127.0.0.1
-distributed_cookie = bondy
-security.allow_anonymous_user = off
-security.config_file = /bondy/etc/security_conf.json
-```
-</tab>
-</tabs>
-
 
 
 ## Operating System Configuration
