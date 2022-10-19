@@ -215,12 +215,12 @@ export default {
           },
           {
             text: 'Commercial Support',
-            link: 'https://bondy.io/commercial_support',
+            link: 'https://bondy.io/',
             isFeature: false
           },
           {
             text: 'Github',
-            link: 'https://github.com/Leapsight',
+            link: 'https://github.com/Leapsight/bondy',
             isFeature: false
           }
         ]
