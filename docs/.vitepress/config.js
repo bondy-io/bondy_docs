@@ -14,7 +14,6 @@ export default {
     description: 'Bondy Documentation Website',
     appearance: true,
     lastUpdated: true,
-
     markdown: {
         toc: { level: [3] },
         theme: 'one-dark-pro',

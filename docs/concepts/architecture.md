@@ -229,7 +229,7 @@ Default: 1w
 - `aae.exchange_timer` - how often should a node initiate an exchange with a cluster peer, e.g. '10s' for 10 seconds.
 Default: 10s
 
-<ZoomImg src="/assets/bondy_container_diagram.png"/>
+<ZoomImg src="./assets/bondy_container_diagram.png"/>
 
 
-<ZoomImg src="/assets/bondy_architecture.png"/>
+<ZoomImg src="./assets/bondy_architecture.png"/>
