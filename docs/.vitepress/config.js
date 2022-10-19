@@ -214,6 +214,11 @@ export default {
             isFeature: false
           },
           {
+            text: 'Commercial Chat',
+            link: 'https://bondy.zulipchat.com',
+            isFeature: false
+          },
+          {
             text: 'Commercial Support',
             link: 'https://bondy.io/',
             isFeature: false
