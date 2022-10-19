@@ -28,7 +28,7 @@ To learn more about this topic review the [Single Sign-on page](/concepts/single
 
 SSO works by having realms **share a common realm** to which they delegate the user identification and authentication.
 
-Let’s see how it works with an example. We will first create two organisation realms. The following is the definition of the SSO realm called `com.example.sso`.
+Let’s see how it works with an example. The following is the definition of the SSO realm called `com.example.sso`.
 
 ```json
 CALL("bondy.realm.create", [{
