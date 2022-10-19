@@ -214,7 +214,7 @@ export default {
             isFeature: false
           },
           {
-            text: 'Commercial Chat',
+            text: 'Community Chat',
             link: 'https://bondy.zulipchat.com',
             isFeature: false
           },
