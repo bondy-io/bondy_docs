@@ -1,13 +1,23 @@
 # What is Bondy
 
-> Bondy is an open source, always-on and scalable application networking platform for modern distributed architectures.  It is an all-in-one event and service mesh with support for multiple communication patterns and secure multi-tenancy.{.definition}
+> Bondy is an open source, always-on and scaleable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined.
+> From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple and secured communication protocol.{.definition}
+
+Bondy is an open source application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined.
+
+From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple and secured communication protocol.
 
 Bondy is a **reliable application message router, designed for availability and scalability**. It scales horizontally and vertically to support a high number of concurrent clients while maintaining low latency and fault tolerance. As opposed to mainstream messaging solutions Bondy **offers both routed Remote Procedure Call (RPC) and Publish & Subscribe communication patterns**.
 
-By combining the capabilities of a service mesh and an event mesh, Bondy can be used for the entire messaging requirements of a distributed system, from web and mobile apps to IoT devices and backend services, allowing everything to talk using **one single, simple messaging protocol**, thus **reducing technology stack complexity, as well as networking overheads**.‌
+By combining the capabilities of a service mesh and an event mesh, Bondy can be used for the entire messaging requirements of a distributed system, from web and mobile apps to IoT devices and backend services, allowing everything to talk using **one single, simple messaging protocol**, thus **reducing technology stack complexity, as well as networking overheads**.
+
 
 
 At its core, Bondy is a feature rich, scalable, robust and secure implementation of the open [Web Application Messaging Protocol (WAMP)](/guides/wamp.md), a  secure and multi-tenant messaging protocol that provides Routed RPC and Pub-Sub. **But Bondy goes beyond WAMP**.
+
+::: info Like a distributed D-Bus over a network
+[D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions. As Bondy, it offers RPC and Pub-Sub, but whereas Bondy is designed for be distributed over a set of hosts (cluster) and used over a network, D-Bus is designed for inter-process communication (IPC) on a single host.
+:::
 
 <ZoomImg src="/assets/bondy_diagram.png"/>
 

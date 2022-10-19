@@ -1,6 +1,8 @@
 // import MermaidPlugin from "vitepress-plugin-mermaid";
 
 export default {
+    // Set to false for publishing
+    ignoreDeadLinks: true,
     // These are app level configs.
     lang: 'en-GB',
     title: 'Bondy Docs',
@@ -141,7 +143,7 @@ export default {
         {
           text: 'Concepts',
           link: '/concepts/index',
-          activeMatch: '/guides/'
+          activeMatch: '/concepts/'
         },
         {
           text: 'Tutorials',
@@ -207,9 +209,21 @@ export default {
 
   function resources() {
     return [
-          { text: 'Community Forum', link: 'https://discuss.bondy.io' },
-          { text: 'Commercial Support', link: 'https://bondy.io/commercial_support' },
-          { text: 'Github', link: 'https://github.com/Leapsight' }
+          {
+            text: 'Community Forum',
+            link: 'https://discuss.bondy.io',
+            isFeature: false
+          },
+          {
+            text: 'Commercial Support',
+            link: 'https://bondy.io/commercial_support',
+            isFeature: false
+          },
+          {
+            text: 'Github',
+            link: 'https://github.com/Leapsight',
+            isFeature: false
+          }
         ]
   }
 
@@ -286,21 +300,31 @@ export default {
         {
           text: 'Introduction',
           items: [
-            { text: 'Why Bondy', link: '/concepts/why_bondy' },
-            { text: 'What is Bondy', link: '/concepts/what_is_bondy' },
-            { text: 'How is Bondy different', link: '/concepts/how_is_bondy_different' },
-            { text: 'Architecture', link: '/concepts/architecture' }
-
+            {
+              text: 'Why Bondy',
+              link: '/concepts/why_bondy' ,
+              isFeature: true
+            },
+            {
+              text: 'What is Bondy',
+              link: '/concepts/what_is_bondy' ,
+              isFeature: true
+            },
+            {
+              text: 'How is Bondy different',
+              link: '/concepts/how_is_bondy_different',
+              isFeature: true
+            },
+            {
+              text: 'Architecture',
+              link: '/concepts/architecture',
+              isFeature: true
+            }
           ]
         },
         {
           text: 'Multi-tenant Security',
           items: [
-            {
-              text: 'Overview',
-              link: '/concepts/index',
-              isFeature: false
-            },
             {
               text: 'Realms',
               link: '/concepts/realms',
@@ -336,19 +360,50 @@ export default {
         {
           text: 'Clustering',
           items: [
-            { text: 'Overview', link: '/concepts/index' },
-            { text: 'Data Replication', link: '/concepts/data_replication' },
+            {
+              text: 'Overview',
+              link: '/concepts/index',
+              isFeature: true },
+            {
+              text: 'Data Replication',
+              link: '/concepts/data_replication',
+              isFeature: true
+            },
           ]
         },
         {
           text: 'WAMP',
           items: [
-            { text: 'Introduction to WAMP', link: '/concepts/wamp/introduction' },
-            { text: 'Getting started with WAMP', link: '/concepts/wamp/getting_started' },
-            { text: 'Communication Patterns', link: '/concepts/wamp/communication_patterns' },
-            { text: 'Under the Hood', link: '/concepts/wamp/under_the_hood' },
-            { text: 'Beyond the Basics', link: '/concepts/wamp/beyond_the_basics' },
-            { text: 'Security', link: '/concepts/wamp/security' },
+            {
+              text: 'Introduction to WAMP',
+              link: '/concepts/wamp/introduction',
+              isFeature: true
+            },
+            {
+              text: 'Getting started with WAMP',
+              link: '/concepts/wamp/getting_started',
+              isFeature: true
+            },
+            {
+              text: 'Communication Patterns',
+              link: '/concepts/wamp/communication_patterns',
+              isFeature: true
+            },
+            {
+              text: 'Under the Hood',
+              link: '/concepts/wamp/under_the_hood',
+              isFeature: true
+            },
+            {
+              text: 'Beyond the Basics',
+              link: '/concepts/wamp/beyond_the_basics',
+              isFeature: true
+            },
+            {
+              text: 'Security',
+              link: '/concepts/wamp/security',
+              isFeature: true
+            },
           ]
         },
         {

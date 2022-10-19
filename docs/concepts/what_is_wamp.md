@@ -7,6 +7,10 @@
 
 * **It is a routed protocol**<br>All components connecting to a **WAMP** [Router](/concepts/router), where the router performs message routing between **WAMP** [Clients](/concepts/client).
 
+::: info Like D-Bus over a network
+[D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions. It offers the same two basic workflows as WAMP, but whereas WAMP is designed for use over a network, D-Bus is designed for inter-process communication (IPC) on a single host.
+:::
+
 ## Unified routing for both RPC and Pub/Sub
 
 ## Peer-to-peer programming model

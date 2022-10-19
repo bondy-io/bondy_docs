@@ -1,11 +1,11 @@
 {
   "name": "bondy_docs",
   "version": "1.0.0",
-  "description": "Bondy Documentation website",
+  "description": "Bondy Developer",
   "main": "index.js",
   "repository": "https://github.com/bondy-io/bondy_docs.git",
   "author": "Bondy Team",
-  "license": "CC BY-SA 4.0",
+  "license": "CC-BY-SA-4.0",
   "private": false,
   "devDependencies": {
     "vitepress": "^1.0.0-alpha.1"
@@ -22,7 +22,7 @@
     "markdown-it-katex": "^2.0.3",
     "markdown-it-task-lists": "^2.1.1",
     "medium-zoom": "^1.0.6",
-    "switch-ts": "^1.0.9",
-    "vue3-tabs-component": "^1.1.0"
+    "mixpanel-browser": "^2.45.0",
+    "switch-ts": "^1.0.9"
   }
 }

@@ -1,12 +1,22 @@
 # Why Bondy
-> Bondy is an open source application networking platform that connects all elements of a distributed application, from web and mobile apps to IoT devices and backend services, allowing everything to talk using one single, simple protocol.{.definition}
+> Delivering innovative customer experiences today requires the real-time networked connection of people, process, data and things.
+> But creating those connections has become shockingly complicated: too many protocols, client libraries and infrastructure components need to be integrated.
+{.definition}
 
 ## TL;DR
 Delivering innovative customer experiences today requires the real-time **networked connection of people, process, data and things (devices)**. Advances in technology so far have facilitated some of the tasks involved, but the overall process has become shockingly complicated, putting projects at risk.
 
 This results in a complex technology solution prone to inefficiencies, delays and fatigue hindering the success of business initiatives.
 
-Bondy is our contribution to solve the problem and it was born out of our own necessity. Bondy is an easy to use platform that allows any software talk to any other software, anywhere, in any programming language, securely and reliably, using multiple communication patterns and requiring a **single unifying protocol** and a **single infrastructure component**.
+Bondy is our contribution to solve the problem and it was born out of our own necessity.
+
+::: tip
+Bondy is an easy to use platform that allows any software talk to any other software, anywhere, in any programming language, securely and reliably, using multiple communication patterns and requiring a **single unifying protocol** and a **single infrastructure component**.
+:::
+
+> A long habit of not thinking a thing wrong, gives it a superficial appearance of being right, and raises at first a formidable outcry in defence of custom
+>
+>— Thomas Paine
 
 ::: warning DRAFT
 
@@ -39,11 +49,25 @@ We desperately need to simplify and make it easier for developers to deliver the
 > Where the big technology companies can cope with this complexity,
 
 
+:::
+
 
 ## The need for a universal application communication protocol
+
+* An aplication protocol (L7)
+* Support for multiple (all) application communication patterns
+* P2P programming model (nobody is dumb anymore)
+* Extensible (without committee approvals)
+* Web Native (no WASM)
+* Transport agnostic
+* Multiple serializations
+* P2P network
+
+## WAMP: The protocol that was ahead of its time
+
+## WAMP: Revival and Beyond
 
 
 [^1]: The [Cloud Native Computing Foundation (CNCF) [Cloud Native Interactive Landscape](https://landscape.cncf.io) lists more than 450 technologies. Most of them added in the last 10 years.
 [^2]: [Local-First Software: Your Own Your Data, in spite of the Cloud](https://martin.kleppmann.com/papers/local-first.pdf)
 [^3]: In [No Silver Bullet — Essence and Accident in Software Engineering](https://en.wikipedia.org/wiki/No_Silver_Bullet), Fred Brooks distinguishes between two different types of complexity: accidental complexity and essential complexity. Essential complexity is caused by the problem to be solved, and nothing can remove it. Accidental complexity relates to problems which engineers create and can fix; for example, the details of writing and optimizing assembly code or the delays caused by batch processing.
-:::
