@@ -7,7 +7,7 @@ In Bondy a realm is represented by a control plane object.
 
 Realms (and the associated users, credentials, groups, sources and permissions) are persisted to disk and replicated across the cluster by Bondy's control plane data replication procedures.
 
-<ZoomImg src="/assets/realm_diagram.png"/>
+<ZoomImg src="./assets/realm_diagram.png"/>
 
 As a Bondy administrator you can dynamically create any number of realms using the API described in this page.
 
