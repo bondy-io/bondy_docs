@@ -31,11 +31,11 @@ To learn more about this topic review the [Single Sign-on page](/concepts/single
 
 SSO works by having realms **share a common realm** in which they delegate the user identification and authentication.
 
-Let’s see how it works with an example. We will first create two organisation realms. The following is the definition of the SSO realm called `com.thing.sso`.
+Let’s see how it works with an example. We will first create two organisation realms. The following is the definition of the SSO realm called `com.example.sso`.
 
 ```jsx
 CALL("bondy.realm.create", [{
-   "uri": "com.thing.sso",
+   "uri": "com.example.sso",
    "is_sso_realm": true,
    "allow_connections": false,
    "security_enabled": true,
@@ -43,15 +43,15 @@ CALL("bondy.realm.create", [{
 }])
 ```
 
-Here we asume we will manage this realm by opening a WAMP session on Bondy’s master admin realm a.k.a `com.leapsight.bondy`, thus, we do not need anybody to open WAMP sessions on `com.thing.sso` so we disabled connections by using a new option introduced in this release: `allow_connections :: boolean()` .
+Here we asume we will manage this realm by opening a WAMP session on Bondy’s master admin realm a.k.a `com.leapsight.bondy`, thus, we do not need anybody to open WAMP sessions on `com.example.sso` so we disabled connections by using a new option introduced in this release: `allow_connections :: boolean()` .
 
-Now that we have the SSO realm we can put it to work. First we redefine the System realm to use SSO. To do that we just need to add the following declaration to the system realm definition: `"sso_realm_uri": "com.thing.sso"` .
+Now that we have the SSO realm we can put it to work. First we redefine the System realm to use SSO. To do that we just need to add the following declaration to the system realm definition: `"sso_realm_uri": "com.example.sso"` .
 
 ```jsx
 {
-   "uri": "com.thing.system",
+   "uri": "com.example.realm.1",
    "is_sso_realm": false,
-   "sso_realm_uri": "com.thing.sso",
+   "sso_realm_uri": "com.example.sso",
    "allow_connections": true,
    "security_enabled": true,
    "authmethods": [
@@ -70,7 +70,7 @@ Now that we have the SSO realm we can put it to work. First we redefine the Syst
 }
 ```
 
-This tells the `com.thing.system` realm to delegate the authentication of some users to the `com.thing.sso` realm.
+This tells the `com.example.realm.1` realm to delegate the authentication of some users to the `com.example.sso` realm.
 
 Now we create a user organisation realm, that will also use the same SSO realm.
 
@@ -78,7 +78,7 @@ Now we create a user organisation realm, that will also use the same SSO realm.
 {
    "uri": "com.thing.organization.1972",
    "is_sso_realm": false,
-   "sso_realm_uri": "com.thing.sso",
+   "sso_realm_uri": "com.example.sso",
    "allow_connections": true,
    "security_enabled": true,
    "authmethods": [
@@ -107,15 +107,15 @@ We can do the above using two options offered by Bondy:
 2. **Indirect** option (only available If the user does not yet exist in the SSO realm):
     1. Create the user in either the system realm or user organization realm, passing the setting the `sso_realm_uri` with the URI of the SSO realm supported by the realm , as it will be demonstrated below. Bondy will automatically create the user in the SSO realm as well as in the chosen realm (atomically).
 
-In the following example we will use indirect option (2) to create the user `linda@gmail.com` in the `com.thing.system` realm **which will result in the user being also created in the SSO realm** and linked to it.
+In the following example we will use indirect option (2) to create the user `linda@gmail.com` in the `com.example.realm.1` realm **which will result in the user being also created in the SSO realm** and linked to it.
 
 ```jsx
-CALL("bondy.user.add", [<<"com.thing.system">>, {
+CALL("bondy.user.add", [<<"com.example.realm.1">>, {
     "username": "linda@gmail.com",
     "password": "123456",
     "groups": ["organization_admin"],
     "meta" : {"country": "us"},
-    "sso_realm_uri": "com.thing.sso"
+    "sso_realm_uri": "com.example.sso"
 }])
 ```
 
@@ -133,12 +133,12 @@ The above call creates two records. The first record is **created in the SSO rea
 }
 ```
 
-The second record is created **in the `com.thing.system` realm** and looks like this:
+The second record is created **in the `com.example.realm.1` realm** and looks like this:
 
 ```jsx
 {
   "username": "linda@gmail.com",
-  "sso_realm_uri": "com.thing.sso",
+  "sso_realm_uri": "com.example.sso",
   "groups": [
      "organization_admin"
    ],
@@ -158,7 +158,7 @@ We now need to add Linda to her organisation realm. We simply do:
 
 ```jsx
 CALL("bondy.user.add", [<<"com.thing.organization.1972">>, {
-    "sso_realm_uri": "com.thing.sso",
+    "sso_realm_uri": "com.example.sso",
     "username": "linda@gmail.com",
     "groups": ["organization_admin"]
 }])
@@ -169,7 +169,7 @@ Bondy will first validate Linda exists in the SSO realm and then create the “l
 ```jsx
 {
   "username": "linda@gmail.com",
-  "sso_realm_uri": "com.thing.sso",
+  "sso_realm_uri": "com.example.sso",
   "groups": [
      "organization_admin"
    ],
@@ -200,7 +200,7 @@ Every time Bondy boots it loads the provided security configuration file and mak
 That is, when using a configuration file Bondy treats it as a declarative configuration statement.
 
 <aside>
-<img src="https://img.icons8.com/ios/250/000000/attach.png" alt="https://img.icons8.com/ios/250/000000/attach.png" width="40px" /> You can find a complete working example of (Bondy Same Sign-on and Single Sign-on) at  `st-platform-docs/docs/developer/tools/docker_compose` . The example uses 3 organisation realms and the system realm using a common SSO realm called `com.thing.sso`.
+<img src="https://img.icons8.com/ios/250/000000/attach.png" alt="https://img.icons8.com/ios/250/000000/attach.png" width="40px" /> You can find a complete working example of (Bondy Same Sign-on and Single Sign-on) at  `st-platform-docs/docs/developer/tools/docker_compose` . The example uses 3 organisation realms and the system realm using a common SSO realm called `com.example.sso`.
 
 </aside>
 
