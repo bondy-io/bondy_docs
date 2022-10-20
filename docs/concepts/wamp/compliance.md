@@ -11,12 +11,14 @@ The following two sections go into a detail compliance analysis listing what WAM
 |Web Socket transport|:heavy_check_mark:|||
 |Batched Web Socket transport|:x:||Yes|
 |Raw Socket transport|:heavy_check_mark:|||
+|Longpoll transport|:x:|||
 |Transport and Session Lifetime|:heavy_check_mark:<br>Each session establishes a new transport connection|||
 |Close session and connection on protocol errors|:heavy_check_mark:|||
 |Serializations: Support JSON and Msgpack|:heavy_check_mark:| BERT, Erlang (subset)|CBOR, Flatbuffers|
 |Validation of custom attribute keys using regex|:heavy_check_mark:|||
 |No Polymorphism, avoid empty arguments and keyword arguments|:heavy_check_mark:|||
 |Agent Identification|:heavy_check_mark:|||
+|Session Meta API|:heavy_check_mark:|||
 
 ### Pub/Sub Features
 
@@ -33,12 +35,47 @@ The following two sections go into a detail compliance analysis listing what WAM
 
 ## Advanced Profile
 
-## Authentication
+### General Features
+
 |Feature|Status|Extensions|Roadmap|
 |---|---|---|---|
 |Challenge-response authentication|:heavy_check_mark:||
 |Ticket authentication|:heavy_check_mark:|Allows [Single Sign-on](/concepts/single_sign_on) to multiple realms|
 |Cookie authentication|:x:||No|
+
+### Pub/Sub Features
+
+|Feature|Status|Extensions|Roadmap|
+|---|---|---|---|
+|Subscriber black-/white-listing|:heavy_check_mark:|||
+|Publisher exclusion|:heavy_check_mark:|||
+|Publisher identification|:heavy_check_mark:|||
+|Publication trust-levels|:heavy_check_mark:|||
+|Subscription Meta API|:heavy_check_mark:|||
+|Pattern-based subscription|:heavy_check_mark:|||
+|Sharded subscription|:x:||Yes|
+|Event history|:x:||Yes|
+|Topic reflection|:x:||Yes|
+
+### Routed RPC Features
+
+|Feature|Status|Extensions|Roadmap|
+|---|---|---|---|
+|Call Timeout|:heavy_check_mark:|||
+|Call Canceling|:heavy_check_mark:|||
+|Caller Identification|:heavy_check_mark:|||
+|Call Trust-levels|:heavy_check_mark:|||
+|Registration Meta API|:heavy_check_mark:|||
+|Pattern-based Registration|:heavy_check_mark:|||
+|Shared Registration|:heavy_check_mark:|||
+|Sharded Registration|:x:||Yes|
+|Registration Revocation|:x:||Yes|
+|Procedure Reflection|:x:||Yes|
+|Progressive Call Results|:x:||Yes|
+|Progressive Calls|:x:||Yes|
+
+
+
 
 ## Non-compliance Cases
 
