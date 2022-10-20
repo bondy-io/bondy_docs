@@ -138,8 +138,10 @@ Finally, AWS recommends segmenting database access i.e. **affecting the design o
 ## Bondy Architecture Background
 
 > If you expect failure to happen on an external service, do not make its presence a guarantee of your system.
-— *Fred Hebert*
+— *Fred Hebert, It's About the Guarantees[^1]*
 >
+
+[^1]: [It's About the Guarantees](https://ferd.ca/it-s-about-the-guarantees.html)
 
 ### Key Characteristics
 

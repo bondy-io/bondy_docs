@@ -1,11 +1,15 @@
 # Web Application Messaging Protocol (WAMP)
->WAMP is an open standard for (soft) real-time message exchange amongst system components—applications, (micro-) services and connected devices—that eases the creation of loosely coupled distributed architectures.{.definition}
+>WAMP is an open standard for (soft) real-time message exchange amongst system components—applications, (micro-) services and connected devices—that eases the creation of loosely coupled distributed architectures. It unifies routed Remote Procedure Calls and Publish/Subscribe communication patterns in one unified protocol.{.definition}
+
+
 
 ## Introduction
 
+The WAMP protocol is a community effort and the [specification](https://wamp-proto.org/wamp_latest_ietf.html) is made available for free under an open license for everyone to use or implement.
+
 ## Key Characteristics
 
-* **It is a routed protocol**<br>All components connecting to a **WAMP** [Router](/concepts/router), where the router performs message routing between **WAMP** [Clients](/concepts/client).
+* **It is a routed protocol**<br>All components connecting to a**WAMP** [Router](/concepts/router), where the router performs message routing between**WAMP** [Clients](/concepts/client).
 
 ::: info Like D-Bus over a network
 [D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions. It offers the same two basic workflows as WAMP, but whereas WAMP is designed for use over a network, D-Bus is designed for inter-process communication (IPC) on a single host.
@@ -74,8 +78,8 @@ Five key features makes WAMP unique amongst alternative application messaging pr
 1. **WAMP provides multi-tenancy** through the use of Realms for both security and routing. Realms are virtual so it does not impose additional infrastructure requirements e.g. dedicated ports.
 2. **WAMP provides both application messaging patterns,** Publish & Subscribe (PubSub) and Remote Procedure Calls (RPC).
 3. **WAMP offers routed RPC**, a dynamic RPC variant that enables a **peer-to-peer communication pattern,** as any distributed application component can act as both client (caller) and servers (callee).
-4. **WAMP offers multiple-transports** and each client can choose which one to use. WAMP can run over any transport which is message-oriented, ordered, reliable, and bi-directional such as Websockets, TCP, Unix domain socket, etc.
+4. **WAMP offers multiple-transports** and each client can choose which one to use. WAMP can run over any transport which ismessage-oriented, ordered, reliable, and bi-directionalsuch as Websockets, TCP, Unix domain socket, etc.
 5. **WAMP supports multiple serializations** and each client can choose which one to use.
 
-By combining these key features into a single infrastructure component, a WAMP Router can be used for the entire messaging requirements of all the components of distributed systems including connected devices, browser and mobile apps and backend services, thus **reducing technology stack complexity, accidental complexity as well as networking overheads**.
+By combining these key features into a single infrastructure component, a WAMP Router can be used for the entire messaging requirements of all the components of distributed systems including connected devices, browser and mobile apps and backend services, thus**reducing technology stack complexity, accidental complexity as well as networking overheads**.
 :::

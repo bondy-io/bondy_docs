@@ -1,0 +1,47 @@
+body {
+    font-size: 15px;
+    line-height: calc(25 / 15);
+    font-family: -apple-system, BlinkMacSystemFont, "Source Sans 3", sans-serif;
+}
+
+input,
+button,
+select,
+textarea {
+    font-family: -apple-system, BlinkMacSystemFont, "Source Sans 3", sans-serif !important;
+}
+
+code,
+pre {
+    font-size: 14px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Mono", "Source Code Pro", monospace  !important;
+}
+
+[data-tippy-root] {
+    /* Since tooltip elements are sometimes inside elements
+     * which have different font-family, we force font-family
+     * for tooltips here.
+     */
+    font-family: -apple-system, BlinkMacSystemFont, "Source Sans 3", sans-serif !important;
+}
+
+textarea,
+input {
+    font-family: -apple-system, BlinkMacSystemFont, "Source Sans 3", sans-serif !important;
+}
+
+
+.operator_value {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Mono", "Source Code Pro", monospace !important;
+}
+
+.operator {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Mono", "Source Code Pro", monospace !important;
+}
+
+#searchbox,
+#searchbox_legacy {
+    #search_query {
+        font-family: -apple-system, BlinkMacSystemFont, "Source Sans 3", sans-serif !important;
+        }
+}

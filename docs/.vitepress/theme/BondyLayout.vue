@@ -11,6 +11,8 @@ const image = "/assets/logo.png"
   <Layout>
     <template #home-hero-before>
     </template>
+    <template #home-hero-after>
+    </template>
     <template #doc-before>
     </template>
   </Layout>

@@ -180,33 +180,63 @@ export default {
           ]
         },
         {
-          text: 'Resources',
-          items: resources()
+          text: 'About',
+          items: [
+            {
+              text: 'FAQ',
+              link: '/about/faq',
+            },
+            {
+              text: 'Community',
+              link: '/about/community',
+            },
+            {
+              text: 'Terms and Policies',
+              link: '/about/terms_and_policies',
+            }
+          ]
         }
     ]
   }
 
   function sidebars() {
     return {
-      '/tutorials/': [...tutorialsSidebar(), ...resourcesSidebar()],
-      '/guides/': [...guidesSidebar(), ...resourcesSidebar()],
-      '/reference/configuration': [...configurationSidebar(), ...resourcesSidebar()],
-      '/reference/wamp_api': [...wampAPISidebar(), ...resourcesSidebar()],
-      '/reference/http_api': [...httpAPISidebar(), ...resourcesSidebar()],
-      '/concepts/': [...conceptsSidebar(), ...resourcesSidebar()]
+      '/tutorials/': tutorialsSidebar(),
+      '/guides/': guidesSidebar(),
+      '/reference/configuration': configurationSidebar(),
+      '/reference/wamp_api': wampAPISidebar(),
+      '/reference/http_api': httpAPISidebar(),
+      '/concepts/': conceptsSidebar()
     }
   }
 
-  function resourcesSidebar() {
+
+  function externalResources() {
     return [
-        {
-        text: 'Resources',
-        items: resources()
-      }
-    ]
+          {
+            text: 'Community Forum',
+            link: 'https://discuss.bondy.io',
+            isFeature: false
+          },
+          {
+            text: 'Community Chat',
+            link: 'https://bondy.zulipchat.com',
+            isFeature: false
+          },
+          {
+            text: 'Commercial Support',
+            link: 'https://bondy.io/',
+            isFeature: false
+          },
+          {
+            text: 'Github',
+            link: 'https://github.com/Leapsight/bondy',
+            isFeature: false
+          }
+        ]
   }
 
-  function resources() {
+  function tc() {
     return [
           {
             text: 'Community Forum',
@@ -236,7 +266,15 @@ export default {
   function tutorialsSidebar() {
     return [
         {
-          text: 'Tutorials',
+          text: 'Getting Started',
+          collapsible: true,
+          items: [
+            { text: 'Get Bondy', link: '/tutorials/getting_started/get_bondy' },
+            { text: 'Getting Started', link: '/tutorials/getting_started/index'}
+          ]
+        },
+        {
+          text: 'Other Tutorials',
           items: [
 
           ]
@@ -249,14 +287,6 @@ export default {
 
   function guidesSidebar() {
     return [
-        {
-          text: 'Getting Started',
-          collapsible: true,
-          items: [
-            { text: 'Get Bondy', link: '/guides/getting_started/get_bondy' },
-            { text: 'Getting Started', link: '/guides/getting_started/index'}
-          ]
-        },
         {
           text: 'Programming with WAMP',
           collapsible: true,
@@ -277,14 +307,14 @@ export default {
           text: 'Administration',
           collapsible: true,
           items: [
-            { text: 'Simplifying realm management using prototypes', link: '/guides/administration/simplifying_realm_management_using_prototypes'}
+            // { text: 'Simplifying realm management using prototypes', link: '/guides/administration/simplifying_realm_management_using_prototypes'}
           ]
         },
         {
           text: 'Security',
           collapsible:true,
           items: [
-            { text: 'TLS configuration', link: '/guides/security/tls_configuration'}
+            // { text: 'TLS configuration', link: '/guides/security/tls_configuration'}
           ]
         },
         {
@@ -305,18 +335,23 @@ export default {
           text: 'Introduction',
           items: [
             {
-              text: 'Why Bondy',
-              link: '/concepts/why_bondy' ,
-              isFeature: true
-            },
-            {
               text: 'What is Bondy',
               link: '/concepts/what_is_bondy' ,
               isFeature: true
             },
             {
+              text: 'Why Bondy',
+              link: '/concepts/why_bondy' ,
+              isFeature: true
+            },
+            {
               text: 'How is Bondy different',
               link: '/concepts/how_is_bondy_different',
+              isFeature: true
+            },
+            {
+              text: 'Features',
+              link: '/concepts/features',
               isFeature: true
             },
             {
