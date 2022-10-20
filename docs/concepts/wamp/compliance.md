@@ -27,6 +27,10 @@ The following two sections go into a detail compliance analysis listing what WAM
 
 ### Routed RPC Features
 
+|Feature|Status|Extensions|Roadmap|
+|---|---|---|---|
+|Registration (and Registration ID) to be shared amongst callees|:x:<br>see [NC2](#nc3)||No|
+
 ## Advanced Profile
 
 ## Authentication
@@ -91,6 +95,36 @@ A subscriber receives a subscription ID as the result of a successful subscripti
 Bondy was designed as a distributed router with continuous availability as its main goal. Bondy uses an eventually consistent model avoiding coordination between nodes at all cost.
 
 Sharing a subscription between two or more subscribers in at least two cluster nodes will require coordination (consensus) and thus it is not support it.
+</tab>
+<tab name="Roadmap">
+No changes planned.
+</tab>
+</tabs>
+
+
+### NC3
+
+<tabs cache-lifetime="1000">
+<tab name="Requirement">
+
+**Pub/Sub: Registration (and Registration ID) to be shared amongst callees**
+
+The WAMP protocol requires a registration to be shared amogst callees to the same procedure.
+
+A registration is created when a client sends a registration request for a procedure where there are currently no other callees. It is deleted when the last callee cancels its registration, or its session is disconnected.
+
+A callee receives a registration ID as the result of a successful registration request. When an second callee issues a registration request for the same procedure, then it receives the **same** registration ID.
+
+</tab>
+<tab name="Implementation">
+A registration is created when a client sends a registration request for a procedure when itself does not have an existing registration for the same procedure. It is deleted when the callee cancels the registration, or its session is disconnected.
+
+A callee receives a registration ID as the result of a successful registration request. When an second callee issues a registration request for the same procedure, then it receives a **different** registration ID.
+</tab>
+<tab name="Rationale">
+Bondy was designed as a distributed router with continuous availability as its main goal. Bondy uses an eventually consistent model avoiding coordination between nodes at all cost.
+
+Sharing a registration between two or more callees in at least two cluster nodes will require coordination (consensus) and thus it is not support it.
 </tab>
 <tab name="Roadmap">
 No changes planned.

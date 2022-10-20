@@ -443,6 +443,11 @@ export default {
               link: '/concepts/wamp/security',
               isFeature: true
             },
+            {
+              text: 'WAMP Compliance',
+              link: '/concepts/wamp/compliance',
+              isFeature: true
+            }
           ]
         },
         {
