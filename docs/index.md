@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /guides/getting_started/index
+      link: /tutorials/getting_started/index
     - theme: alt
       text: What is Bondy?
       link: /concepts/what_is_bondy
