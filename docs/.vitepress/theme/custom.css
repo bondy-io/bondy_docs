@@ -402,7 +402,17 @@ table.property-table > tbody > tr > td {
     padding: 2px 2px 2px 2px;
 }
 
+@media (max-width: 600px) {
 
+   .VPHome .image-src{
+    max-width: 50px;
+    width: 250px;
+    margin-top: 120px;
+    position: relative;
+    padding-top: 10px;
+    padding-bottom: 200px;
+  }
+}
 
 @media (min-width: 700px) {
     .tabs-component-tabs {
