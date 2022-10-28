@@ -18,10 +18,11 @@ A ticket can be issued using different scopes. The scope is determined based
 on the options used to issue the ticket.
 
 ### Local scope
+> The ticket can be used to authenticate on the ***session's realm only.***
+
 The ticket was issued with `allow_sso` option set to `false` or when set to
 `true` the user did not have SSO credentials, and the option `client_ticket`
 was not provided.
-The ticket can be used to authenticate on the session's realm only.
 
 ::: warning Authorization
 To be able to issue this ticket, the session must have been granted the
@@ -29,12 +30,12 @@ permission `bondy.issue` on the `bondy.ticket.scope.local`
 resource.
 :::
 
-
 ### SSO Scope
+> The ticket can be used to authenticate on ***any realm*** the user has access > to through SSO.
+
 The ticket was issued with `allow_sso` option set to `true` and the user has
 SSO credentials, and the option `client_ticket` was not provided.
-The ticket can be used to authenticate  on any realm the user has access to
-through SSO.
+
 
 ::: warning Authorization
 To be able to issue this ticket, the session must have been granted the
@@ -43,11 +44,12 @@ resource.
 :::
 
 ### Client-Local scope
+> The ticket can be used to authenticate on the ***session's realm only.***
+
 The ticket was issued with `allow_sso` option set to `false` or when set to
 `true` the user did not have SSO credentials, and the option `client_ticket`
 was provided having a valid ticket issued by a client
 (a local or sso ticket).
-The ticket can be used to authenticate on the session's realm only.
 
 ::: warning Authorization
 To be able to issue this ticket, the session must have been granted the
@@ -57,11 +59,13 @@ resource.
 
 
 ### Client-SSO scope
+> The ticket can be used to authenticate on ***any realm*** the user has access
+> to through SSO.
+
 The ticket was issued with `allow_sso` option set to `true` and the user has
 SSO credentials, and the option `client_ticket` was provided having a valid
 ticket issued by a client ( a local or sso ticket).
-The ticket can be used to authenticate on any realm the user has access to
-through SSO.
+
 
 
 ::: warning Authorization
@@ -93,8 +97,7 @@ the WAMP permission required to call the procedures.
 
 ## Procedures
 
-::: details Issue Ticket
-<!-- ### Issue ticket -->
+
 ### bondy.ticket.issue(uri;expiry_time_secs=,...) -> [] {.wamp-procedure}
 #### Call
 
@@ -123,7 +126,7 @@ The call result is a single positional argument containing  a realm:
 
 ##### Keyword Args
 None.
-:::
+
 
 <script>
 const data = {
@@ -169,13 +172,13 @@ const claims = {
     },
     issued_by: {
         type: "string",
-        description: "Identifies the principal that issued the ticket. Most of the time this is an application identifier (a.k.asl username or client_id) but sometimes can be the WAMP session's username (a.k.a `authid`).",
+        description: "Identifies the principal that issued the ticket. Most of the time this is an application identifier (a.k.a username or client_id) but sometimes it can be the WAMP session's username (a.k.a `authid`).",
         mutable: false,
         required: false
     },
     authid: {
         type: "string",
-        description: "identifies the principal that is the subject of the ticket. The Claims in a ticket are normally statements. This is the WAMP session's username (a.k.a `authid').",
+        description: "identifies the principal that is the subject of the ticket. This is the WAMP session's username (a.k.a `authid').",
         mutable: false,
         required: false
     },
@@ -187,7 +190,7 @@ const claims = {
     },
     expires_at: {
         type: "string",
-        description: "Identifies the expiration time on or after which the ticket MUST NOT be accepted for processing.  The processing of th thia claim requires that the current date/time MUST be before the expiration date/time listed in the claim. Bondy considers a small leeway of 2 mins by default.",
+        description: "Identifies the expiration time (a timestamp in seconds) on or after which the ticket MUST NOT be accepted for processing.  The processing of this attribute requires that the current date/time MUST be before the value assigned to this attribute. Bondy considers a small leeway of 2 mins by default",
         mutable: false,
         required: false
     },
@@ -199,15 +202,20 @@ const claims = {
     },
     issued_on: {
         type: "string",
-        description: "The bondy nodename in which the ticket was issued.",
+        description: "The Bondy nodename in which the ticket was issued.",
         mutable: false,
         required: false
     },
     scope: {
-        type: "string",
-        description: "the scope of the ticket, consisting of",
+        type: "object",
+        description: "The scope of the ticket.",
         computed: true,
-        required: false
+        required: false,
+        properties: {
+            realm : {required: false, type: "uri", mutable: false},
+            client_id: {required: false, type: "string", mutable: false},
+            client_instance_id: {required: false, type: "string", mutable: false}
+        }
     },
     realm: {
         type: "string",
