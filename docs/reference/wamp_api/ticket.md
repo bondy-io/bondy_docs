@@ -98,43 +98,74 @@ the WAMP permission required to call the procedures.
 ## Procedures
 
 
-### bondy.ticket.issue(uri;expiry_time_secs=,...) -> [] {.wamp-procedure}
+### bondy.ticket.issue(realm_uri;expiry_time_secs=,...) -> [] {.wamp-procedure}
 #### Call
 
 ##### Positional Args
 
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		0:{
-			'type': 'string',
-			'required': true,
-			'description' : 'The uri we want to issue the ticket for.'
-		}
-	})"
-/>
-
+None.
 
 ##### Keyword Args
 
-<DataTreeView :maxDepth="10" :data="data"/>
+<DataTreeView :maxDepth="10" :data="issue_opts"/>
 
 #### Result
 
 ##### Positional Args
-The call result is a single positional argument containing  a realm:
+The call result is a single positional argument containing the encoded and signed ticket:
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        0:{
+            'type': 'string',
+            'required': true,
+            'description' : 'The ticket.'
+        }
+    })"
+/>
+
+##### Keyword Args
+None.
+
+### bondy.ticket.revoke_all(realm_uri, authid) -> [] {.wamp-procedure}
+#### Call
+##### Positional Args
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        0:{
+            'type': 'string',
+            'required': true,
+            'description' : 'The realm uri we want to revoke the ticket from.'
+        },
+        1:{
+            'type': 'string',
+            'required': true,
+            'description' : 'The authid of the user associated with the tickets we want to revoke.'
+        }
+    })"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+##### Positional Args
 
 ##### Keyword Args
 None.
 
 
+
+
 <script>
-const data = {
+const issue_opts = {
     expiry_time_secs : {
         type: "integer",
         description: "",
         mutable: true,
-        required: false
+        required: false,
+        default: "The value of Bondy configuration parameter 'security.ticket.expiry_time'"
     },
     allow_sso : {
         type: "boolean",
@@ -228,7 +259,7 @@ const claims = {
 export default {
     data() {
         return {
-            data: JSON.stringify(data),
+            issue_opts: JSON.stringify(issue_opts),
             claims: JSON.stringify(claims),
         }
     }
