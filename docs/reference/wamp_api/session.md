@@ -1,7 +1,14 @@
 
 # Session
+> A Session is an authenticated two-way link between a client and the Router, enabling real-time, interactive communication between the client and other peers (incl. the Router itself) over a single [Realm](/reference/wamp_api/realm).{.definition}
 
-Blabblabla
+Key characteristics:
+
+* A session is established at a certain point in time, and then ‘torn down’–brought to an end–at some later point.
+* A session is attached to a single Realm
+* A session is authenticated on the Realm (unless `anonymous` is being used as `authmethod`)
+* A session is **stateful**, meaning that Bondy holds current state information about the session to be able to communicate, as opposed to stateless communication, where the communication consists of independent request-response interactions.
+
 
 
 ## Types
