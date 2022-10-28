@@ -71,14 +71,14 @@ h5 {
   background-color:#f1f1f1;
   border-left-color: #727272 !important;
   border-left-style: solid;
-  border-left-width: 2px !important;
+  border-left-width: 3px !important;
   border:1px solid hsla(0,0%,46.3%,.3);
   display:inline-block;
   font-family: var(--vp-font-family-mono);
   font-size:1.0rem !important;
   font-weight:500!important;
-  margin-top:20px;
-  margin-bottom:20px;
+  margin-top:10px;
+  margin-bottom:20px !important;
   min-width:320px;
   padding:0.5em;
   width:100%;
@@ -87,17 +87,18 @@ h5 {
 }
 
 .wamp-procedure{
-  background-color:#f1f1f1;
-  border-left-color: #727272 !important;
+  background-color: rgba(102, 103, 171, 0.1) !important;
+  border-color: RGB(102, 103, 171, 0.3) !important;
+  border-left-color: rgba(102, 103, 171, 1.00) !important;
   border-left-style: solid;
-  border-left-width: 2px !important;
+  border-left-width: 3px !important;
   border:1px solid rgba(147, 147, 147, 0.3);
   display:inline-block;
   font-family: var(--vp-font-family-mono);
   font-size:1.0rem !important;
   font-weight:500!important;
   margin-top:10px !important;
-  margin-bottom:20px;
+  margin-bottom:5px !important;
   min-width:320px;
   padding:0.5em;
   width:100%;
@@ -106,10 +107,11 @@ h5 {
 }
 
 .wamp-topic{
-  background-color:#f1f1f1;
-  border-left-color: #727272 !important;
+  background-color: rgba(150, 198, 35, 0.1) !important;
+  border-color: RGB(150, 198, 35, 0.3) !important;
+  border-left-color: rgba(150, 198, 35, 1.00) !important;
   border-left-style: solid;
-  border-left-width: 2px !important;
+  border-left-width: 3px !important;
   border:1px solid hsla(0,0%,46.3%,.3);
   display:inline-block;
   font-family: var(--vp-font-family-mono);
@@ -244,11 +246,11 @@ table.property-table > tbody > tr > td {
 }
 
 .custom-block.config-param{
-  background-color: RGB(201, 114, 228, 0.1) !important;
-  border-color: RGB(201, 114, 228, 0.3) !important;
-  border-left-color: RGB(201, 114, 228, 1) !important;
+  background-color: rgba(102, 103, 171, 0.1) !important;
+  border-color: RGB(102, 103, 171, 0.3) !important;
+  border-left-color: rgba(102, 103, 171, 1.00) !important;
   border-left-style: solid;
-  border-left-width: 5px !important;
+  border-left-width: 3px !important;
   border:1px solid rgba(147, 147, 147, 0.3);
   border-radius: 0px;
   display: inline-flex;
