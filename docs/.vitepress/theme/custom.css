@@ -451,3 +451,111 @@ table.property-table > tbody > tr > td {
     }
 }
 
+/* Button */
+
+.BondyButton {
+  display: inline-block;
+  border: 1px solid transparent;
+  text-align: center;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.25s, border-color 0.25s, background-color 0.25s;
+}
+.BondyButton:active {
+  transition: color 0.1s, border-color 0.1s, background-color 0.1s;
+}
+.BondyButton.medium {
+  border-radius: 20px;
+  padding: 0 20px;
+  line-height: 38px;
+  font-size: 14px;
+}
+
+/* P is inserted by markdown-it-container when we use custom container 'button' */
+.BondyButton.medium  p {
+    display: block !important;
+    margin: 5px !important;
+    padding: 0px !important;
+}
+
+.BondyButton.big {
+  border-radius: 24px;
+  padding: 0 24px;
+  line-height: 46px;
+  font-size: 16px;
+}
+
+.BondyButton.big  p {
+    display: block !important;
+    margin: 5px !important;
+    padding: 0px !important;
+}
+
+.BondyButton.brand {
+  border-color: var(--vp-button-brand-border);
+  color: var(--vp-button-brand-text);
+  background-color: var(--vp-button-brand-bg);
+}
+.BondyButton.brand:hover {
+  border-color: var(--vp-button-brand-hover-border);
+  color: var(--vp-button-brand-hover-text);
+  background-color: var(--vp-button-brand-hover-bg);
+}
+.BondyButton.brand:active {
+  border-color: var(--vp-button-brand-active-border);
+  color: var(--vp-button-brand-active-text);
+  background-color: var(--vp-button-brand-active-bg);
+}
+.BondyButton.alt {
+  border-color: var(--vp-button-alt-border);
+  color: var(--vp-button-alt-text);
+  background-color: var(--vp-button-alt-bg);
+}
+.BondyButton.alt:hover {
+  border-color: var(--vp-button-alt-hover-border);
+  color: var(--vp-button-alt-hover-text);
+  background-color: var(--vp-button-alt-hover-bg);
+}
+.BondyButton.alt:active {
+  border-color: var(--vp-button-alt-active-border);
+  color: var(--vp-button-alt-active-text);
+  background-color: var(--vp-button-alt-active-bg);
+}
+.BondyButton.sponsor {
+  border-color: var(--vp-button-sponsor-border);
+  color: var(--vp-button-sponsor-text);
+  background-color: var(--vp-button-sponsor-bg);
+}
+.BondyButton.sponsor:hover {
+  border-color: var(--vp-button-sponsor-hover-border);
+  color: var(--vp-button-sponsor-hover-text);
+  background-color: var(--vp-button-sponsor-hover-bg);
+}
+.BondyButton.sponsor:active {
+  border-color: var(--vp-button-sponsor-active-border);
+  color: var(--vp-button-sponsor-active-text);
+  background-color: var(--vp-button-sponsor-active-bg);
+}
+
+
+/* CUSTOM CONTAINES */
+
+@media (min-width: 992px) {
+
+    .column-wrapper {
+        display: flex;
+    }
+
+    .column {
+        flex: 1;
+        max-width: 50%;
+    }
+
+    .column:first-child {
+        margin-right: 20px;
+    }
+
+}
+
+
+

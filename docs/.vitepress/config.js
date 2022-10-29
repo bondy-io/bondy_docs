@@ -28,27 +28,84 @@ export default {
           md.use(require('markdown-it-footnote'))
           md.use(require('markdown-it-task-lists'))
           md.use(require('markdown-it-katex'))
-          md.use(require('markdown-it-container'), 'tabs', {
+          md.use(require('markdown-it-container'), 'big-button', {
             validate: function(params) {
-              return params.trim().match(/^tabs\s+(.*)$/);
+              return params.trim().match(/^big-button\s+(.*)$/);
             },
-            render: function(tokens, idx) {
-              var tokens = tokens[idx].info.trim().match(/^tabs\s+(.*)$/);
-              return '<tabs cache-lifetime="1000">' + md.utils.escapeHtml(tokens[1]) + '</tabs>\n';
+
+            render: function (tokens, idx) {
+              var m = tokens[idx].info.trim().match(/^big-button\s+(.*)$/);
+
+              if (tokens[idx].nesting === 1) {
+                var href = m[1];
+                var target = href.startsWith('http') ? '__blank' : '';
+                // opening tag
+                return '<div class="action"><a class="BondyButton big alt" href="' + href + '" target="' + target + '">';
+
+              } else {
+                // closing tag
+                return '</a></div>\n';
+              }
             }
           })
-          md.use(require('markdown-it-container'), 'tab', {
+          md.use(require('markdown-it-container'), 'column', {
             validate: function(params) {
-              return params.trim().match(/^tab\s+(.*)$/);
+              return params.trim().match(/^column\s+(.*)$/);
             },
-            render: function(tokens, idx) {
-              var tokens = tokens[idx].info.trim().match(/^tab\s+(.*)$/);
-              var name  = md.utils.escapeHtml(tokens[1]);
-              var content  = md.utils.escapeHtml(tokens[2]);
-              return '<tab name="' + name + '">' + content + '</tab>\n';
+
+            render: function (tokens, idx) {
+              var m = tokens[idx].info.trim().match(/^column\s+(.*)$/);
+
+              if (tokens[idx].nesting === 1) {
+                // opening tag
+                return '<div class="column">'
+
+              } else {
+                // closing tag
+                return '</div>\n';
+              }
             }
           })
+          md.use(require('markdown-it-container'), 'columns', {
+            validate: function(params) {
+              return params.trim().match(/^columns\s+(.*)$/);
+            },
+
+            render: function (tokens, idx) {
+              var m = tokens[idx].info.trim().match(/^columns\s+(.*)$/);
+
+              if (tokens[idx].nesting === 1) {
+                // opening tag
+                return '<div class="column-wrapper">'
+
+              } else {
+                // closing tag
+                return '</div>\n';
+              }
+            }
+          })
+          // md.use(require('markdown-it-container'), 'tabs', {
+          //   validate: function(params) {
+          //     return params.trim().match(/^tabs\s+(.*)$/);
+          //   },
+          //   render: function(tokens, idx) {
+          //     var tokens = tokens[idx].info.trim().match(/^tabs\s+(.*)$/);
+          //     return '<tabs cache-lifetime="1000">' + md.utils.escapeHtml(tokens[1]) + '</tabs>\n';
+          //   }
+          // })
+          // md.use(require('markdown-it-container'), 'tab', {
+          //   validate: function(params) {
+          //     return params.trim().match(/^tab\s+(.*)$/);
+          //   },
+          //   render: function(tokens, idx) {
+          //     var tokens = tokens[idx].info.trim().match(/^tab\s+(.*)$/);
+          //     var name  = md.utils.escapeHtml(tokens[1]);
+          //     var content  = md.utils.escapeHtml(tokens[2]);
+          //     return '<tab name="' + name + '">' + content + '</tab>\n';
+          //   }
+          // })
           md.use(require('markdown-it-custom-block'), {
+            // URI
             uri (str) {
               let args = str.replace(/\s+/g, '').split(",");
               let uri = args.shift();
@@ -63,6 +120,7 @@ export default {
               };
               return `<div class="custom-block uri ${className}"><a name="${uri}"></a><span class="custom-block uri ${className}">${badge}</span><p class="custom-block-title">${uri}</p></div>`;
             },
+            // CONFIG
             config (str) {
               console.log(str);
               let args = str.replace(/\s+/g, '').split(",");
