@@ -57,7 +57,7 @@ security.config_file = /bondy/etc/security_conf.json
 
 ## Operating System Configuration
 
-### Configuring Open File Limits‌
+### Configuring Open File Limits
 
 Bondy can accumulate a large number of open file handles during operation. The creation of numerous data files is normal, and the storage backend performs periodic merges of data file collections to avoid accumulating file handles.
 
@@ -120,7 +120,7 @@ Save and close the file.
 UseLogin yes
 ```
 
-‌
+
 
 Restart the machine so the limits take effect and verify that the new limits are set with the following command:
 

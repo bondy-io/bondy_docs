@@ -10,5 +10,6 @@ const { theme } = useData()
 
 <div v-for="section in theme.sidebar['/concepts/']">
     <h2 v-if="section.items.filter(function(item){return item.isFeature}).length > 0">{{section.text}}</h2>
+    <p>{{section.description}}</p>
     <Features class="VPHomeFeatures" :features="section.items.filter(function(item){return item.isFeature})"/>
 </div>

@@ -87,4 +87,4 @@ broker_bridge.kafka.topics.user_events = ${USER_EVENTS_TOPIC}
 
 ## Dynamically configuring subscriptions
 
-‌TBD
+TBD

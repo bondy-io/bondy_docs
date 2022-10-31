@@ -430,36 +430,43 @@ export default {
         },
         {
           text: 'Multi-tenant Security',
+          description: "Bondy leverages WAMP Realms to provide multi-tenant security.",
           items: [
             {
               text: 'Realms',
               link: '/concepts/realms',
-              isFeature: true
+              isFeature: true,
+              description: "Realms are routing and administrative domains that act as namespaces. All resources in Bondy belong to a Realm."
             },
             {
               text: 'Identity Management',
               link: '/concepts/identity_management',
-              isFeature: true
+              isFeature: true,
+              description: "Learn how Identity Management is performed in Realms."
             },
             {
               text: 'Authentication',
               link: '/concepts/authentication',
-              isFeature: true
+              isFeature: true,
+              description: "Learn about the may athentication options available to realms."
             },
             {
               text: 'Authorization',
               link: '/concepts/authorization',
-              isFeature: true
+              isFeature: true,
+              description: "Each realm provides a Role-based Access Control service allowing fine-grained authorization capabilities."
             },
             {
               text: 'Same Sign-on',
               link: '/concepts/same_sign_on',
-              isFeature: true
+              isFeature: true,
+              description: "Do you need to provide users access to multiple realms? Learn about same sign-on realms."
             },
             {
               text: 'Single Sign-on',
               link: '/concepts/single_sign_on',
-              isFeature: true
+              isFeature: true,
+              description: "Learn how to enable Single Sign-on on multiple realms."
             },
           ]
         },

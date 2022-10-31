@@ -38,7 +38,7 @@ To run an official Bondy Docker image you will use the `docker run` command with
 - `{VERSION}` can be `master`, `develop` or a tag like `1.0.0-beta.56`
 - `{VARIANT}` can be null or `slim` (we will provide the `alpine` variant in the future).
 
-‌
+
 
 For example to run the 1.0.0-beta.56 release you would use:
 
@@ -52,7 +52,7 @@ docker run \
     -d leapsight/bondy:1.0.0-beta.56
 ```
 
-‌
+
 
 To run the slim variant of the same release you would use:
 
