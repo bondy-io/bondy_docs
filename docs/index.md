@@ -8,12 +8,15 @@ hero:
   tagline: Bondy is an open source application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple communication protocol.
   actions:
     - theme: brand
-      text: Get Started
-      link: /tutorials/getting_started/index
+      text: Get Bondy
+      link: /tutorials/getting_started/get_bondy
     - theme: alt
+      text: Getting Started
+      link: /tutorials/getting_started/index
+    - theme: sponsor
       text: What is Bondy?
       link: /concepts/what_is_bondy
-    - theme: alt
+    - theme: sponsor
       text: What is WAMP?
       link: /concepts/what_is_wamp
 

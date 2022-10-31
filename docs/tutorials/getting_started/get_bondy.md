@@ -17,9 +17,36 @@ Regardless of the installation method, Bondy exposes the following ports by defa
 |ADMIN API HTTPS|`18084`|
 |CLUSTER PEER SERVICE|`18086`|
 
+If you want to change those port numbers checkout the [Configuration Reference](/reference/configuration/index).
+
 ::: warning Notice
 The Websocket (WS) listeners at the moment are the same used for HTTP traffic. This will change in future versions.
 :::
+
+## Installation
+
+:::::: columns 1
+::: column 1
+### Installing using Docker
+
+:::
+::: column 2
+### Installing from Source
+:::
+::::::
+
+:::::: columns 1
+:::: column 1
+::: big-button https://hub.docker.com/r/leapsight/bondy
+Get Docker Image
+::::
+
+:::: column 2
+::: big-button https://github.com/Leapsight/bondy/tree/develop/deployment
+Github Repository
+:::
+::::
+::::::
 
 ## Using Docker
 

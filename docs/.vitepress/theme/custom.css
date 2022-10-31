@@ -10,6 +10,18 @@
     /* --vp-font-family-base: 'Montserrat', sans-serif; */
     --vp-font-family-mono: 'SF Mono','Inconsolata','Menlo','Courier',monospace;
     --vp-code-font-size: 15px;
+
+    --vp-button-sponsor-border: var(--vp-button-alt-border);
+    --vp-button-sponsor-text: var(--vp-button-alt-text);
+    --vp-button-sponsor-bg: #FFFFFF;
+    --vp-button-sponsor-hover-border: var(--vp-button-alt-hover-border);
+    --vp-button-sponsor-hover-text: var(--vp-button-alt-hover-text);
+    --vp-button-sponsor-hover-bg: #FFFFFF;
+/*    --vp-button-sponsor-active-border;
+    --vp-button-sponsor-active-text;
+    --vp-button-sponsor-active-bg;*/
+}
+
   }
 
 
@@ -452,7 +464,23 @@ table.property-table > tbody > tr > td {
     }
 }
 
-/* Button */
+/* Buttons */
+
+.sponsor {
+  border-color: var(--vp-button-sponsor-border);
+  color: var(--vp-button-sponsor-text);
+  background-color: var(--vp-button-sponsor-bg);
+}
+.sponsor:hover {
+  border-color: var(--vp-button-sponsor-hover-border);
+  color: var(--vp-button-sponsor-hover-text);
+  background-color: var(--vp-button-sponsor-hover-bg);
+}
+.sponsor:active {
+  border-color: var(--vp-button-sponsor-active-border);
+  color: var(--vp-button-sponsor-active-text);
+  background-color: var(--vp-button-sponsor-active-bg);
+}
 
 .BondyButton {
   display: inline-block;
