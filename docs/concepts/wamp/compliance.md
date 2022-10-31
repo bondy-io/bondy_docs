@@ -6,6 +6,7 @@ The following two sections go into a detail compliance analysis listing what WAM
 ## Basic Profile
 
 ### General Features
+
 |Feature|Status|Extensions|Roadmap|
 |---|---|---|---|
 |Web Socket transport|:heavy_check_mark:|||

@@ -1,7 +1,6 @@
+DRAFT{.watermark}
 # Web Application Messaging Protocol (WAMP)
 >WAMP is an open standard for (soft) real-time message exchange amongst system components—applications, (micro-) services and connected devices—that eases the creation of loosely coupled distributed architectures. It unifies routed Remote Procedure Calls and Publish/Subscribe communication patterns in one unified protocol.{.definition}
-
-
 
 ## Introduction
 

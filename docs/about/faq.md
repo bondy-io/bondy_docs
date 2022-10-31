@@ -6,11 +6,6 @@ Bondy is an open source, always-on and scaleable application networking platform
 
 Read more about Bondy in the [What is Bondy](/concepts/what_is_bondy) section.
 
-## Is Bondy multi-protocol?
-
-Bondy is designed as a multi-protocol router but adopts [WAMP](#what-is-wamp) at its core as WAMP unifies Remote Procedure Call (RPC) and Publish/Subscribe(Pub/Sub) patterns and as such consists of a common denominator between individual RCP and Pub/Sub protocols.
-
-At the moment Bondy implements WAMP v2 (Websockets and TCP) and HTTP (through the internal API Gateway). In the near future Bondy will provide gateways for additional protocols.
 
 ## What is WAMP?
 
@@ -18,13 +13,13 @@ The Web Application Messaging Protocol (WAMP) is an open, routed protocol for po
 
 Read more about Bondy in the [What is WAMP](/concepts/what_is_wamp) section.
 
-## How compliant is Bondy to the WAMP protocol?
+## How compliant is Bondy to WAMP?
 
 Please find the answers to this question in the [WAMP Compliance](/concepts/wamp/compliance.md) page.
 
 ## How is WAMP different than other messaging technologies?
 
-This is a difficult question to answer as it all depends on your use cases, quality attributes requirements and your architecture design i.e. the way you will solve the trade-offs between all those quality attribute requirements.
+In short: WAMP unifies Remote Procedure Calls (RPC) and Publish & Subscribe and offers a peer-to-peer programming model.
 
 In general, WAMP differs from other messaging platforms in that it natively (and by design) provides an implementation of routed Remote Procedure Calls (RPC) together with Publish & Subscribe.
 
@@ -32,7 +27,7 @@ As its name implies, Publish & Subscribe offers at most once semantics a.k.a fir
 
 Being an extensible protocol means we can extend the message delivery guarantees and we have plans to do so e.g. at least once.
 
-For a further comparison with other products and technologies we invite you to review the [Compare Bondy](https://www.notion.so/Compare-Bondy-6f5b5ff1714445bcb08fa7a2e86d1b62) section and the [WAMP Compared article](https://wamp-proto.org/comparison.html) in the protocol specification website.
+For a further comparison with other products and technologies we invite you to review the [Bondy Compared](/about/bondy_compared) section and the [WAMP Compared article](https://wamp-proto.org/comparison.html) in the protocol specification website.
 
 ## How is Bondy different than other WAMP routers?
 

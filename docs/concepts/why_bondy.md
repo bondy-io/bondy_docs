@@ -1,7 +1,10 @@
+DRAFT{.watermark}
 # Why Bondy
 > Delivering innovative customer experiences today requires the real-time networked connection of people, process, data and things.
 > But creating those connections has become shockingly complicated: too many protocols, client libraries and infrastructure components need to be integrated.
 {.definition}
+
+
 
 ## TL;DR
 Delivering innovative customer experiences today requires the real-time **networked connection of people, process, data and things (devices)**. Advances in technology so far have facilitated some of the tasks involved, but the overall process has become shockingly complicated, putting projects at risk.

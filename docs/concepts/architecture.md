@@ -2,6 +2,7 @@
 outline: deep
 ---
 
+DRAFT{.watermark}
 # Architecture
 
 ## Preliminaries
@@ -9,6 +10,8 @@ outline: deep
 > A distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable.
 >
 >— Leslie Lamport
+
+
 
 ::: info Distributed system
 A distributed system is a group of computers working together to achieve a unified goal.

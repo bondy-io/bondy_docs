@@ -18,7 +18,9 @@
 |[Retrieve a realm security status](#retrieve-a-realm-security-status)|`bondy.realm.security.status`|
 
 ### Create a realm
-### bondy.realm.create(input_data) -> result(realm){.wamp-procedure}
+
+bondy.realm.create(input_data) -> result(realm){.wamp-procedure}
+
 Creates a new realm based on the provided data. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
 Publishes an event under topic [bondy.realm.created](#bondy-realm-created){.uri} after the realm has been created.
@@ -108,7 +110,9 @@ call bondy.realm.create \
 :::
 
 ### Retrieve a realm
-### bondy.realm.get(uri) -> result(realm){.wamp-procedure}
+
+bondy.realm.get(uri) -> result(realm){.wamp-procedure}
+
 Retrieves the requested realm uri.
 
 #### Call
@@ -194,7 +198,9 @@ call bondy.realm.get "com.leapsight.test_creation_1" | jq
 :::
 
 ### Update a realm
-### bondy.realm.update(uri, input_data) -> <br>result(realm) {.wamp-procedure}
+
+bondy.realm.update(uri, input_data) -> <br>result(realm) {.wamp-procedure}
+
 Updates the data of the provided realm uri. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
 Publishes an event under topic [bondy.realm.updated](#bondy-realm-updated){.uri} after the realm has been updated.
@@ -302,7 +308,9 @@ call bondy.realm.update \
 :::
 
 ### List all realms
-### bondy.realm.list() -> result([realm]) {.wamp-procedure}
+
+bondy.realm.list() -> result([realm]) {.wamp-procedure}
+
 Lists all configured realms.
 
 #### Call
@@ -639,7 +647,9 @@ call bondy.realm.list | jq
 :::
 
 ### Delete a realm
-### bondy.realm.delete(uri; force=boolean -> result() {.wamp-procedure}
+
+bondy.realm.delete(uri; force=boolean -> result() {.wamp-procedure}
+
 Deletes the realm and all its associated objects.
 
 This call fails with an error if the realm has associated users. To override this behaviour use the `force` option.
@@ -709,7 +719,9 @@ call bondy.realm.delete "com.leapsight.test_creation_1" --kwarg force=true
 :::
 
 ### Retrieve if a realm security is enabled
-### bondy.realm.security.is_enabled(uri) -> results(boolean) {.wamp-procedure}
+
+bondy.realm.security.is_enabled(uri) -> results(boolean) {.wamp-procedure}
+
 Returns `true` if security is enabled for the realm identified with `uri`. Otherwise returns `false`.
 Realm security is `enabled` by default.
 
@@ -758,7 +770,9 @@ true
 :::
 
 ### Enable realm security
-### bondy.realm.security.enable(uri) -> result() {.wamp-procedure}
+
+bondy.realm.security.enable(uri) -> result() {.wamp-procedure}
+
 Enables the security for the realm identified with `uri`.
 
 #### Call
@@ -802,7 +816,9 @@ call bondy.realm.security.enable "com.leapsight.test_creation_1"
 :::
 
 ### Disable realm security
-### bondy.realm.security.disable(uri) -> result() {.wamp-procedure}
+
+bondy.realm.security.disable(uri) -> result() {.wamp-procedure}
+
 Disables security for the realm identified with `uri`.
 
 ::: danger Danger
@@ -855,7 +871,9 @@ call bondy.realm.security.disable "com.leapsight.test_creation_1"
 :::
 
 ### Retrieve a realm security status
-### bondy.realm.security.status(uri) -> 'enabled' | 'disabled' {.wamp-procedure}
+
+bondy.realm.security.status(uri) -> 'enabled' | 'disabled' {.wamp-procedure}
+
 Returns the security status (`enabled` or `disabled`) for the realm identified by `uri`.
 Realm security is `enabled` by default.
 

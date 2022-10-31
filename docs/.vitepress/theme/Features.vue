@@ -16,15 +16,18 @@ const props = defineProps<{
 const grid = computed(() => {
   const length = props.features.length
 
+  // We hardcode to grid-3
   if (!length) {
     return
-  } else if (length === 2) {
-    return 'grid-2'
+  // } else if (length === 2) {
+  //   return 'grid-2'
   } else if (length === 3) {
     return 'grid-3'
   } else if (length % 3 === 0) {
     return 'grid-3'
   } else if (length % 2 === 0) {
+    return 'grid-3'
+  } else {
     return 'grid-3'
   }
 })

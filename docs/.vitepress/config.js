@@ -84,15 +84,6 @@ export default {
               }
             }
           })
-          // md.use(require('markdown-it-container'), 'tabs', {
-          //   validate: function(params) {
-          //     return params.trim().match(/^tabs\s+(.*)$/);
-          //   },
-          //   render: function(tokens, idx) {
-          //     var tokens = tokens[idx].info.trim().match(/^tabs\s+(.*)$/);
-          //     return '<tabs cache-lifetime="1000">' + md.utils.escapeHtml(tokens[1]) + '</tabs>\n';
-          //   }
-          // })
           // md.use(require('markdown-it-container'), 'tab', {
           //   validate: function(params) {
           //     return params.trim().match(/^tab\s+(.*)$/);
@@ -102,6 +93,15 @@ export default {
           //     var name  = md.utils.escapeHtml(tokens[1]);
           //     var content  = md.utils.escapeHtml(tokens[2]);
           //     return '<tab name="' + name + '">' + content + '</tab>\n';
+          //   }
+          // })
+          // md.use(require('markdown-it-container'), 'tabs', {
+          //   validate: function(params) {
+          //     return params.trim().match(/^tabs\s+(.*)$/);
+          //   },
+          //   render: function(tokens, idx) {
+          //     var tokens = tokens[idx].info.trim().match(/^tabs\s+(.*)$/);
+          //     return '<tabs cache-lifetime="1000">' + md.utils.escapeHtml(tokens[1]) + '</tabs>\n';
           //   }
           // })
           md.use(require('markdown-it-custom-block'), {
@@ -243,6 +243,10 @@ export default {
             {
               text: 'FAQ',
               link: '/about/faq',
+            },
+            {
+              text: 'Bondy Compared',
+              link: '/concepts/how_is_bondy_different',
             },
             {
               text: 'Community',
@@ -459,11 +463,11 @@ export default {
           items: [
             {
               text: 'Overview',
-              link: '/concepts/index',
+              link: '/concepts/clustering/index',
               isFeature: true },
             {
               text: 'Data Replication',
-              link: '/concepts/data_replication',
+              link: '/concepts/clustering/data_replication',
               isFeature: true
             },
           ]
