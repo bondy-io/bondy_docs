@@ -516,10 +516,6 @@ export default {
               isFeature: true
             }
           ]
-        },
-        {
-          text: 'HTTP Gateway',
-          items: []
         }
     ]
   }
