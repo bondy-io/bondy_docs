@@ -1,9 +1,10 @@
+DRAFT{.watermark}
 # Errors
-> See below the all bondy and wamp common error uris.
+> The catalogue of all error URIs used by Bondy and WAMP.
 
-#### Bondy Error Uris
+## Bondy Error URIs
 
-* [bondy.error.active_users](/reference/wamp_api/errors/active_sers): when the provided resource has associated users.
+* [bondy.error.active_users](/reference/wamp_api/errors/active_users): when the provided resource has associated users.
 * [bondy.error.already_exists](/reference/wamp_api/errors/already_exists): when the provided resource identifier already exists.
 * [bondy.error.badmap]():
 * [bondy.error.bad_gateway]():
@@ -24,7 +25,7 @@
 * [bondy.error.unknown_group](/reference/wamp_api/errors/unknown_group): when the group with the provided name doesn't exist.
 
 
-#### Wamp Error Uris
+## WAMP Error URIs
 
 * [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when the given argument type or value is invalid.
 * [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the given authid does not exist.

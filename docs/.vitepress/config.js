@@ -689,9 +689,10 @@ export default {
               isFeature: true,
               description: "Creating, retrieving and managing Bridge Relay (Edge) connections."
             },
-            { text: 'Errors',
+            { text: 'Error URIs',
               link: '/reference/wamp_api/errors/index',
-              isFeature: false
+              isFeature: true,
+              description: "The catalogue of all error URIs used by Bondy and WAMP."
             }
           ]
         }

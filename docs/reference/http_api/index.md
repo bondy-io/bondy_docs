@@ -5,7 +5,7 @@ import { useData } from 'vitepress'
 const { theme } = useData()
 </script>
 
-
+DRAFT{.watermark}
 # Introduction
 
 > Bondy povides an HTTP API Gateway that exposes some of the WAMP Admin and Meta APIs via HTTP.
