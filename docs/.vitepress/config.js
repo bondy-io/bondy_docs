@@ -399,27 +399,32 @@ export default {
             {
               text: 'What is Bondy',
               link: '/concepts/what_is_bondy' ,
-              isFeature: true
+              isFeature: true,
+              description: "A high-level description of Bondy, its key features and the key benefits it delivers."
             },
             {
               text: 'Why Bondy',
               link: '/concepts/why_bondy' ,
-              isFeature: true
+              isFeature: true,
+              description: "Learn about the need for a unified application networking platform."
             },
             {
               text: 'How is Bondy different',
               link: '/concepts/how_is_bondy_different',
-              isFeature: true
+              isFeature: true,
+              description: "Learn about Bondy's unique set of features and how it compares to alternative solutions."
             },
             {
               text: 'Features',
               link: '/concepts/features',
-              isFeature: true
+              isFeature: true,
+              description: "Dive into a more detail description of Bondy's features."
             },
             {
               text: 'Architecture',
               link: '/concepts/architecture',
-              isFeature: true
+              isFeature: true,
+              description: "Dive into a description of Bondy's architecture and its rationale behind its characteristics."
             }
           ]
         },
