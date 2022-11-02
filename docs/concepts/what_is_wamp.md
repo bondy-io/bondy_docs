@@ -1,20 +1,26 @@
 DRAFT{.watermark}
 # Web Application Messaging Protocol (WAMP)
->WAMP is an open standard for (soft) real-time message exchange amongst system components—applications, (micro-) services and connected devices—that eases the creation of loosely coupled distributed architectures. It unifies routed Remote Procedure Calls and Publish/Subscribe communication patterns in one unified protocol.{.definition}
+> WAMP is an open standard protocol for (soft) real-time message exchange that provides two application messaging patterns in one unified protocol: Remote Procedure Calls and Publish/Subscribe.{.definition}
 
 ## Introduction
 
-The WAMP protocol is a community effort and the [specification](https://wamp-proto.org/wamp_latest_ietf.html) is made available for free under an open license for everyone to use or implement.
+The Web Application Messaging Protocol (WAMP) is intended to provide application developers with the semantics they need to handle messaging between components in distributed applications.
+
+By combining Combining the two main application communication patterns–Remote Procedure Calls and Publish/Subscribe– into a single protocol, it can be used for the entire messaging requirements of a distributed system, thus reducing technology stack complexity, as well as networking overheads.
+
+WAMP is a community effort and the [protocol specification](https://wamp-proto.org/wamp_latest_ietf.html) is made available for free under an open license for everyone to use or implement.
 
 ## Key Characteristics
 
-* **It is a routed protocol**<br>All components connecting to a**WAMP** [Router](/concepts/router), where the router performs message routing between**WAMP** [Clients](/concepts/client).
+* **It is a routed protocol**<br>All components connecting to a [Router](/concepts/router), where the router performs message routing between [Clients](/concepts/client).
 
 ::: info Like D-Bus over a network
 [D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions. It offers the same two basic workflows as WAMP, but whereas WAMP is designed for use over a network, D-Bus is designed for inter-process communication (IPC) on a single host.
 :::
 
 ## Unified routing for both RPC and Pub/Sub
+
+<ZoomImg src="/assets/wamp_flows.png"/>
 
 ## Peer-to-peer programming model
 In WAMP all clients are peers i.e. they can play all and the same roles.

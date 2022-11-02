@@ -1,14 +1,14 @@
 body {
     font-size: 15px;
     line-height: calc(25 / 15);
-    font-family: -apple-system, BlinkMacSystemFont, "Source Sans 3", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans", sans-serif;
 }
 
 input,
 button,
 select,
 textarea {
-    font-family: -apple-system, BlinkMacSystemFont, "Source Sans 3", sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans", sans-serif !important;
 }
 
 code,
@@ -22,12 +22,12 @@ pre {
      * which have different font-family, we force font-family
      * for tooltips here.
      */
-    font-family: -apple-system, BlinkMacSystemFont, "Source Sans 3", sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans", sans-serif !important;
 }
 
 textarea,
 input {
-    font-family: -apple-system, BlinkMacSystemFont, "Source Sans 3", sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans", sans-serif !important;
 }
 
 
@@ -42,6 +42,6 @@ input {
 #searchbox,
 #searchbox_legacy {
     #search_query {
-        font-family: -apple-system, BlinkMacSystemFont, "Source Sans 3", sans-serif !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Noto Sans", sans-serif !important;
         }
 }

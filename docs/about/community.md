@@ -9,7 +9,7 @@ The Bondy Users Forum is a place for Bondy users to communicate about anything a
 :::
 ::: column 2
 ### Chat
-Development of Bondy, and general chatter happens on Zulip.
+Development of Bondy, and general chatter happens on Slack.
 :::
 ::::::
 
@@ -18,13 +18,30 @@ Development of Bondy, and general chatter happens on Zulip.
 ::: big-button https://discuss.bondy.io
 Visit Forum
 ::::
-
 :::: column 2
-::: big-button https://bondy.zulipchat.com
-Zulip
+::: big-button https://join.slack.com/t/bondy-group/shared_invite/zt-1j1fbpr04-BUesuqeWBbblbqUPsXrP1A
+Slack
 :::
+
+
 ::::
 ::::::
+
+:::::: columns 1
+:::: column 1
+
+### Reporting an issue
+
+Please report any issues using the project's Github Issues page.
+
+::: big-button https://github.com/Leapsight/bondy/issues
+Github Issues
+:::
+
+::::
+::::::
+
+
 
 
 ## Community Standards
@@ -40,6 +57,3 @@ If you don't know Erlang you can still contribute to the project, specially if y
 * [Code of Conduct](https://github.com/Leapsight/bondy/blob/develop/CODE_OF_CONDUCT.md)
 * [Coding Guidelines](https://github.com/Leapsight/bondy/blob/develop/CODING_GUIDELINES.md)
 
-### Reporting an issue
-
-Please report any issues using the project's [Github Issues page](https://github.com/Leapsight/bondy/issues).

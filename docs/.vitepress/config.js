@@ -160,13 +160,13 @@ export default {
         algolia: {
             appId: '66TO7T25GX',
             apiKey: '4d01178fd6ad6018c75914e31db9bae4',
-            indexName: 'bondy_docs'
+            indexName: 'bondy'
         },
 
         socialLinks: [
             { icon: 'github', link: 'https://github.com/bondy-io'},
             { icon: 'twitter', link: 'https://twitter.com/bondyIO' },
-            { icon: 'discord', link: 'https://discord.gg/Ux9EVst4' }
+            { icon: 'slack', link: 'https://join.slack.com/t/bondy-group/shared_invite/zt-1j1fbpr04-BUesuqeWBbblbqUPsXrP1A' }
         ],
 
         // The footer will displayed only when the page doesn't contain sidebar
@@ -274,31 +274,6 @@ export default {
 
 
   function externalResources() {
-    return [
-          {
-            text: 'Community Forum',
-            link: 'https://discuss.bondy.io',
-            isFeature: false
-          },
-          {
-            text: 'Community Chat',
-            link: 'https://bondy.zulipchat.com',
-            isFeature: false
-          },
-          {
-            text: 'Commercial Support',
-            link: 'https://bondy.io/',
-            isFeature: false
-          },
-          {
-            text: 'Github',
-            link: 'https://github.com/Leapsight/bondy',
-            isFeature: false
-          }
-        ]
-  }
-
-  function tc() {
     return [
           {
             text: 'Community Forum',
