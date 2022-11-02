@@ -158,8 +158,8 @@ export default {
 
         // Search
         algolia: {
-            appId: '66TO7T25GX',
-            apiKey: '4d01178fd6ad6018c75914e31db9bae4',
+            appId: '1GA3LX5N2C',
+            apiKey: '17d9078a92df8769b75e5a64a3d8f869',
             indexName: 'bondy'
         },
 
