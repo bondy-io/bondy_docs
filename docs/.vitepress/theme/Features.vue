@@ -4,6 +4,7 @@ import Feature from './Feature.vue'
 
 export interface Feature {
   icon?: string
+  type?: string
   link: string
   text: string
   description: string
@@ -40,6 +41,7 @@ const grid = computed(() => {
         <div v-for="feature in features" :key="feature.title" class="item" :class="[grid]">
           <Feature
             :icon="feature.icon"
+            :type="feature.type"
             :link="feature.link"
             :text="feature.text"
             :description="feature.description"

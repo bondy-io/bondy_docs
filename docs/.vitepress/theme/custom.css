@@ -1,4 +1,6 @@
 :root {
+    --vp-c-green: #96c623;
+    --vp-c-green-lighter: #96c623;
     --vp-c-brand: #000000;
     --vp-c-brand-light: #323232;
     --vp-c-brand-lighter: #323232;
@@ -599,3 +601,23 @@ table.property-table > tbody > tr > td {
     z-index:1;
 }
 
+
+.related-block{
+    background-color: var(--vp-custom-block-info-bg);
+    border-color: var(--vp-custom-block-info-border);
+    border-radius: 8px;
+    border: 1px solid var(--vp-custom-block-info-border);
+    color: var(--vp-custom-block-info-text);
+    font-size: 16px;
+    line-height: 24px;
+    line-height: 24px;
+    margin-bottom: 30px !important;
+    margin-top: 50px !important;
+    padding: 16px 16px 8px;
+}
+
+.related-block h2, h3 {
+    margin:  10px 0 0 ;
+    padding-top: 0px;
+    border-top: 0px;
+}
