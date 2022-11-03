@@ -3,29 +3,30 @@ draft: true
 ---
 # Why Bondy
 > Delivering innovative customer experiences today requires the real-time networked connection of people, process, data and things.
-> But creating those connections has become shockingly complicated: too many protocols, client libraries and infrastructure components need to be integrated.
+> But creating those connections has become shockingly complicated: as a developer you have to cope with too many protocols, client libraries, cloud services and infrastructure components.
 {.definition}
 
 
 
 ## TL;DR
-Delivering innovative customer experiences today requires the real-time **networked connection of people, process, data and things (devices)**. Advances in technology so far have facilitated some of the tasks involved, but the overall process has become shockingly complicated, putting projects at risk.
 
-This results in a complex technology solution prone to inefficiencies, delays and fatigue hindering the success of business initiatives.
+Delivering innovative customer experiences today requires the real-time networked connection of people, process, data and things (devices).
+
+But creating those connections has become shockingly complicated: as a systems architect and developer you have to cope with too many protocols, client libraries, cloud services and infrastructure components.
+
+The result in a complex technology solution prone to inefficiencies, delays and fatigue hindering the success of business initiatives.
 
 Bondy is our contribution to solve the problem and it was born out of our own necessity.
 
-::: tip
-Bondy is an easy to use platform that allows any software talk to any other software, anywhere, in any programming language, securely and reliably, using multiple communication patterns and requiring a **single unifying protocol** and a **single infrastructure component**.
-:::
 
-> A long habit of not thinking a thing wrong, gives it a superficial appearance of being right, and raises at first a formidable outcry in defence of custom
->
->— Thomas Paine
 
 ::: warning DRAFT
 
 ## An overwhelming accidental complexity
+
+> A long habit of not thinking a thing wrong, gives it a superficial appearance of being right, and raises at first a formidable outcry in defence of custom.
+>
+>— Thomas Paine
 
 The computer software industry has a tendency to add vertical solutions as silos and build layers over layers without taking things away[^1].
 
