@@ -71,12 +71,17 @@ For example to run the 1.0.0-beta.56 release you would use:
 
 ```bash
 docker run \
+    -e BONDY_ERL_NODENAME=bondy1@127.0.0.1 \
+    -e BONDY_ERL_DISTRIBUTED_COOKIE=bondy \
     -p 18080:18080 \
     -p 18081:18081 \
     -p 18082:18082 \
     -p 18086:18086 \
+    -u 0:1000 \
     --name bondy \
-    -d leapsight/bondy:1.0.0-beta.56
+    --env-file .env \
+    -v "${PWD}/bondy/etc:/bondy/etc" \
+    -d leapsight/bondy:1.0.0-beta.64
 ```
 
 

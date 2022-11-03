@@ -8,16 +8,11 @@ Bondy is an open source, always-on and scaleable application networking platform
 
 Read more about Bondy in the [What is Bondy](/concepts/what_is_bondy) section.
 
-
 ### What is WAMP?
 
 The Web Application Messaging Protocol (WAMP) is an open, routed protocol for polyglot distributed applications with all application agents connecting to a WAMP Router that performs message routing between them. WAMP unifies the two most important communication patterns under a single protocol: Publish-Subscribe and Routed Remote Procedure Calls.
 
 Read more about Bondy in the [What is WAMP](/concepts/what_is_wamp) section.
-
-### How compliant is Bondy to WAMP?
-
-Please find the answers to this question in the [WAMP Compliance](/concepts/wamp/compliance.md) page.
 
 ### How is WAMP different than other messaging technologies?
 
@@ -35,7 +30,22 @@ For a further comparison with other products and technologies we invite you to r
 
 Bondy provides a unique sets of features which sets it apart from other WAMP router implementations in terms of *scalability, reliability, high-performance and operational simplicity*.
 
-Read more about this differences in [What is Bondy](https://www.notion.so/What-is-Bondy-fac8112658494e0ca15611a8cfd201e8)  page.
+Read more about this differences in [What is Bondy](https://www.notion.so/What-is-Bondy-fac8112658494e0ca15611a8cfd201e8) page.
+
+## Protocol Support
+
+### Is Bondy multi-protocol?
+
+At its core Bondy implements the Web Application Messaging Protoco (WAMP). Learn why this is important in [Why Bondy](/concepts/why_bondy).
+
+However, Bondy was envisioned as a multi-protocol router. Bondy already offers "REST" HTTP API Gateway capabilities, allowing to configure a mapping between arbitrary HTTP messages to WAMP messages, covering both RPC and Publish/Subscribe interactions.  Bondy also currently provides a Kafka Bridge, allowing to configure a mapping from WAMP topics to Kafka topics.
+
+In the near future, Bondy will incorporate additional protocols and communication patterns, but always maintaining its core capability: being able to offer multiple communication patterns under a single protocol (when using WAMP) and a single networking application platform.
+
+### How compliant is Bondy to WAMP?
+
+Please find the answers to this question in the [WAMP Compliance](/concepts/wamp/compliance.md) page.
+
 
 ## Architecture
 

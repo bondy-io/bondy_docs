@@ -16,8 +16,15 @@ draft: true
 
 Delivering innovative customer experiences today requires the real-time networked connection of people, process, data and things (devices)[^a16z].
 
+[^a16z]: Marc Andreessen, [Why Software is Eating the World](https://a16z.com/2011/08/20/why-software-is-eating-the-world)
 
-But creating those connections has become shockingly complicated: as a systems architect and developer you have to cope with too many client libraries, cloud services and infrastructure components.
+But creating those connections has become shockingly complicated due to the sheer number of tools (and their rapid rate of change) involved in most modern application development[^ogrady].
+
+[^ogrady]: Stephen O'Grady, [The Developer Experience Gap](https://redmonk.com/sogrady/2020/10/06/developer-experience-gap/)
+
+This is due to the increasing fragmentation of the technology landscape and the industry's tendency to build layers over the existing layers without retiring the ones below and most importantly, the tendency to solve specific problems with vertical solutions, creating technology silos. This obviously is beneficial for the industry as it creates the need for integration layers (Yet more layers!).
+
+As a result, developers have to cope with too many client libraries, cloud services and infrastructure components.
 
 Why are we doing this? Because most libraries, services and infrastructure components implement different protocols. These protocols where designed as silos, covering a very specific application development requirement.
 
@@ -41,11 +48,16 @@ Bondy is our contribution to solve the problem and it was born out of our own ne
 
 The computer software industry has a tendency to add vertical solutions as silos and build layers over layers without taking things away[^cncf].
 
+
+[^cncf]: The Cloud Native Computing Foundation (CNCF), [Cloud Native Interactive Landscape](https://landscape.cncf.io) lists more than 450 technologies. Most of them added in the last 10 years.
+
 For example, new modern Remote Procedure Call (RPC) technologies like gRPC and new incarnations of the ubiquitous HTTP protocol still make a distinction between clients and servers. When the smart phones we have in our pockets are more powerful than the supercomputers of the 80s, those frameworks still treat the browser running on the them as dumb clients.
 
 These complicates the implement of several use cases in which it would be desirable for the "server" to call the "client".
 
 Fortunately, the advances in distributed computing over the last 10 years have given us a new horizon, one where we are able to treat our mobile devices as the system or record. I am referrying to peer-to-peer networking and local-first software[^mklepp].
+
+[^mklepp]: Marin Kleppmann et al., [Local-First Software: Your Own Your Data, in spite of the Cloud](https://martin.kleppmann.com/papers/local-first.pdf)
 
 But this will come at a cost.
 
@@ -59,13 +71,13 @@ The growing need to deliver innovative customer experiences in a hypersegmented 
 
 In order to deliver these systems developers need to integrate and ever increasing number of technologies (protocols, clients, dependencies, infrastructure components). This dramatically increments the accidental complexity[^fbrooks].
 
+[^fbrooks]: In [No Silver Bullet — Essence and Accident in Software Engineering](https://en.wikipedia.org/wiki/No_Silver_Bullet), Fred Brooks distinguishes between two different types of complexity: accidental complexity and essential complexity. Essential complexity is caused by the problem to be solved, and nothing can remove it. Accidental complexity relates to problems which engineers create and can fix; for example, the details of writing and optimizing assembly code or the delays caused by batch processing.
+
 <ZoomImg src="/assets/accidental_complexity.png"/>
 
 We desperately need to simplify and make it easier for developers to deliver these systems swiftly and at a lower cost.
 
 > Where the big technology companies can cope with this complexity,
-
-
 :::
 
 
@@ -81,11 +93,10 @@ We desperately need to simplify and make it easier for developers to deliver the
 * P2P network
 
 ## WAMP: The protocol that was ahead of its time
+TBD
 
-## WAMP: Revival and Beyond
+## Bondy: WAMP Revival and Beyond
+TBD
 
 
-[^cncf]: The Cloud Native Computing Foundation (CNCF), [Cloud Native Interactive Landscape](https://landscape.cncf.io) lists more than 450 technologies. Most of them added in the last 10 years.
-[^mklepp]: Marin Kleppmann et al., [Local-First Software: Your Own Your Data, in spite of the Cloud](https://martin.kleppmann.com/papers/local-first.pdf)
-[^fbrooks]: In [No Silver Bullet — Essence and Accident in Software Engineering](https://en.wikipedia.org/wiki/No_Silver_Bullet), Fred Brooks distinguishes between two different types of complexity: accidental complexity and essential complexity. Essential complexity is caused by the problem to be solved, and nothing can remove it. Accidental complexity relates to problems which engineers create and can fix; for example, the details of writing and optimizing assembly code or the delays caused by batch processing.
-[^a16z]: Marc Andreessen, [Why Software is Eating the World](https://a16z.com/2011/08/20/why-software-is-eating-the-world)
+

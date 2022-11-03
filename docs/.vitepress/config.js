@@ -388,6 +388,12 @@ export default {
               description: "Learn about the need for a unified application networking platform."
             },
             {
+              text: 'What is WAMP',
+              link: '/concepts/what_is_wamp' ,
+              isFeature: true,
+              description: "Find out more about the Web Application Messaging Protocol. "
+            },
+            {
               text: 'How does Bondy work',
               link: '/concepts/how_does_bondy_work' ,
               isFeature: true,
