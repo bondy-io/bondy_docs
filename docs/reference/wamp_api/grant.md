@@ -1,3 +1,5 @@
-DRAFT{.watermark}
+---
+draft: true
+---
 # Grant
 > {.definition}

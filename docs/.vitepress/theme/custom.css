@@ -591,11 +591,11 @@ table.property-table > tbody > tr > td {
 .watermark{
     /*transform: rotate(45deg);*/
     font-size: 40px;
-    color:red;
+    color:#ff6442;
     position:fixed;
     top: 9%;
     right:35%;
-    opacity:0.6;
+    opacity:1.0;
     z-index:1;
 }
 

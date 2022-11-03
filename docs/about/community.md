@@ -1,8 +1,9 @@
+
 # Community
 
 ## Where to talk
 
-:::::: columns 1
+:::::: columns titles
 ::: column 1
 ### User Forums
 The Bondy Users Forum is a place for Bondy users to communicate about anything and everything related to Bondy.
@@ -13,7 +14,7 @@ Development of Bondy, and general chatter happens on Slack.
 :::
 ::::::
 
-:::::: columns 1
+:::::: columns buttons
 :::: column 1
 ::: big-button https://discuss.bondy.io
 Visit Forum
@@ -22,38 +23,40 @@ Visit Forum
 ::: big-button https://join.slack.com/t/bondy-group/shared_invite/zt-1j1fbpr04-BUesuqeWBbblbqUPsXrP1A
 Slack
 :::
-
-
 ::::
 ::::::
 
-:::::: columns 1
-:::: column 1
-
 ### Reporting an issue
+Please report any new issues using Bondy's Github Issues page. Start by searching the known issues, it’s very likely fellow users have raised the same issue.
 
-Please report any issues using the project's Github Issues page.
-
+:::::: columns buttons
+:::: column 1
 ::: big-button https://github.com/Leapsight/bondy/issues
 Github Issues
 :::
-
 ::::
 ::::::
 
+## How to contribute
+We are always very happy to have contributions fro the community. If you are planning on contributing to the project please carefully read the [Contributors](/about/contributors) section.
+
+:::::: columns buttons
+:::: column 2
+::: big-button /about/contributors
+Contributors
+:::
+::::
+::::::
 
 
 
 ## Community Standards
 
-We are always very happy to have contributions. If you are planning on contributing to the project please carefully read the following sections.
+We are committed to providing a friendly, safe and welcoming environment for all, regardless of gender, sexual orientation, disability, ethnicity, religion, or similar personal characteristic. Our code of conduct sets the standards for behavior in all official Bondy forums.
 
-Active development is done at [Bondy's Github repository](https://github.com/leapsight/bondy).
+<!-- If you feel you have been or are being harassed or made uncomfortable by a community member, please contact any of the Bondy Moderation Team immediately. Whether you are a regular contributor or a newcomer, we care about making the community a safe space for you. -->
 
-If you don't know Erlang you can still contribute to the project, specially if you are interested in Bondy as a WAMP router, an important area of development is in the WAMP clients.
-
-### General guidelines
-
-* [Code of Conduct](https://github.com/Leapsight/bondy/blob/develop/CODE_OF_CONDUCT.md)
-* [Coding Guidelines](https://github.com/Leapsight/bondy/blob/develop/CODING_GUIDELINES.md)
+::: big-button https://github.com/Leapsight/bondy/blob/develop/CODE_OF_CONDUCT.md
+Read the Code of Conduct
+:::
 

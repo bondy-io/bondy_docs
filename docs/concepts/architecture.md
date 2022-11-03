@@ -1,8 +1,8 @@
 ---
 outline: deep
+draft: true
 ---
 
-DRAFT{.watermark}
 # Architecture
 
 ## Preliminaries

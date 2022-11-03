@@ -253,6 +253,10 @@ export default {
               link: '/about/community',
             },
             {
+              text: 'Contributors',
+              link: '/about/contributors',
+            },
+            {
               text: 'Terms and Policies',
               link: '/about/terms_and_policies',
             }

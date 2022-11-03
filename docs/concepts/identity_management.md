@@ -1,2 +1,4 @@
-DRAFT{.watermark}
+---
+draft: true
+---
 # Identity Management

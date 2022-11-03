@@ -1,27 +1,37 @@
-DRAFT{.watermark}
+---
+draft: true
+---
 # How is Bondy different
 > Bondy provides a unique combination of features which sets it apart from other application networking solutions (e.g. WAMP routers) in terms of scalability, reliability, high-performance, development and operational simplicity.{.definition}
 
 ## Bondy vs. other WAMP routers
 
-### Self-sufficiency
-Bondy does not depend on any external system e.g. databases, as it would not be able to guarantee their availability.
 
 ### Distributed by design
 Bondy was designed as a reliable distributed router, ensuring continued operation in the event of node or network failures through clustering and data replication.
 
-Each Bondy node is capable of sending messages to and receiving messages from other nodes. The nodes act as relays, passing on a message towards its final destination.
+Each Bondy node is capable of sending messages to and receiving messages from other nodes. All nodes in Bondy cluster act as relays, passing on a message towards its final destination.
 
 <ZoomImg src="/assets/bondy_architecture.png"/>
 
-### Scalable
-Bondy is written in Erlang/OTP which provides the underlying operating system to handle concurrency and scalability requirements, allowing it to scale to thousands and even millions of concurrent connections on a single node. Its distributed architecture also allows for horizontal scaling by simply adding nodes to the cluster.
+### Self-sufficiency
+Bondy does not depend on any external system e.g. databases, as it would not be able to guarantee their availability. Bondy stores all configuration and control plane data in its own embedded, globally-replicated database.
 
-### Decentralised
-All peer nodes in a Bondy cluster are equal, thanks to the underlying clustering and networking technology which provides a master-less architecture.
+### Scalable
+Bondy is written in Erlang/OTP which provides the underlying operating system to handle concurrency and scalability requirements, allowing it to scale to thousands and even millions of concurrent connections on a single node.
+
+Its distributed architecture allows for horizontal scaling by simply adding nodes to the cluster.
+
+### Decentralised, master-less
+All nodes in a Bondy cluster are equal peers, there are no special nodes.
+This enables Bondy's operational simplicity.
 
 ### Low latency data replication
-All nodes in a Bondy cluster share a global state which is replicated through a highly scaleable and low latency eventually consistency model. Data is diseminated in real-time using epidemic broadcast trees (gossip). Bondy uses [Partisan](https://github.com/lasp-lang/partisan), a high-performance Distributed Erlang replacement that enables various network topologies and supports large clusters.
+All nodes in a Bondy cluster share a global state which is replicated through a highly scaleable and low latency eventually consistency model. Data is diseminated in real-time using epidemic broadcast trees (gossip)[^ebt].
+
+[^ebt]: [Epidemic broadcast trees](https://www.gsd.inesc-id.pt/~ler/reports/srds07.pdf), João Leitão, José Pereira and Luís Rodrigues
+
+Bondy uses [Partisan](https://github.com/lasp-lang/partisan), a high-performance Distributed Erlang alternative that enables various network topologies and supports larger clusters.
 
 ### Easy to operate
 Bondy is easy to operate mainly due to its decentralised peer-to-peer nature, the lack of special nodes, automatic data replication and self-healing.

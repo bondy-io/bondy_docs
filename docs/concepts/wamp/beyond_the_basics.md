@@ -1,4 +1,6 @@
-DRAFT{.watermark}
+---
+draft: true
+---
 # Beyond the basics
 
 ## RPC Load Balancing

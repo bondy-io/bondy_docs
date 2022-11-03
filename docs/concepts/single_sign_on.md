@@ -1,2 +1,4 @@
-DRAFT{.watermark}
+---
+draft: true
+---
 # Single Sign-on

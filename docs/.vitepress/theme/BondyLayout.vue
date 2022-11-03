@@ -14,6 +14,9 @@ const image = "/assets/logo.png"
     <template #home-hero-after>
     </template>
     <template #doc-before>
+      <span v-if="$frontmatter.draft" class="watermark">DRAFT</span>
+    </template>
+    <template #doc-after>
     </template>
   </Layout>
 </template>

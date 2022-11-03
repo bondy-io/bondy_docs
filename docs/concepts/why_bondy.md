@@ -1,4 +1,6 @@
-DRAFT{.watermark}
+---
+draft: true
+---
 # Why Bondy
 > Delivering innovative customer experiences today requires the real-time networked connection of people, process, data and things.
 > But creating those connections has become shockingly complicated: too many protocols, client libraries and infrastructure components need to be integrated.

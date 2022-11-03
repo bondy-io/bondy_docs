@@ -1,4 +1,6 @@
-DRAFT{.watermark}
+---
+draft: true
+---
 # Remote Procedure Calls
 
 

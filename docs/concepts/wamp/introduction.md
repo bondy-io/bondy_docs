@@ -1,4 +1,6 @@
-DRAFT{.watermark}
+---
+draft: true
+---
 # Introduction to WAMP
 
 >The Web Application Messaging Protocol (WAMP) is a routed protocol for polyglot distributed applications with all application agents connecting to a WAMP Router that performs message routing between them. WAMP unifies the two most important communication patterns under a single protocol: Publish-Subscribe and Routed Remote Procedure Calls.{.definition}

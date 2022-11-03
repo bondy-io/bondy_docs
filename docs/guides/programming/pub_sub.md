@@ -1,4 +1,6 @@
-DRAFT{.watermark}
+---
+draft: true
+---
 # Publish and Subscribe
 
 ## How Subscriptions Work
