@@ -5,7 +5,7 @@ const { theme } = useData()
 
 
 # Overview
-> Learn how to configure Bondy to match your particular needs. The following reference material covers evertyhing from single node to multi-node cluster deployments.{.definition}
+> Learn how to configure Bondy to match your particular needs. The following reference material covers everything from single node to multi-node cluster deployments.{.definition}
 
 
 

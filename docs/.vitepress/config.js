@@ -382,16 +382,16 @@ export default {
               description: "A high-level description of Bondy, its key features and the key benefits it delivers."
             },
             {
-              text: 'How does Bondy work',
-              link: '/concepts/how_does_bondy_work' ,
-              isFeature: true,
-              description: "A high-level description that explains how Bondy works."
-            },
-            {
               text: 'Why Bondy',
               link: '/concepts/why_bondy' ,
               isFeature: true,
               description: "Learn about the need for a unified application networking platform."
+            },
+            {
+              text: 'How does Bondy work',
+              link: '/concepts/how_does_bondy_work' ,
+              isFeature: true,
+              description: "A high-level description that explains how Bondy works."
             },
             {
               text: 'How is Bondy different',
