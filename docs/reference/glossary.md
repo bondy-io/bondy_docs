@@ -39,6 +39,9 @@ When performed, cluster nodes tell each other about the keys and what versions t
 
 ## Convergence
 
+## Distributed application
+Distributed applications are applications or software that run on network-connect devices and communicate with each other using one or more communication patterns.
+
 ## Entropy
 
 In a distributed system like Bondy, conflicts between object replicas stored on different cluster nores are an expected by product of node failure, concurrent client updates, physical data loss and corruption, and other events that distributed systems are built to handle.

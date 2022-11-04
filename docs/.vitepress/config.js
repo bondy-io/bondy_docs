@@ -14,6 +14,7 @@ export default {
     description: 'Bondy Documentation Website',
     appearance: true,
     lastUpdated: true,
+
     markdown: {
         toc: { level: [3] },
         theme: 'one-dark-pro',
@@ -459,7 +460,7 @@ export default {
           ]
         },
         {
-          text: 'Multi-tenant Security',
+          text: 'Key Concepts',
           description: "Bondy leverages WAMP Realms to provide multi-tenant security.",
           items: [
             {
@@ -498,24 +499,15 @@ export default {
               isFeature: true,
               description: "Learn how to enable Single Sign-on on multiple realms."
             },
-          ]
-        },
-        {
-          text: 'Clustering',
-          items: [
             {
-              text: 'Overview',
-              link: '/concepts/clustering/index',
-              isFeature: true },
-            {
-              text: 'Data Replication',
-              link: '/concepts/clustering/data_replication',
+              text: 'Clustering',
+              link: '/concepts/clustering',
               isFeature: true
             },
           ]
         },
         {
-          text: 'WAMP',
+          text: 'WAMP Essentials',
           items: [
             {
               text: 'Introduction to WAMP',
@@ -524,28 +516,53 @@ export default {
               description:'Learn the WAMP basics including how to establish a session and use RPC and Publish/Subscribe.'
             },
             {
-              text: 'Getting started with WAMP',
-              link: '/concepts/wamp/getting_started',
-              isFeature: true
-            },
-            {
               text: 'Communication Patterns',
               link: '/concepts/wamp/communication_patterns',
               isFeature: true
             },
             {
-              text: 'Under the Hood',
-              link: '/concepts/wamp/under_the_hood',
+              text: 'Routed RPC',
+              link: '/concepts/wamp/rpc',
               isFeature: true
             },
             {
-              text: 'Beyond the Basics',
-              link: '/concepts/wamp/beyond_the_basics',
+              text: 'Publish/Subscribe',
+              link: '/concepts/wamp/pubsub',
+              isFeature: true
+            },
+            {
+              text: 'Connections and Sessions',
+              link: '/concepts/wamp/pubsub',
+              isFeature: true
+            },
+            {
+              text: 'Naming Best Practices',
+              link: '/concepts/wamp/naming',
               isFeature: true
             },
             {
               text: 'Security',
               link: '/concepts/wamp/security',
+              isFeature: true
+            },
+            {
+              text: 'Getting started with WAMP',
+              link: '/concepts/wamp/getting_started',
+              isFeature: true
+            }
+          ]
+        },
+        {
+          text: 'WAMP Features',
+          items: [
+            {
+              text: 'Advanced RPC',
+              link: '/concepts/wamp/advanced/rpc',
+              isFeature: true
+            },
+            {
+              text: 'Advanced Publish/Subscribe',
+              link: '/concepts/wamp/advanced/pubsub',
               isFeature: true
             },
             {

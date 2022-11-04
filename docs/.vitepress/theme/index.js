@@ -4,6 +4,7 @@ import {VPHomeHero} from 'vitepress/theme'
 import DataTreeView from './DataTreeView.vue'
 import ZoomImg from './ZoomImg.vue'
 import Features from './Features.vue'
+import Badge from './Badge.vue'
 
 import Tabs from './Tabs.vue'
 import Tab from './Tab.vue'
@@ -20,6 +21,7 @@ export default {
     Layout: BondyLayout,
     enhanceApp({ app }) {
         app.component('VPHomeHero', VPHomeHero)
+        app.component('Badge', Badge)
         app.component('Tab', Tab)
         app.component('Tabs', Tabs)
         app.component('DataTreeView', DataTreeView)
