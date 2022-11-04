@@ -12,6 +12,7 @@ related:
 > Bondy is an open source, always-on and scaleable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined.
 > It enables data to be routed between Internet-connected devices such as browsers, phones, servers and IoT (Internet of Things) devices in realtime.{.definition}
 
+
 ## What does Bondy do?
 
 ## Why should I use Bondy?

@@ -1,3 +1,11 @@
+---
+related:
+    - type: concepts
+      text: Introduction to WAMP
+      link: /concepts/wamp/introduction
+      description: 'Learn the WAMP basics including how to establish a session and use RPC and Publish/Subscribe.'
+---
+
 <script setup>
 import { computed } from 'vue'
 import { useData } from 'vitepress'
@@ -8,18 +16,24 @@ const { theme } = useData()
 
 # Introduction
 
-> Bondy enables the monitoring of administrative operations via WAMP Events and the management of dynamic resources via WAMP Procedures. These events and procedures include the ones defined by the [WAMP](/concepts/wamp/introduction) Meta API.{.definition}
+> Bondy can be configured, managed and monitored via WAMP Procedures and Events. These events and procedures include the ones defined by the WAMP Meta API specification.{.definition}
 
-In Bondy, a Realm and all its entities are dynamically managed using the WAMP Admin API.
+In Bondy, a Realm and all its entities are dynamically configured using the WAMP Admin API, these are procedures and events URIs that start with the reserved `bondy.` prefix e.g. `bondy.user.add`.
 
-Bondy Admin procedures and events URIs start with the reserved `bondy.` prefix, whereas the WAMP Meta procedures and events start with the reserved `wamp.` prefix e.g. `bondy.user.add` and `wamp.session.get`.
+Additionally, Bondy offers WAMP Meta procedures and events (as defined by the WAMP Specification) which start with the reserved `wamp.` prefix e.g. `wamp.session.get`.
 
-::: info HTTP API
-Bondy also offers equivalent HTTP APIs for most of the entities in the WAMP API, this is done by the HTTP API Gateway.
+::: details Context Diagram
+The following diagram shows how the WAMP APIs described in this reference fit within the overall configuration and management landscape:
+
+<ZoomImg src="/assets/configuration_scopes.png"/>
 :::
 
-## Entities and Resources
-The following is a catalogue of APIs organised by entity/resource
+::: tip HTTP API
+Bondy also offers equivalent [HTTP APIs](/reference/http_api) for most of the entities in the WAMP API, this is implemented by the HTTP API Gateway.
+:::
+
+## Services
+The following is a catalogue of APIs organised by service. Each service provides APIs to manage (or get information about) an Entity or Feature.
 
 <Features
     class="VPHomeFeatures"

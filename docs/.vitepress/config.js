@@ -520,7 +520,8 @@ export default {
             {
               text: 'Introduction to WAMP',
               link: '/concepts/wamp/introduction',
-              isFeature: true
+              isFeature: true,
+              description:'Learn the WAMP basics including how to establish a session and use RPC and Publish/Subscribe.'
             },
             {
               text: 'Getting started with WAMP',
