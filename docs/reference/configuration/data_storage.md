@@ -3,6 +3,7 @@
 
 ## Store
 
+
 @[config](store.data_dir)
 
 @[config](store.open_retries_delay)

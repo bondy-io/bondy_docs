@@ -1,7 +1,15 @@
 :root {
-    --vp-c-green: #96c623;
-    --vp-c-green-lighter: #96c623;
-    --vp-c-brand: #000000;
+    --vp-c-green: #42b883;
+    --vp-c-green-light: #b9d96c;
+    --vp-c-green-lighter: #dcecb5;
+    --vp-c-green-dark: #86a53c;
+    --vp-c-green-darker: #728d33;
+    --vp-c-green-dimm-1: rgba(150, 198, 35, 0.5);
+    --vp-c-green-dimm-2: rgba(150, 198, 35, 0.25);
+    --vp-c-green-dimm-3: rgba(150, 198, 35, 0.05);
+
+
+    --vp-c-brand: #171916;
     --vp-c-brand-light: #323232;
     --vp-c-brand-lighter: #323232;
     --vp-c-text-1: #454545;
@@ -55,6 +63,15 @@ h5 {
   border-bottom-color: #989898;
 }
 
+.VPHomeHero > div > div.main > h1 > span{
+    background: #FF6442;
+    background: -webkit-linear-gradient(to right, #FF6442 0%, #6667AB 100%);
+    background: -moz-linear-gradient(to right, #FF6442 0%, #6667AB 100%);
+    background: linear-gradient(to right, #FF6442 0%, #6667AB 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 .VPHomeHero > div > div.main > p.text{
   font-size: 36px !important;
   line-height: 45px;
@@ -80,6 +97,37 @@ h5 {
     margin-left: -15px;
     height: 55px !important;
 }
+
+
+.uri {
+  font-family: var(--vp-font-family-mono);
+  font-size:0.95rem;
+}
+
+.table-of-contents {
+  font-family: var(--vp-font-family-mono);
+  font-size:0.9rem !important;
+}
+
+.definition > p {
+  /* color: #000000 !important; */
+  /* font-style: italic; */
+  font-size:1.2rem !important;
+}
+
+table.property-table > thead > tr > th {
+  font-size: 14px;
+  background-color: #858585f8;
+  line-height: 10px;
+  color: white;
+}
+
+table.property-table > tbody > tr > td {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+
 
 .datatype{
   background-color:#f1f1f1;
@@ -141,70 +189,94 @@ h5 {
   color:#323232f5;
 }
 
-.uri {
-  font-family: var(--vp-font-family-mono);
-  font-size:0.95rem;
-}
-
-.table-of-contents {
-  font-family: var(--vp-font-family-mono);
-  font-size:0.9rem !important;
-}
-
-.definition > p {
-  /* color: #000000 !important; */
-  /* font-style: italic; */
-  font-size:1.2rem !important;
-}
-
-table.property-table > thead > tr > th {
-  font-size: 14px;
-  background-color: #858585f8;
-  line-height: 10px;
-  color: white;
-}
-
-table.property-table > tbody > tr > td {
-  font-size: 14px;
-  line-height: 20px;
-}
-
 .custom-block{
   font-size: 16px;
   margin-top: 30px !important;
   margin-bottom: 30px !important;
 }
 
-.custom-block.uri {
-    border-left-style: solid;
-    border-left-width: 3px;
-    box-sizing: border-box;
-    color: rgb(0, 0, 0);
-    display: inline-block;
-    font-family: "SF Mono", Inconsolata, Menlo, Courier, monospace;
-    height: 43px;
-    width: 100%;
-    line-height: 27px;
-    margin-bottom: 16px;
-    margin-left: 0px;
-    margin-right: 0px;
-    margin-top: 32px;
-    padding-bottom: 0px;
-    padding-left: 0px;
-    padding-right: 16px;
-    padding-top: 0px;
-    position: relative;
-    text-size-adjust: 100%;
+
+.custom-block.config-param{
+  background-color: rgba(180, 212, 238, 0.3) !important;
+  border-color: RGB(180, 212, 238, 0.4) !important;
+  border-left-color: rgba(180, 212, 238, 1.00) !important;
+  border-left-style: solid;
+  border-left-width: 3px !important;
+  border:1px solid rgba(147, 147, 147, 0.3);
+  border-radius: 0px;
+  display: inline-flex;
+  justify-content: space-between;
+  font-family: var(--vp-font-family-mono);
+  font-size:1.0rem !important;
+  font-weight:500!important;
+  width:100%;
+  margin-top:30px !important;
+  margin-bottom:0px !important;
+  min-width:320px;
+  padding:0.5em;
+  color:#323232f5;
 }
 
+.config-param-badge{
+    display: inline-block;
+    position: relative;
+    font-family: var(--vp-font-family-mono) !important;
+    font-size:12px !important;
+    font-weight:500 !important;
+    letter-spacing: 1px;
+    height: 130%;
+    padding: 0px 0px 0px 0px;
+    border-radius: 0px 0px 0px 0px;
+    text-transform: uppercase;
+    background-color: rgba(180, 212, 238, 1.00) !important;
+}
+
+.config-param-meta{
+  font-family: var(--vp-font-family-mono) !important;
+  font-size:14px !important;
+  font-weight:500 !important;
+}
+
+.since-version{
+  margin-top: 5px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--vp-font-family-mono) !important;
+  font-size:14px !important;
+  font-weight:500!important;
+}
+
+.custom-block.uri{
+  background-color: rgba(102, 103, 171, 0.1) !important;
+  border-color: RGB(102, 103, 171, 0.3) !important;
+  border-left-color: rgba(102, 103, 171, 1.00) !important;
+  border-left-style: solid;
+  border-left-width: 3px !important;
+  border:1px solid rgba(147, 147, 147, 0.3);
+  border-radius: 0px;
+  display: inline-flex;
+  justify-content: space-between;
+  font-family: var(--vp-font-family-mono);
+  font-size:1.0rem !important;
+  font-weight:500!important;
+  width:100%;
+  margin-top:30px !important;
+  margin-bottom:0px !important;
+  min-width:320px;
+  padding:0.5em;
+  width:49100%8px;
+  color:#323232f5;
+}
+
+
 .custom-block.uri.public {
-    background-color: rgba(61, 175, 123, 0.0);
-    border-left-color: rgba(61, 175, 123, 0.8);
+    background-color: rgba(102, 103, 171, 0.0);
+    border-left-color: rgba(102, 103, 171, 0.8);
 }
 
 .custom-block.private {
-    background-color: rgba(218, 89, 96, 0.0);
-    border-left-color: rgba(218, 89, 96, 0.8);
+    background-color: rgba(102, 103, 171, 0.0);
+    border-left-color: rgba(102, 103, 171, 0.8);
 }
 
 .custom-block.uri > p{
@@ -259,44 +331,6 @@ table.property-table > tbody > tr > td {
 .custom-block.private > span {
     border-color: rgba(218, 89, 96, 0.4);
 }
-
-.custom-block.config-param{
-  background-color: rgba(102, 103, 171, 0.1) !important;
-  border-color: RGB(102, 103, 171, 0.3) !important;
-  border-left-color: rgba(102, 103, 171, 1.00) !important;
-  border-left-style: solid;
-  border-left-width: 3px !important;
-  border:1px solid rgba(147, 147, 147, 0.3);
-  border-radius: 0px;
-  display: inline-flex;
-  justify-content: space-between;
-  font-family: var(--vp-font-family-mono);
-  font-size:1.0rem !important;
-  font-weight:500!important;
-  width:100%;
-  margin-top:30px !important;
-  margin-bottom:0px !important;
-  min-width:320px;
-  padding:0.5em;
-  width:49100%8px;
-  color:#323232f5;
-}
-
-.custom-block.config-param > .meta{
-  font-family: var(--vp-font-family-mono) !important;
-  font-size:14px !important;
-  font-weight:500 !important;
-}
-
-.since-version{
-  margin-top: 5px;
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--vp-font-family-mono) !important;
-  font-size:14px !important;
-  font-weight:500!important;
-}
-
 
 
 .footnotes{
@@ -600,6 +634,7 @@ table.property-table > tbody > tr > td {
     opacity:1.0;
     z-index:1;
 }
+
 
 .text-gradient{
     background: #FF6442;

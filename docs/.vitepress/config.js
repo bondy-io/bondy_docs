@@ -118,7 +118,7 @@ export default {
                 badge = args.shift();
                 className = (args.shift() === 'private') ? 'private' : 'public';
               };
-              return `<div class="custom-block uri ${className}"><a name="${uri}"></a><span class="custom-block uri ${className}">${badge}</span><p class="custom-block-title">${uri}</p></div>`;
+              return `<div class=" wamp-uri ${className}"><a name="${uri}"></a><span class="wamp-uri ${className}">${badge}</span><p class="wamp-uri-title">${uri}</p></div>`;
             },
             // CONFIG
             config (str) {
@@ -140,7 +140,40 @@ export default {
                 since = since ? since : 'N/A';
               };
               return `
-              <h3 id="${param}" tabindex="-1"><span class="custom-block config-param"><span><span class="custom-block-title"><a class="header-anchor" href="#${param}" aria-hidden="true">#</a>${param}</span><span class="meta">&nbsp;::&nbsp;${datatype}</span></span></span><div class="since-version"><span class="meta">Default = ${defaultValue}</span><span>Since&nbsp;${since}</span></div></h3>`;
+    <div id="${param}" tabindex="-1">
+        <span class="custom-block config-param">
+            <span>
+                <span class="custom-block-title">
+                    <a href="#${param}" aria-hidden="true"></a>
+                    ${param}
+                </span>
+                <span class="config-param-meta">&nbsp;::&nbsp;${datatype}</span>
+            </span>
+        </span>
+        <div class="since-version">
+            <span class="config-param-meta">Default = ${defaultValue}</span>
+            <span>Since&nbsp;${since}</span>
+        </div>
+    </div>`;
+            },
+            // FOO
+            configRef (str) {
+              console.log(str);
+              let obj = str.replace(/\s+/g, '');
+              var datatype = obj.datatype ? obj.datatype : 'string';
+              return `
+    <div id="${obj.key}" tabindex="-1">
+        <span class="config-param">
+            <span>
+                <span class="config-param-badge">config</span>
+                <span class="custom-block-title">
+                    <a href="#${obj.key}" aria-hidden="true"></a>
+                    ${obj.key}
+                </span>
+                <span class="config-param-meta">&nbsp;::&nbsp;${datatype}</span>
+            </span>
+        </span>
+    </div>`;
             }
           })
         }
@@ -241,12 +274,12 @@ export default {
           text: 'About',
           items: [
             {
-              text: 'FAQ',
-              link: '/about/faq',
+              text: 'Bondy.io',
+              link: 'https://www.bondy.io',
             },
             {
-              text: 'Bondy Compared',
-              link: '/concepts/how_is_bondy_different',
+              text: 'FAQ',
+              link: '/about/faq',
             },
             {
               text: 'Community',
