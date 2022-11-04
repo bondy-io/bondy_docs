@@ -644,3 +644,9 @@ table.property-table > tbody > tr > td {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
+
+/* Hide Theme toggle until we fix Dark Mode */
+.VPNavBarAppearance{
+    visibility: hidden;
+}
