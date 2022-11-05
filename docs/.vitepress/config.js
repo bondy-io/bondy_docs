@@ -53,7 +53,6 @@ export default {
             validate: function(params) {
               return params.trim().match(/^column\s+(.*)$/);
             },
-
             render: function (tokens, idx) {
               var m = tokens[idx].info.trim().match(/^column\s+(.*)$/);
 
@@ -85,26 +84,43 @@ export default {
               }
             }
           })
-          // md.use(require('markdown-it-container'), 'tab', {
-          //   validate: function(params) {
-          //     return params.trim().match(/^tab\s+(.*)$/);
-          //   },
-          //   render: function(tokens, idx) {
-          //     var tokens = tokens[idx].info.trim().match(/^tab\s+(.*)$/);
-          //     var name  = md.utils.escapeHtml(tokens[1]);
-          //     var content  = md.utils.escapeHtml(tokens[2]);
-          //     return '<tab name="' + name + '">' + content + '</tab>\n';
-          //   }
-          // })
-          // md.use(require('markdown-it-container'), 'tabs', {
-          //   validate: function(params) {
-          //     return params.trim().match(/^tabs\s+(.*)$/);
-          //   },
-          //   render: function(tokens, idx) {
-          //     var tokens = tokens[idx].info.trim().match(/^tabs\s+(.*)$/);
-          //     return '<tabs cache-lifetime="1000">' + md.utils.escapeHtml(tokens[1]) + '</tabs>\n';
-          //   }
-          // })
+          md.use(require('markdown-it-container'), 'tab', {
+            validate: function(params) {
+              return params.trim().match(/^tab\s+(.*)$/);
+            },
+            render: function(tokens, idx) {
+              var m = tokens[idx].info.trim().match(/^tab\s+(.*)$/);
+
+              if (tokens[idx].nesting === 1) {
+                // opening tag
+                var name = m[1];
+                return '<tab name="' + name + '">';
+
+              } else {
+                // closing tag
+                return '</tab>\n';
+              }
+            }
+          })
+          md.use(require('markdown-it-container'), 'tabs', {
+            validate: function(params) {
+              return params.trim().match(/^tabs\s+(.*)$/);
+            },
+            render: function(tokens, idx) {
+              var m = tokens[idx].info.trim().match(/^tabs\s+(.*)$/);
+                  if (tokens[idx].nesting === 1) {
+                // opening tag
+                var className = m[1] === 'code' ? 'code' : '';
+
+                return '<tabs cache-lifetime="1000" class="'
+                + className + '">';
+
+              } else {
+                // closing tag
+                return '</tabs>\n';
+              }
+            }
+          })
           md.use(require('markdown-it-custom-block'), {
             // URI
             uri (str) {
@@ -350,7 +366,6 @@ export default {
           text: 'Getting Started',
           collapsible: true,
           items: [
-            { text: 'Get Bondy', link: '/tutorials/getting_started/get_bondy' },
             { text: 'Getting Started', link: '/tutorials/getting_started/index'}
           ]
         },
@@ -369,12 +384,61 @@ export default {
   function guidesSidebar() {
     return [
         {
+          text: 'Get Bondy',
+          description: 'Bondy can be installed on many different systems. From bare metal on constraint devices and high-end servers, to virtual machines, containers and cloud native Kubernetes environments. Choose what is the best installation option for you.',
+          collapsible: true,
+          items: [
+            {
+              text: 'Install from Source',
+              link: '/guides/install/source',
+              description: 'Build and install Bondy from source.',
+              isFeature: true
+            },
+            // {
+            //   text: 'Install using prebuild Packages',
+            //   link: '/guides/install/packages',
+            //   description: 'Install Bondy as a prebuilt package.',
+            //   isFeature: true
+            // },
+            {
+              text: 'Install using Docker',
+              link: '/guides/install/docker' ,
+              description: 'Use the official Docker images for amd64 and arm64 architectures.',
+              isFeature: true
+            },
+            {
+              text: 'Install using Kubernetes',
+              link: '/guides/install/Kubernetes' ,
+              description: 'See a starter manifest recipe and taylor it based on your needs.',
+              isFeature: true
+            },
+            // {
+            //   text: 'Install using Homebrew (macOS)',
+            //   link: '/guides/install/packages',
+            //   description: 'Install Bondy using the Homebrew package manager.',
+            //   isFeature: true
+            // },
+          ]
+        },
+        {
           text: 'Programming with WAMP',
           collapsible: true,
           items: [
-            { text: 'General', link: '/guides/programming/general'},
-            { text: 'Remote Procedure Calls', link: '/guides/programming/rpc'},
-            { text: 'Publish and Subscribe', link: '/guides/programming/pub_sub'}
+            {
+              text: 'General',
+              link: '/guides/programming/general',
+              isFeature: true
+            },
+            {
+              text: 'Remote Procedure Calls',
+              link: '/guides/programming/rpc',
+              isFeature: true
+            },
+            {
+              text: 'Publish and Subscribe',
+              link: '/guides/programming/pub_sub',
+              isFeature: true
+            }
           ]
         },
         {
@@ -417,7 +481,7 @@ export default {
           items: [
             {
               text: 'What is Bondy',
-              link: '/concepts/what_is_bondy' ,
+              link: '/concepts/what_is_bondy',
               isFeature: true,
               description: "A high-level description of Bondy, its key features and the key benefits it delivers."
             },

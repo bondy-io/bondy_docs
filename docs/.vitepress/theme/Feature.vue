@@ -5,6 +5,7 @@ defineProps<{
   type?: string
   text: string
   link: string
+  linkText?: string
   description: string
 }>()
 </script>
@@ -15,8 +16,8 @@ defineProps<{
     <div v-if="icon" class="icon">{{ icon }}</div>
     <span v-if="type" class="type">{{ type }}</span>
     <h3 class="title">{{ text }}</h3>
-
     <p class="details">{{ description }}</p>
+    <p v-if="linkText" class="link-text">{{ linkText }}&nbsp;&rarr;</p>
   </article>
   </a>
 </template>
@@ -72,5 +73,9 @@ article:hover {
   font-size: 14px;
   font-weight: 500;
   color: var(--vp-c-text-2);
+}
+
+.link-text{
+  font-size: 14px;
 }
 </style>

@@ -16,6 +16,7 @@
     "docs:serve": "vitepress serve docs"
   },
   "dependencies": {
+    "@sindresorhus/slugify": "^2.1.1",
     "markdown-it-container": "^3.0.0",
     "markdown-it-custom-block": "^0.1.2",
     "markdown-it-footnote": "^3.0.2",

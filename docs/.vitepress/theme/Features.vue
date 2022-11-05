@@ -6,6 +6,7 @@ export interface Feature {
   icon?: string
   type?: string
   link: string
+  linkText?: string
   text: string
   description: string
 }
@@ -43,6 +44,7 @@ const grid = computed(() => {
             :icon="feature.icon"
             :type="feature.type"
             :link="feature.link"
+            :linkText="feature.linkText"
             :text="feature.text"
             :description="feature.description"
           />
