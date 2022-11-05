@@ -1,104 +1,32 @@
+---
+draft: true
+features:
+  - text: Install from Source
+    link: '#install-from-source'
+    description: Build and install Bondy from source.
+  - text: Install using Docker
+    link: '#install-using-docker'
+    description: Use the official docker image
+  - text: Install using Kubernetes
+    link: '#install-using-kubernetes'
+    description: See a starter manifest recipe and taylor it based on your needs.
+
+---
+
 # Get Bondy
 >There are several ways to get Bondy up and running. The fastest one is using the official Docker images,  but you can also compile Bondy from source depending on your deployment scenarios and needs.{.definition}
 
-## Overview
+## Installation options
+Choose what is the best installation option for you.
 
-Regardless of the installation method, Bondy exposes the following ports by default:
-
-|Listener|Port|
-|:---|---|
-|WAMP WS|`18080`|
-|WAMP WSS|`18083`|
-|WAMP RAW SOCKET TCP|`18082`|
-|WAMP RAW SOCKET TLS|`18085`|
-|API GATEWAY HTTP|`18080`|
-|API GATEWAY HTTPS|`18083`|
-|ADMIN API HTTP|`18081`|
-|ADMIN API HTTPS|`18084`|
-|CLUSTER PEER SERVICE|`18086`|
-
-If you want to change those port numbers checkout the [Configuration Reference](/reference/configuration/index).
-
-::: warning Notice
-The Websocket (WS) listeners at the moment are the same used for HTTP traffic. This will change in future versions.
-:::
-
-## Installation
-
-:::::: columns 1
-::: column 1
-### Installing using Docker
-
-:::
-::: column 2
-### Installing from Source
-:::
-::::::
-
-:::::: columns 1
-:::: column 1
-::: big-button https://hub.docker.com/r/leapsight/bondy
-Get Docker Image
-::::
-
-:::: column 2
-::: big-button https://github.com/Leapsight/bondy/tree/develop/deployment
-Github Repository
-:::
-::::
-::::::
-
-## Using Docker
-
-### Prerequisites
-* Docker
-
-### Steps
-You can install and run Bondy by using Docker images from the official [Docker Hub](https://hub.docker.com/r/leapsight/bondy) repository.
-
-::: info Docker Image Sources
-The official image source files are available on the Bondy [source code repository](https://github.com/Leapsight/bondy/tree/develop/deployment).
-:::
-
-To run an official Bondy Docker image you will use the `docker run` command with an image name using the following syntax: `leapsight/bondy:{VERSION}[-{VARIANT}]` where:
-
-- `{VERSION}` can be `master`, `develop` or a tag like `1.0.0-beta.56`
-- `{VARIANT}` can be null or `slim` (we will provide the `alpine` variant in the future).
+<Features class="VPHomeFeatures" :features="$frontmatter.features"/>
 
 
+## Install from Source
 
-For example to run the 1.0.0-beta.56 release you would use:
+## Install using Docker
 
-```bash
-docker run \
-    -e BONDY_ERL_NODENAME=bondy1@127.0.0.1 \
-    -e BONDY_ERL_DISTRIBUTED_COOKIE=bondy \
-    -p 18080:18080 \
-    -p 18081:18081 \
-    -p 18082:18082 \
-    -p 18086:18086 \
-    -u 0:1000 \
-    --name bondy \
-    --env-file .env \
-    -v "${PWD}/bondy/etc:/bondy/etc" \
-    -d leapsight/bondy:1.0.0-beta.64
-```
-
-
-
-To run the slim variant of the same release you would use:
-
-```bash
-docker run \
-    -p 18080:18080 \
-    -p 18081:18081 \
-    -p 18082:18082 \
-    -p 18086:18086 \
-    --name bondy \
-    -d leapsight/bondy:1.0.0-beta.56-slim
-```
-
-## Installing using Kubernetes
+## Install using Kubernetes
 
 ### Prerequisites
 * Docker
@@ -125,50 +53,25 @@ cluster.tls.enabled = off
 
 For more information about this options check the [Complete Configuration Reference]() section.
 
-## Installing from Source
 
-### Prerequisites
+## Default Port Numbers
 
-* Erlang 24 or later
-* Rebar3 3.17.0 or later
-* openssl
-* libssl
-* Libsodium
-* libsnappy
-* liblz4
+Regardless of the installation method, Bondy exposes the following ports by default:
 
-### Steps
+|Listener|Port|
+|:---|---|
+|WAMP WS|`18080`|
+|WAMP WSS|`18083`|
+|WAMP RAW SOCKET TCP|`18082`|
+|WAMP RAW SOCKET TLS|`18085`|
+|API GATEWAY HTTP|`18080`|
+|API GATEWAY HTTPS|`18083`|
+|ADMIN API HTTP|`18081`|
+|ADMIN API HTTPS|`18084`|
+|CLUSTER PEER SERVICE|`18086`|
 
-#### Building
-Clone the repository and cd to the location where you cloned it.
+If you want to change those port numbers checkout the [Configuration Reference](/reference/configuration/index).
 
-To generate a Bondy release to be used in production execute the following command which will generate a tarball containing the release at `$(PWD)/_build/prod/rel/`.
-
-```bash
-rebar3 as prod tar
-```
-
-Untar and copy the resulting tarball to the location where you want to install Bondy e.g. ~/tmp/bondy.
-
-```bash
-tar -zxvf _build/prod/rel/bondy-1.0.0-beta.28.tar.qz -C ~/tmp/bondy
-```
-
-#### Running
-To run Bondy, cd to the location where you installed it e.g. ~/tmp/bondy and run the following command which will print all the options.
-
-```bash
-bin/bondy
-```
-
-For example, to run Bondy with output to stdout do
-
-```bash
-bin/bondy foreground
-```
-
-And to run Bondy with an interactive Erlang shell do
-
-```bash
-bin/bondy console
-```
+::: warning Notice
+The Websocket (WS) listeners at the moment are the same used for HTTP traffic. This will change in future versions.
+:::
