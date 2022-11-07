@@ -657,3 +657,9 @@ table.property-table > tbody > tr > td {
 .VPNavBarAppearance{
     visibility: hidden;
 }
+
+/*Definition lists*/
+
+dt {
+    font-weight: bold;
+}

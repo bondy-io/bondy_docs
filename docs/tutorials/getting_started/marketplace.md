@@ -1,26 +1,51 @@
 # Marketplace
-In this tutorial we will show how to write some Python and Javascript code to connect to Bondy and have micro-services communicating through PubSub and RPC calls.
+Learn how to write a simple marketplace with Python microservices and a VueJS web application.
 
-This will demonstrate how quick and easy it is to setup an application network with Bondy.
 
 ## Goal
+To demonstrate how quick and easy it is to setup an application network with Bondy allowing a set of microservices and a single-page web application to  communicate using RPC and Publish/Subscribe.
+
+## Background
 
 Say you want to build a marketplace where people can buy and sell items.
 
-### Sellers
 
-A seller sells an item at a given starting price for a given period of time.
-I.e. People can bid on the item until it times out.
+## Domain
+The domain consists of the following four entities.
 
-There are 2 possible outcome once the end of the sell period is reached:
-* There was no bids, the item just expired. No deal.
-* There was at least on bid higher than the initial price. The higher bidder wins. We have a deal.
+Marketplace
+:   the place where sellers and buyers congregate to exchange goods.
 
-### Buyers
 
-A buyer tries to buy an item by bidding until the sell period expires.
-Only bids higher than the current highest price are accepted.
-Once the item has timed out, i.e. the sell period has ended, the deal is settled and the current highest bidder wins.
+Seller
+
+:   A seller sells an item at a given starting price for a given period of time
+i.e. people can bid on the item until it times out.
+
+    There are 2 possible outcomes once the end of the sell period is reached:
+    * There were no bids, the item just expired. No deal happened.
+    * There was at least one bid higher than the initial price. The higher bidder wins. We have a deal.
+
+Bid
+:   an offer (a certain price) for an item listed on the marketplace. Only bids higher than the current highest price are accepted.
+
+Buyer
+
+:   A buyer tries to buy an item by bidding until the sell period expires.
+
+## Design
+The design of the example application is depicted in the following diagram.
+
+<ZoomImg src="marketplace.png"/>
+
+The application consists of the following actors.
+
+
+1. **Market** - A microservice implementing a simple marketplace
+2. **Bot** - A microservice that allows the creation of named bots (via its CLI). Bots will automatically bid for items.
+3. **Web App** - A single page application written written in Typescript using VueJS and Autobahn JS (Browser).
+4. **CLI** - A command line interface written in Python and using Autobahn Python WAMP client.
+5. **User** - A human using either the CLI or the Web App.
 
 ### Bots
 
@@ -185,4 +210,4 @@ For instance when the bot Alice joins the marketplace, it calls:
 
 ## For more...
 
-The snippets here were simplified to keep the tutorial simple but for the full picture and more detail, please have a look at the code at the [GitHub `bondy-demo-marketplace` repo](https://github.com/bondy-io/bondy-demo-marketplace). 
+The snippets here were simplified to keep the tutorial simple but for the full picture and more detail, please have a look at the code at the [GitHub `bondy-demo-marketplace` repo](https://github.com/bondy-io/bondy-demo-marketplace).

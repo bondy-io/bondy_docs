@@ -26,6 +26,7 @@ export default {
           disable: false
         },
         config: (md) => {
+          md.use(require('markdown-it-deflist'))
           md.use(require('markdown-it-footnote'))
           md.use(require('markdown-it-task-lists'))
           md.use(require('markdown-it-katex'))
@@ -371,7 +372,18 @@ export default {
           text: 'Getting Started',
           collapsible: true,
           items: [
-            { text: 'Getting Started', link: '/tutorials/getting_started/index'}
+            {
+              text: 'Getting Started',
+              link: '/tutorials/getting_started/get_bondy',
+              isFeature:true,
+              description: 'Follow this tutorial to install Bondy.'
+            },
+            {
+              text: 'Marketplace',
+              link: '/tutorials/getting_started/marketplace',
+              isFeature:true,
+              description: 'Learn how to write a simple marketplace with Python microservices and a VueJS web application.'
+            }
           ]
         },
         {
