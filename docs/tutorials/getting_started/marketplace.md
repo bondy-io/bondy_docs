@@ -36,7 +36,7 @@ Buyer
 ## Design
 The design of the example application is depicted in the following diagram.
 
-<ZoomImg src="marketplace.png"/>
+<ZoomImg src="./marketplace.png"/>
 
 The application consists of the following actors.
 
