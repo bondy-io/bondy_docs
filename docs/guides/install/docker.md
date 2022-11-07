@@ -1,12 +1,19 @@
 # Install using Docker
 > This guide provides steps to install and configure Bondy on Docker using the official Docker images.{.definition}
 
+::: tip Using your own image instead
+
+If you want to build and use your own Docker image, make sure you check the official images sources first as you might want to use them as your template.
+
+These are located at the Bondy's Github repository under the ["deployment" directory](https://github.com/Leapsight/bondy/tree/develop/deployment).
+:::
+
 ## Prerequisites
 * A Docker-enabled system with proper Docker access
 
 ## Steps
 
-### Setup directory
+### 1. Setup directory
 
 Bondy needs access to a configuration file and the ability to store its embeded database. Choose a directory (or create one) e.g. `bondy-docker`.
 
@@ -22,7 +29,7 @@ mkdir etc
 cd etc
 ```
 
-### Prepare a `security.config.json` file
+### 2. Prepare a `security.config.json` file
 
 Using your prefered text editor, create a file named `security.config.json` (
 This file can have any other name you like but make sure to use the same name in the following step.).
@@ -109,7 +116,7 @@ This snippet allows any user (from any network) to authenticate to Bondy using `
 For production use make sure you understand Bondy's Security system and configure it accordingly.
 :::
 
-## Prepare the `bondy.conf` file
+### 3. Prepare the `bondy.conf` file
 
 Again using your text editor create a file name `bondy.conf` in the `etc` directory we created in the previous steps, containing the following content:
 
@@ -117,7 +124,7 @@ Again using your text editor create a file name `bondy.conf` in the `etc` direct
 security.config_file = /bondy/etc/security_config.json
 ```
 
-### Verify your setup
+### 4. Verify your setup
 
 ```bash
 cd ~/bondy-docker
@@ -132,7 +139,7 @@ You should get the following output:
     ├── security.config.json
 ````
 
-### Run Bondy
+### 5. Run Bondy
 
 We will run an official Bondy Docker image using the `docker run` command with an image name using the following syntax: `leapsight/bondy:{VERSION}[-{VARIANT}]` where:
 
@@ -176,14 +183,4 @@ docker run \
 :::
 ::::
 
-
-
-
-
-
-## Using your own Dockerfile
-
-If you want to use build and use your own image, make sure you check the official image source files first as you might want to use them as your template.
-
-These are located at the Bondy's Github repository under the ["deployment" directory](https://github.com/Leapsight/bondy/tree/develop/deployment).
 

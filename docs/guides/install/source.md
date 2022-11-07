@@ -1,16 +1,20 @@
+---
+autonumber: true
+---
 # Install from Source
 > This guide will show you how to install Bondy from its source.{.definition}
 
 ::: tip
-If this is your first time trying Bondy, you might prefer to start with one of our [tutorial examples](/tutorials/getting_started/index).
+If this is your first time trying Bondy, you might prefer to start with one of our [tutorial examples](/tutorials/getting_started/index). Some of them use Docker Compose so you can start reviewing Bondy without installing it locally.
 :::
 
 
 ## Prerequisites
 
-* macOS or Linux
-* Erlang 24 or later
-* Rebar3 3.17.0 or later
+* Hardware architectures: amd64 (x86) or arm64
+* Operating Systems: macOS or Linux
+* [Erlang](https://www.erlang.org/downloads) 24 or later
+* [Rebar3](http://www.rebar3.org/) 3.17.0 or later
 * openssl
 * libssl
 * Libsodium
@@ -19,7 +23,7 @@ If this is your first time trying Bondy, you might prefer to start with one of o
 
 ## Steps
 
-### Building
+### 1. Building
 Clone the repository and cd to the location where you cloned it.
 
 To generate a Bondy release to be used in production execute the following command which will generate a tarball containing the release at `$(PWD)/_build/prod/rel/`.
@@ -34,7 +38,7 @@ Untar and copy the resulting tarball to the location where you want to install B
 tar -zxvf _build/prod/rel/bondy-1.0.0-beta.28.tar.qz -C ~/tmp/bondy
 ```
 
-### Running
+### 2. Running
 To run Bondy, cd to the location where you installed it e.g. ~/tmp/bondy and run the following command which will print all the options.
 
 ```bash

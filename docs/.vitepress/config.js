@@ -287,6 +287,11 @@ export default {
               activeMatch: '/reference/http_api'
             },
             {
+              text: 'WAMP Client Libraries',
+              link: '/reference/wamp_clients/index',
+              activeMatch: '/reference/wamp_clients'
+            },
+            {
               text: 'Glossary',
               link: '/reference/glossary',
               activeMatch: '/reference/glossary'
@@ -408,7 +413,7 @@ export default {
             },
             {
               text: 'Install using Kubernetes',
-              link: '/guides/install/Kubernetes' ,
+              link: '/guides/install/kubernetes' ,
               description: 'See a starter manifest recipe and taylor it based on your needs.',
               isFeature: true
             },

@@ -35,3 +35,23 @@ const image = "/assets/logo.png"
 
   </Layout>
 </template>
+
+<style>
+/*main    { counter-reset: h2counter; }
+main h2[data-autonumber] { counter-reset: h3counter; }
+main h3[data-autonumber] { counter-reset: h4counter; }
+
+main h2[data-autonumber]::before {
+    counter-increment: h2counter;
+    content: counter(h2counter) ".";
+}
+main h3[data-autonumber]::before {
+    counter-increment: h3counter;
+    content: counter(h2counter) "." counter(h3counter) ".";
+}
+main h4[data-autonumber]::before {
+    counter-increment: h4counter;
+    content: counter(h2counter) "." counter(h3counter) "." counter(h4counter) ".";
+}*/
+
+</style>
