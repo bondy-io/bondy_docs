@@ -1,5 +1,5 @@
 # bondy.error.unknown_group
-> When the group that you're trying to retrieve doesn't exist.
+When the group that you're trying to retrieve doesn't exist.
 
 ## Description
 Normally this is caused by an operation trying to retrieve a group that not exist.

@@ -5,6 +5,7 @@ import { computed } from 'vue'
 import { useData } from 'vitepress'
 const { theme } = useData()
 const image = "/assets/logo.png"
+import slugify from '@sindresorhus/slugify'
 </script>
 
 <template>
@@ -35,4 +36,13 @@ const image = "/assets/logo.png"
 
   </Layout>
 </template>
+
+<style>
+/* First paragraph after H1 */
+
+main > div > div > p:first-of-type {
+  line-height: 1.651rem;
+  font-size:1.23529rem !important;
+}
+</style>
 

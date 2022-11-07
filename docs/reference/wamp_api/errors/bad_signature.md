@@ -1,5 +1,5 @@
 # bondy.error.bad_signature
-> When the password that you're trying to change doesn't match.
+When the password that you're trying to change doesn't match.
 
 ## Description
 Normally this is caused by an operation trying to change the user's password.

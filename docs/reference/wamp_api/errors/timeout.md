@@ -1,5 +1,4 @@
 # bondy.error.timeout
->
 
 ## Description
 

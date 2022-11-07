@@ -1,4 +1,6 @@
+# Marketplace
 In this tutorial we will show how to write some Python and Javascript code to connect to Bondy and have micro-services communicating through PubSub and RPC calls.
+
 This will demonstrate how quick and easy it is to setup an application network with Bondy.
 
 ## Goal

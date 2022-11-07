@@ -32,7 +32,11 @@
     --vp-button-sponsor-active-bg;*/
 }
 
-  }
+body {
+    font-size: 17px;
+    letter-spacing: -0.374px;
+    line-height: 25.000032px;
+}
 
 
 .dark {
@@ -110,10 +114,12 @@ h5 {
   font-size:0.9rem !important;
 }
 
-.definition > p {
+
+.definition {
   /* color: #000000 !important; */
   /* font-style: italic; */
-  font-size:1.2rem !important;
+  line-height: 20px;
+  font-size:1.3rem !important;
 }
 
 table.property-table > thead > tr > th {

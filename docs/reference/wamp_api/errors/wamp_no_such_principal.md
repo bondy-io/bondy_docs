@@ -1,5 +1,5 @@
 # wamp.error.no_such_principal
-> When the given authid does not exist.
+When the given authid does not exist.
 
 ## Description
 The request failed because the authid provided does not exist.

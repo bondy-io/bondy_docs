@@ -2,7 +2,7 @@
 draft: true
 ---
 # What is WAMP
-> Web Application Messaging Protocol (WAMP) is an open standard protocol for (soft) real-time message exchange that provides two application messaging patterns in one unified protocol: Remote Procedure Calls and Publish/Subscribe.{.definition}
+Web Application Messaging Protocol (WAMP) is an open standard protocol for (soft) real-time message exchange that provides two application messaging patterns in one unified protocol: Remote Procedure Calls and Publish/Subscribe.
 
 ## Introduction
 

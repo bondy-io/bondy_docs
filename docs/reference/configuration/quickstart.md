@@ -1,5 +1,5 @@
 # Quickstart Configuration
-> The minimal configuration you must do for a quick start.{.definition}
+The minimal configuration you must do for a quick start.
 
 <tabs cache-lifetime="1000" class="code">
 <tab name="bondy.conf">

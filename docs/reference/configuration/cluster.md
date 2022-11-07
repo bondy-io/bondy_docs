@@ -1,5 +1,5 @@
 # Cluster Configuration Reference
-> Bondy configuration options controlling the cluster.{.definition}
+Bondy configuration options controlling the cluster.
 
 
 ## Listener options

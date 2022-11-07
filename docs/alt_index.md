@@ -16,4 +16,4 @@ features:
 ---
 
 # Bondy
-> Bondy is an open source application networking platform that connects all elements of a distributed application, from web and mobile apps to IoT devices and backend services, allowing everything to talk using one single, simple protocol.{.definition}
+Bondy is an open source application networking platform that connects all elements of a distributed application, from web and mobile apps to IoT devices and backend services, allowing everything to talk using one single, simple protocol.

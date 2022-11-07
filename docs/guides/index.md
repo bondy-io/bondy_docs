@@ -19,7 +19,7 @@ const { theme } = useData()
 </script>
 
 # How-to Guides
->Learn how to perform common tasks and operations.{.definition}
+Learn how to perform common tasks and operations.
 
 <div v-for="section in theme.sidebar['/guides/']">
     <h2 v-bind:id="slugify(section.text)" tab-index="-1" v-if="section.items.filter(function(item){return item.isFeature}).length > 0">

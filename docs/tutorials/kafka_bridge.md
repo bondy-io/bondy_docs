@@ -1,6 +1,5 @@
-
-
 # Kafka Bridge Tutorial
+Learn how to configure the Kafka Bridge to re-publish WAMP events to a Kafka topic.
 
 To enable the Kafka Bridge modify the `broker_bridge.kafka.enabled` option in the `bondy.conf` file as shown below:
 

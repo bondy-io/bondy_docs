@@ -1,5 +1,5 @@
 # Network Listeners Configuration Reference
-> Configure the network listeners for the different protocols and gateways.{.definition}
+Configure the network listeners for the different protocols and gateways.
 
 ## Admin API HTTP Listener
 

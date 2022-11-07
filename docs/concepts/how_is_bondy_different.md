@@ -2,7 +2,7 @@
 draft: true
 ---
 # How is Bondy different
-> Bondy provides a unique combination of features which sets it apart from other application networking solutions (e.g. WAMP routers) in terms of scalability, reliability, high-performance, development and operational simplicity.{.definition}
+Bondy provides a unique combination of features which sets it apart from other application networking solutions (e.g. WAMP routers) in terms of scalability, reliability, high-performance, development and operational simplicity.
 
 ## Bondy vs. other WAMP routers
 

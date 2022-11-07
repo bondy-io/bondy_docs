@@ -2,4 +2,3 @@
 draft: true
 ---
 # Grant
-> {.definition}

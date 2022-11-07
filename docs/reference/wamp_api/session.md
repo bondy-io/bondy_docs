@@ -2,7 +2,7 @@
 draft: true
 ---
 # Session
-> A Session is an authenticated two-way link between a client and the Router, enabling real-time, interactive communication between the client and other peers (incl. the Router itself) over a single [Realm](/reference/wamp_api/realm).{.definition}
+A Session is an authenticated two-way link between a client and the Router, enabling real-time, interactive communication between the client and other peers (incl. the Router itself) over a single [Realm](/reference/wamp_api/realm).
 
 Key characteristics:
 

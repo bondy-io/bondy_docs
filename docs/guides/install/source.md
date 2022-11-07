@@ -2,7 +2,7 @@
 autonumber: true
 ---
 # Install from Source
-> This guide will show you how to install Bondy from its source.{.definition}
+This guide will show you how to install Bondy from its source.
 
 ::: tip
 If this is your first time trying Bondy, you might prefer to start with one of our [tutorial examples](/tutorials/getting_started/index). Some of them use Docker Compose so you can start reviewing Bondy without installing it locally.

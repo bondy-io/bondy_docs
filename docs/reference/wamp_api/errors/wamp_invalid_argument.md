@@ -1,5 +1,5 @@
 # wamp.error.invalid_argument
-> When the given argument type or value is invalid.
+When the given argument type or value is invalid.
 
 ## Description
 Normally this is caused when the given argument types or values are not acceptable to the called procedure.

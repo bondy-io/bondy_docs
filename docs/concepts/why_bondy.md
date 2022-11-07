@@ -2,8 +2,8 @@
 draft: true
 ---
 # Why Bondy
-> Learn why we created Bondy to reduce accidental complexity and bring back the joy to distributed systems programming.
-{.definition}
+Learn why we created Bondy to reduce accidental complexity and bring back the joy to distributed systems programming.
+
 
 
 

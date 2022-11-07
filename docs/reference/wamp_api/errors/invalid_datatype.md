@@ -1,5 +1,5 @@
 # bondy.error.invalid_datatype
-> When the data value is invalid according to the data type definition.
+When the data value is invalid according to the data type definition.
 
 ## Description
 Normally this is caused when there are request or input data validation failures.

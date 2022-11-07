@@ -1,5 +1,5 @@
 # bondy.error.already_exists
-> When the resource that you're trying to create already exists.
+When the resource that you're trying to create already exists.
 
 ## Description
 Normally this is caused by an operation trying to create a resource with an identifier that is already in use.

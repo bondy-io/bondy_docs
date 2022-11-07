@@ -1,6 +1,6 @@
 
 # Node Configuration Reference
-> Configure the nodename, platform paths and Erlang VM parameters.{.definition}
+Configure the nodename, platform paths and Erlang VM parameters.
 
 
 ## Node Identity

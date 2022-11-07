@@ -1,5 +1,5 @@
 # Same Sign-on
->Bondy SSO (Same Sign-on) is a feature that allows users to authenticate into multiple realms using just one set of credentials.{.definition}
+Bondy SSO (Same Sign-on) is a feature that allows users to authenticate into multiple realms using just one set of credentials.
 
 ## Background
 A realm can be seen as a self-contained Identity Provider and Authorization Service: all users, groups and permissions for a realm are managed by the realm itself in a (virtual) private database.

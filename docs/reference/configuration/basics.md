@@ -1,5 +1,5 @@
 # Configuration Basics
-> Learn about the Bondy runtime configuration, the Bondy configuration file, its syntax, variable replacement and the required OS-specific configuration.{.definition}
+Learn about the Bondy runtime configuration, the Bondy configuration file, its syntax, variable replacement and the required OS-specific configuration.
 
 The complete behaviour of Bondy is defined by the combination of 3 types of "configuration" data:
 

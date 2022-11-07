@@ -1,5 +1,5 @@
 # Install using Docker
-> This guide provides steps to install and configure Bondy on Docker using the official Docker images.{.definition}
+This guide provides steps to install and configure Bondy on Docker using the official Docker images.
 
 ::: tip Using your own image instead
 

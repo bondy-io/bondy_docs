@@ -1,5 +1,5 @@
 # Active Anti-entropy Configuration Reference
-> Periodically, each Bondy node will choose a random cluster peer and perform an exchange comparing their replicated data, synchronising any missing data and/or repairing conflicting data. This is done efficiently by using Merkle trees (a.k.a hashtrees) that are stored on disk.{.definition}
+Periodically, each Bondy node will choose a random cluster peer and perform an exchange comparing their replicated data, synchronising any missing data and/or repairing conflicting data. This is done efficiently by using Merkle trees (a.k.a hashtrees) that are stored on disk.
 
 
 @[config](aae.enabled,on|off,on,v0.8.8)

@@ -3,7 +3,7 @@ draft: true
 ---
 
 # Tutorials
-> A hands-on introduction to Bondy for developers and devops engineers through a series of tutorials.{.definition}
+A hands-on introduction to Bondy for developers and devops engineers through a series of tutorials.
 
 
 ## Getting Started

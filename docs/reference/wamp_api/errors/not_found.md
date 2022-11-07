@@ -1,5 +1,5 @@
 # bondy.error.not_found
-> When the resource that you're trying to retrieve doesn't exist.
+When the resource that you're trying to retrieve doesn't exist.
 
 ## Description
 Normally this is caused by an operation trying to retrieve a resource that not exist.

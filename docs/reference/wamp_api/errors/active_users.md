@@ -1,5 +1,5 @@
 # bondy.error.active_users
-> When there are associated users to the resource.
+When there are associated users to the resource.
 
 ## Description
 For example this is caused when there are related users to the realm you atrying to delete.

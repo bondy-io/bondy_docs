@@ -1,5 +1,5 @@
 # Startup/Shutdown Configuration Reference
-> Configure options controlling serveral aspects of what happens during startup and shutdown.{.definition}
+Configure options controlling serveral aspects of what happens during startup and shutdown.
 
 ## Startup
 

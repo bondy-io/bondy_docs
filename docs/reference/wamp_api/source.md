@@ -1,5 +1,5 @@
 # Source
-> Source is an access control rule used to restrict access based for a user based on the combination of the incoming IP address (CIDR masks) and the authentication method being used.{.definition}
+Source is an access control rule used to restrict access based for a user based on the combination of the incoming IP address (CIDR masks) and the authentication method being used.
 
 ## Description
 While user management enables you to control authorization with regard to users, security sources provide you with an interface for managing means of authentication. If you create users and grant them access to some or all of Bondy's functionality, you will then need to define security sources required for authentication.

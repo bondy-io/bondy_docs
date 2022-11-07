@@ -14,7 +14,7 @@ features:
 ---
 
 # Get Bondy
->There are several ways to get Bondy up and running. The fastest one is using the official Docker images,  but you can also compile Bondy from source depending on your deployment scenarios and needs.{.definition}
+There are several ways to get Bondy up and running. The fastest one is using the official Docker images,  but you can also compile Bondy from source depending on your deployment scenarios and needs.
 
 ## Installation options
 Choose what is the best installation option for you.

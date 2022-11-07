@@ -2,7 +2,7 @@
 draft: true
 ---
 # Errors
-> The catalogue of all error URIs used by Bondy and WAMP.
+The catalogue of all error URIs used by Bondy and WAMP.
 
 ## Bondy Error URIs
 

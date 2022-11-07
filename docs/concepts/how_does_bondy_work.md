@@ -1,5 +1,5 @@
 # How does Bondy work
-> Bondy enables data to be routed between Internet-connected devices such as browsers, phones, servers and IoT (Internet of Things) devices realtime.{.definition}
+Bondy enables data to be routed between Internet-connected devices such as browsers, phones, servers and IoT (Internet of Things) devices realtime.
 
 
 ## Router

@@ -1,5 +1,5 @@
 # bondy.error.no_such_groups
-> When the groups value is invalid.
+When the groups value is invalid.
 
 ## Description
 Normally this is caused when there are request or input data validation failures.

@@ -2,7 +2,7 @@
 draft: true
 ---
 # Getting Started with WAMP
-> WAMP is a routed protocol for distributed applications with all application components connecting to a WAMP Router, where the WAMP Router performs message routing between them. WAMP provides two communication patterns: Publish-Subscribe and Routed Remote Procedure Calls. {.definition}
+WAMP is a routed protocol for distributed applications with all application components connecting to a WAMP Router, where the WAMP Router performs message routing between them. WAMP provides two communication patterns: Publish-Subscribe and Routed Remote Procedure Calls.
 
 
 ## Establishing a Session

@@ -1,5 +1,5 @@
 # bondy.error.no_such_users
-> When the usernames value is invalid.
+When the usernames value is invalid.
 
 ## Description
 Normally this is caused when there are request or input data validation failures.

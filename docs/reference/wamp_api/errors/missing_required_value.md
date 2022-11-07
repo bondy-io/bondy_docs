@@ -1,5 +1,5 @@
 # bondy.error.missing_required_value
-> When the required data is not provided.
+When the required data is not provided.
 
 ## Description
 Normally this is caused when there are request or input data without required values.

@@ -1,5 +1,5 @@
 # bondy.error.invalid_value
-> When the data value is invalid.
+When the data value is invalid.
 
 ## Description
 Normally this is caused when there are request or input data validation failures.
