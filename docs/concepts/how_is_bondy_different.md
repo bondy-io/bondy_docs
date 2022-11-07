@@ -54,9 +54,6 @@ Bondy embeds a Broker Bridge that can manage a set of internal WAMP subscribers 
 
 In this comparison, we will be featuring NATS, Apache Kafka, RabbitMQ, Apache Pulsar, and gRPC.
 
-::: info Atribution
-This document is based on the article [Compare NATS](https://docs.nats.io/compare-nats).
-:::
 
 ## Bondy vs. other messaging technologies
 
@@ -64,7 +61,7 @@ This section presents a summary of how Bondy compares with popular messaging tec
 
 
 
-::: info Notice
+::: info Atribution
 In this comparison, we will be featuring NATS, Apache Kafka, RabbitMQ, Apache Pulsar, and gRPC. The content is based on the article [Compare NATS](https://docs.nats.io/compare-nats).
 :::
 
