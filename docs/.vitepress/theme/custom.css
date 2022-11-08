@@ -40,6 +40,10 @@ body {
     line-height: 25.000032px;
 }
 
+pre > code {
+    padding-left: 12px !important;
+}
+
 
 .dark {
   --vp-c-brand: #FFFFFF;
@@ -47,7 +51,6 @@ body {
   --vp-button-alt-bg: hwb(0 89% 11%);
   --vp-c-text-1: var(--vp-c-text-dark-1);
 }
-
 
 
 h4 {
