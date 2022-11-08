@@ -42,22 +42,7 @@ The diagram shows the following components:
 Market
 : A Python microservice implementing a simple marketplace.
 
-    Uses [AutobhanPython](https://github.com/crossbario/autobahn-python), WAMP client to open a session to Bondy and registers the following WAMP procedure URIs (RPCs) on the `com.example.demo` realm:
-
-    * `com.market.bidder.add` - Add a user as bidder
-    * `com.market.bidder.gone` - Remove a user as bidder
-    * `com.market.get` - List all the items for sale
-    * `com.market.item.bid` - Place a bid on a listed item
-    * `com.market.item.get` - Return an item's details
-    * `com.market.item.sell` -  List a new item for sale.
-
-    The market publishes the following WAMP topics (Publish/Subscribe) -
-
-    * `com.market.item.added` - When a new item is on offer.
-    * `com.market.item.expired` - When an item times out without any bids.
-    * `com.market.item.new_price` - When a bid was accepted.
-    * `com.market.item.sold` - When an item times out with a winner.
-    * `com.market.opened` - When market is connected and has registered the RPC URIs, it publishes this topic to let the listeners it is ready to accept calls.
+    Uses [AutobhanPython](https://github.com/crossbario/autobahn-python), WAMP client to open a session  on `com.example.demo` realm in Bondy and registers the WAMP procedures URIs (RPCs) the Web App and Bot instances will use to sell and buy goods.
 
 Bot
 : A Python microservice that creates named bots (via its CLI). Once a bot is created it will automatically bid for items.
@@ -148,33 +133,38 @@ The screen capture shows the market docker instance log window below the web app
 Using the Web App again, click on the `SELL ITEM` button to sell an item.
 
 Enter the following information (as shown in the screen capture below):
-* the name of the item,
-* the initial price,
-* the number of minutes before the deal closes.
+* the name of the item e.g. Apple,
+* the initial price e.g. 0.5,
+* the number of minutes before the deal closes e.g. 2
 
-Once you click on `Save`, you'll see the bots starting competing, unless your initial price is too high, i.e. more than $10,000.
 
-Notice that once we enter the item the app receives a notification (Publish/Subscribe event) shown in the green banner below.
+In the following example we add an item called `apple`. You can repeat this operation multiple times to add several items.
 
 <ZoomImg src="/assets/tutorials/marketplace/sell_item.gif"/>
 
+Notice that once we enter the item the app receives a notification (Publish/Subscribe event) shown in the green banner below.
+
+Once you click on `Save`, you'll see the bots starting to compete for the item, placing bids, unless your initial price is too high, i.e. more than $10,000.
+
+You should see something similar to the capture below:
+
+<ZoomImg src="/assets/tutorials/marketplace/sell_item.gif"/>
 
 ## Under the hood
 
 Now let see how this was done and what is happening.
 
-### The marketplace
-
-For this to work, the marketplace (once connected to Bondy) registers a bunch of RPCs, listens to topics and publishes events.
-
-#### WAMP client
-
-In python, this is done based on a WAMP client (`autobahn-py`) that will handle the WAMP protocol and let us focus on the business logic.
+### Market
 
 #### Connection to Bondy
 
 The connection to bondy is performed through a component that requires a fairly light configuration.
 
+This component uses [AutobhanPython](https://github.com/crossbario/autobahn-python), the WAMP client.
+
+The client will handle the WAMP protocol interactions and let us focus on the business logic.
+
+[See Demo Source Code](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/market.py#L25-L29)
 ``` python
 class Market:
   def __init__(self):
@@ -204,67 +194,101 @@ In line 3 we call a util function that returns the following dictionary:
 }
 ```
 
-This tells Autobhan to open a websocket session with Bondy attached to the `com.market.demo` realm. The realm would have been already configured in Bondy by the Make target responsible to running the Bondy docker instance.
+This tells Autobhan to open a websocket session with Bondy attached to the `com.market.demo` realm and using WAMP Cryptosign authentication.
 
-For the marketplace, a WAMP Cryptosign authentication is performed on the `com.market.demo` realm.
-The component configuration will result in the following dictionary:
+::: info Note
+The `com.market.demo` realm is configured by the Make target responsible to running the Bondy docker instance.
+:::
 
 
-#### Registration
 
-Once connected, the `_on_join` method is called with the opened session.
-The marketplace registers 6 RPCs under the following URIs:
-* `com.market.bidder.add`: When a new bigger joins, it has to give a name to be able to bid.
-* `com.market.bidder.gone`: When a client gently leave the marketplace, i.e. no errors or interruptions.
-* `com.market.get`: To get all the listed items.
-* `com.market.item.bid`: To bid on a listed item.
-* `com.market.item.get`: To get the details of a specific item.
-* `com.market.item.sell` To put a new item on sale on the marketplace.
+#### RPC Registration
 
-A registration is performed by simply calling the `register` method on the session giving the callback function and the URI.
-For instance:
+Once connected, the `_on_join` method is called with the established session.
+
+The market registers 6 RPCs under the following URIs:
+
+Once it has established a session to Bondy the `com.example.demo` realm,  registers the following RPCs.
+
+* `com.market.bidder.add` - Add a user as bidder
+* `com.market.bidder.gone` - Remove a user as bidder
+* `com.market.get` - List all the items for sale
+* `com.market.item.bid` - Place a bid on a listed item
+* `com.market.item.get` - Return an item's details
+* `com.market.item.sell` -  List a new item for sale.
+
+A registration is performed by simply calling the `register` method on the session object giving the callback function and the procedure URI.
+
+For example:
+
+[See Demo Source Code](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/market.py#L40-L51)
+
 ``` python
-    def _on_join(self, session, details):
-
-        session.register(self._get_items, "com.market.get")
+def _on_join(self, session, details):
+  session.register(self._get_items, "com.market.get")
+  ...
 ```
 
-#### Publication
+#### Publications
 
-Once the marketplace is connected and ready to accept items and bids, it has to notify all the micro-services connected to the same realm.
-This is performed by simply publishing on the `com.market.opened` topic, i.e. calling `publish` on the session.
-No arguments are needed here since it is a basic event, but some can be provided in a more general case.
+Once the marketplace is connected and ready to accept items and bids, it has to notify all the other components connected to the same realm about certain events.
+
+The market will publishe events under the following WAMP topics (Publish/Subscribe):
+
+* `com.market.opened` - When market is connected and has registered the RPC URIs, it publishes this topic to let the listeners it is ready to accept calls.
+* `com.market.item.added` - When a new item is on offer.
+* `com.market.item.expired` - When an item times out without any bids.
+* `com.market.item.new_price` - When a bid was accepted.
+* `com.market.item.sold` - When an item times out with a winner.
+
+This is performed by calling the session's object `publish` method.
+
+In the following example no arguments are needed since the event has no payload, but some can be provided in a more general case.
+
+[See Demo Source Code](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/market.py#L40-L51)
+
 ``` python
-    session.publish("com.market.opened")
+def _on_join(self, session, details):
+    ...
+    # MARKET_OPENED resolves to "com.market.opened"
+    session.publish(MARKET_OPENED)
 ```
+
+
 
 ### Bots
 
-Similarly the bots connect to Bondy with their own private key.
-However upon successful connections, the bots will only subscribe to the `com.market.opened` topic and wait until the marketplace is open before trying to bid on items.
-The subscription is simply done by calling `subscribe` on the session:
-``` python
-    def _on_join(self, session, details):
+Similarly the bots connect to Bondy with their own private crytpsign key.
+However, upon successful connections, the bots will only subscribe to the `com.market.opened` topic and wait until the marketplace is open before trying to bid on items.
 
-        session.subscribe(self._on_market_opening, "com.market.opened")
+The subscription is simply done by calling `subscribe` on the session:
+
+[See Demo Source Code](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/bot.py#L48-L57)
+``` python
+def _on_join(self, session, details):
+    session.subscribe(self._on_market_opening, "com.market.opened")
 ```
 
 Once the marketplace is open, the bots do many things, the most important ones being:
-* join the marketplace by identifying themselves.
-* query the marketplace for all currently available items.
+* Join the marketplace by identifying themselves.
+    * Making a call to `com.market.bidder.add`
+* Query the marketplace for all currently available items
+    * Making a call to `com.market.get`
+    * Making a call to `com.market.item.get`
 * bid on any item that are under $10,000.
-* subscribe to `com.market.item.added` to be notified every time a new item is on sale.
-* subscribe to `com.market.item.new_price` to be notified every time there is a new big on an item.
+    * Making a call to `com.market.item.bid`
+* Subscribe to `com.market.item.added` to be notified every time a new item is on sale.
+* Subscribe to `com.market.item.new_price` to be notified every time there is a new big on an item.
 
-For the first 3 actions, the bots need to call registered RPCs.
-This is done by calling the `call` method on the session.
+Making an RPC call is done by calling the `call` method on the session object.
+
 For instance when the bot Alice joins the marketplace, it calls:
 ``` python
-    await session.call("com.market.bidder.add", "Alice")
+await session.call("com.market.bidder.add", "Alice")
 ```
 
 ::: info Note
-This is an asynchronous because the bot has to know if the call was successful and it was accepted in the marketplace. Similarly, bidders have to wait for the bid to return to know if it was accepted or rejected.
+This is an asynchronous call because the bot has to know if the call was successful and it was accepted in the marketplace. Similarly, bidders have to wait for the bid to return to know if it was accepted or rejected.
 :::
 
 ## For more...
