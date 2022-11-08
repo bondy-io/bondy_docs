@@ -203,7 +203,6 @@ The `com.market.demo` realm is configured by the Make target responsible to runn
 :::
 
 
-
 #### RPC Registration
 
 Once connected, the `_on_join` method is called with the established session.
@@ -257,6 +256,11 @@ def _on_join(self, session, details):
 ```
 
 
+### Web App
+
+The Web App subscribes to several topics and calls the WAMP procedures on the market to perform actions like the ones you've done already: add a new participant and sell and item.
+
+You can also bid for item using the item button at the end of the row.
 
 ### Bots
 
