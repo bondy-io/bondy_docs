@@ -1,11 +1,26 @@
 <script setup>
 import DefaultTheme from 'vitepress/theme'
-const { Layout } = DefaultTheme
 import { computed } from 'vue'
 import { useData } from 'vitepress'
+import { useRouter } from 'vitepress';
+import slugify from '@sindresorhus/slugify'
+import { watch } from "vue"
+
+const { Layout } = DefaultTheme
+
 const { theme } = useData()
 const image = "/assets/logo.png"
-import slugify from '@sindresorhus/slugify'
+
+// For analytics
+const router = useRouter()
+
+// Only run this on the client. Not during build.
+// if (typeof window !== 'undefined') {
+//   watch(() => router.route.data.relativePath, (path) => {
+//     window.mixpanel.track('pageview', {'path': path});
+//   }, { immediate: true });
+// }
+
 </script>
 
 <template>

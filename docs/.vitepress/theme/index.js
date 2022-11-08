@@ -1,18 +1,22 @@
+// Vitepress
 import DefaultTheme from 'vitepress/theme'
-import BondyLayout from './BondyLayout.vue'
 import {VPHomeHero} from 'vitepress/theme'
+
+
+// Custom Layout
+import BondyLayout from './BondyLayout.vue'
+
+// Components
 import DataTreeView from './DataTreeView.vue'
 import ZoomImg from './ZoomImg.vue'
 import Features from './Features.vue'
 import Badge from './Badge.vue'
-
 import Tabs from './Tabs.vue'
 import Tab from './Tab.vue'
 // import {Tabs, Tab} from 'vue3-tabs-component';
 
 import './custom.css'
 // import './custom_home.css'
-
 
 export default {
     ...DefaultTheme,

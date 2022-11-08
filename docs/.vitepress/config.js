@@ -380,14 +380,14 @@ export default {
               text: 'Marketplace',
               link: '/tutorials/getting_started/marketplace',
               isFeature:true,
-              description: 'Learn how to write a simple marketplace with Python microservices and a VueJS web application.'
+              description: 'A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS web application.'
             }
           ]
         },
         {
           text: 'Other Tutorials',
           items: [
-
+            { text: 'Coming soon...',}
           ]
         }
     ]
@@ -400,7 +400,7 @@ export default {
     return [
         {
           text: 'Get Bondy',
-          description: 'Bondy can be installed on many different systems. From bare metal on constraint devices and high-end servers, to virtual machines, containers and cloud native Kubernetes environments. Choose what is the best installation option for you.',
+          description: 'Bondy can be deployed anywhere from resource-constrained AMD64/ARM64 edge devices to private, hybrid and public clouds running bare metal, virtual machines and containers. Choose the option best suited to your needs.',
           collapsible: true,
           items: [
             {
@@ -611,7 +611,7 @@ export default {
             },
             {
               text: 'Connections and Sessions',
-              link: '/concepts/wamp/pubsub',
+              link: '/concepts/wamp/sessions',
               isFeature: true
             },
             {
