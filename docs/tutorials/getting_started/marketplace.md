@@ -1,5 +1,5 @@
 # Marketplace
-A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS web application.
+A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
 
 
 ## Goal
@@ -8,98 +8,116 @@ In this tutorial we are going to build a marketplace where people can buy and se
 
 The goal is to demonstrate how quick and easy it is to setup an application network with Bondy where all components communicate using RPC and Publish/Subscribe.
 
-## Domain
 
-The domain consists of the following four entities.
+## Demo Architecture
+
+### Domain Model
+
+The demo models the following actors:
 
 Marketplace
-:   The place where sellers and buyers congregate to exchange goods.
-
+: The place where sellers and buyers congregate to exchange goods.
 
 Seller
-:   A seller sells an item at a given starting price for a given period of time,
+: A seller sells an item at a given starting price for a given period of time,
 i.e. people can bid on the item until it times out.
 
     There are 2 possible outcomes once the end of the sell period is reached:
     * There were no bids, the item just expired. No deal happened.
     * There was at least one bid higher than the initial price. The higher bidder wins. We have a deal.
 
-Bid
-:   An offer (a certain price) for an item listed on the marketplace. Only bids higher than the current highest price are accepted.
-
 Buyer
-:   A buyer tries to buy an item by bidding until the sell period ends.
+: A buyer tries to buy an item by bidding until the sell period ends.
 
-## Design
+Bid
+: An offer (a certain price) for an item listed on the marketplace. Only bids higher than the current highest price are accepted.
 
-The design of the example application is depicted in the following diagram.
+### Technical View
+The architecture design of the example application is depicted in the following diagram.
 
 <ZoomImg src="/assets/tutorials/marketplace/marketplace.png"/>
 
-The application consists of the following components:
+The diagram shows the following components:
 
-:::: tabs components
+Market
+: A Python microservice implementing a simple marketplace.
 
-::: tab Market
-A Python microservice implementing a simple marketplace.
-:::
+    Uses [AutobhanPython](https://github.com/crossbario/autobahn-python), WAMP client to open a session to Bondy and registers the following WAMP procedure URIs (RPCs) on the `com.example.demo` realm:
 
-::: tab Bot
-A Python microservice that creates named bots (via its CLI). Bots will automatically bid for items.
-:::
+    * `com.market.bidder.add` - Add a user as bidder
+    * `com.market.bidder.gone` - Remove a user as bidder
+    * `com.market.get` - List all the items for sale
+    * `com.market.item.bid` - Place a bid on a listed item
+    * `com.market.item.get` - Return an item's details
+    * `com.market.item.sell` -  List a new item for sale.
 
-::: tab Web App
-A single page application written in Javascript using VueJS and Autobahn JS (Browser).
-:::
+    The market publishes the following WAMP topics (Publish/Subscribe) -
 
-::: tab Interactive CLI
-An interactive command line interface written in Python and using the Autobahn Python WAMP client.
-:::
+    * `com.market.item.added` - When a new item is on offer.
+    * `com.market.item.expired` - When an item times out without any bids.
+    * `com.market.item.new_price` - When a bid was accepted.
+    * `com.market.item.sold` - When an item times out with a winner.
+    * `com.market.opened` - When market is connected and has registered the RPC URIs, it publishes this topic to let the listeners it is ready to accept calls.
 
-::::
+Bot
+: A Python microservice that creates named bots (via its CLI). Once a bot is created it will automatically bid for items.
 
+    Uses [AutobhanPython](https://github.com/crossbario/autobahn-python)
 
-### Bots
+    ::: info Configuration
+    The demo spawns 5 bots that are configured to:
+    * Bid on any items whose prices are lower than a given limit,
+    * Increasing the price by a given amount
+    * Taking a given amount of time to perform the bid, i.e. lag between computing the price and actually bidding. We use this lag is to have some bids from the bots rejected and slow down the demo to a more human friendly rhythm.
+    :::
 
-To spice things up, there are bots that are configured to:
-* bid on any items whose prices are lower than a given limit,
-* increasing the price by a given amount
-* taking a given amount of time to perform the bid, i.e. lag between computing the price and actually bidding.
+Web App
+: A single page Web App written in Javascript. Uses using [VueJS](https://vuejs.org) and [AutobahnJS](https://github.com/crossbario/autobahn-js) (Browser).
 
-The reason for the bidding lag is to have some bids from the bots rejected and slow down the demo to a more more human friendly rhythm.
+Interactive CLI
+: An interactive command line interface written in Python and using the Autobahn Python WAMP client.
+
+All components open a single WAMP session to Bondy on the `com.market.demo` realm.
 
 ## Running the Demo
 
-### 0. Prerequisites
+::: warning Requirements
 
-In order to run the marketplace and play with it you will need:
-
+* [Docker](https://www.docker.com) (Docker Desktop in case you use macOS or Windows)
 * `git`
 * `make`
-* [Docker](https://www.docker.com) (Docker Desktop in case you use macOS or Windows)
 
-All the source files required for the tutorial can be retrieved from the [GitHub `bondy-demo-marketplace` repo](https://github.com/bondy-io/bondy-demo-marketplace).
+Make sure that Docker is running.
+
+:::
+
+### 1. Clone the Demo repository
+
 ``` bash
 $ git clone https://github.com/bondy-io/bondy-demo-marketplace.git
 ```
 
-### 1. Running the marketplace
+### 2. Build and run the Demo
 
-Just make the default (`demo_docker`) target.
+The following command uses Docker compose to download and/or build the images for the components [mentioned before](#technical-view).
 
 ``` bash
 $ make
 ```
 
-This will create a docker container with:
+This will result in the following Docker containers:
 * 1 instance of Bondy
+* 1 instance of the Web App
 * 1 instance of the Market service
-* 4 instances of the Bot service, each one ready to bid
+* 4 instances of the Bot service, each one ready to bid (with names `alice`, `tom`, `victor`, `mary`)
+
+<ZoomImg alt="Docker Dashboard showing " src="/assets/tutorials/marketplace/docker_dashboard.png"/>
 
 ::: info Note
-Bondy needs a few seconds to start, create a network and be ready to accept connections.
-From the Docker containers, you will see the micro-services trying to reconnect with logs like the following, which is normal:
-```bash
+Bondy needs a few seconds to start and be ready to accept connections.
+From the Docker containers' logs you will notice the microservices are trying to reconnect with logs like the following, do not worry. The microservice will keep on retrying to connect to Bondy.
+
+```text
 2022-11-07T15:37:51 Connection failed with OS error:
     ConnectionRefusedError: [Errno 111] Connect call
     failed ('192.168.16.2', 18080)
@@ -109,20 +127,23 @@ From the Docker containers, you will see the micro-services trying to reconnect 
 :::
 
 
-### 2. Joining the marketplace
+### 3. Joining the marketplace
 
-To sell an item and see the bots competing, just open the Web App from a browser pointing at [http://localhost:8080/](http://localhost:8080/)
+To sell an item and see the bots competing, just open the Web App from a browser pointing at [http://localhost:8080/](http://localhost:8080/).
 
 ::: info Note
-Again, since Bondy needs a few seconds to start. You may see the webpage spinning (`Loading... Please wait`) before successfully connecting and printing `No items to show`.
+Again, since Bondy needs a few seconds to start, you may notice the Web App spinning (`Loading... Please wait`) before successfully connecting and printing `No items to show`.
 :::
 
-In the following screen capture we create ourselves as a user with name Alex.
+Once the web app has loaded, click the button with user icon (top right corner) to setup yourself up as a market participant.
+
+You should see something similar to the following screen capture:
 
 <ZoomImg src="/assets/tutorials/marketplace/user_setup.gif"/>
 
+The screen capture shows the market docker instance log window below the web app, you might want to do the same and open the logs to see what is going on, although the Web App will print all events as well.
 
-### 3. Selling items
+### 4. Selling items
 
 Using the Web App again, click on the `SELL ITEM` button to sell an item.
 
@@ -153,19 +174,20 @@ In python, this is done based on a WAMP client (`autobahn-py`) that will handle 
 #### Connection to Bondy
 
 The connection to bondy is performed through a component that requires a fairly light configuration.
+
 ``` python
 class Market:
-    def __init__(self):
-
-        ab_component_config = create_autobahn_component_config(user_id="market")
-        self._component = Component(**ab_component_config)
-        self._component.on("join", self._on_join)
+  def __init__(self):
+    ab_component_config = create_autobahn_component_config(user_id="market")
+    self._component = Component(**ab_component_config)
+    self._component.on("join", self._on_join)
 ```
 
-For the marketplace, a cryptosign authentication is performed on the `com.market.demo` realm.
-The component configuration will result in the following dictionary:
+In line 3 we call a util function that returns the following dictionary:
+
 ``` python
 {
+    "realm": "com.market.demo",
     "transports": [
         {
             "type": "websocket",
@@ -178,10 +200,15 @@ The component configuration will result in the following dictionary:
             "authid": "market",
             "privkey": PRIVATE_KEY
         }
-    },
-    "realm": "com.market.demo",
+    }
 }
 ```
+
+This tells Autobhan to open a websocket session with Bondy attached to the `com.market.demo` realm. The realm would have been already configured in Bondy by the Make target responsible to running the Bondy docker instance.
+
+For the marketplace, a WAMP Cryptosign authentication is performed on the `com.market.demo` realm.
+The component configuration will result in the following dictionary:
+
 
 #### Registration
 
