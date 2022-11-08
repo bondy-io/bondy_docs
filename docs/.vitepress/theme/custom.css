@@ -17,7 +17,9 @@
     --vp-button-alt-bg: hwb(0 89% 11%);
     /*--vp-c-bg-alt: #f9f9f9;*/
     --vp-c-text-code: rgb(30, 30, 30);
-    /* --vp-font-family-base: 'Montserrat', sans-serif; */
+    --vp-font-family-base: 'Inter var experimental', 'Inter var', ui-sans-serif,system-ui, -apple-system, BlinkMacSystemFont, 'Montserrat',
+'Helvetica Neue', Helvetica, Arial, 'Noto Sans', sans-serif,'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
     --vp-font-family-mono: 'SF Mono','Inconsolata','Menlo','Courier',monospace;
     --vp-code-font-size: 15px;
 
@@ -662,4 +664,5 @@ table.property-table > tbody > tr > td {
 
 dt {
     font-weight: bold;
+    font-style: italic;
 }
