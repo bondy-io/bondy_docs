@@ -1,5 +1,3 @@
-// import MermaidPlugin from "vitepress-plugin-mermaid";
-
 export default {
     // Set to false for publishing
     ignoreDeadLinks: true,

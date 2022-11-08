@@ -24,7 +24,6 @@
     "markdown-it-katex": "^2.0.3",
     "markdown-it-task-lists": "^2.1.1",
     "medium-zoom": "^1.0.6",
-    "mixpanel-browser": "^2.45.0",
     "switch-ts": "^1.0.9"
   }
 }
