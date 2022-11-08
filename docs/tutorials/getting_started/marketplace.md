@@ -1,14 +1,12 @@
 # Marketplace
-Learn how to write a simple marketplace with Python microservices and a VueJS web application.
+A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS web application.
 
 
 ## Goal
-To demonstrate how quick and easy it is to setup an application network with Bondy allowing a set of microservices and a single-page web application to  communicate using RPC and Publish/Subscribe.
 
-## Background
+In this tutorial we are going to demonstrate how to build a marketplace where people can buy and sell items.
 
-Say you want to build a marketplace where people can buy and sell items.
-
+The goal is to demonstrate how quick and easy it is to setup an application network with Bondy where all components communicate using RPC and Publish/Subscribe.
 
 ## Domain
 The domain consists of the following four entities.
@@ -38,14 +36,30 @@ The design of the example application is depicted in the following diagram.
 
 <ZoomImg src="/assets/tutorials/marketplace/marketplace.png"/>
 
-The application consists of the following actors.
+The application consists of the following components:
 
+:::: tabs components
 
-1. **Market** - A microservice implementing a simple marketplace
-2. **Bot** - A microservice that allows the creation of named bots (via its CLI). Bots will automatically bid for items.
-3. **Web App** - A single page application written written in Typescript using VueJS and Autobahn JS (Browser).
-4. **CLI** - A command line interface written in Python and using Autobahn Python WAMP client.
-5. **User** - A human using either the CLI or the Web App.
+::: tab Market
+A Python microservice implementing a simple marketplace.
+
+:::
+
+::: tab Bot
+A Python microservice that allows the creation of named bots (via its CLI). Bots will automatically bid for items.
+:::
+
+::: tab Web App
+A single page application written in Javascript using VueJS and Autobahn JS (Browser).
+:::
+
+::: tab Interactive CLI
+An interactive command line interface written in Python and using Autobahn Python WAMP client.
+
+:::
+
+::::
+
 
 ### Bots
 
@@ -56,16 +70,15 @@ To spice things up, there are bots that are configured to:
 
 The reason for the bidding lag is to have some bids from the bots rejected and slow down the demo to a more more human friendly rhythm.
 
-## Setup and Run
+## Running the Demo
 
 ### Prerequisites
 
 In order to run the marketplace and play with it you will need:
+
 * `git`
 * `make`
 * [Docker](https://www.docker.com) (Docker Desktop in case you use macOS or Windows)
-
-### Materials
 
 All the source files required for the tutorial can be retrieved from the [GitHub `bondy-demo-marketplace` repo](https://github.com/bondy-io/bondy-demo-marketplace).
 ``` bash
@@ -74,39 +87,59 @@ $ git clone https://github.com/bondy-io/bondy-demo-marketplace.git
 
 ### Running the marketplace
 
-How does it look like?
-Just make the default (`demo_docker`) target:
+Just make the default (`demo_docker`) target.
+
 ``` bash
 $ make
 ```
 
 This will create a docker container with:
-* an instance of Bondy
-* a marketplace
-* 4 bots ready to bid
+* 1 instance of Bondy
+* 1 instance of Market services
+* 4 instances of the Bot service, each one ready to bid
 
-**Note:** Bondy needs a few seconds to start, create a network and be ready to accept connection.
-From the Docker containers, you will see the micro-services trying to reconnect with logs like:
+::: info Note
+Bondy needs a few seconds to start, create a network and be ready to accept connection.
+From the Docker containers, you will see the micro-services trying to reconnect with logs like the following, which is normal:
+```bash
+2022-11-07T15:37:51 Connection failed with OS error:
+    ConnectionRefusedError: [Errno 111] Connect call
+    failed ('192.168.16.2', 18080)
+2022-11-07T15:37:51 trying transport 0 ("ws://bondy:18080/ws")
+    using connect delay 2.2569295356372576
 ```
-2022-11-07T15:37:51 Connection failed with OS error: ConnectionRefusedError: [Errno 111] Connect call failed ('192.168.16.2', 18080)
-2022-11-07T15:37:51 trying transport 0 ("ws://bondy:18080/ws") using connect delay 2.2569295356372576
-```
+:::
 
-### Joining the marketplace
 
-To sell an item and see the bots competing, just open the webapp from a browser pointing at http://localhost:8080/.
+### 1. Joining the marketplace
 
-**Note:** Again, since Bondy needs a few seconds to start. You may see the webpage spinning (`Loading... Please wait`) before successfully connecting and printing `No items to show`.
+To sell an item and see the bots competing, just open the Web App from a browser pointing at [http://localhost:8080/](http://localhost:8080/)
+
+::: Note
+Again, since Bondy needs a few seconds to start. You may see the webpage spinning (`Loading... Please wait`) before successfully connecting and printing `No items to show`.
+:::
+
+In the following screen capture we create ourselves as a user with name Alex.
+
+<ZoomImg src="/assets/tutorials/marketplace/user_setup.gif"/>
+
 
 ### Selling items
 
-From the webpage pointing at http://localhost:8080/, you can sell an item by clicking on [SELL ITEM] on the top right corner of the page.
-Enter:
+Using the Web App again, click on the `SELL ITEM` button to sell an item.
+
+Enter the following information (as shown in the screen capture below):
 * the name of the item,
 * the initial price,
 * the number of minutes before the deal closes.
 
-Once you click on [Save], you'll see the bots starting competing, unless your initial price is too high, i.e. more than $10,000.
+<ZoomImg src="/assets/tutorials/marketplace/sell_item.gif"/>
+
+Once you click on `Save`, you'll see the bots starting competing, unless your initial price is too high, i.e. more than $10,000.
+
+Notice that once we enter the item the app receives a notification (Publish/Subscribe event) shown in the green banner below.
+
+
 
 ## Under the hood
 
