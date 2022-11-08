@@ -4,20 +4,20 @@ A tutorial that demonstrates a simple marketplace with Python microservices and 
 
 ## Goal
 
-In this tutorial we are going to demonstrate how to build a marketplace where people can buy and sell items.
+In this tutorial we are going to build a marketplace where people can buy and sell items.
 
 The goal is to demonstrate how quick and easy it is to setup an application network with Bondy where all components communicate using RPC and Publish/Subscribe.
 
 ## Domain
+
 The domain consists of the following four entities.
 
 Marketplace
-:   the place where sellers and buyers congregate to exchange goods.
+:   The place where sellers and buyers congregate to exchange goods.
 
 
 Seller
-
-:   A seller sells an item at a given starting price for a given period of time
+:   A seller sells an item at a given starting price for a given period of time,
 i.e. people can bid on the item until it times out.
 
     There are 2 possible outcomes once the end of the sell period is reached:
@@ -25,13 +25,13 @@ i.e. people can bid on the item until it times out.
     * There was at least one bid higher than the initial price. The higher bidder wins. We have a deal.
 
 Bid
-:   an offer (a certain price) for an item listed on the marketplace. Only bids higher than the current highest price are accepted.
+:   An offer (a certain price) for an item listed on the marketplace. Only bids higher than the current highest price are accepted.
 
 Buyer
-
-:   A buyer tries to buy an item by bidding until the sell period expires.
+:   A buyer tries to buy an item by bidding until the sell period ends.
 
 ## Design
+
 The design of the example application is depicted in the following diagram.
 
 <ZoomImg src="/assets/tutorials/marketplace/marketplace.png"/>
@@ -42,11 +42,10 @@ The application consists of the following components:
 
 ::: tab Market
 A Python microservice implementing a simple marketplace.
-
 :::
 
 ::: tab Bot
-A Python microservice that allows the creation of named bots (via its CLI). Bots will automatically bid for items.
+A Python microservice that creates named bots (via its CLI). Bots will automatically bid for items.
 :::
 
 ::: tab Web App
@@ -54,8 +53,7 @@ A single page application written in Javascript using VueJS and Autobahn JS (Bro
 :::
 
 ::: tab Interactive CLI
-An interactive command line interface written in Python and using Autobahn Python WAMP client.
-
+An interactive command line interface written in Python and using the Autobahn Python WAMP client.
 :::
 
 ::::
@@ -72,7 +70,7 @@ The reason for the bidding lag is to have some bids from the bots rejected and s
 
 ## Running the Demo
 
-### Prerequisites
+### 0. Prerequisites
 
 In order to run the marketplace and play with it you will need:
 
@@ -85,7 +83,7 @@ All the source files required for the tutorial can be retrieved from the [GitHub
 $ git clone https://github.com/bondy-io/bondy-demo-marketplace.git
 ```
 
-### Running the marketplace
+### 1. Running the marketplace
 
 Just make the default (`demo_docker`) target.
 
@@ -95,11 +93,11 @@ $ make
 
 This will create a docker container with:
 * 1 instance of Bondy
-* 1 instance of Market services
+* 1 instance of the Market service
 * 4 instances of the Bot service, each one ready to bid
 
 ::: info Note
-Bondy needs a few seconds to start, create a network and be ready to accept connection.
+Bondy needs a few seconds to start, create a network and be ready to accept connections.
 From the Docker containers, you will see the micro-services trying to reconnect with logs like the following, which is normal:
 ```bash
 2022-11-07T15:37:51 Connection failed with OS error:
@@ -111,11 +109,11 @@ From the Docker containers, you will see the micro-services trying to reconnect 
 :::
 
 
-### 1. Joining the marketplace
+### 2. Joining the marketplace
 
 To sell an item and see the bots competing, just open the Web App from a browser pointing at [http://localhost:8080/](http://localhost:8080/)
 
-::: Note
+::: info Note
 Again, since Bondy needs a few seconds to start. You may see the webpage spinning (`Loading... Please wait`) before successfully connecting and printing `No items to show`.
 :::
 
@@ -124,7 +122,7 @@ In the following screen capture we create ourselves as a user with name Alex.
 <ZoomImg src="/assets/tutorials/marketplace/user_setup.gif"/>
 
 
-### Selling items
+### 3. Selling items
 
 Using the Web App again, click on the `SELL ITEM` button to sell an item.
 
@@ -133,12 +131,11 @@ Enter the following information (as shown in the screen capture below):
 * the initial price,
 * the number of minutes before the deal closes.
 
-<ZoomImg src="/assets/tutorials/marketplace/sell_item.gif"/>
-
 Once you click on `Save`, you'll see the bots starting competing, unless your initial price is too high, i.e. more than $10,000.
 
 Notice that once we enter the item the app receives a notification (Publish/Subscribe event) shown in the green banner below.
 
+<ZoomImg src="/assets/tutorials/marketplace/sell_item.gif"/>
 
 
 ## Under the hood
@@ -239,7 +236,9 @@ For instance when the bot Alice joins the marketplace, it calls:
     await session.call("com.market.bidder.add", "Alice")
 ```
 
-**Note:** This is an asynchronous because the bot has to know if the call was successful and it was accepted in the marketplace. Similarly, bidders have to wait for the bid to return to know if it was accepted or rejected.
+::: info Note
+This is an asynchronous because the bot has to know if the call was successful and it was accepted in the marketplace. Similarly, bidders have to wait for the bid to return to know if it was accepted or rejected.
+:::
 
 ## For more...
 
