@@ -112,7 +112,7 @@ From the Docker containers' logs you will notice the microservices are trying to
 :::
 
 
-### 3. Joining the marketplace
+### 3. Join the marketplace
 
 To sell an item and see the bots competing, just open the Web App from a browser pointing at [http://localhost:8080/](http://localhost:8080/).
 
@@ -128,7 +128,7 @@ You should see something similar to the following screen capture:
 
 The screen capture shows the market docker instance log window below the web app, you might want to do the same and open the logs to see what is going on, although the Web App will print all events as well.
 
-### 4. Selling items
+### 4. Sell one or more items
 
 Using the Web App again, click on the `SELL ITEM` button to sell an item.
 
@@ -143,6 +143,8 @@ In the following example we add an item called `apple`. You can repeat this oper
 <ZoomImg src="/assets/tutorials/marketplace/sell_item.gif"/>
 
 Notice that once we enter the item the app receives a notification (Publish/Subscribe event) shown in the green banner below.
+
+### 5. See the bots bidding for your items
 
 Once you click on `Save`, you'll see the bots starting to compete for the item, placing bids, unless your initial price is too high, i.e. more than $10,000.
 
