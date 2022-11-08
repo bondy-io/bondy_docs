@@ -11,7 +11,7 @@ If this is your first time trying Bondy, you might prefer to start with one of o
 
 ## Prerequisites
 
-* Hardware architectures: amd64 (x86) or arm64
+* Hardware architectures: AMD64 or ARM64
 * Operating Systems: macOS or Linux
 * [Erlang](https://www.erlang.org/downloads) 24 or later
 * [Rebar3](http://www.rebar3.org/) 3.17.0 or later

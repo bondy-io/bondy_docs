@@ -12,7 +12,7 @@ features:
   - title: Always-on
     details:  Bondy convergence-based data replication and self healing capabilities allows it to be highly available even under network partitions, message loss and node failures.
   - title: Deploy Anywhere
-    details: Bondy clusters can be deployed anywhere from resource-constrained x86/ARM edge devices to private, hybrid and public clouds running bare metal, virtualisation or containers. Bondy even allows edge clusters to sync with cloud clusters.
+    details: Bondy clusters can be deployed anywhere from resource-constrained AMD64/ARM64 edge devices to private, hybrid and public clouds running bare metal, virtualisation or containers. Bondy even allows edge clusters to sync with cloud clusters.
 ---
 
 # Bondy
