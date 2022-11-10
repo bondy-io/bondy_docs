@@ -48,6 +48,20 @@ export default {
               }
             }
           })
+          md.use(require('markdown-it-container'), 'definition', {
+            validate: function(params) {
+              return params.trim().match(/^definition\s+(.*)$/);
+            },
+            render: function(tokens, idx) {
+              var m = tokens[idx].info.trim().match(/^definition\s+(.*)$/);
+              if (tokens[idx].nesting === 1) {
+                const title = md.renderInline(m[1] || 'Definition')
+                return `<div class="definition custom-block"><p class="custom-block-title">${title}</p>\n`;
+              } else {
+                return `</div>\n`;
+              }
+            }
+          })
           md.use(require('markdown-it-container'), 'column', {
             validate: function(params) {
               return params.trim().match(/^column\s+(.*)$/);
@@ -418,7 +432,7 @@ export default {
             {
               text: 'Install using Docker',
               link: '/guides/install/docker' ,
-              description: 'Use the official Docker images for amd64 and arm64 architectures.',
+              description: 'Use the official Docker images for AMD64 and ARM64 architectures.',
               isFeature: true
             },
             {

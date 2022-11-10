@@ -130,13 +130,6 @@ h5 {
 }
 
 
-.definition {
-  /* color: #000000 !important; */
-  /* font-style: italic; */
-  line-height: 20px;
-  font-size:1.3rem !important;
-}
-
 table.property-table > thead > tr > th {
   font-size: 14px;
   background-color: #858585f8;
@@ -217,6 +210,15 @@ table.property-table > tbody > tr > td {
   margin-bottom: 30px !important;
 }
 
+.custom-block.definition {
+  border-color: rgba(23, 25, 22, 1.00);
+  color: rgba(23, 25, 22, 1.00);
+  background-color: rgba(180, 212, 238, 0.15);
+}
+
+.custom-block.definition code {
+  background-color: var(--vp-custom-block-info-code-bg);
+}
 
 .custom-block.config-param{
   background-color: rgba(180, 212, 238, 0.3) !important;
