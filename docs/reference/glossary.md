@@ -72,6 +72,11 @@ The key goal of a microservices architecture is to modularize application develo
 
 [^cmeik]: Christopher Meiklejohn, Strangeloop 2022 [Resilient Microservices without the Chaos](https://www.youtube.com/watch?v=F32peAwCPlM)
 
+## Publish/Subscribe
+<!-- @TODO -->
+
+## Remote Procedure Call
+<!-- @TODO -->
 
 ## Service Mesh
 A service mesh is a dedicated network layer that sits above the service layer and enables service-to-service communication. Its communication channels rely on distributed APIs instead of centralized and discrete appliances.
