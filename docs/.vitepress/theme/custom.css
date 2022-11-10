@@ -40,6 +40,16 @@ body {
     line-height: 25.000032px;
 }
 
+/*prevent sub sup to affect line height */
+sup, sub {
+  vertical-align: baseline;
+  position: relative;
+  top: -0.4em;
+}
+sub {
+  top: 0.4em;
+}
+
 pre > code {
     padding-left: 12px !important;
 }
