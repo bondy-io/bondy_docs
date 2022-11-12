@@ -1,3 +1,6 @@
+---
+draft: true
+---
 # HTTP API Gateway Configuration Reference
 Bondy HTTP API Gateway is an HTTP/REST API management subsystem that sits between an HTTP client and a realm's WAMP RPC procedures and PubSub Topics. It acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over those procedures and topics.
 
