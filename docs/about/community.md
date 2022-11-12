@@ -31,7 +31,7 @@ Please report any new issues using Bondy's Github Issues page. Start by searchin
 
 :::::: columns buttons
 :::: column 1
-::: big-button https://github.com/Leapsight/bondy/issues
+::: big-button https://github.com/bondy-io/bondy/issues
 Github Issues
 :::
 ::::
@@ -56,7 +56,7 @@ We are committed to providing a friendly, safe and welcoming environment for all
 
 <!-- If you feel you have been or are being harassed or made uncomfortable by a community member, please contact any of the Bondy Moderation Team immediately. Whether you are a regular contributor or a newcomer, we care about making the community a safe space for you. -->
 
-::: big-button https://github.com/Leapsight/bondy/blob/develop/CODE_OF_CONDUCT.md
+::: big-button https://github.com/bondy-io/bondy/blob/develop/CODE_OF_CONDUCT.md
 Read the Code of Conduct
 :::
 

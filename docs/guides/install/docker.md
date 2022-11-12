@@ -5,7 +5,7 @@ This guide provides steps to install and configure Bondy on Docker using the off
 
 If you want to build and use your own Docker image, make sure you check the official images sources first as you might want to use them as your template.
 
-These are located at the Bondy's Github repository under the ["deployment" directory](https://github.com/Leapsight/bondy/tree/develop/deployment).
+These are located at the Bondy's Github repository under the ["deployment" directory](https://github.com/bondy-io/bondy/tree/develop/deployment).
 :::
 
 ## Prerequisites

@@ -370,7 +370,7 @@ export default {
           },
           {
             text: 'Github',
-            link: 'https://github.com/Leapsight/bondy',
+            link: 'https://github.com/bondy-io/bondy',
             isFeature: false
           }
         ]
