@@ -40,6 +40,11 @@ body {
     line-height: 25.000032px;
 }
 
+blockquote > p {
+    line-height: 1.651rem !important;
+    font-size:1.15rem !important;
+}
+
 /*prevent sub sup to affect line height */
 sup, sub {
   vertical-align: baseline;
