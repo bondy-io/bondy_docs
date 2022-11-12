@@ -72,6 +72,11 @@ The key goal of a microservices architecture is to modularize application develo
 
 [^cmeik]: Christopher Meiklejohn, Strangeloop 2022 [Resilient Microservices without the Chaos](https://www.youtube.com/watch?v=F32peAwCPlM)
 
+## Process
+Unless otherwise specified in the documentation, the word "process" refers to an Erlang process, a lighweight concurrency primitive with small memory footprint that operates independently and is scheduled by the Erlang VM.
+
+A Bondy node can manage millions of concurrently executing processes.
+
 ## Publish/Subscribe
 <!-- @TODO -->
 
