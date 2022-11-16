@@ -1,4 +1,16 @@
+## Types
 
+### realm{.datatype}
+The representation of the realm returned by the read or write operations e.g. `get`, `list`, `create` or `update`.
+
+<DataTreeView :data="realm" :maxDepth="10" />
+
+### input_data{.datatype}
+The object used to create or update a realm. Notice this object contains more information than the actually create realm e.g. users, groups, etc.
+
+The object represents as overview of the all realm properties but the available properties are detailed in each particular operation.
+
+<DataTreeView :data="inputCreateData" :maxDepth="10" />
 
 <script>
 const realmUri = {
@@ -9,7 +21,28 @@ const realmUri = {
         "description": "The realm identifier"
     }
 };
-const realmData = {
+const realmPrivate = {
+    "private_keys" :  {
+        "type": "array",
+        "required": false,
+        "mutable": true,
+        "description": "A list of private keys used for signing.",
+        "items": {
+            "type": "private_key"
+        }
+    },
+    "encryption_keys" :  {
+        "type": "array",
+        "required": false,
+        "mutable": true,
+        "description": "A list of private keys used for encryption.",
+        "items": {
+            "type": "private_key"
+        }
+    }
+};
+
+const realmPublic = {
     "description": {
         "type": "string",
         "required": true,
@@ -185,31 +218,13 @@ const realmData = {
                 }
             }
         }
-    },
-    "private_keys" :  {
-        "type": "array",
-        "required": false,
-        "mutable": true,
-        "description": "A list of private keys used for signing.",
-        "items": {
-            "type": "private_key"
-        }
-    },
-    "encryption_keys" :  {
-        "type": "array",
-        "required": false,
-        "mutable": true,
-        "description": "A list of private keys used for encryption.",
-        "items": {
-            "type": "private_key"
-        }
     }
 };
 
-const inputCreateData = {...realmUri, ...realmData};
-const inputUpdateData = {...realmData};
+const inputCreateData = {...realmUri, ...realmPublic, ...realmPrivate};
+const inputUpdateData = {...realmPublic, ...realmPrivate};
 
-const realm = {...realmUri, ...realmData,
+const realm = {...realmUri, ...realmPublic,
     "security_status" :  {
         "type": "string",
         "required": false,
