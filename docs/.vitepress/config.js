@@ -401,7 +401,13 @@ export default {
         {
           text: 'Other Tutorials',
           items: [
-            { text: 'Coming soon...',}
+            {
+              text: 'Using Same Sign-on',
+              link: '/tutorials/security/same_sign_on' ,
+              description: 'Learn how to use create and use a Same Sign-on Realm.',
+              isFeature: true
+            },
+            { text: 'More tutorials coming soon...',}
           ]
         }
     ]

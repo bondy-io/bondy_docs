@@ -56,7 +56,11 @@ sub {
 }
 
 pre > code {
-    padding-left: 12px !important;
+    padding-left: 40px !important;
+}
+
+.line-numbers-mode{
+    padding-left: 0px !important;
 }
 
 
@@ -371,7 +375,7 @@ table.property-table > tbody > tr > td {
 /* ========================================================================== */
 
 .tabs-component {
-    margin: 4em 0;
+    margin: 1.5em 0;
 }
 
 .tabs-component-tabs {
