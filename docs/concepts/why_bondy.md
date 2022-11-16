@@ -2,9 +2,7 @@
 draft: true
 ---
 # Why Bondy
-Learn why we created Bondy to reduce accidental complexity and bring back the joy to distributed systems programming.
-
-
+Learn why we created Bondy to reduce accidental complexity and bring back the joy to distributed applications programming.
 
 
 ## TL;DR
@@ -14,19 +12,28 @@ Learn why we created Bondy to reduce accidental complexity and bring back the jo
 
 [^cmeik]: Christopher Meiklejohn, Strangeloop 2022 [Resilient Microservices without the Chaos](https://www.youtube.com/watch?v=F32peAwCPlM)
 
-Delivering innovative customer experiences today requires the real-time networked connection of people, process, data and things (devices)[^a16z].
+Delivering innovative customer experiences today requires the real-time networked connection of people, process, data and things (devices)[^cisco-ioe][^a16z].
 
+[^cisco-ioe]: [The Internet of Everything](https://www.cisco.com/c/dam/en_us/about/business-insights/docs/ioe-value-at-stake-public-sector-analysis-faq.pdf)
 [^a16z]: Marc Andreessen, [Why Software is Eating the World](https://a16z.com/2011/08/20/why-software-is-eating-the-world)
 
 But creating those connections has become shockingly complicated due to the sheer number of tools (and their rapid rate of change) involved in most modern application development[^ogrady].
 
 [^ogrady]: Stephen O'Grady, [The Developer Experience Gap](https://redmonk.com/sogrady/2020/10/06/developer-experience-gap/)
 
-This is due to the increasing fragmentation of the technology landscape and the industry's tendency to build layers over the existing layers without retiring the ones below and most importantly, the tendency to solve specific problems with vertical solutions, creating technology silos. This obviously is beneficial for the industry as it creates the need for integration layers (Yet more layers!).
+If you are using a microservices architectural style or if you are integrating multiple different customer/user touchpoints across Web, Mobile (and possibly IoT devices) you are developing a distributed system.
 
-As a result, developers have to cope with too many client libraries, cloud services and infrastructure components.
+Distributed systems are hard to design, develop and maintain yet we are not doing ourselves a favor by the way in which we are building them.
 
-Why are we doing this? Because most libraries, services and infrastructure components implement different protocols. These protocols where designed as silos, covering a very specific application development requirement.
+The industry's tendency to build layers over the existing layers without retiring the ones below and most importantly, the tendency to solve specific problems with vertical solutions, creating technology silos is dramatically increasing fragmentation of the technology landscape.
+
+> The fragmentation means that the fundamental activity in building a distributed application has now become **integration**.
+
+The tools that we were using to integrate the 3-tier application monoliths of a not that distant past are the same we pretent to use to integrate 10s, 100s and in some cases even 1000s of microservices that resulted from the monolith decomposition. The decomposition allowed us to scale the social aspects of development, enabling us to tackle the increasing number of requirements (essential complexity) but due to the tools we are using we have now created a massive wave of accidental complexity.
+
+As a result, developers have to cope with too many protocols, driving the number of client libraries, cloud services and infrastructure components.
+
+Why are we doing this? Because most protocols where designed as silos, covering a very specific application use case or requirement.
 
 But do we really need them? Couldn't
 
@@ -57,7 +64,7 @@ These complicates the implement of several use cases in which it would be desira
 
 Fortunately, the advances in distributed computing over the last 10 years have given us a new horizon, one where we are able to treat our mobile devices as the system or record. I am referrying to peer-to-peer networking and local-first software[^mklepp].
 
-[^mklepp]: Marin Kleppmann et al., [Local-First Software: Your Own Your Data, in spite of the Cloud](https://martin.kleppmann.com/papers/local-first.pdf)
+[^mklepp]: Martin Kleppmann et al., [Local-First Software: Your Own Your Data, in spite of the Cloud](https://martin.kleppmann.com/papers/local-first.pdf)
 
 But this will come at a cost.
 

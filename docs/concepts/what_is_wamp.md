@@ -8,7 +8,7 @@ Web Application Messaging Protocol (WAMP) is an open standard protocol for (soft
 
 The Web Application Messaging Protocol (WAMP) is intended to provide application developers with the semantics they need to handle messaging between components in distributed applications.
 
-By combining Combining the two main application communication patterns–Remote Procedure Calls and Publish/Subscribe– into a single protocol, it can be used for the entire messaging requirements of a distributed system, thus reducing technology stack complexity, as well as networking overheads.
+By combining the two main application communication patterns–Remote Procedure Calls and Publish/Subscribe– into a single protocol, it can be used for the entire messaging requirements of a distributed application, thus reducing technology stack complexity, as well as networking overheads.
 
 WAMP is a community effort and the [protocol specification](https://wamp-proto.org/wamp_latest_ietf.html) is made available for free under an open license for everyone to use or implement.
 
@@ -62,21 +62,53 @@ The typical data exchange workflow is:
 
 The clients send these messages using the two high-level primitives that are routed RPC and PubSub, doing four core interactions:
 
-- **register**: a client (*Callee*) exposes a procedure to be called remotely with an URI (also a URI pattern if Router provides this feature).
+### RPC
+#### Register
+A client (*Callee*) exposes a procedure to be called remotely with an URI (also a URI pattern if Router provides this feature).
 
-    ```bash
-    session.register("com.example.add", [], {}, fun(a, b){return a + b})
-    ```
+:::::: tabs code
+::: tab Javascript
+```javascript
+session.register(
+    "com.example.add", // procedure URI
+    function(a, b){return a + b;}, // callback
+    {invoke: "single", match: "exact"} // registration options
+).then(
+    function(reg){...},
+    function(err){...}
+);
+```
+:::
+::::::
 
-- **call**: a client (*Caller*) asks the *Router* to invoke procedure from another client by providing the procedure URI.
 
-    ```bash
-    Res = session.call("com.example.add", [3, 4])
-    // Res = 7
-    ```
+#### Call
+A client (*Caller*) asks the *Router* to invoke procedure from another client by providing the procedure URI.
 
-- **subscribe**: a client (*Subscriber*) notifies its interest in a topic, by providing the topic URI (or URI pattern).
-- **publish**: a client (*Publisher*) publishes events on a topic, by providing the topic URI.
+:::::: tabs code
+::: tab Javascript
+```javascript
+Res = session.call(
+    "com.example.add", // procedure URI
+    [3, 4] // positional args
+).then(
+    function(res){
+        var val = res.args[0]; // access positional result, Val = 7
+        ...
+    },
+    function(err){...}
+);
+```
+:::
+::::::
+
+### Publish/Subscribe
+
+#### Subscribe
+A client (*Subscriber*) notifies its interest in a topic, by providing the topic URI (or URI pattern).
+
+#### Publish
+A client (*Publisher*) publishes events on a topic, by providing the topic URI.
 
 ::: info SUMMARY: How is WAMP different than other protocols?
 
