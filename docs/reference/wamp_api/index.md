@@ -28,7 +28,7 @@ The following diagram shows how the WAMP APIs described in this reference fit wi
 :::
 
 ::: tip HTTP API
-Bondy also offers equivalent [HTTP APIs](/reference/http_api) for most of the entities in the WAMP API, this is implemented by the HTTP API Gateway.
+Bondy also offers equivalent [HTTP APIs](/reference/http_api/index) for most of the entities in the WAMP API, this is implemented by the HTTP API Gateway.
 :::
 
 ## Services

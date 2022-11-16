@@ -16,7 +16,7 @@ The following diagram shows the scopes and mechanism for managing each configura
 This refence documentation covers only the **Bondy node runtime configuration** using environment variables and the `bondy.conf` file.
 :::
 
-To learn more about **Multi-tenancy security configuration** check the [WAMP](/reference/wamp_api) and [HTTP](/reference/http_api) references.
+To learn more about **Multi-tenancy security configuration** check the [WAMP](/reference/wamp_api/index) and [HTTP](/reference/http_api/index) references.
 
 As opposed to other application networking options i.e. Service Mesh, in which services are configured using a proprietary API e.g. Istio APIs and YAML for Kubernetes resources, Bondy **RPC and Pub/Sub configuration** is entirely managed by [WAMP](/concepts/what_is_wamp).
 
