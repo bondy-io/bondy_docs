@@ -35,7 +35,7 @@ As a result, developers have to cope with too many protocols, driving the number
 
 Why are we doing this? Because most protocols where designed as silos, covering a very specific application use case or requirement.
 
-But do we really need them? Couldn't
+But do we really need them?
 
 The result in a complex technology solution prone to inefficiencies, delays and fatigue hindering the success of business initiatives.
 
