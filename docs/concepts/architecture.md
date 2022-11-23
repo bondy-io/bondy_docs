@@ -104,7 +104,7 @@ Eventual consistency, also called optimistic replication, is widely deployed in 
 
 Eventual consistency is a weak guarantee – most stronger models, like linearizability are trivially eventually consistent, but a system that is merely eventually consistent does not usually fulfil these stronger constraints.
 
-Eventually-consistent services are often classified as providing BASE (**B**asically **A**vailable, **S**oft state, **E**ventual consistency) semantics, in contrast to traditional ACID (Atomicity, Consistency, Isolation, Durability) guarantees.
+Eventually-consistent services are often classified as providing BASE (**B**asically **A**vailable, **S**oft state, **E**ventual consistency) semantics, in contrast to traditional ACID (**A**tomicity, **C**onsistency, **I**solation, **D**urability) guarantees.
 
 - **(B)asically (A)vailable**: basic reading and writing operations are available as much as possible (using all nodes of a database cluster), but without any kind of consistency guarantees (the write may not persist after conflicts are reconciled, the read may not get the latest write)
 - **(S)oft state**: without consistency guarantees, after some amount of time, we only have some probability of knowing the state, since it may not yet have converged
@@ -151,7 +151,7 @@ Finally, AWS recommends segmenting database access i.e. **affecting the design o
 The following are the key characteristics of Bondy.
 
 - **Self-sufficiency** — Bondy does not depend on any external system e.g. databases, as it would not be able to guarantee their availability.
-- **Distributed by design** – ****Bondy was designed as a reliable distributed router, ensuring continued operation in the event of node or network failures through **clustering** and **data replication**.
+- **Distributed by design** – Bondy was designed as a reliable distributed router, ensuring continued operation in the event of node or network failures through **clustering** and **data replication**.
 - **Scalability** – Bondy is written in Erlang/OTP which provides the underlying operating system to handle concurrency and scalability requirements, allowing Bondy to scale to thousands and even millions of concurrent connections on a single node. Its distributed architecture also allows for horizontal scaling by simply adding nodes to the cluster.
 - **Peer-to-peer master-less clustering** – All nodes in a Bondy cluster are equal, thanks to the underlying clustering and networking technology which provides a master-less architecture.
 - **Low latency data replication** – All nodes in a Bondy cluster share a global state which is replicated through a highly scaleable and low latency eventually consistency model based on gossip. Bondy uses [Partisan](http://partisan.cloud/), a high-performance Distributed Erlang replacement that enables various network topologies and supports large clusters (Partisan has been demonstrated to scale up to 1,024 Erlang nodes, and provide better scalability and reduced latency than Distributed Erlang).
