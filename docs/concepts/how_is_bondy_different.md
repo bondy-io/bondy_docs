@@ -102,7 +102,7 @@ In this comparison, we will be featuring NATS, Apache Kafka, RabbitMQ, Apache Pu
 
 |Project|Features and Capabilities|
 |---|---|
-|Bondy|Bondy supports true multi-tenancy and decentralised security through WAMP Realms.|
+|Bondy|Bondy supports true multi-tenancy and decentralised security through WAMP Realms. Each realm can have its own authentication and authorization scheme.|
 |NATS|NATS supports true multi-tenancy and decentralized security through accounts and defining shared streams and services.|
 |gRPC|N/A|
 |Kafka|N/A|
@@ -113,7 +113,7 @@ In this comparison, we will be featuring NATS, Apache Kafka, RabbitMQ, Apache Pu
 
 |Project|Features and Capabilities|
 |---|---|
-|Bondy|Crytosign, Ticket (JWT), OAuth2 (JWT), username and password, Trust and anonymous. All authentication methods support CIDR address restrictions.|
+|Bondy|WAMP Crytosign, WAMP Ticket (JWT), HTTP OAuth2 (JSON Web Token), WAMP CRA, username and password, Trust and Anonymous. All authentication methods support CIDR address restrictions.|
 |NATS|NATS supports TLS, NATS credentials, NKEYS (NATS ED25519 keys), username and password, or simple token.|
 |gRPC|TLS, ALT, Token, channel and call credentials, and a plug-in mechanism.|
 |Kafka|Supports Kerberos and TLS. Supports JAAS and an out-of-box authorizer implementation that uses ZooKeeper to store connection and subject.|
@@ -124,7 +124,7 @@ In this comparison, we will be featuring NATS, Apache Kafka, RabbitMQ, Apache Pu
 
 |Project|Features and Capabilities|
 |---|---|
-|Bondy|Realms provide a fine grained Role-based Access Control (RBAC) model which enables user-level publish/subscribe and RPC permissions and CIDR address restrictions.|
+|Bondy|Realms provide a fine grained Role-based Access Control (RBAC) model that enables user-level Publish/Subscribe and RPC permissions and CIDR address restrictions. Supports exact, pattern and wildcard URI matching.|
 |NATS|Account limits including number of connections, message size, number of imports and exports. User-level publish and subscribe permissions, connection restrictions, CIDR address restrictions, and time of day restrictions.|
 |gRPC|Users can configure call credentials to authorize fine-grained individual calls on a service.|
 |Kafka|Supports JAAS, ACLs for a rich set of Kafka resources including topics, clusters, groups, and others.|

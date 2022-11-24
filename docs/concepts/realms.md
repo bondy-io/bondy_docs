@@ -11,10 +11,13 @@ related:
       description: Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status.
 ---
 # Realms
-Realms are routing and administrative domains that act as namespaces. All resources in Bondy belong to a Realm. Messages are routed separately for each individual realm so sessions attached to a realm won’t see message routed on another realm.
+The realm is a central and fundamental concept in Bondy. It does not only serve as an authentication and authorization domain but also as a message routing domain. Bondy ensures no messages routed in one realm will leak into another realm.
 
 ## Description
-The realm is a central and fundamental concept in Bondy. It does not only serve as an authentication and authorization domain but also as a message routing domain. Bondy ensures no messages routed in one realm will leak into another realm.
+::: definition Realm
+Realms are routing and administrative domains that act as namespaces. All resources in Bondy belong to a Realm. Messages are routed separately for each individual realm so sessions attached to a realm won’t see message routed on another realm.
+:::
+
 
 <ZoomImg src="/assets/realm_diagram.png"/>
 
@@ -34,7 +37,7 @@ Notice that since realms are globally replicated, the smallest node in a Bondy c
 
 
 ## Master Realm
-When you start Bondy for the first time it creates and stores the Bondy Master realm a.k.a `com.leapsight.bondy`.
+When you start Bondy for the first time it creates and stores the Bondy Master realm identifiedm with the uri `bondy` (also the now deprecated `com.leapsight.bondy`).
 
 This realm is the root realm which allows an admin user to create, list, modify and delete other realms. The realm can be customised either through the `bondy.conf` file or dynamically using the [WAMP](/reference/wamp_api/realm) and [HTTP](/reference/http_api/realm) APIs.
 
@@ -44,14 +47,19 @@ However, the master realm has some limitations:
 * It cannot use [Prototype Inheritance](#prototype-inheritance)
 * It cannot use [Same Sign-on](#same-sign-on)
 
+
 ## Prototype Inheritance
 
 Prototypical inheritance allows us to reuse the properties (including RBAC definitions) from one realm to another through a reference URI configured on the `prototype_uri` property.
-Prototypical inheritance is a form of single inheritance as realms are can only be related to a single prototype.
-The `prototype_uri` property is defined as an **irreflexive property** i.e. a realm cannot have itself as prototype. In addition **a prototype cannot inherit from another prototype**. This means the inheritance chain is bounded to one level.
+
+Key charactaristics:
+
+* Prototypical inheritance is a form of single inheritance i.e. realms can only inherit from a single prototype.
+* The `prototype_uri` property is defined as an **irreflexive property** i.e. a realm cannot have itself as prototype.
+* In addition **a prototype cannot inherit from another prototype**. This means the inheritance chain is bounded to one level.
 
 ::: definition Prototype Realm
-A **Prototype Realm** is a realm that acts as a prototype for the construction of other realms. It is a normal realm whose property `is_prototype` has been set to true.
+A **Prototype Realm** is a realm that acts as a prototype for the construction of other realms. It is a normal realm whose property `is_prototype` has been set to `true`.
 :::
 
 The following is the list of properties which a realm inherits from a prototype when those properties have not been assigned a value. Setting a value to these properties is equivalent to overriding the prototype's.
