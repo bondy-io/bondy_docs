@@ -120,5 +120,5 @@ Five key features makes WAMP unique amongst alternative application messaging pr
 4. **WAMP offers multiple-transports** and each client can choose which one to use. WAMP can run over any transport which ismessage-oriented, ordered, reliable, and bi-directionalsuch as Websockets, TCP, Unix domain socket, etc.
 5. **WAMP supports multiple serializations** and each client can choose which one to use.
 
-By combining these key features into a single infrastructure component, a WAMP Router can be used for the entire messaging requirements of all the components of distributed systems including connected devices, browser and mobile apps and backend services, thus**reducing technology stack complexity, accidental complexity as well as networking overheads**.
+By combining these key features into a single infrastructure component, a WAMP Router can be used for the entire messaging requirements of all the components of distributed systems including connected devices, browser and mobile apps and backend services, thus **reducing technology stack complexity, accidental complexity as well as networking overheads**.
 :::
