@@ -37,31 +37,7 @@
         @selected="bubbleSelected"
       />
     </div>
-    <div v-else>
-      <div
-        v-if="data.type === 'string' || data.type === 'integer' || data.type === 'bigInt' || data.type === 'boolean' || data.type === 'undefined' || data.type === 'map'"
-        :style="valueStyle"
-        :class="valueClasses"
-        :role="canSelect ? 'button' : undefined"
-        :tabindex="canSelect ? '0' : undefined"
-        @click="onClick(data)"
-        @keyup.enter="onClick(data)"
-        @keyup.space="onClick(data)"
-      >
-        <!-- Root -->
-        <span class="value-key"><code>{{ data.key }}</code></span>
-        <span class="value-type">{{ data.type }}</span>
-        <span v-if="data.required" class="value-tag red">REQUIRED</span>
-        <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
-        <span v-if="data.computed" class="value-tag">COMPUTED</span>
-        <div class="value-description ">{{ data.description }}</div>
-        <div v-if="data.default" class="value-default">
-          <i>Default: {{ data.default }}</i>
-        </div>
-
-      </div>
-
-      <div
+    <div
         v-else
         :style="valueStyle"
         :class="valueClasses"
@@ -73,7 +49,11 @@
       >
         <!-- Root -->
         <span class="value-key"><code>{{ data.key }}</code></span>
-        <span class="value-type"><a :href="slug">{{ data.type }}</a></span>
+        <span v-if="data.type === 'string' || data.type === 'integer' || data.type === 'bigInt' || data.type === 'boolean' || data.type === 'undefined' || data.type === 'map'"
+        class="value-type">{{ data.type }}</span>
+        <span v-else class="value-type">
+          <a :href="slug">{{ data.type }}</a>
+        </span>
         <span v-if="data.required" class="value-tag red">REQUIRED</span>
         <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
         <span v-if="data.computed" class="value-tag">COMPUTED</span>
@@ -83,8 +63,6 @@
         </div>
 
       </div>
-    </div>
-
   </div>
 </template>
 
