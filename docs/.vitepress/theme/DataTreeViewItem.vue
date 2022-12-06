@@ -269,6 +269,7 @@ code.property{
 
 .object-description code {
   background-color: rgba(23, 25, 22, 0.00) !important;
+  font-size: 0.95em !important;
 }
 
 .data-tree-item:not(.root-item) {
