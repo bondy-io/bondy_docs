@@ -55,7 +55,7 @@ const realmPublic = {
         "required": true,
         "mutable": true,
         "description": "If true this realm is a realm used as a prototype. Prototype realms cannot be used by themselves. Once a realm has been designated as a prototype it cannot be changed.",
-        "default": "false"
+        "default": "`false`"
     },
     "prototype_uri": {
         "type": "uri",
@@ -68,7 +68,7 @@ const realmPublic = {
         "required": true,
         "mutable": true,
         "description": "If true this realm is an SSO Realm. Once a realm has been designated as an SSO realm it cannot be changed.",
-        "default": "false"
+        "default": "`false`"
     },
     "sso_realm_uri": {
         "type": "uri",
@@ -89,7 +89,7 @@ const realmPublic = {
         "required": true,
         "mutable": true,
         "description": "The list of the authentication methods allowed by this realm. Allowed values: 'anonymous', 'trust', 'password', 'ticket', 'oauth2', 'wampcra', 'cryptosign'",
-        "default": [],
+        "default": "`[]`",
         "items" : {
             "type": "string"
         }
@@ -138,7 +138,7 @@ const realmPublic = {
                     "required": true,
                     "mutable": true,
                     "description": "Group metadata.",
-                    "default": {}
+                    "default": "`{}`"
                 }
             }
         }

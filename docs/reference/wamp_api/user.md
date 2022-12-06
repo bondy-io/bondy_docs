@@ -1319,14 +1319,14 @@ const userData = {
 		"required": true,
 		"mutable": true,
 		"description": "If the user is enabled or not.",
-        "default": true
+        "default": "`true`"
 	},
     "meta": {
         "type": "map",
         "required": true,
 		"mutable": true,
 		"description": "User metadata.",
-        "default": {}
+        "default": "`{}`"
     }
 };
 

@@ -363,7 +363,7 @@ const apiRequest = {
             "required": false,
             "mutable": false,
             "description": "The requested language.",
-            "default": "en"
+            "default": '"en"'
         },
         "query_string": {
             "type": "string",
@@ -510,21 +510,21 @@ const version = {
         "type": "boolean",
         "required": false,
         "mutable": false,
-        "default": true,
+        "default": "`true`",
         "description": "Whether the path is active."
     },
     "is_deprecated": {
         "type": "boolean",
         "required": false,
         "mutable": false,
-        "default": false,
+        "default": "`false`",
         "description": "Whether the path is deprecated i.e. the path will be removed in future versions of the API."
     },
     "pool_size": {
         "type": "integer",
         "required": false,
         "mutable": false,
-        "default": 200,
+        "default": '`200`',
         "description": ""
     },
     "info": {
@@ -570,7 +570,7 @@ const version = {
         "items": {
             "type": "string"
         },
-        "default": ["en"],
+        "default": '["en"]',
         "description": "An array of language code string."
     }
 };
@@ -605,7 +605,7 @@ const path = {
         "type": "boolean",
         "required": false,
         "mutable": false,
-        "default": false,
+        "default": "`false`",
         "description": "Defines whether the resource managed in this path is a collection or not."
     },
     "headers": {
@@ -639,7 +639,7 @@ const path = {
         "items": {
             "type": "string"
         },
-        "default": ["http"],
+        "default": '["http"]',
         "description": "An array of strings where values can be: `http` or `https`."
     },
     "body_max_byte" : {
@@ -686,43 +686,43 @@ const path = {
         "type": "OperationObject",
         "required": false,
         "mutable": false,
-        "description": "The operation specification to perform in case the API Gateway receives an HTTP DELETE Request."
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP `DELETE` Request."
     },
     "get" :  {
         "type": "OperationObject",
         "required": false,
         "mutable": false,
-        "description": "The operation specification to perform in case the API Gateway receives an HTTP GET Request."
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP `GET` Request."
     },
     "head" :  {
         "type": "OperationObject",
         "required": false,
         "mutable": false,
-        "description": "The operation specification to perform in case the API Gateway receives an HTTP HEAD Request."
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP `HEAD` Request."
     },
     "options" :  {
         "type": "OperationObject",
         "required": false,
         "mutable": false,
-        "description": "The operation specification to perform in case the API Gateway receives an HTTP OPTIONS Request."
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP `OPTIONS` Request."
     },
     "patch" :  {
         "type": "OperationObject",
         "required": false,
         "mutable": false,
-        "description": "The operation specification to perform in case the API Gateway receives an HTTP PATCH Request."
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP `PATCH` Request."
     },
     "post" :  {
         "type": "OperationObject",
         "required": false,
         "mutable": false,
-        "description": "The operation specification to perform in case the API Gateway receives an HTTP POST Request."
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP `POST` Request."
     },
     "put" :  {
         "type": "OperationObject",
         "required": false,
         "mutable": false,
-        "description": "The operation specification to perform in case the API Gateway receives an HTTP PUT Request."
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP `PUT` Request."
     }
 };
 
@@ -740,7 +740,7 @@ const basicSecurity = {
         "items": {
             "type": "string"
         },
-        "default": ["http"],
+        "default": '["http"]',
         "description": "An array of strings where values can be: `http` or `https`."
     }
 };
@@ -759,7 +759,7 @@ const oauth2 = {
         "items": {
             "type": "string"
         },
-        "default": ["http"],
+        "default": '["http"]',
         "description": "An array of strings where values can be: `http` or `https`."
     },
     "schemes": {

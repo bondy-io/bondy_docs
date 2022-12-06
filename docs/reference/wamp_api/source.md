@@ -431,7 +431,7 @@ const sourceData = {
         "required": true,
 		"mutable": true,
 		"description": "Source metadata.",
-        "default": {}
+        "default": "`{}`"
     }
 };
 

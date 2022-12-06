@@ -13,9 +13,7 @@
             <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
             <span v-if="data.computed" class="value-tag">COMPUTED</span>
             <div class="object-description " v-html="md.render( data.description)"></div>
-            <div v-if="data.default" class="object-default">
-              <i>Default: {{ data.default }}</i>
-            </div>
+            <div v-if="data.default" class="object-default" v-html="md.renderInline( 'Default: ' + data.default)"></div>
           <button
             v-if="data.type === 'object' || data.arrayType === 'object' || data.arrayType === 'array'"
             class="property-toggle"
@@ -57,11 +55,8 @@
         <span v-if="data.required" class="value-tag red">REQUIRED</span>
         <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
         <span v-if="data.computed" class="value-tag">COMPUTED</span>
-        <div class="value-description " v-html="md.render( data.description)"></div>
-        <div v-if="data.default" class="value-default">
-          <i>Default: {{ data.default }}</i>
-        </div>
-
+        <div class="value-description " v-html="md.render( data.description)"/>
+        <div v-if="data.default" class="value-default" v-html="md.renderInline( 'Default: ' + data.default)"></div>
       </div>
   </div>
 </template>
@@ -268,6 +263,11 @@ code.property{
 }
 
 .object-description code {
+  background-color: rgba(23, 25, 22, 0.00) !important;
+  font-size: 0.95em !important;
+}
+
+.value-description code {
   background-color: rgba(23, 25, 22, 0.00) !important;
   font-size: 0.95em !important;
 }

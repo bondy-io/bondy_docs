@@ -637,7 +637,7 @@ const actionSpec = {
         "required": true,
         "mutable": false,
         "description": "Allowed values: out, in and both.",
-        "default": "out"
+        "default": '"out"'
     }
 };
 
@@ -662,7 +662,7 @@ const bridgeData = {
         "required": true,
 		"mutable": true,
 		"description": "Whether the bridge is enabled.",
-        "default": false
+        "default": "`false`"
     },
     "endpoint": {
         "type": "required",
@@ -675,7 +675,7 @@ const bridgeData = {
         "required": true,
 		"mutable": false,
 		"description": "The connection transport. The allowed values are: tls and tcp.",
-        "default": "tcp"
+        "default": '"tcp"'
     },
     "tls_opts": {
         "type": "object",
@@ -691,14 +691,14 @@ const bridgeData = {
                 "items": {
                     "type": "string"
                 },
-                "default": ["tlsv1.3"]
+                "default": '["tlsv1.3"]'
             },
             "verify": {
                 "type": "string",
                 "required": true,
                 "mutable": false,
                 "description": "The allowed values are: verify_peer and verify_none.",
-                "default": "verify_none"
+                "default": '"verify_none"'
             },
             "certfile": {
                 "type": "string",
@@ -732,7 +732,7 @@ const bridgeData = {
             "keepalive": {
                 "type": "boolean",
                 "required": true,
-                "default": true
+                "default": "`true`"
             },
             "nodelay": {
                 "type": "boolean",
@@ -752,17 +752,14 @@ const bridgeData = {
                 "required": false
             }
         },
-        "default": {
-            "keepalive": true,
-            "nodelay": true
-        }
+        "default": '{"keepalive": true, "nodelay": true}'
     },
     "parallelism": {
         "type": "integer",
         "required": true,
 		"mutable": false,
 		"description": "Parallelism.",
-        "default": 1
+        "default": "`1`"
     },
     "restart": {
         "type": "string",
@@ -776,7 +773,7 @@ const bridgeData = {
         "required": true,
 		"mutable": false,
 		"description": "Time in milliseconds that Bondy will allow for a connection with no activity to be kept alive. Bondy will close the connection after this time. Default is 24 hours.",
-        "default": 86400000
+        "default": "86400000"
     },
     "hibernate": {
         "type": "string",
@@ -790,14 +787,14 @@ const bridgeData = {
         "required": true,
 		"mutable": false,
 		"description": "TCP connection timeout in milliseconds.",
-        "default": 5000
+        "default": "5000"
     },
     "network_timeout": {
         "type": "integer | infinity",
         "required": true,
 		"mutable": false,
 		"description": "Network connection timeout in milliseconds, waiing for network connected event.",
-        "default": 30000
+        "default": "30000"
     },
     "max_frame_size": {
         "type": "integer | infinity",
@@ -817,21 +814,21 @@ const bridgeData = {
                 "required": true,
                 "mutable": false,
                 "description": "If the reconnection is enabled.",
-                "default": true
+                "default": "`true`"
             },
             "backoff_max": {
                 "type": "integer",
                 "required": true,
                 "mutable": false,
                 "description": "The maximun backoff time in milliseconds.",
-                "default": 60000
+                "default": "60000"
             },
             "backoff_min": {
                 "type": "integer",
                 "required": true,
                 "mutable": false,
                 "description": "The minimum backoff time in milliseconds.",
-                "default": 5000
+                "default": "5000"
             },
             "backoff_type": {
                 "type": "string",
@@ -845,10 +842,10 @@ const bridgeData = {
                 "required": true,
                 "mutable": false,
                 "description": "The max number of retries.",
-                "default": 100
+                "default": "100"
             }
         },
-        "default": {}
+        "default": "`{}`"
     },
     "ping": {
         "type": "object",
@@ -860,31 +857,31 @@ const bridgeData = {
                 "required": true,
                 "mutable": false,
                 "description": "If the ping is enabled.",
-                "default": true
+                "default": "`true`"
             },
             "idle_timeout": {
                 "type": "integer | infinity",
                 "required": true,
                 "mutable": false,
                 "description": "Time in milliseconds that Bondy will allow for a connection with no activity to be kept alive.",
-                "default": 20000
+                "default": "20000"
             },
             "timeout": {
                 "type": "integer",
                 "required": true,
                 "mutable": false,
                 "description": "Timeout in milliseconds.",
-                "default": 10000
+                "default": "10000"
             },
             "max_attempts": {
                 "type": "integer",
                 "required": true,
                 "mutable": false,
                 "description": "The max retries after which Bondy deems the connection dead and closes the socket.",
-                "default": 2
+                "default": "2"
             }
         },
-        "default": {}
+        "default": "`{}`"
     },
     "realms": {
         "type": "array",
@@ -951,7 +948,7 @@ const bridgeData = {
                         "properties": procedureActionSpec
                     },
                     "description": "",
-                    "default": []
+                    "default": "[]"
                 },
                 "topics": {
                     "type": "array",
@@ -961,7 +958,7 @@ const bridgeData = {
                         "properties": topicActionSpec
                     },
                     "description": "",
-                    "default": []
+                    "default": "[]"
                 }
             }
         }
