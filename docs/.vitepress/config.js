@@ -395,6 +395,12 @@ export default {
               link: '/tutorials/getting_started/marketplace',
               isFeature:true,
               description: 'A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS web application.'
+            },
+            {
+              text: 'HTTP API Gateway',
+              link: '/tutorials/getting_started/http_api_gateway',
+              isFeature:true,
+              description: 'A tutorial that demonstrates how create and configure HTTP endpoints to expose the wamp procedures of the Marketplace.'
             }
           ]
         },
