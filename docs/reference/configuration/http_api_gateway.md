@@ -127,60 +127,50 @@ TBD
 
 ## Action Object
 
-### Static Action
+The API Gateway currently supports 3 types of actions.
 
-- **type** = "static"
-- **headers** map
-- **body** any
+### Static Action
+An action that returns a static response.
+
+
+<DataTreeView :data="staticAction" :maxDepth="10" />
+
+#### Example
+
+```json
+TBD
+```
 
 ### Forward Action
+An action that forwards the incoming HTTP request to an upstream HTTP endpoint.
 
-- **type** = "forward"
-- **http_method** *string*
-One of the following values:
-    - `delete`
-    - `get`
-    - `head`
-    - `options`
-    - `patch`
-    - `post`
-    - `put`
-- **host** string
-- **path** string
-- **query_string** string
-- **headers** map
-- **body** any
-- **timeout** integer
-- **connect_timeout** integer
-- **retries** integer
-- **retry_timeout** integer
+<DataTreeView :data="fwdAction" :maxDepth="10" />
+
+#### Example
+
+```json
+TBD
+```
 
 ### WAMP Action
+An action that transforms an incoming HTTP request to a WAMP operation.
 
-- **type** *string*
-One of the following values:
-    - `wamp_call`
-    - `wamp_publish`
-    - `wamp_register`
-    - `wamp_unregister`
-    - `wamp_subscribe`
-    - `wamp_unsubscribe`
-- options map
-- timeout integer
-- retries integer
-- procedure uri
-- options map
-- arguments Any[]
-- arguments_kw map
+<DataTreeView :data="wampAction" :maxDepth="10" />
+
+#### Example
+
+```json
+TBD
+```
 
 ## Response Object
 
-- **headers** map
-- **body** any
-- **status_code** integer
-- **uri** uri
+<DataTreeView :data="response" :maxDepth="10" />
 
 ## Defaults Object
+The defaults object is used to defined default values for the API specification objects properties.
+
+<DataTreeView :data="defaults" :maxDepth="10" />
 
 - **schemes** *array*
 An array of strings where values can be: `http` or `https`.
@@ -304,6 +294,18 @@ Let's explore a some example mops expressions to demonstrate how you can use mop
 
 
 <script>
+
+const schemes = {
+    "type": "array",
+    "required": false,
+    "mutable": false,
+    "items": {
+        "type": "string"
+    },
+    "default": '["http"]',
+    "description": "An array of strings where values can be: `http` or `https`."
+};
+
 const apiRequest = {
     "type": "object",
     "required": false,
@@ -733,16 +735,7 @@ const basicSecurity = {
         "mutable": false,
         "description": "A value of `basic`."
     },
-    "schemes": {
-        "type": "array",
-        "required": false,
-        "mutable": false,
-        "items": {
-            "type": "string"
-        },
-        "default": '["http"]',
-        "description": "An array of strings where values can be: `http` or `https`."
-    }
+    "schemes": schemes
 };
 
 const oauth2 = {
@@ -752,21 +745,12 @@ const oauth2 = {
         "mutable": false,
         "description": "A value of `oauth2`."
     },
-    "schemes": {
-        "type": "array",
-        "required": false,
-        "mutable": false,
-        "items": {
-            "type": "string"
-        },
-        "default": '["http"]',
-        "description": "An array of strings where values can be: `http` or `https`."
-    },
-    "schemes": {
+    "schemes": schemes,
+    "flow": {
         "type": "string",
         "required": true,
         "mutable": false,
-        "description": "One of the following values: implicit, authorization_code, client_credentials, resource_owner_password_credentials."
+        "description": "One of the following values:\n- `implicit`\n- `authorization_code`\n- `client_credentials`\n- `resource_owner_password_credentials`"
     },
     "token_path": {
         "type": "string",
@@ -826,6 +810,180 @@ const operation = {
 };
 
 
+const staticAction = {
+    "\ttype": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "The value `static`."
+    },
+    "headers": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of HTTP headers to their corresponding values to be returned with the response"
+    },
+    "body": {
+        "type": "undefined",
+        "required": false,
+        "mutable": false,
+        "description": "The body to be returned with the response."
+    }
+};
+
+const fwdAction = {
+    "\ttype": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "The value `forward`."
+    },
+    "http_method" : {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "The HTTP method to be used when forwarding the request to the upstream endpoint. It must be on of the HTTP methods:\n- `delete`\n- `get`\n- `head`\n- `options`\n- `patch`\n- `post`\n- `put`"
+    },
+    "host" : {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "The upstream host."
+    },
+    "path" : {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "The upstream path."
+    },
+    "query_string" : {
+        "type": "string",
+        "required": false,
+        "mutable": false,
+        "description": "The upstream query string."
+    },
+    "headers": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of HTTP headers to their corresponding values to be forwarded to the upstream endpoint."
+    },
+    "body": {
+        "type": "undefined",
+        "required": false,
+        "mutable": false,
+        "description": "The body to be forwarded to the upstream endpoint."
+    },
+    "timeout": {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "connect_timeout": {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "retries": {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "retry_timeout": {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    }
+};
+
+const wampAction = {
+    "\ttype": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "One of the following values:\n- `wamp_call`\n- `wamp_publish`\n- `wamp_register`\n- `wamp_unregister`\n- `wamp_subscribe`\n- `wamp_unsubscribe`"
+    },
+    "options": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "The WAMP message `options`."
+    },
+    "args": {
+        "type": "array",
+        "items": {
+            "type": "undefined"
+        },
+        "required": false,
+        "mutable": false,
+        "description": "The WAMP message `args`."
+    },
+    "kwargs": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "The WAMP message `kwargs`."
+    },
+    "timeout": {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "connect_timeout": {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "retries": {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "retry_timeout": {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    }
+};
+
+
+const response = {
+    "headers": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of HTTP headers to their corresponding values to be returned with the response"
+    },
+    "body": {
+        "type": "undefined",
+        "required": false,
+        "mutable": false,
+        "description": "The body to be returned with the response."
+    },
+    "status_code": {
+        "type": "integer",
+        "required": false,
+        "mutable": false,
+        "description": "The HTTP status code for the response"
+    },
+    "uri": {
+        "type": "string",
+        "required": false,
+        "mutable": false,
+        "description": "The URI for the response. If defined, the status code will the redirect code."
+    }
+};
+
+
+const defaults = {
+    "schemes": schemes,
+    "security": {
+        "type": "SecurityObject",
+        "required": false,
+        "mutable": true,
+    }
+};
+
 export default {
     data() {
         return {
@@ -834,8 +992,13 @@ export default {
             version: JSON.stringify(version),
             path: JSON.stringify(path),
             operation: JSON.stringify(operation),
+            staticAction: JSON.stringify(staticAction),
+            fwdAction: JSON.stringify(fwdAction),
+            wampAction: JSON.stringify(wampAction),
+            response: JSON.stringify(response),
             basicSecurity: JSON.stringify(basicSecurity),
-            oauth2: JSON.stringify(oauth2)
+            oauth2: JSON.stringify(oauth2),
+            defaults: JSON.stringify(defaults)
         }
     }
 };
