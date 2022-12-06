@@ -32,7 +32,8 @@ At the moment, following on the [Marketplace tutorial](/tutorials/getting_starte
     - item deadline (in minutes)
 
 ::: info Note
-👉 For simplicity our realm already has configured the support for the `oauth2` and `password` methods and the proper users, groups and grants to be able to do the oauth2 flow. You can see the realm definition below:
+For simplicity our realm already has for the `oauth2` and `password` methods and the proper users, groups and grants to be able to do the OAuth2 flow.
+You can see those in the realm definition below:
 
 - `com.example.demo`
     
