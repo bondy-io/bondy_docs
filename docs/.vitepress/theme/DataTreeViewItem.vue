@@ -4,7 +4,7 @@
       v-if="data.type === 'object' || data.type === 'array'"
       :style="valueStyle">
       <div v-if="data.key != '/'" class="data-key">
-            <code>{{ data.key }}</code>
+            <code class="property">{{ data.key }}</code>
             <span v-if="data.type === 'array'" class="value-type">
               {{ data.type + "[" + data.arrayType + "]" }}
             </span>
@@ -12,7 +12,7 @@
             <span v-if="data.required" class="value-tag red">REQUIRED</span>
             <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
             <span v-if="data.computed" class="value-tag">COMPUTED</span>
-            <div class="object-description">{{ data.description }}</div>
+            <div class="object-description " v-html="md.render( data.description)"></div>
             <div v-if="data.default" class="object-default">
               <i>Default: {{ data.default }}</i>
             </div>
@@ -48,7 +48,7 @@
         @keyup.space="onClick(data)"
       >
         <!-- Root -->
-        <span class="value-key"><code>{{ data.key }}</code></span>
+        <span class="value-key"><code class="property">{{ data.key }}</code></span>
         <span v-if="data.type === 'string' || data.type === 'integer' || data.type === 'bigInt' || data.type === 'boolean' || data.type === 'undefined' || data.type === 'map'"
         class="value-type">{{ data.type }}</span>
         <span v-else class="value-type">
@@ -57,7 +57,7 @@
         <span v-if="data.required" class="value-tag red">REQUIRED</span>
         <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
         <span v-if="data.computed" class="value-tag">COMPUTED</span>
-        <div class="value-description ">{{ data.description }}</div>
+        <div class="value-description " v-html="md.render( data.description)"></div>
         <div v-if="data.default" class="value-default">
           <i>Default: {{ data.default }}</i>
         </div>
@@ -76,8 +76,9 @@ import {
   SetupContext,
 } from "vue";
 import { then, when } from "switch-ts";
-import { MarkdownIt } from "markdown-it";
 import slugify from '@sindresorhus/slugify'
+import MarkdownIt from 'markdown-it'
+
 
 export interface SelectedData {
   key: string;
@@ -189,6 +190,7 @@ export default defineComponent({
         .default(then("var(--jtv-valueKey-color)"));
     }
 
+    const md = new MarkdownIt();
 
     const classes = computed((): unknown => {
       return {
@@ -249,7 +251,8 @@ export default defineComponent({
       lengthString,
       ItemType,
       isImmutable,
-      slug
+      slug,
+      md
 
     };
   },
@@ -259,6 +262,13 @@ export default defineComponent({
 <style lang="css">
 .root-item {
     margin-left: 0px;
+}
+
+code.property{
+}
+
+.object-description code {
+  background-color: rgba(23, 25, 22, 0.00) !important;
 }
 
 .data-tree-item:not(.root-item) {
