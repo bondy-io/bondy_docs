@@ -2,35 +2,31 @@
 draft: true
 ---
 
-# Bondy HTTP API Gateway - Marketplace demo
+# Marketplace HTTP API Gateway
+A tutorial that demonstrates how to add an HTTP API to an existing project using the HTTP API Gateway.
 
 ## Goal
+In this tutorial we are going to pick up where we left off with the [Marketplace tutorial](/tutorials/getting_started/marketplace.html).
 
-The tutorial demonstrates how we can configure and expose the all wamp procedures registered in the [Marketplace](https://developer.bondy.io/tutorials/getting_started/marketplace.html) throw http using the **[Bondy API Gateway](https://developer.bondy.io/reference/configuration/http_api_gateway.html#overview)**. 
+The idea is to now expose the WAMP API we have developed to HTTP. The goal is to demonstrate how one can use Bondy's capabilities to integrate HTTP clients into the application network.
 
-To be able to do it, we need to execute the steps detailed below, creating and configuring the http api spec as a json file, loading it and then executing http endpoints as a test.
+The steps in the following sections will demonstrate how to create an HTTP [API Specification Object](reference/configuration/http_api_gateway.html#api-specification-object) from scratch, loading it in Bondy and demonstrating how we can call the resulting HTTP API using an HTTP client.
 
 ## Context
 
 ### Procedures
 
-At the moment we have registered the following wamp procedures in the marketplace demo on the `com.example.demo` realm:
+At the moment, following on the [Marketplace tutorial](/tutorials/getting_started/marketplace.html), we have the following WAMP procedures registered on the `com.example.demo` realm:
 
-- `com.market.bidder.add` - It adds an user as bidder
-It receives only one positional arg with the bidder name
-- `com.market.bidder.gone` - It removes an user as bidder
-It receives only one positional arg with the bidder name
-- `com.market.get` - It lists the all items for sale
-It hasn’t any positional args
-- `com.market.item.bid` - It places a bid on a listed item
-It receives three positional args:
+- `com.market.bidder.add` - Add a user as bidder. Takes a single positional argument, the bidder name
+- `com.market.bidder.gone` - Remove a user as bidder. Takes a single positional argument, the bidder name
+- `com.market.get` - List all the items for sale
+- `com.market.item.bid` - Place a bid on a listed item. Takes three positional arguments:
     - item name
     - item new price
     - bidder name
-- `com.market.item.get` - It returns an item's details
-It receives only one positional arg with the item name
-- `com.market.item.sell` - It allows to offer a new item for sale
-It receives three positional args:
+- `com.market.item.get` - Return an item's details. Takes single positional argument, the item name
+- `com.market.item.sell` - List a new item for sale. Takes three positional arguments:
     - item name
     - item price
     - item deadline (in minutes)
@@ -199,7 +195,7 @@ The demo is already running locally the make command (for detailed information t
             }
             ```
             
-    3. Then we need to define the paths using the [Path Object](https://developer.bondy.io/reference/configuration/http_api_gateway.html#path-object) with the proper HTTP method, action type, wamp procedures, arguments and responses. Example below for the `/market` GET endpoint calling to the proper `com.market.get` wamp procedures without any args nor kwargs. Example below:
+    3. Then we need to define the paths using the [Path Object](https://developer.bondy.io/reference/configuration/http_api_gateway.html#path-object) with the proper HTTP method, action type, WAMP procedures, arguments and responses. Example below for the `/market` GET endpoint calling to the proper `com.market.get` WAMP procedures without any args nor kwargs. Example below:
         
         ::: info Note
         👉 In the configured path you can notice, for example, the property is_collection: true due to the result of this endpoint is a collection of items
@@ -404,7 +400,7 @@ The demo is already running locally the make command (for detailed information t
 
 ## Conclusion
 
-As we have demonstrated above, we can configure and expose in a really easy and quickly way the http api for all wamp procedures registered in the Bondy Marketplace demo
+As we have demonstrated above, we can configure and expose in a really easy and quickly way the http api for all WAMP procedures registered in the Bondy Marketplace demo
 
 As a reference, you can see the configured http api spec in the steps above [api_gateway_config.json](https://github.com/bondy-io/bondy-demo-marketplace/blob/main/resources/api_gateway_config.json)
 
