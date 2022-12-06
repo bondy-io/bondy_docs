@@ -14,9 +14,9 @@ The steps in the following sections will demonstrate how to create an HTTP [API 
 
 ## Context
 
-### Procedures
+### Marketplace API
 
-At the moment, following on the [Marketplace tutorial](/tutorials/getting_started/marketplace.html), we have the following WAMP procedures registered on the `com.example.demo` realm:
+The [Marketplace tutorial](/tutorials/getting_started/marketplace.html) offers the following WAMP API procedures registered on the `com.example.demo` realm:
 
 - `com.market.bidder.add` - Add a user as bidder. Takes a single positional argument, the bidder name
 - `com.market.bidder.gone` - Remove a user as bidder. Takes a single positional argument, the bidder name
@@ -32,56 +32,58 @@ At the moment, following on the [Marketplace tutorial](/tutorials/getting_starte
     - item deadline (in minutes)
 
 ::: info Note
-For simplicity our realm already has for the `oauth2` and `password` methods and the proper users, groups and grants to be able to do the OAuth2 flow.
-You can see those in the realm definition below:
+The `com.example.demo` realm we used in the Marketplace tutorial already had support for OAuth2 authentication:
+* `oauth2` and `password` authmethods enabled
+* users, groups and grants to be able to perform the OAuth2 flow.
 
-- `com.example.demo`
-    
-    ```json
-    {
-        "authmethods": [
-            "cryptosign",
-            "anonymous",
-            "oauth2",
-            "password"
-        ],
-        "description": "The market realm",
-        "is_prototype": false,
-        "is_sso_realm": false,
-        "password_opts": {
-            "params": {
-                "iterations": 10000,
-                "kdf": "pbkdf2"
-            },
-            "protocol": "cra"
+You can see those highlighted in the Realm definition below:
+
+
+```json 5-6
+{
+    "authmethods": [
+        "cryptosign",
+        "anonymous",
+        "oauth2",
+        "password"
+    ],
+    "description": "The market realm",
+    "is_prototype": false,
+    "is_sso_realm": false,
+    "password_opts": {
+        "params": {
+            "iterations": 10000,
+            "kdf": "pbkdf2"
         },
-        "public_keys": [
-            {
-                "crv": "P-256",
-                "kid": "11116844",
-                "kty": "EC",
-                "x": "-wc2zdqixwOixJ45Bi_bmr5WknFyUibrQMWkLXbL3Kg",
-                "y": "YBWzCcHCGMDAmUfx84J3O53L7QcZl_Be4zEMsjQmq8g"
-            },
-            {
-                "crv": "P-256",
-                "kid": "119815566",
-                "kty": "EC",
-                "x": "ce3F2nAqePIAgJawlupqUE3gjVmTSYLrAc76wyToBPc",
-                "y": "a0WppYd2m_7UpXbb1SfW0O3i7USuxbUokl48Uk6GARQ"
-            },
-            {
-                "crv": "P-256",
-                "kid": "129179117",
-                "kty": "EC",
-                "x": "0XSBmbwcOTKxR14Ic8Nr9LMAjgOz_3FYfg7wJCaEdl4",
-                "y": "TU9ji-7AelCmwrOu0fNfVN0G8o6LeNf-rNqjDspq2lM"
-            }
-        ],
-        "security_status": "enabled",
-        "uri": "com.market.demo"
-    }
-    ```
+        "protocol": "cra"
+    },
+    "public_keys": [
+        {
+            "crv": "P-256",
+            "kid": "11116844",
+            "kty": "EC",
+            "x": "-wc2zdqixwOixJ45Bi_bmr5WknFyUibrQMWkLXbL3Kg",
+            "y": "YBWzCcHCGMDAmUfx84J3O53L7QcZl_Be4zEMsjQmq8g"
+        },
+        {
+            "crv": "P-256",
+            "kid": "119815566",
+            "kty": "EC",
+            "x": "ce3F2nAqePIAgJawlupqUE3gjVmTSYLrAc76wyToBPc",
+            "y": "a0WppYd2m_7UpXbb1SfW0O3i7USuxbUokl48Uk6GARQ"
+        },
+        {
+            "crv": "P-256",
+            "kid": "129179117",
+            "kty": "EC",
+            "x": "0XSBmbwcOTKxR14Ic8Nr9LMAjgOz_3FYfg7wJCaEdl4",
+            "y": "TU9ji-7AelCmwrOu0fNfVN0G8o6LeNf-rNqjDspq2lM"
+        }
+    ],
+    "security_status": "enabled",
+    "uri": "com.market.demo"
+}
+```
 :::
 
 ## Configuration Steps
