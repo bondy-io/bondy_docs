@@ -38,7 +38,6 @@ The `com.example.demo` realm we used in the Marketplace tutorial already had sup
 
 You can see those highlighted in the Realm definition below:
 
-
 ```json 5-6
 {
     "authmethods": [
@@ -84,22 +83,27 @@ You can see those highlighted in the Realm definition below:
     "uri": "com.market.demo"
 }
 ```
+
+In addition, the realm had the following users defined:
+
+- `postman`: Postman app user for testing purposes that belongs to the `api_clients` group
+- `victor`: An end user for testing purposes that belongs to the `resource_owners` group
 :::
 
 ## Configuration Steps
 
 ::: info Note
-👉 Please you can check the [API Specification Object](https://developer.bondy.io/reference/configuration/http_api_gateway.html#api-specification-object) for detailed information.
+Please refer to [API Specification Object](/reference/configuration/http_api_gateway.html#api-specification-object) for detailed information.
 :::
 
 ### Pre-conditions
 
-The Marketplace’s realm `com.example.demo` already has configured the following users with the proper groups and grants:
+The Marketplace’s realm `com.example.demo` already has the following users configured with the proper groups and grants:
 
-- `postman`: Postman app user for testing purposes that belongs to the **api_clients** group
-- `victor`: Victor end user for testing purposes that belongs to the **resource_owners** group
+- `postman`: Postman app user for testing purposes that belongs to the `api_clients` group
+- `victor`: An end user for testing purposes that belongs to the `resource_owners` group
 
-The demo is already running locally using the `make` command (for detailed information to download and run the demo, please see [Running the Demo](https://developer.bondy.io/tutorials/getting_started/marketplace.html#running-the-demo))
+The demo is already running locally using the `make` command (for detailed information to download and run the demo, please see [Running the Demo](/tutorials/getting_started/marketplace.html#running-the-demo))
 
 ### Configuration
 
@@ -107,7 +111,7 @@ The demo is already running locally using the `make` command (for detailed infor
     
     In this part we try to show how we can create and configure the api spec to be able to expose some endpoints to call registered wamp procedures:
     
-    1. As a first step we need to define the "headers" for the [API Object](https://developer.bondy.io/reference/configuration/http_api_gateway.html#api-object). In this case we are configuring it with the **id** `com.market.demo` on the **realm** `com.market.demo` and with **oauth2** as security enabled and also some other defaults and configuration. Example below:
+    1. As a first step we need to define the "headers" for the [API Object](/reference/configuration/http_api_gateway.html#api-object). In this case we are configuring it with the **id** `com.market.demo` on the **realm** `com.market.demo` and with **oauth2** as security enabled and also some other defaults and configuration. Example below:
         - **API Object**
             
             ```json
@@ -172,7 +176,7 @@ The demo is already running locally using the `make` command (for detailed infor
             }
             ```
             
-    2. Then we need to define the [Version Object](https://developer.bondy.io/reference/configuration/http_api_gateway.html#version-object) and its path. In this case we are defining the **version** `1.0.0` and it is part of the default path (optional). Example below:
+    2. Then we need to define the [Version Object](/reference/configuration/http_api_gateway.html#version-object) and its path. In this case we are defining the **version** `1.0.0` and it is part of the default path (optional). Example below:
         - **Version Object**
             
             ```json
@@ -198,7 +202,7 @@ The demo is already running locally using the `make` command (for detailed infor
             }
             ```
             
-    3. Then we need to define the paths using the [Path Object](https://developer.bondy.io/reference/configuration/http_api_gateway.html#path-object) with the proper HTTP method, action type, WAMP procedures, arguments and responses. Example below for the `/market` GET endpoint calling to the proper `com.market.get` WAMP procedure without any args nor kwargs. Example below:
+    3. Then we need to define the paths using the [Path Object](/reference/configuration/http_api_gateway.html#path-object) with the proper HTTP method, action type, WAMP procedures, arguments and responses. Example below for the `/market` GET endpoint calling to the proper `com.market.get` WAMP procedure without any args nor kwargs. Example below:
         
         ::: info Note
         👉 In the configured path you can notice, for example, the property is_collection: true due to the result of this endpoint is a list of items
@@ -256,7 +260,7 @@ The demo is already running locally using the `make` command (for detailed infor
             }
             ```
             
-2. Load the defined api spec using the [Bondy Administrative API](https://developer.bondy.io/reference/http_api/index.html)
+2. Load the defined api spec using the [Bondy Administrative API](/reference/http_api/index.html)
     
     ```bash
     curl -X "POST" "http://localhost:18081/services/load_api_spec" \
