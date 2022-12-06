@@ -172,8 +172,6 @@ The defaults object is used to defined default values for the API specification 
 
 <DataTreeView :data="defaults" :maxDepth="10" />
 
-- **schemes** *array*
-An array of strings where values can be: `http` or `https`.
 - security Security
 - body_max_byte integer
 - body_read_bytes integer
@@ -306,6 +304,33 @@ const schemes = {
     "description": "An array of strings where values can be: `http` or `https`."
 };
 
+const headers = {
+    "type": "map",
+    "required": false,
+    "mutable": false,
+    "description": "A mapping of HTTP headers to their corresponding values to be returned with the response"
+};
+
+const accepts = {
+    "type": "array",
+    "required": false,
+    "mutable": false,
+    "items": {
+        "type": "string"
+    },
+    "description": "An array of content types. The supported content types are:\n* `application/json`\n* `application/json; charset=utf-8`\n* `application/msgpack` \n* `application/msgpack; charset=utf-8`\n* `application/x-www-form-urlencoded`"
+};
+
+const provides = {
+    "type": "array",
+    "required": false,
+    "mutable": false,
+    "items": {
+        "type": "string"
+    },
+    "description": "An array of content types. The supported content types are:\n* `application/json`\n* `application/json; charset=utf-8`\n* `application/msgpack` \n* `application/msgpack; charset=utf-8`"
+};
+
 const apiRequest = {
     "type": "object",
     "required": false,
@@ -354,12 +379,7 @@ const apiRequest = {
             "mutable": false,
             "description": "The port number the request."
         },
-        "headers": {
-            "type": "map",
-            "required": false,
-            "mutable": false,
-            "description": "A map where the keys are HTTP headers."
-        },
+        "headers": headers,
         "language": {
             "type": "string",
             "required": false,
@@ -610,40 +630,10 @@ const path = {
         "default": "`false`",
         "description": "Defines whether the resource managed in this path is a collection or not."
     },
-    "headers": {
-        "type": "map",
-        "required": false,
-        "mutable": false,
-        "description": "map or expression"
-    },
-    "accepts": {
-        "type": "array",
-        "required": false,
-        "mutable": false,
-        "items": {
-            "type": "string"
-        },
-        "description": "An array of content types. The supported content types are:\n* `application/json`\n* `application/json; charset=utf-8`\n* `application/msgpack` \n* `application/msgpack; charset=utf-8`\n* `application/x-www-form-urlencoded`"
-    },
-    "provides": {
-        "type": "array",
-        "required": false,
-        "mutable": false,
-        "items": {
-            "type": "string"
-        },
-        "description": "An array of content types. The supported content types are:\n* `application/json`\n* `application/json; charset=utf-8`\n* `application/msgpack` \n* `application/msgpack; charset=utf-8`"
-    },
-    "schemes": {
-        "type": "array",
-        "required": false,
-        "mutable": false,
-        "items": {
-            "type": "string"
-        },
-        "default": '["http"]',
-        "description": "An array of strings where values can be: `http` or `https`."
-    },
+    "headers": headers,
+    "accepts": accepts,
+    "provides": provides,
+    "schemes": schemes,
     "body_max_byte" : {
         "type": "integer",
         "required": false,
@@ -817,12 +807,7 @@ const staticAction = {
         "mutable": false,
         "description": "The value `static`."
     },
-    "headers": {
-        "type": "map",
-        "required": false,
-        "mutable": false,
-        "description": "A mapping of HTTP headers to their corresponding values to be returned with the response"
-    },
+    "headers": headers,
     "body": {
         "type": "undefined",
         "required": false,
@@ -862,12 +847,7 @@ const fwdAction = {
         "mutable": false,
         "description": "The upstream query string."
     },
-    "headers": {
-        "type": "map",
-        "required": false,
-        "mutable": false,
-        "description": "A mapping of HTTP headers to their corresponding values to be forwarded to the upstream endpoint."
-    },
+    "headers": headers,
     "body": {
         "type": "undefined",
         "required": false,
@@ -948,12 +928,7 @@ const wampAction = {
 
 
 const response = {
-    "headers": {
-        "type": "map",
-        "required": false,
-        "mutable": false,
-        "description": "A mapping of HTTP headers to their corresponding values to be returned with the response"
-    },
+    "headers": headers,
     "body": {
         "type": "undefined",
         "required": false,
@@ -977,10 +952,33 @@ const response = {
 
 const defaults = {
     "schemes": schemes,
+    "accepts": accepts,
+    "provides": provides,
     "security": {
         "type": "SecurityObject",
         "required": false,
         "mutable": true,
+    },
+    "body_max_byte" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false,
+        "description": "",
+        "default": "The parent Path Object's `body_max_byte` value."
+    },
+    "body_read_bytes" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false,
+        "description": "",
+        "default": "The parent Path Object's `body_read_bytes` value."
+    },
+    "body_read_seconds" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false,
+        "description": "",
+        "default": "The parent Path Object's `body_read_seconds` value."
     }
 };
 
