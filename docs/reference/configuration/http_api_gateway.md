@@ -70,53 +70,18 @@ The Version Object represents a particular API version.
 ### Example
 
 ```json
-{
-
-}
+TBD
 ```
 
 ## Path Object
 
 <DataTreeView :data="path" :maxDepth="10" />
 
-- **summary** string
-- **description** string
-A user description for this object
-- **variables** map | Expr
-- **defaults** Defaults | Expr
-- **is_collection** boolean
-Defines wether the resource managed in this path is a collection or not.
-- **headers** map | Expr
-- **accepts** array
-An array of content types. The supported content types are:
-    - `application/json`
-    - `application/json; charset=utf-8`
-    - `application/msgpack`
-    - `application/msgpack; charset=utf-8`
-    - `application/x-www-form-urlencoded`
-- **provides** array
-An array of content types. The supported content types are:
-    - `application/json`
-    - `application/json; charset=utf-8`
-    - `application/msgpack`
-    - `application/msgpack; charset=utf-8`
-- **schemes** array
-An array of strings where values can be: `http` or `https`.
-- **security** Security
-- **body_max_byte** integer
-- **body_read_bytes** integer
-- **body_read_seconds** integer
-- **timeout** integer
-- **connect_timeout** integer
-- **retries** integer
-- **retry_timeout** integer
-- **delete** Operation
-- **get** Operation
-- **head** Operation
-- **options** Operation
-- **patch** Operation
-- **post** Operation
-- **put** Operation
+### Example
+
+```json
+TBD
+```
 
 ## Operation Object
 
@@ -213,41 +178,30 @@ An array of content types. The supported content types are:
 
 One of the following objects.
 
-### Basic Security
+### Basic Authentication
 
-- type = basic string
-- schemes SCHEME[]
+<DataTreeView :data="basicSecurity" :maxDepth="10" />
 
-### APIKeySecurity
+
+### API Key Authentication
 
 ::: warning
 NOT IMPLEMENTED
 :::
 
-- type = api_key string
+<!-- - type = api_key string
 - schemes SCHEME[]
-- header_name string
+- header_name string -->
 
-### OAUTH2 Security
+### OAuth2 AUthentication
 
-- type = oauth2 string
-- description string
-- **schemes** *array*
-An array of strings where values can be: `http` or `https`.
-- **flow** *string*
-One of the following values:
-    - `implicit`
-    - `authorization_code`
-    - `client_credentials`
-    - `resource_owner_password_credentials`
-- **token_path** *string*
-The path to use for the obtain and refresh token action. Normally `/oauth/token`
-- **revoke_token_path** string
-The path to use for the revoke token action. Normally `/oauth/revoke`
+<DataTreeView :data="oauth2" :maxDepth="10" />
 
 ## API Context
 
-The API context is a map that contains the results of parsing and evaluating the definitions and expressions defined in an API Specification. This map contains the following keys:
+The API context is a map that at runtime contains the results of parsing and evaluating the definitions and expressions defined in an API Specification Object.
+
+This map contains the following keys:
 
 <DataTreeView :data="apiContext" :maxDepth="10" />
 
@@ -258,7 +212,6 @@ These properties are addressable by the expression language using the key `reque
 ```
 {{request.body}}
 ```
-
 :::
 
 ## API Expression Language
@@ -269,8 +222,7 @@ This same language is also used by the [Broker Bridge Specification](/reference/
 
 The expression language operates on the [API Context](#api-context), a recursive map data structure that at design time contains an API Request object.
 
-::: info How do the API specification expressions work?
-**It works by expanding keys (or key paths) provided in a context object and adding or updating keys in the same context object.**
+Mops works by **expanding keys (or key paths) provided in a context object and adding or updating keys in the same context object.**
 
 To understand how mops is used in those use cases let's first explore a very simple and non-Bondy related example to understand how Mops works.
 
@@ -317,7 +269,6 @@ Let's explore a some example mops expressions to demonstrate how you can use mop
 |`{{"The sku number is \{\{sku\}\}"}}`|"The sku number is ZPK1972"|
 
 
-:::
 
 <script>
 const apiRequest = {
@@ -460,7 +411,7 @@ const api = {
         "type": "string",
         "required": true,
         "mutable": false,
-        "description": "The hostname or a pattern."
+        "description": "A string used for matching the incoming HTTP request HOST header value. Hosts with and without a trailing dot are equivalent for routing. Similarly, hosts with and without a leading dot are also equivalent e.g. 'cowboy.example.org', 'cowboy.example.org.' and '.cowboy.example.org' are equivalent. A pattern using the keyword ':' and wildcard '_' can be used to match multiple domains e.g. 'mydomain.:_' will match 'mydomain.foo' and 'mydomain.bar' but not 'mydomain.foo.baz'."
     },
     "realm_uri": {
         "type": "string",
@@ -499,9 +450,12 @@ const api = {
         "description": "A mapping of WAMP Error URIs to HTTP Status Codes."
     },
     "versions": {
-        "type": "list",
+        "type": "array",
         "required": true,
         "mutable": false,
+        "items": {
+            "type": "VersionObject"
+        },
         "description": "An array of Version Object instances."
     },
 };
@@ -577,9 +531,12 @@ const version = {
         "description": "A mapping of WAMP Error URIs to HTTP Status Codes."
     },
     "languages": {
-        "type": "list",
+        "type": "array",
         "required": false,
         "mutable": false,
+        "items": {
+            "type": "string"
+        },
         "default": ["en"],
         "description": "An array of language code string."
     }
@@ -587,11 +544,201 @@ const version = {
 
 
 const path = {
-    "paths": {
+    "summary": {
+        "type": "string",
+        "required": false,
+        "mutable": false,
+        "description": "A short summary of the API."
+    },
+    "description": {
+        "type": "string",
+        "required": false,
+        "mutable": false,
+        "description": "A description of the API."
+    },
+    "variables": {
         "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of arbitrary variable names to values or MOPS expressions. This variables can be referenced by MOPS expressions in the children objects of this object. These values are merged with and thus override the ones inherited from the API Object variables property."
+    },
+    "defaults": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of attributes to their default values or a MOPS expression resolving to such a map. This values are inherited by children objects as defaults when their value is unset. These values are merged with and thus override the ones inherited from the API Object default property."
+    },
+    "is_collection": {
+        "type": "boolean",
+        "required": false,
+        "mutable": false,
+        "default": false,
+        "description": "Defines whether the resource managed in this path is a collection or not."
+    },
+    "headers": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "map or expression"
+    },
+    "accepts": {
+        "type": "array",
+        "required": false,
+        "mutable": false,
+        "items": {
+            "type": "string"
+        },
+        "description": "An array of content types. The supported content types are: `application/json`, `application/json; charset=utf-8`, `application/msgpack`, `application/msgpack; charset=utf-8` and `application/x-www-form-urlencoded`."
+    },
+    "provides": {
+        "type": "array",
+        "required": false,
+        "mutable": false,
+        "items": {
+            "type": "string"
+        },
+        "description": "An array of content types. The supported content types are: `application/json`, `application/json; charset=utf-8`, `application/msgpack`, and `application/msgpack; charset=utf-8`."
+    },
+    "schemes": {
+        "type": "array",
+        "required": false,
+        "mutable": false,
+        "items": {
+            "type": "string"
+        },
+        "default": ["http"],
+        "description": "An array of strings where values can be: `http` or `https`."
+    },
+    "body_max_byte" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "body_read_bytes" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "body_read_seconds" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "timeout" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "connect_timeout" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "retries" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "retry_timeout" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false
+    },
+    "security" :  {
+        "type": "SecurityObject",
+        "required": false,
+        "mutable": false
+    },
+    "delete" :  {
+        "type": "OperationObject",
+        "required": false,
+        "mutable": false
+    },
+    "get" :  {
+        "type": "OperationObject",
+        "required": false,
+        "mutable": false
+    },
+    "head" :  {
+        "type": "OperationObject",
+        "required": false,
+        "mutable": false
+    },
+    "options" :  {
+        "type": "OperationObject",
+        "required": false,
+        "mutable": false
+    },
+    "patch" :  {
+        "type": "OperationObject",
+        "required": false,
+        "mutable": false
+    },
+    "post" :  {
+        "type": "OperationObject",
+        "required": false,
+        "mutable": false
+    },
+    "put" :  {
+        "type": "OperationObject",
+        "required": false,
+        "mutable": false
+    }
+};
+
+const basicSecurity = {
+    "\ttype": {
+        "type": "string",
         "required": true,
         "mutable": false,
-        "description": "A mapping of paths to Path Objects. Paths are relative URL paths and can contain patterns and optional segments. The path '/' is invalid while the path '/ws' is reserved (used by Bondy for requesting Websocket connections)."
+        "description": "A value of 'basic'."
+    },
+    "schemes": {
+        "type": "array",
+        "required": false,
+        "mutable": false,
+        "items": {
+            "type": "string"
+        },
+        "default": ["http"],
+        "description": "An array of strings where values can be: `http` or `https`."
+    }
+};
+
+const oauth2 = {
+    "\ttype": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "A value of 'oauth2'."
+    },
+    "schemes": {
+        "type": "array",
+        "required": false,
+        "mutable": false,
+        "items": {
+            "type": "string"
+        },
+        "default": ["http"],
+        "description": "An array of strings where values can be: `http` or `https`."
+    },
+    "schemes": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "One of the following values: implicit, authorization_code, client_credentials, resource_owner_password_credentials."
+    },
+    "token_path": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "The path to use for the obtain and refresh token action. Normally '/oauth/token'."
+    },
+    "revoke_token_path": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "The path to use for the revoke token action. Normally '/oauth/revoke'."
     }
 };
 
@@ -602,7 +749,9 @@ export default {
             apiContext: JSON.stringify(apiContext),
             api: JSON.stringify(api),
             version: JSON.stringify(version),
-            path: JSON.stringify(path)
+            path: JSON.stringify(path),
+            basicSecurity: JSON.stringify(basicSecurity),
+            oauth2: JSON.stringify(oauth2)
         }
     }
 };
