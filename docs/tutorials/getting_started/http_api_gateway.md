@@ -407,10 +407,11 @@ The demo is already running locally using the `make` command (for detailed infor
 
 ## Conclusion
 
-As we have demonstrated above, we can configure and expose in a really easy and quickly way the http api spec for all WAMP procedures registered in the Bondy Marketplace demo.
+It is very easy to configure and expose an HTTP API on top of an existing WAMP API. We can do it by using a declarative specification language based on JSON and without any coding.
 
-As a reference, you can see the complete configured http api spec in the steps above [api_gateway_config.json](https://github.com/bondy-io/bondy-demo-marketplace/blob/main/resources/api_gateway_config.json)
 
-Besides, you can check the complete Postman collection with the all configured http endpoints here [Bondy Marketplace demo Postman Collection](/assets/tutorials/Bondy_Marketplace_demo.postman_collection.json)
+As a reference, you can see the resulting HTTP API Specification file at [api_gateway_config.json](https://github.com/bondy-io/bondy-demo-marketplace/blob/main/resources/api_gateway_config.json).
+
+Finally, you can check the complete [Marketplace Postman Collection](/assets/tutorials/Bondy_Marketplace_demo.postman_collection.json).
 
 <ZoomImg alt="Postman Collection overview" src="/assets/tutorials/Postman_Collection.png"/>
