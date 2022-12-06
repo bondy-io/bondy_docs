@@ -37,28 +37,54 @@
         @selected="bubbleSelected"
       />
     </div>
-    <div
-      v-else
-      :style="valueStyle"
-      :class="valueClasses"
-      :role="canSelect ? 'button' : undefined"
-      :tabindex="canSelect ? '0' : undefined"
-      @click="onClick(data)"
-      @keyup.enter="onClick(data)"
-      @keyup.space="onClick(data)"
-    >
-      <!-- Root -->
-      <span class="value-key"><code>{{ data.key }}</code></span>
-      <span class="value-type">{{ data.type }}</span>
-      <span v-if="data.required" class="value-tag red">REQUIRED</span>
-      <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
-      <span v-if="data.computed" class="value-tag">COMPUTED</span>
-      <div class="value-description ">{{ data.description }}</div>
-      <div v-if="data.default" class="value-default">
-        <i>Default: {{ data.default }}</i>
+    <div v-else>
+      <div
+        v-if="data.type === 'string' || data.type === 'integer' || data.type === 'bigInt' || data.type === 'boolean' || data.type === 'undefined' || data.type === 'map'"
+        :style="valueStyle"
+        :class="valueClasses"
+        :role="canSelect ? 'button' : undefined"
+        :tabindex="canSelect ? '0' : undefined"
+        @click="onClick(data)"
+        @keyup.enter="onClick(data)"
+        @keyup.space="onClick(data)"
+      >
+        <!-- Root -->
+        <span class="value-key"><code>{{ data.key }}</code></span>
+        <span class="value-type">{{ data.type }}</span>
+        <span v-if="data.required" class="value-tag red">REQUIRED</span>
+        <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
+        <span v-if="data.computed" class="value-tag">COMPUTED</span>
+        <div class="value-description ">{{ data.description }}</div>
+        <div v-if="data.default" class="value-default">
+          <i>Default: {{ data.default }}</i>
+        </div>
+
       </div>
 
+      <div
+        v-else
+        :style="valueStyle"
+        :class="valueClasses"
+        :role="canSelect ? 'button' : undefined"
+        :tabindex="canSelect ? '0' : undefined"
+        @click="onClick(data)"
+        @keyup.enter="onClick(data)"
+        @keyup.space="onClick(data)"
+      >
+        <!-- Root -->
+        <span class="value-key"><code>{{ data.key }}</code></span>
+        <span class="value-type"><a :href="slug">{{ data.type }}</a></span>
+        <span v-if="data.required" class="value-tag red">REQUIRED</span>
+        <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
+        <span v-if="data.computed" class="value-tag">COMPUTED</span>
+        <div class="value-description ">{{ data.description }}</div>
+        <div v-if="data.default" class="value-default">
+          <i>Default: {{ data.default }}</i>
+        </div>
+
+      </div>
     </div>
+
   </div>
 </template>
 
@@ -73,6 +99,7 @@ import {
 } from "vue";
 import { then, when } from "switch-ts";
 import { MarkdownIt } from "markdown-it";
+import slugify from '@sindresorhus/slugify'
 
 export interface SelectedData {
   key: string;
@@ -163,15 +190,14 @@ export default defineComponent({
       return !isNaN(keyValue) ? `${itemDate.key}"` : `"${itemDate.key}"`;
     }
 
-    function isValue(value: ValueTypes): string {
-      return when(typeof value)
-        .is((v) => v === "string", then(true))
-        .is((v) => v === "number", then(true))
-        .is((v) => v === "bigint", then(true))
-        .is((v) => v === "boolean", then(true))
-        .is((v) => v === "unknown", then(true))
-        .is((v) => v === "undefined", then(true))
-        .default(then(false));
+    function isValueType(value: string): string {
+      return
+        value === "string" ||
+        value === "number" ||
+        value === "bigint" ||
+        value === "boolean" ||
+        value === "unknown" ||
+        value === "undefined";
     }
 
     function getValueColor(value: ValueTypes): string {
@@ -180,7 +206,7 @@ export default defineComponent({
         .is((v) => v === "number", then("var(--jtv-number-color)"))
         .is((v) => v === "bigint", then("var(--jtv-number-color)"))
         .is((v) => v === "boolean", then("var(--jtv-boolean-color)"))
-        .is((v) => v === "object", then("var(--jtv-null-color)"))
+        .is((v) => v === "unknown", then("var(--jtv-null-color)"))
         .is((v) => v === "undefined", then("var(--jtv-null-color)"))
         .default(then("var(--jtv-valueKey-color)"));
     }
@@ -216,6 +242,10 @@ export default defineComponent({
       return length === 1 ? `(${length} property)` : `(${length} properties)`;
     });
 
+    const slug = computed(() : string => {
+      return '#' + slugify(props.data.type);
+    });
+
     const isImmutable = computed((): string => {
       let isMutable = props.data.mutable ?? true;
       let isComputed = props.data.computed ?? false;
@@ -234,13 +264,15 @@ export default defineComponent({
       bubbleSelected,
       getKey,
       getValueColor,
-      isValue,
+      isValueType,
       classes,
       valueStyle,
       valueClasses,
       lengthString,
       ItemType,
-      isImmutable
+      isImmutable,
+      slug
+
     };
   },
 });
