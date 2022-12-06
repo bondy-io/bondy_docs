@@ -2,7 +2,7 @@
 draft: true
 ---
 # Why Bondy
-Learn why we created Bondy to reduce accidental complexity and bring back the joy to distributed applications programming.
+Learn about the need for a unified application networking platform for distributed application development.
 
 
 ## TL;DR
@@ -12,18 +12,19 @@ Learn why we created Bondy to reduce accidental complexity and bring back the jo
 
 [^cmeik]: Christopher Meiklejohn, Strangeloop 2022 [Resilient Microservices without the Chaos](https://www.youtube.com/watch?v=F32peAwCPlM)
 
-Delivering innovative customer experiences today requires the real-time networked connection of people, process, data and things (devices)[^cisco-ioe][^a16z].
+Delivering innovative customer experiences today requires the real-time networked connection of people, process, data and things (devices)[^cisco-ioe].
 
 [^cisco-ioe]: [The Internet of Everything](https://www.cisco.com/c/dam/en_us/about/business-insights/docs/ioe-value-at-stake-public-sector-analysis-faq.pdf)
-[^a16z]: Marc Andreessen, [Why Software is Eating the World](https://a16z.com/2011/08/20/why-software-is-eating-the-world)
 
-But creating those connections has become shockingly complicated due to the sheer number of tools (and their rapid rate of change) involved in most modern application development[^ogrady].
+But creating those connections has become shockingly complicated due to the sheer number of infrastructure components, associated protocols, APIs and client libraries involved in most modern application development[^ogrady].
 
 [^ogrady]: Stephen O'Grady, [The Developer Experience Gap](https://redmonk.com/sogrady/2020/10/06/developer-experience-gap/)
 
-If you are using a microservices architectural style or if you are integrating multiple different customer/user touchpoints across Web, Mobile (and possibly IoT devices) you are developing a distributed system.
+If you are using a microservices architectural style or if you are integrating multiple different customer/user touchpoints across Web, Mobile (and possibly IoT devices) you are developing a distributed application.
 
-Distributed systems are hard to design, develop and maintain yet we are not doing ourselves a favor by the way in which we are building them.
+Distributed applications are very hard to design, develop and maintain. They require multiple application communication patterns such as Remote Procedure Call (RPC) for point-to-point synchronous request-response and Publish/Subscribe for many-to-many asynchronous communications. Unfortunately, this is where things get really complicated, because typically each pattern requires a separate frameworks and infrastructure component.
+
+But should they be that difficult? Aren't we shooting ourselves in the foot by
 
 The industry's tendency to build layers over the existing layers without retiring the ones below and most importantly, the tendency to solve specific problems with vertical solutions, creating technology silos is dramatically increasing fragmentation of the technology landscape.
 
@@ -42,9 +43,6 @@ The result in a complex technology solution prone to inefficiencies, delays and 
 Bondy is our contribution to solve the problem and it was born out of our own necessity. We have used Bondy in production for serveral years achieving a reduction in time-to-market
 
 
-
-::: warning DRAFT
-
 ## An overwhelming accidental complexity
 
 > A long habit of not thinking a thing wrong, gives it a superficial appearance of being right, and raises at first a formidable outcry in defence of custom.
@@ -55,18 +53,17 @@ Bondy is our contribution to solve the problem and it was born out of our own ne
 
 The computer software industry has a tendency to add vertical solutions as silos and build layers over layers without taking things away[^cncf].
 
-
 [^cncf]: The Cloud Native Computing Foundation (CNCF), [Cloud Native Interactive Landscape](https://landscape.cncf.io) lists more than 450 technologies. Most of them added in the last 10 years.
 
-For example, new modern Remote Procedure Call (RPC) technologies like gRPC and new incarnations of the ubiquitous HTTP protocol still make a distinction between clients and servers. When the smart phones we have in our pockets are more powerful than the supercomputers of the 80s, those frameworks still treat the browser running on the them as dumb clients.
+For example, new modern Remote Procedure Call (RPC) technologies like gRPC and new incarnations of the ubiquitous HTTP protocol still make a distinction between clients and servers. Moreover when smartphones we have in our pockets are more powerful than the supercomputers of the 80s, HTTP still treats the browser running on the them as dumb clients.
 
-These complicates the implement of several use cases in which it would be desirable for the "server" to call the "client".
+These complicates the implementation of several use cases in which it would be desirable for the "server" to call the "client" or a "client" to call "client".
 
 Fortunately, the advances in distributed computing over the last 10 years have given us a new horizon, one where we are able to treat our mobile devices as the system or record. I am referrying to peer-to-peer networking and local-first software[^mklepp].
 
 [^mklepp]: Martin Kleppmann et al., [Local-First Software: Your Own Your Data, in spite of the Cloud](https://martin.kleppmann.com/papers/local-first.pdf)
 
-But this will come at a cost.
+But this will come at an additional cost: new protocols, APIs and libraries we need to learn and depend on.
 
 Moreover, these technologies implement a single application comunication pattern e.g. point-to-point RPCs or Publish-Subscribe (PubSub). If your application, needs both communication patterns, you need to adopt, learn and use two different client libraries and infrastructure components. Moreover, some protocols are not web-native so if you want to integrate say PubSub on your web-based app you might need to resort to integrate also a cloud based solution, again this means yet another protocol/client dependency.
 
@@ -85,7 +82,7 @@ In order to deliver these systems developers need to integrate and ever increasi
 We desperately need to simplify and make it easier for developers to deliver these systems swiftly and at a lower cost.
 
 > Where the big technology companies can cope with this complexity,
-:::
+
 
 
 ## The need for a universal application communication protocol

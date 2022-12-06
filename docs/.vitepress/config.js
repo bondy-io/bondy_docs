@@ -515,16 +515,16 @@ export default {
           text: 'Introduction',
           items: [
             {
+              text: 'Why Bondy',
+              link: '/concepts/why_bondy' ,
+              isFeature: true,
+              description: "Learn about the need for a unified application networking platform for distributed application development."
+            },
+            {
               text: 'What is Bondy',
               link: '/concepts/what_is_bondy',
               isFeature: true,
               description: "A high-level description of Bondy, its key features and the key benefits it delivers."
-            },
-            {
-              text: 'Why Bondy',
-              link: '/concepts/why_bondy' ,
-              isFeature: true,
-              description: "Learn about the need for a unified application networking platform."
             },
             {
               text: 'What is WAMP',
