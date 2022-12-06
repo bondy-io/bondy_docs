@@ -163,6 +163,17 @@ export default defineComponent({
       return !isNaN(keyValue) ? `${itemDate.key}"` : `"${itemDate.key}"`;
     }
 
+    function isValue(value: ValueTypes): string {
+      return when(typeof value)
+        .is((v) => v === "string", then(true))
+        .is((v) => v === "number", then(true))
+        .is((v) => v === "bigint", then(true))
+        .is((v) => v === "boolean", then(true))
+        .is((v) => v === "unknown", then(true))
+        .is((v) => v === "undefined", then(true))
+        .default(then(false));
+    }
+
     function getValueColor(value: ValueTypes): string {
       return when(typeof value)
         .is((v) => v === "string", then("var(--jtv-string-color)"))
@@ -223,6 +234,7 @@ export default defineComponent({
       bubbleSelected,
       getKey,
       getValueColor,
+      isValue,
       classes,
       valueStyle,
       valueClasses,
