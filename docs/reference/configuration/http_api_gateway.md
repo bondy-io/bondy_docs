@@ -75,22 +75,55 @@ TBD
 
 ## Path Object
 
+A path specification to be used as a value to a key in the `paths` property of a [Version Object](#version-object).
+
 <DataTreeView :data="path" :maxDepth="10" />
+
+### Path Patterns and Bindings
+TBD
 
 ### Example
 
 ```json
-TBD
+{
+    "id": "example-api",
+    ...,
+    "versions" : {
+        "base_path": "v1.0",
+        ...,
+        "paths" : {
+            "/path/to/resource" : {
+                "get" : {
+                    ...
+                },
+                "post" : {
+                    ...
+                }
+            },
+            "/path/to/:resourceId" : {
+                "get" : {
+                    ...
+                },
+                "post" : {
+                    ...
+                }
+            },
+            "/path/to/other/resource" : {
+                "get" : {
+                    ...
+                },
+                "post" : {
+                    ...
+                }
+            }
+        }
+    }
+}
 ```
 
 ## Operation Object
 
-- info ReqInfo
-- body_max_byte integer
-- body_read_bytes integer
-- body_read_seconds integer
-- action Action
-- response Response
+<DataTreeView :data="operation" :maxDepth="10" />
 
 ## Action Object
 
@@ -411,7 +444,7 @@ const api = {
         "type": "string",
         "required": true,
         "mutable": false,
-        "description": "A string used for matching the incoming HTTP request HOST header value. Hosts with and without a trailing dot are equivalent for routing. Similarly, hosts with and without a leading dot are also equivalent e.g. 'cowboy.example.org', 'cowboy.example.org.' and '.cowboy.example.org' are equivalent. A pattern using the keyword ':' and wildcard '_' can be used to match multiple domains e.g. 'mydomain.:_' will match 'mydomain.foo' and 'mydomain.bar' but not 'mydomain.foo.baz'."
+        "description": "A string used for matching the incoming HTTP request HOST header value. Hosts with and without a trailing dot are equivalent for routing. Similarly, hosts with and without a leading dot are also equivalent e.g. `cowboy.example.org`, `cowboy.example.org.` and `.cowboy.example.org` are equivalent. A pattern using the keyword `:` and wildcard `_` can be used to match multiple domains e.g. `mydomain.:_` will match `mydomain.foo` and `mydomain.bar` but not `mydomain.foo.baz`."
     },
     "realm_uri": {
         "type": "string",
@@ -461,17 +494,17 @@ const api = {
 };
 
 const version = {
-    "paths": {
-        "type": "map",
-        "required": true,
-        "mutable": false,
-        "description": "A mapping of paths to Path Objects. Paths are relative URL paths and can contain patterns and optional segments. The path '/' is invalid while the path '/ws' is reserved (used by Bondy for requesting Websocket connections)."
-    },
     "base_path": {
         "type": "string",
         "required": true,
         "mutable": false,
-        "description": "The base path for this version of the API. This value will be used by the API Gateway to match incoming requests e.g. '/v1.0' will match '/v1.0/foo' but not '/foo'. It is possible to have optional segments, anything between brackets is optional e.g. '/[v1.0]' will match '/v1.0/foo' and also '/foo'."
+        "description": "The base path for this version of the API. This value will be used by the API Gateway to match incoming requests e.g. `/v1.0` will match `/v1.0/foo` but not `/foo`. It is possible to have optional segments, anything between brackets is optional e.g. `/[v1.0]` will match `/v1.0/foo` and also `/foo`."
+    },
+    "paths": {
+        "type": "map",
+        "required": true,
+        "mutable": false,
+        "description": "A mapping of paths to Path Objects. Paths are relative URL paths and can contain patterns and optional segments. The path `/` is invalid while the path `/ws` is reserved (used by Bondy for requesting Websocket connections)."
     },
     "is_active": {
         "type": "boolean",
@@ -588,7 +621,7 @@ const path = {
         "items": {
             "type": "string"
         },
-        "description": "An array of content types. The supported content types are: `application/json`, `application/json; charset=utf-8`, `application/msgpack`, `application/msgpack; charset=utf-8` and `application/x-www-form-urlencoded`."
+        "description": "An array of content types. The supported content types are:\n* `application/json`\n* `application/json; charset=utf-8`\n* `application/msgpack` \n* `application/msgpack; charset=utf-8`\n* `application/x-www-form-urlencoded`"
     },
     "provides": {
         "type": "array",
@@ -597,7 +630,7 @@ const path = {
         "items": {
             "type": "string"
         },
-        "description": "An array of content types. The supported content types are: `application/json`, `application/json; charset=utf-8`, `application/msgpack`, and `application/msgpack; charset=utf-8`."
+        "description": "An array of content types. The supported content types are:\n* `application/json`\n* `application/json; charset=utf-8`\n* `application/msgpack` \n* `application/msgpack; charset=utf-8`"
     },
     "schemes": {
         "type": "array",
@@ -652,37 +685,44 @@ const path = {
     "delete" :  {
         "type": "OperationObject",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP DELETE Request."
     },
     "get" :  {
         "type": "OperationObject",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP GET Request."
     },
     "head" :  {
         "type": "OperationObject",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP HEAD Request."
     },
     "options" :  {
         "type": "OperationObject",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP OPTIONS Request."
     },
     "patch" :  {
         "type": "OperationObject",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP PATCH Request."
     },
     "post" :  {
         "type": "OperationObject",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP POST Request."
     },
     "put" :  {
         "type": "OperationObject",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "description": "The operation specification to perform in case the API Gateway receives an HTTP PUT Request."
     }
 };
 
@@ -691,7 +731,7 @@ const basicSecurity = {
         "type": "string",
         "required": true,
         "mutable": false,
-        "description": "A value of 'basic'."
+        "description": "A value of `basic`."
     },
     "schemes": {
         "type": "array",
@@ -710,7 +750,7 @@ const oauth2 = {
         "type": "string",
         "required": true,
         "mutable": false,
-        "description": "A value of 'oauth2'."
+        "description": "A value of `oauth2`."
     },
     "schemes": {
         "type": "array",
@@ -732,13 +772,56 @@ const oauth2 = {
         "type": "string",
         "required": true,
         "mutable": false,
-        "description": "The path to use for the obtain and refresh token action. Normally '/oauth/token'."
+        "description": "The path to use for the obtain and refresh token action. Normally `/oauth/token`."
     },
     "revoke_token_path": {
         "type": "string",
         "required": true,
         "mutable": false,
-        "description": "The path to use for the revoke token action. Normally '/oauth/revoke'."
+        "description": "The path to use for the revoke token action. Normally `/oauth/revoke`."
+    }
+};
+
+const operation = {
+
+    "action": {
+        "type": "ActionObject",
+        "required": true,
+        "mutable": false,
+        "description": ""
+    },
+    "response": {
+        "type": "ResponseObject",
+        "required": true,
+        "mutable": false,
+        "description": ""
+    },
+    "info": {
+        "type": "string",
+        "required": false,
+        "mutable": false,
+        "description": ""
+    },
+    "body_max_byte" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false,
+        "description": "",
+        "default": "The parent Path Object's `body_max_byte` value."
+    },
+    "body_read_bytes" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false,
+        "description": "",
+        "default": "The parent Path Object's `body_read_bytes` value."
+    },
+    "body_read_seconds" : {
+        "type": "integer",
+        "required": false,
+        "mutable": false,
+        "description": "",
+        "default": "The parent Path Object's `body_read_seconds` value."
     }
 };
 
@@ -750,6 +833,7 @@ export default {
             api: JSON.stringify(api),
             version: JSON.stringify(version),
             path: JSON.stringify(path),
+            operation: JSON.stringify(operation),
             basicSecurity: JSON.stringify(basicSecurity),
             oauth2: JSON.stringify(oauth2)
         }
