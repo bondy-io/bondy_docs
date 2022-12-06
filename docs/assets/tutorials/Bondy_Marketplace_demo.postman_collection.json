@@ -1,0 +1,708 @@
+{
+	"info": {
+		"_postman_id": "bb424dba-8723-4550-a1cc-86c8300e0fc9",
+		"name": "Bondy Marketplace demo",
+		"description": "It is a complete collection of all http endpoints to be able to call the registered wamp procedures in the Bondy Marketplace demo.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6047005"
+	},
+	"item": [
+		{
+			"name": "OAuth2",
+			"item": [
+				{
+					"name": "Get Token - api_clients",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"postman.setEnvironmentVariable(\"access_token\", null);\r",
+									"\r",
+									"var jsonData = JSON.parse(responseBody);\r",
+									"postman.setEnvironmentVariable(\"access_token\", jsonData.access_token);\r",
+									"postman.setEnvironmentVariable(\"refresh_token\", jsonData.refresh_token);\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"perfil\", \"USER PASSWORD\");\r",
+									"\r",
+									"tests[\"Login correcto\"] = jsonData.access_token != null;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "Postman123456!",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "postman",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic eWNXM0FxUUF6Uk45RkxHckVCZHhRdWhld1I4YjZ2MlY6NlpiS2ZlUkF1ajNqMlVCRHh1eUJMRDNHanp2aDdOUlpIWkhOUGpLU0xWYXp2cE5n"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{bondy_url}}/oauth/token",
+							"host": [
+								"{{bondy_url}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						},
+						"description": "Android client credentials"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Token - user & password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"postman.setEnvironmentVariable(\"access_token\", null);\r",
+									"\r",
+									"var jsonData = JSON.parse(responseBody);\r",
+									"postman.setEnvironmentVariable(\"access_token\", jsonData.access_token);\r",
+									"postman.setEnvironmentVariable(\"refresh_token\", jsonData.refresh_token);\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"perfil\", \"USER PASSWORD\");\r",
+									"\r",
+									"tests[\"Login correcto\"] = jsonData.access_token != null;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "postman",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "Postman123456!",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic eWNXM0FxUUF6Uk45RkxHckVCZHhRdWhld1I4YjZ2MlY6NlpiS2ZlUkF1ajNqMlVCRHh1eUJMRDNHanp2aDdOUlpIWkhOUGpLU0xWYXp2cE5n"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "victor",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Victor123456!",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{bondy_url}}/oauth/token",
+							"host": [
+								"{{bondy_url}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						},
+						"description": "Android client credentials"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20ubWFya2V0LmRlbW8iLCJleHAiOjkwMCwiZ3JvdXBzIjpbInJlc291cmNlX293bmVycyJdLCJpYXQiOjE2NzAzMzQ2ODAsImlkIjoxMjEwNjU1ODA2NTU3MzIsImlzcyI6InBvc3RtYW4iLCJraWQiOiI4MzMwOTAxMSIsIm1ldGEiOnsiZGVzY3JpcHRpb24iOiJWaWN0b3IgZW5kIHVzZXIgZm9yIHRlc3RpbmcgcHVycG9zZXMifSwic3ViIjoidmljdG9yIn0.fQ0Ctl9RV4TYzfcusHy1f6aDuqIVuMkffx08vJ9dFq-x8at3fdZR3alCrF1I2lYT5vJFA7YJqjHPb-rbDB2Y1A",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json; charset=utf-8",
+						"disabled": true
+					},
+					{
+						"key": "Accept-Language",
+						"type": "text",
+						"value": "en",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{bondy_url}}/market",
+					"host": [
+						"{{bondy_url}}"
+					],
+					"path": [
+						"market"
+					],
+					"query": [
+						{
+							"key": "Content-Type",
+							"value": "admin:bondy",
+							"disabled": true
+						}
+					]
+				},
+				"description": "List the all items for sale"
+			},
+			"response": [
+				{
+					"name": "Item List",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json; charset=utf-8",
+								"disabled": true
+							},
+							{
+								"key": "Accept-Language",
+								"type": "text",
+								"value": "en",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{bondy_url}}/market",
+							"host": [
+								"{{bondy_url}}"
+							],
+							"path": [
+								"market"
+							],
+							"query": [
+								{
+									"key": "Content-Type",
+									"value": "admin:bondy",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "access-control-allow-credentials",
+							"value": "true"
+						},
+						{
+							"key": "access-control-allow-headers",
+							"value": "origin,x-requested-with,content-type,accept,authorization,accept-language"
+						},
+						{
+							"key": "access-control-allow-methods",
+							"value": "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE"
+						},
+						{
+							"key": "access-control-allow-origin",
+							"value": "*"
+						},
+						{
+							"key": "access-control-max-age",
+							"value": "86400"
+						},
+						{
+							"key": "content-language",
+							"value": "en"
+						},
+						{
+							"key": "content-length",
+							"value": "120"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 06 Dec 2022 14:10:04 GMT"
+						},
+						{
+							"key": "server",
+							"value": "bondy/undefined"
+						},
+						{
+							"key": "vary",
+							"value": "accept"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"deadline\": \"2022-12-06T14:06:10.306988+00:00\",\n        \"name\": \"first item\",\n        \"price\": 591,\n        \"winner\": \"Mary\"\n    }\n]"
+				}
+			]
+		},
+		{
+			"name": "Item Get",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20ubWFya2V0LmRlbW8iLCJleHAiOjkwMCwiZ3JvdXBzIjpbImFwaV9jbGllbnRzIl0sImlhdCI6MTY3MDI4MzA3OSwiaWQiOjY0OTU2MDAwNjIxMjE2MiwiaXNzIjoib2F1dGhfYXBwIiwia2lkIjoiMTE0ODA2MzkzIiwibWV0YSI6eyJkZXNjcmlwdGlvbiI6Im9hdXRoIGFwcCB1c2VyIn0sInN1YiI6Im9hdXRoX2FwcCJ9.D3qyDzWspZ_P4EAFopSp43l1nuBxGsx1MwO7Nls17ftxSnF-3NXd1yABu9HM7JxBedvyUvujitSI5GjCavBcqA",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json; charset=utf-8",
+						"disabled": true
+					},
+					{
+						"key": "Accept-Language",
+						"type": "text",
+						"value": "en",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{bondy_url}}/market/item/first%20item",
+					"host": [
+						"{{bondy_url}}"
+					],
+					"path": [
+						"market",
+						"item",
+						"first%20item"
+					],
+					"query": [
+						{
+							"key": "Content-Type",
+							"value": "admin:bondy",
+							"disabled": true
+						}
+					]
+				},
+				"description": "It returns an item's details"
+			},
+			"response": []
+		},
+		{
+			"name": "Item Bid",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20ubWFya2V0LmRlbW8iLCJleHAiOjkwMCwiZ3JvdXBzIjpbImFwaV9jbGllbnRzIl0sImlhdCI6MTY3MDI4MzA3OSwiaWQiOjY0OTU2MDAwNjIxMjE2MiwiaXNzIjoib2F1dGhfYXBwIiwia2lkIjoiMTE0ODA2MzkzIiwibWV0YSI6eyJkZXNjcmlwdGlvbiI6Im9hdXRoIGFwcCB1c2VyIn0sInN1YiI6Im9hdXRoX2FwcCJ9.D3qyDzWspZ_P4EAFopSp43l1nuBxGsx1MwO7Nls17ftxSnF-3NXd1yABu9HM7JxBedvyUvujitSI5GjCavBcqA",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json; charset=utf-8",
+						"disabled": true
+					},
+					{
+						"key": "Accept-Language",
+						"type": "text",
+						"value": "en",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"price\": 100,\n    \"bidder\": \"ale\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{bondy_url}}/market/item/second%20item",
+					"host": [
+						"{{bondy_url}}"
+					],
+					"path": [
+						"market",
+						"item",
+						"second%20item"
+					],
+					"query": [
+						{
+							"key": "Content-Type",
+							"value": "admin:bondy",
+							"disabled": true
+						}
+					]
+				},
+				"description": "It places a bid on a listed item"
+			},
+			"response": []
+		},
+		{
+			"name": "Item Sell",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20ubWFya2V0LmRlbW8iLCJleHAiOjkwMCwiZ3JvdXBzIjpbInJlc291cmNlX293bmVycyJdLCJpYXQiOjE2NzAzMzQ2ODAsImlkIjoxMjEwNjU1ODA2NTU3MzIsImlzcyI6InBvc3RtYW4iLCJraWQiOiI4MzMwOTAxMSIsIm1ldGEiOnsiZGVzY3JpcHRpb24iOiJWaWN0b3IgZW5kIHVzZXIgZm9yIHRlc3RpbmcgcHVycG9zZXMifSwic3ViIjoidmljdG9yIn0.fQ0Ctl9RV4TYzfcusHy1f6aDuqIVuMkffx08vJ9dFq-x8at3fdZR3alCrF1I2lYT5vJFA7YJqjHPb-rbDB2Y1A",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json; charset=utf-8",
+						"disabled": true
+					},
+					{
+						"key": "Accept-Language",
+						"type": "text",
+						"value": "en",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"first item\",\n    \"price\": 1,\n    \"deadline\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{bondy_url}}/market/item",
+					"host": [
+						"{{bondy_url}}"
+					],
+					"path": [
+						"market",
+						"item"
+					],
+					"query": [
+						{
+							"key": "Content-Type",
+							"value": "admin:bondy",
+							"disabled": true
+						}
+					]
+				},
+				"description": "It allows to offer a new item for sale"
+			},
+			"response": [
+				{
+					"name": "Item Sold",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json; charset=utf-8",
+								"disabled": true
+							},
+							{
+								"key": "Accept-Language",
+								"type": "text",
+								"value": "en",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"first item\",\n    \"price\": 1,\n    \"deadline\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bondy_url}}/market/item",
+							"host": [
+								"{{bondy_url}}"
+							],
+							"path": [
+								"market",
+								"item"
+							],
+							"query": [
+								{
+									"key": "Content-Type",
+									"value": "admin:bondy",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "access-control-allow-credentials",
+							"value": "true"
+						},
+						{
+							"key": "access-control-allow-headers",
+							"value": "origin,x-requested-with,content-type,accept,authorization,accept-language"
+						},
+						{
+							"key": "access-control-allow-methods",
+							"value": "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE"
+						},
+						{
+							"key": "access-control-allow-origin",
+							"value": "*"
+						},
+						{
+							"key": "access-control-max-age",
+							"value": "86400"
+						},
+						{
+							"key": "content-language",
+							"value": "en"
+						},
+						{
+							"key": "content-length",
+							"value": "4"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 06 Dec 2022 14:05:10 GMT"
+						},
+						{
+							"key": "server",
+							"value": "bondy/undefined"
+						},
+						{
+							"key": "vary",
+							"value": "accept"
+						}
+					],
+					"cookie": [],
+					"body": "true"
+				}
+			]
+		},
+		{
+			"name": "Bidder Add",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20ubWFya2V0LmRlbW8iLCJleHAiOjkwMCwiZ3JvdXBzIjpbInJlc291cmNlX293bmVycyJdLCJpYXQiOjE2NzAzMzU3OTMsImlkIjo2NDI1NTI3ODE5NTYxMTQsImlzcyI6InBvc3RtYW4iLCJraWQiOiIyMDkxODg3MSIsIm1ldGEiOnsiZGVzY3JpcHRpb24iOiJWaWN0b3IgZW5kIHVzZXIgZm9yIHRlc3RpbmcgcHVycG9zZXMifSwic3ViIjoidmljdG9yIn0.6Cm25Hs9lCMP4OwXPeRei6kYc1E2YuGjj4yaQ1bP9D5_LI0VeUny0c2AMyYOO76MyCvXGFRJjM3uVhREvA1obw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json; charset=utf-8",
+						"disabled": true
+					},
+					{
+						"key": "Accept-Language",
+						"type": "text",
+						"value": "en",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"ale\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{bondy_url}}/market/bidder",
+					"host": [
+						"{{bondy_url}}"
+					],
+					"path": [
+						"market",
+						"bidder"
+					],
+					"query": [
+						{
+							"key": "Content-Type",
+							"value": "admin:bondy",
+							"disabled": true
+						}
+					]
+				},
+				"description": "It adds an user as bidder"
+			},
+			"response": []
+		},
+		{
+			"name": "Bidder Gone",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20ubWFya2V0LmRlbW8iLCJleHAiOjkwMCwiZ3JvdXBzIjpbInJlc291cmNlX293bmVycyJdLCJpYXQiOjE2NzAzMzU3OTMsImlkIjo2NDI1NTI3ODE5NTYxMTQsImlzcyI6InBvc3RtYW4iLCJraWQiOiIyMDkxODg3MSIsIm1ldGEiOnsiZGVzY3JpcHRpb24iOiJWaWN0b3IgZW5kIHVzZXIgZm9yIHRlc3RpbmcgcHVycG9zZXMifSwic3ViIjoidmljdG9yIn0.6Cm25Hs9lCMP4OwXPeRei6kYc1E2YuGjj4yaQ1bP9D5_LI0VeUny0c2AMyYOO76MyCvXGFRJjM3uVhREvA1obw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json; charset=utf-8",
+						"disabled": true
+					},
+					{
+						"key": "Accept-Language",
+						"type": "text",
+						"value": "en",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"ale\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{bondy_url}}/market/bidder/ale",
+					"host": [
+						"{{bondy_url}}"
+					],
+					"path": [
+						"market",
+						"bidder",
+						"ale"
+					],
+					"query": [
+						{
+							"key": "Content-Type",
+							"value": "admin:bondy",
+							"disabled": true
+						}
+					]
+				},
+				"description": "It removes an user as bidder"
+			},
+			"response": []
+		}
+	]
+}
