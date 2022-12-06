@@ -8,46 +8,29 @@ Bondy HTTP API Gateway is an HTTP/REST API management subsystem that sits betwee
 
 The API Gateway hosts one or more APIs. Each API is defined using the API Specification Object, a JSON data structure that can contain static values or expressions that are evaluated against the HTTP request data in runtime.
 
-## API Specification Format
+## API Specification Object
 
 The API Specification is a JSON object with the structure represented by the following tree:
 
 - [API Object](#api-object)
-    - [Version Object](#version-object)
+    - [Version Object 1](#version-object)
         - [Path Object 1](#path-object)
             - An [Operation Object](#operation-object) per HTTP verb
                 - [Action Object](#action-object)
                 - [Response Object](#response-object)
-        - ...
-        - [Path Object N](#path-object)
-    - [Version Object](#version-object)
-        - [Path Object 1](#path-object)
-        - ...
+        - ... path objects
+    - ... version objects
 
 The following diagram shows the object structure in detail, including all properties and types.
 
 <ZoomImg src="/assets/api_gateway_spec.png"/>
 
 ## API Object
-The API object is the root of an API definition. It contains one or more API versions.
+The API object is the root of an API Specification. It contains one or more [API Version](#version-object) objects.
 
-- **id** *string [required]*
-A global unique identifier for this API.
-- **name** *string*
-A display name for the API.
-- **host** *string [required]*
-The hostname or a pattern match.
-- **realm_uri** *uri*
-The realm this API will target.
-- **meta** *map*
-- **variables** *map*
-A mapping of arbitrary variable names to values or MOPS expressions. This variables can be referenced by MOPS expressions in the children objects of this object.
-- **defaults** *Defaults*
-A mapping of attributes to their default values. This values are inherited by children objects as defaults when their value is unset.
-- **status_codes** *map*
-A mapping of WAMP error URIs to HTTP Status codes.
-- **versions** *array*
-An array of [Version](https://www.notion.so/HTTP-API-Gateway-b87c2e0d529e4485875a74e4bb987618) objects.
+<DataTreeView :data="api" :maxDepth="10" />
+
+### Example
 
 ```javascript
 {
@@ -80,29 +63,21 @@ An array of [Version](https://www.notion.so/HTTP-API-Gateway-b87c2e0d529e4485875
 ```
 
 ## Version Object
+The Version Object represents a particular API version.
 
-- **base_path** string
-The base path for this version of the API e.g. `"/[v1.0]"`.
-- **is_active** boolean
-Whether the path is active.
-- **is_deprecated** boolean
-Whether the path is deprecated i.e. will be removed in future versions.
-- **pool_size** integer
-- **info** map,
-- **variables** *map*
-A mapping of arbitrary variable names to values or MOPS expressions. This variables can be referenced by MOPS expressions in the children objects of this object.
-These values are merged with and thus override the ones inherited from the API Object variables property.
-- **defaults** *Defaults*
-A mapping of attributes to their default values. This values are inherited by children objects as defaults when their value is unset.
-These values are merged with and thus override the ones inherited from the API Object default property.
-- **status_codes** map
-A mapping of WAMP Error URIs to HTTP Status Codes.
-- **languages** *array*
-An array of language code string.
-- **paths** *array*
-Array of [Path](https://www.notion.so/HTTP-API-Gateway-b87c2e0d529e4485875a74e4bb987618) objects
+<DataTreeView :data="version" :maxDepth="10" />
+
+### Example
+
+```json
+{
+
+}
+```
 
 ## Path Object
+
+<DataTreeView :data="path" :maxDepth="10" />
 
 - **summary** string
 - **description** string
@@ -473,11 +448,161 @@ const apiContext = {
     }
 };
 
+const api = {
+    "id": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "A global unique identifier for this API."
+    },
+
+    "host": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "The hostname or a pattern."
+    },
+    "realm_uri": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "The realm this API will target. An API can only target a single realm."
+    },
+    "name": {
+        "type": "string",
+        "required": false,
+        "mutable": false,
+        "description": "A display name for the API."
+    },
+    "meta": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of metadata keys to values."
+    },
+    "variables": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of arbitrary variable names to values or MOPS expressions. This variables can be referenced by MOPS expressions in the children objects of this object."
+    },
+    "defaults": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of attributes to their default values. This values are inherited by children objects as defaults when their value is unset."
+    },
+    "status_codes": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of WAMP Error URIs to HTTP Status Codes."
+    },
+    "versions": {
+        "type": "list",
+        "required": true,
+        "mutable": false,
+        "description": "An array of Version Object instances."
+    },
+};
+
+const version = {
+    "paths": {
+        "type": "map",
+        "required": true,
+        "mutable": false,
+        "description": "A mapping of paths to Path Objects. Paths are relative URL paths and can contain patterns and optional segments. The path '/' is invalid while the path '/ws' is reserved (used by Bondy for requesting Websocket connections)."
+    },
+    "base_path": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "The base path for this version of the API. This value will be used by the API Gateway to match incoming requests e.g. '/v1.0' will match '/v1.0/foo' but not '/foo'. It is possible to have optional segments, anything between brackets is optional e.g. '/[v1.0]' will match '/v1.0/foo' and also '/foo'."
+    },
+    "is_active": {
+        "type": "boolean",
+        "required": false,
+        "mutable": false,
+        "default": true,
+        "description": "Whether the path is active."
+    },
+    "is_deprecated": {
+        "type": "boolean",
+        "required": false,
+        "mutable": false,
+        "default": false,
+        "description": "Whether the path is deprecated i.e. the path will be removed in future versions of the API."
+    },
+    "pool_size": {
+        "type": "integer",
+        "required": false,
+        "mutable": false,
+        "default": 200,
+        "description": ""
+    },
+    "info": {
+        "type": "object",
+        "required": false,
+        "properties": {
+            "title" : {
+                "type": "string",
+                "required": true,
+                "mutable": false,
+                "description": "The title of the API."
+            },
+            "description" : {
+                "type": "string",
+                "required": true,
+                "mutable": false,
+                "description": "A description of the API."
+            },
+        }
+    },
+    "variables": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of arbitrary variable names to values or MOPS expressions. This variables can be referenced by MOPS expressions in the children objects of this object. These values are merged with and thus override the ones inherited from the API Object variables property."
+    },
+    "defaults": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of attributes to their default values. This values are inherited by children objects as defaults when their value is unset. These values are merged with and thus override the ones inherited from the API Object default property."
+    },
+    "status_codes": {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "A mapping of WAMP Error URIs to HTTP Status Codes."
+    },
+    "languages": {
+        "type": "list",
+        "required": false,
+        "mutable": false,
+        "default": ["en"],
+        "description": "An array of language code string."
+    }
+};
+
+
+const path = {
+    "paths": {
+        "type": "map",
+        "required": true,
+        "mutable": false,
+        "description": "A mapping of paths to Path Objects. Paths are relative URL paths and can contain patterns and optional segments. The path '/' is invalid while the path '/ws' is reserved (used by Bondy for requesting Websocket connections)."
+    }
+};
+
 
 export default {
     data() {
         return {
-            apiContext: JSON.stringify(apiContext)
+            apiContext: JSON.stringify(apiContext),
+            api: JSON.stringify(api),
+            version: JSON.stringify(version),
+            path: JSON.stringify(path)
         }
     }
 };
