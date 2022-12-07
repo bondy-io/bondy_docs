@@ -329,6 +329,7 @@ NOT IMPLEMENTED
 ## Default Values
 
 ### Status Codes
+The following are the default values used to initialise the [API Context](#api-context).
 
 ```javascript
 {
@@ -519,7 +520,8 @@ const context = {
         "type": "map",
         "required": false,
         "mutable": true,
-        "description": "A mapping of WAMP Error URIs to HTTP Status Codes. This entries of this map are obtained during the parsing of the API Object tree. At each level of the tree this property will merge in the values of the target object's `status_codes` property, so children nodes can access the entries defined in the ancestors, override them and/or add new status codes to the context."
+        "description": "A mapping of WAMP Error URIs to HTTP Status Codes. This entries of this map are obtained during the parsing of the API Object tree. At each level of the tree this property will merge in the values of the target object's `status_codes` property, so children nodes can access the entries defined in the ancestors, override them and/or add new status codes to the context.",
+        "default":"Check the [default values below](#status-codes)"
     }
 };
 
