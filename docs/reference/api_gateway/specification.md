@@ -19,24 +19,14 @@ related:
       description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
 ---
 # HTTP API Gateway Specification Reference
-An API gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP APIs.
+Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP APIs. It Bondy to be integrated into an existing HTTP/REST API ecosystem.
 
 ## Overview
 The API Gateway can hosts one or more APIs and runs on top of your WAMP API and also in front of any external HTTP API.
 
-Each API is defined using an [API Gateway Specification](#api-gateway-specification) document, a JSON data structure consisting of an object graph where the object properties can contain static values and/or dynamically evaluated values via [expressions](#api-expression-language) that are resolved against the HTTP request data at runtime.
+Each API is defined using an API Gateway Specification document, a JSON data structure that defines how for each incoming request, Bondy will determine which action to perform e.g. make a WAMP operation or forward the request to an external HTTP API, and how to transform the input data based on this specification.
 
-For each incoming request, Bondy will determine which action to perform e.g. make a WAMP operation or forward the request to an external HTTP API, and how to transform the input data based on this specification.
-
-
-::: definition Evaluation
-More specifically, the definitions found by the [API Gateway Specification](#api-gateway-specification) are evaluated at runtime against the [API Context](#api-context) which contains the HTTP [Request object](#request-object).
-:::
-
-
-## API Gateway Specification
-
-The API Specification is a JSON document with the structure represented by the following object tree:
+The API Gateway Specification document has a structure represented by the following object tree:
 
 - [API Object](#api-object)
     - [Version Object 1](#version-object)
@@ -51,18 +41,19 @@ The following diagram shows the object structure in detail, including all proper
 
 <ZoomImg src="/assets/api_gateway_spec.png"/>
 
+The properties of the objects in the object graph can contain static values and/or dynamically evaluated values via [expressions](#expression-language) that are resolved against the HTTP request data at runtime.
 
-## Request object
-
-The object represents the contents (data and metadata) for each HTTP request that will be can be accessed by an [API Specification Object](#api-specification-object).
-
-<DataTreeView :data="request" :maxDepth="10" />
+::: definition Evaluation
+More specifically, the definitions found by the API Gateway Specification are evaluated at runtime against the [API Context](#api-context) which contains the HTTP [Request object](#request-object).
+:::
 
 ## API Context
 
-The API context is a recursive map data structure that at runtime contains the HTTP Request data and the results of parsing and evaluating the definitions and expressions defined in an API Specification Object against itself. That is, the evaluation of the expressions is done incrementally, where the input values of an expression can be the result of another expression updating the context.
+The API context is a recursive map data structure that at runtime contains the HTTP Request data and the results of parsing and evaluating the definitions and expressions defined in an API Specification Object against itself.
 
-This map can contains the following pre-defined keys:
+We say it is recursive as the evaluation of the expressions is done incrementally, where the input values of an expression can be the result of another expression that has updated the values in context.
+
+This context has the following schema:
 
 <DataTreeView :data="context" :maxDepth="10" />
 
@@ -76,7 +67,7 @@ These properties are addressable by the expression language using the key `reque
 :::
 
 
-## API Expression Language
+### Expression Language
 
 Most API Specification object properties support expressions using an embedded logic-less domain-specific language (internally called "mops") for data transformation and dynamic configuration.
 
@@ -131,6 +122,17 @@ Let's explore a some example mops expressions to demonstrate how you can use mop
 
 :::
 
+### Reading values
+
+### Setting Values
+
+## Request object
+
+The object represents the contents (data and metadata) for each HTTP request that will be can be accessed by an [API Specification Object](#api-specification-object).
+
+<DataTreeView :data="request" :maxDepth="10" />
+
+
 
 ## API Object
 The API object is the root of an API Specification. It contains one or more [API Version](#version-object) objects.
@@ -177,7 +179,7 @@ The Version Object represents a particular API version.
 
 ### Example
 
-```json
+```javascript
 TBD
 ```
 
@@ -192,7 +194,7 @@ TBD
 
 ### Example
 
-```json
+```javascript
 {
     "id": "example-api",
     ...,
@@ -245,7 +247,7 @@ An action that returns a static response.
 
 #### Example
 
-```json
+```javascript
 TBD
 ```
 
@@ -256,7 +258,7 @@ An action that forwards the incoming HTTP request to an upstream HTTP endpoint.
 
 #### Example
 
-```json
+```javascript
 TBD
 ```
 
@@ -267,7 +269,7 @@ An action that transforms an incoming HTTP request to a WAMP operation.
 
 #### Example
 
-```json
+```javascript
 TBD
 ```
 
@@ -292,6 +294,7 @@ The API Specification parser will use this object to find a default value for th
 * `connect_timeout`
 * `retries`
 * `retry_timeout`
+
 
 
 ## Security Object
@@ -323,6 +326,39 @@ NOT IMPLEMENTED
 
 <DataTreeView :data="oauth2" :maxDepth="10" />
 
+## Default Values
+
+### Status Codes
+
+```javascript
+{
+    "bondy.error.already_exists": 400, // BAD REQUEST
+    "bondy.error.not_found": 404, // NOT FOUND
+    "bondy.error.bad_gateway": 504, // SERVICE UNAVAILABLE
+    "bondy.error.http_gateway.invalid_expression": 500, // INTERNAL SERVER ERROR,
+    "bondy.error.timeout": 504, // GATEWAY TIMEOUT
+    "wamp.error.authorization_failed": 500, // INTERNAL SERVER ERROR,
+    "wamp.error.canceled": 400, // BAD REQUEST
+    "wamp.error.close_realm": 500, // INTERNAL SERVER ERROR,
+    "wamp.error.disclose_me_not_allowed": 400, // BAD REQUEST
+    "wamp.error.goodbye_and_out": 500, // INTERNAL SERVER ERROR,
+    "wamp.error.invalid_argument": 400, // BAD REQUEST
+    "wamp.error.invalid_uri": 400, // BAD REQUEST
+    "wamp.error.net_failure": 502, // BAD GATEWAY
+    "wamp.error.not_authorized": 403, // FORBIDDEN
+    "wamp.error.no_eligible_callee": 502, // BAD GATEWAY
+    "wamp.error.no_such_procedure": 501, // NOT IMPLEMENTED
+    "wamp.error.no_such_realm": 502, // BAD GATEWAY
+    "wamp.error.no_such_registration": 502, // BAD GATEWAY
+    "wamp.error.no_such_role": 400, // BAD REQUEST
+    "wamp.error.no_such_session": 500, // INTERNAL SERVER ERROR,
+    "wamp.error.no_such_subscription": 502, // BAD GATEWAY
+    "wamp.error.option_disallowed_disclose_me": 400, // BAD REQUEST
+    "wamp.error.option_not_allowed": 400, // BAD REQUEST
+    "wamp.error.procedure_already_exists": 400, // BAD REQUEST
+    "wamp.error.system_shutdown": 500 // INTERNAL SERVER ERROR
+}
+```
 
 <script>
 
@@ -380,7 +416,7 @@ const request = {
             "type": "string",
             "required": false,
             "mutable": false,
-            "description": "The HTTP method of the request. One of the following values:\n- `delete`\n- `get`\n- `head`\n- `options`\n- `patch`\n- `post`\n- `put`."
+            "description": "The HTTP method of the request. One of the following values:\n- `delete`\n- `get`\n- `head`\n- `options`\n- `patch`\n- `post`\n- `put`"
         },
         "scheme": schemes,
         "peername": {
@@ -453,13 +489,13 @@ const context = {
         "type": "RequestObject",
         "required": false,
         "mutable": true,
-        "description": "The contents (data and metadata) for each HTTP request."
+        "description": "The contents (data and metadata) of the HTTP request being evaluated."
     },
     "security": {
         "type": "SecurityObject",
         "required": false,
         "mutable": true,
-        "description": ""
+        "description": "An instance of the [Security Object](#security-object) provided"
     },
     "action": {
         "type": "ActionObject",
@@ -471,13 +507,13 @@ const context = {
         "type": "map",
         "required": false,
         "mutable": true,
-        "description": "A mapping of arbitrary variable names to values or expressions. This entries of this map are obtained during the parsing of the API Object tree. At each level of the tree this property will merge in the values of the target object's `variables` property, so children nodes can access the entries defined in the ancestors, override them and/or add new variables to the context."
+        "description": "A mapping of arbitrary variable names to values or expressions. Each entry in this map is obtained during the parsing of the [API Object](#api-object) tree. At each level of the tree this property will merge in the values of the target object's `variables` property, so children nodes can access the entries defined in the ancestors, override them and/or add new variables to the context."
     },
     "defaults": {
         "type": "map",
         "required": false,
         "mutable": true,
-        "description": "A mapping of object properties to their default values. This entries of this map are obtained during the parsing of the API Object tree. At each level of the tree this property will merge in the values of the target object's `defaults` property, so children nodes can access the entries defined in the ancestors, override them and/or add new defaults to the context. Expressions in the defaults mapping can reference variables in the `variables` property."
+        "description": "A mapping of object properties to their default values. Each entry in this map is obtained during the parsing of the [API Object](#api-object) tree. At each level of the tree this property will merge in the values of the target object's `defaults` property, so children nodes can access the entries defined in the ancestors, override them and/or add new defaults to the context. Expressions in the defaults mapping can reference variables in the `variables` property."
     },
     "status_codes": {
         "type": "map",
