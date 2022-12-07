@@ -1,6 +1,3 @@
----
-draft: true
----
 # HTTP API Gateway Configuration Reference
 Bondy HTTP API Gateway is an HTTP/REST API management subsystem that sits between an HTTP client and a realm's WAMP RPC procedures and PubSub Topics. It acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over those procedures and topics.
 
@@ -407,13 +404,13 @@ const request = {
             "type": "map",
             "required": false,
             "mutable": false,
-            "description": "A map of query params to values. This is the result of parsing the `query_string`.\n\nExample: for HTTP request `GET [http://example.com/users?region=us&type=individual](http://example.com/v1/foo?x=100&y=200)` the value of this property will be the map `{\"region\": \"us\", \"type\": \"individual\"}` ."
+            "description": "A map of query params to values. This is the result of parsing the request's `query_string`.\n\nExamples:\n|Request|Property Value|\n|---|---|\n|`GET /users?region=us&type=individual`|`{\"region\": \"us\", \"type\": \"individual\"}`|\n|`GET /users?x=100&y=200`|`{\"x\": \"100\", \"y\": \"200\"}`|\n"
         },
         "bindings": {
-            "type": "string",
+            "type": "map",
             "required": false,
             "mutable": false,
-            "description": "A map of path variable bindings. Example: for HTTP request `GET http://example.com/users/U12345` and path specification `/users/:id` , this property will have a map with key `id` and value the value resulting from matching the pate value of this property will be `{\"id\": \"U12345\"}`"
+            "description": "A map of path variable bindings. Bindings occur when the [Path Object](3path-object) contains patterns.\n\nExamples: For the path specification `/accounts/:acc_id/users/:user_id`\n|Request|Property Value|\n|---|---|\n|`GET /accounts/001/users/002`|`{\"acc_id\": \"001\", \"user_id\": \"002\"}`|\n"
         },
         "body": {
             "type": "any",
