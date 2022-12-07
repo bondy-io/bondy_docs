@@ -290,6 +290,11 @@ export default {
               activeMatch: '/reference/configuration'
             },
             {
+              text: 'HTTP API Gateway Specification',
+              link: '/reference/api_gateway/specification',
+              activeMatch: '/reference/api_gateway'
+            },
+            {
               text: 'WAMP API Reference',
               link: '/reference/wamp_api/index',
               activeMatch: '/reference/wamp_api'
@@ -298,11 +303,6 @@ export default {
               text: 'HTTP API Reference',
               link: '/reference/http_api/index',
               activeMatch: '/reference/http_api'
-            },
-            {
-              text: 'HTTP API Gateway Specification',
-              link: '/reference/api_gateway/specification',
-              activeMatch: '/reference/api_gateway'
             },
             {
               text: 'WAMP Client Libraries',
@@ -386,21 +386,21 @@ export default {
   function tutorialsSidebar() {
     return [
         {
-          text: 'Getting Started',
+          text: 'Getting Started with WAMP',
           collapsible: true,
           items: [
-            {
-              text: 'Getting Started',
-              link: '/tutorials/getting_started/get_bondy',
-              isFeature:true,
-              description: 'Follow this tutorial to install Bondy.'
-            },
             {
               text: 'Marketplace',
               link: '/tutorials/getting_started/marketplace',
               isFeature:true,
               description: 'A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS web application.'
-            },
+            }
+          ]
+        },
+        {
+          text: 'Getting Started with HTTP',
+          description: 'Tutorials demonstrating the use of the embedded HTTP API Gateway.',
+          items: [
             {
               text: 'Marketplace HTTP API Gateway',
               link: '/tutorials/getting_started/http_api_gateway',
@@ -410,7 +410,7 @@ export default {
           ]
         },
         {
-          text: 'Other Tutorials',
+          text: 'Advanced Security Topics',
           items: [
             {
               text: 'Using Same Sign-on',
