@@ -40,7 +40,7 @@ But do we really need them?
 
 The result in a complex technology solution prone to inefficiencies, delays and fatigue hindering the success of business initiatives.
 
-Bondy is our contribution to solve the problem and it was born out of our own necessity. We have used Bondy in production for serveral years achieving a reduction in time-to-market
+Bondy is our contribution to solve the problem and it was born out of our own necessity. We have used Bondy in production for serveral years achieving a reduction in time-to-market.
 
 <!--
 ## An overwhelming accidental complexity
