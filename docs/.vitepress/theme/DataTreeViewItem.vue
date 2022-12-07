@@ -262,24 +262,6 @@ export default defineComponent({
 code.property{
 }
 
-.object-description code {
-  background-color: rgba(23, 25, 22, 0.00) !important;
-  font-size: 0.95em !important;
-}
-
-.value-description code {
-  background-color: rgba(23, 25, 22, 0.00) !important;
-  font-size: 0.95em !important;
-}
-
-.object-description th {
-  font-size: 0.95em !important;
-}
-
-.value-description th {
-  font-size: 0.95em !important;
-}
-
 .data-tree-item:not(.root-item) {
     /* margin-left: 25px; */
     border-left-color: #eaeaea;
@@ -313,6 +295,16 @@ code.property{
   white-space: normal;
 }
 
+.value-description code {
+  background-color: rgba(23, 25, 22, 0.00) !important;
+  font-size: 0.95em !important;
+}
+
+.value-description th {
+  font-size: 0.95em !important;
+}
+
+
 .value-default{
   font-size: 15px;
   border-radius: 2px;
@@ -321,6 +313,11 @@ code.property{
   margin-left: 10px;
   padding: 0px 5px 5px 10px;
   white-space: normal;
+}
+
+.value-default code {
+  background-color: rgba(23, 25, 22, 0.00) !important;
+  font-size: 0.95em !important;
 }
 
 .object-description {
@@ -332,6 +329,15 @@ code.property{
   white-space: normal;
 }
 
+.object-description code {
+  background-color: rgba(23, 25, 22, 0.00) !important;
+  font-size: 0.95em !important;
+}
+
+.object-description th {
+  font-size: 0.95em !important;
+}
+
 .object-default{
   font-size: 15px;
   border-radius: 2px;
@@ -340,7 +346,13 @@ code.property{
   padding: 0px 5px 5px 10px;
   white-space: normal;
 }
- .value-key.can-select {
+
+.object-default code {
+  background-color: rgba(23, 25, 22, 0.00) !important;
+  font-size: 0.95em !important;
+}
+
+.value-key.can-select {
 	 cursor: pointer;
 }
  .value-key.can-select:hover {
