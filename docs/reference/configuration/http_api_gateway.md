@@ -1,3 +1,15 @@
+---
+draft: false
+related:
+    - text: HTTP API Gateway
+      type: HTTP API Reference
+      link: /reference/http_api/api_gateway
+      description: Load and manage API Gateway specifications.
+    - text: Marketplace
+      type: Tutorial
+      link: /tutorials/getting_started/marketplace
+      description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
+---
 # HTTP API Gateway Configuration Reference
 Bondy HTTP API Gateway is an HTTP/REST API management subsystem that sits between an HTTP client and a realm's WAMP RPC procedures and PubSub Topics. It acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over those procedures and topics.
 

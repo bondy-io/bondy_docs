@@ -6,9 +6,13 @@ related:
       link: /tutorials/getting_started/marketplace
       description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
     - text: HTTP API Gateway
-      type: Reference
+      type: Configuration Reference
       link: /reference/configuration/http_api_gateway.html#api-specification-object
       description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics.
+    - text: HTTP API Gateway
+      type: HTTP API Reference
+      link: /reference/http_api/api_gateway
+      description: Load and manage API Gateway specifications.
 ---
 
 # Marketplace HTTP API Gateway
