@@ -774,7 +774,7 @@ export default {
               text: 'HTTP API Gateway',
               link: '/reference/configuration/http_api_gateway',
               isFeature: true,
-              description: "Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over those procedures and topics."
+              description: "Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics."
             }
           ]
         },
