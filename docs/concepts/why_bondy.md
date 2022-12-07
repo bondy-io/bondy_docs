@@ -1,5 +1,5 @@
 ---
-draft: true
+draft: false
 ---
 # Why Bondy
 Learn about the need for a unified application networking platform for distributed application development.
