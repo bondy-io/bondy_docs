@@ -24,11 +24,11 @@ If you are using a microservices architectural style or if you are integrating m
 
 Distributed applications are very hard to design, develop and maintain. They require multiple application communication patterns such as Remote Procedure Call (RPC) for point-to-point synchronous request-response and Publish/Subscribe for many-to-many asynchronous communications. Unfortunately, this is where things get really complicated, because typically each pattern requires a separate frameworks and infrastructure component.
 
-But should they be that difficult? Aren't we shooting ourselves in the foot by
+<!-- But should they be that difficult? Aren't we shooting ourselves in the foot by -->
 
-The industry's tendency to build layers over the existing layers without retiring the ones below and most importantly, the tendency to solve specific problems with vertical solutions, creating technology silos is dramatically increasing fragmentation of the technology landscape.
+<!-- The industry's tendency to build layers over the existing layers without retiring the ones below and most importantly, the tendency to solve specific problems with vertical solutions, creating technology silos is dramatically increasing fragmentation of the technology landscape.
 
-> The fragmentation means that the fundamental activity in building a distributed application has now become **integration**.
+> The fragmentation means that the fundamental activity in building a distributed application has now become **integration**. -->
 
 The tools that we were using to integrate the 3-tier application monoliths of a not that distant past are the same we pretent to use to integrate 10s, 100s and in some cases even 1000s of microservices that resulted from the monolith decomposition. The decomposition allowed us to scale the social aspects of development, enabling us to tackle the increasing number of requirements (essential complexity) but due to the tools we are using we have now created a massive wave of accidental complexity.
 
@@ -42,7 +42,7 @@ The result in a complex technology solution prone to inefficiencies, delays and 
 
 Bondy is our contribution to solve the problem and it was born out of our own necessity. We have used Bondy in production for serveral years achieving a reduction in time-to-market
 
-
+<!--
 ## An overwhelming accidental complexity
 
 > A long habit of not thinking a thing wrong, gives it a superficial appearance of being right, and raises at first a formidable outcry in defence of custom.
@@ -65,26 +65,26 @@ Fortunately, the advances in distributed computing over the last 10 years have g
 
 But this will come at an additional cost: new protocols, APIs and libraries we need to learn and depend on.
 
-Moreover, these technologies implement a single application comunication pattern e.g. point-to-point RPCs or Publish-Subscribe (PubSub). If your application, needs both communication patterns, you need to adopt, learn and use two different client libraries and infrastructure components. Moreover, some protocols are not web-native so if you want to integrate say PubSub on your web-based app you might need to resort to integrate also a cloud based solution, again this means yet another protocol/client dependency.
+Moreover, these technologies implement a single application comunication pattern e.g. point-to-point RPCs or Publish-Subscribe (PubSub). If your application, needs both communication patterns, you need to adopt, learn and use two different client libraries and infrastructure components. Moreover, some protocols are not web-native so if you want to integrate say PubSub on your web-based app you might need to resort to integrate also a cloud based solution, again this means yet another protocol/client dependency. -->
 
 <!-- Frameworks pretend to solve this by adding yet more features, more adapters, more callbacks. Most of the time implemented using proprietary Software Development Kits (SDKs) in a specific programming language. This SDKs evolve over time and require those adapters to be rebuilt. Moreover sometimes those adapters have to be deployed within the infrastructure component, which complicates its maintenance, support and operating characteristics. -->
-
+<!--
 As a result, connecting people, process, data and things has become more and more complex.
 
 The growing need to deliver innovative customer experiences in a hypersegmented and hypercompetitive market means developers have to deal with a surge in essential complexity[^fbrooks] new uses cases, new integrations, real-time user interactions.  The key implication is the **need to design and develop multi-platform, polyglot distributed systems**.
 
 In order to deliver these systems developers need to integrate and ever increasing number of technologies (protocols, clients, dependencies, infrastructure components). This dramatically increments the accidental complexity[^fbrooks].
 
-[^fbrooks]: In [No Silver Bullet — Essence and Accident in Software Engineering](https://en.wikipedia.org/wiki/No_Silver_Bullet), Fred Brooks distinguishes between two different types of complexity: accidental complexity and essential complexity. Essential complexity is caused by the problem to be solved, and nothing can remove it. Accidental complexity relates to problems which engineers create and can fix; for example, the details of writing and optimizing assembly code or the delays caused by batch processing.
+[^fbrooks]: In [No Silver Bullet — Essence and Accident in Software Engineering](https://en.wikipedia.org/wiki/No_Silver_Bullet), Fred Brooks distinguishes between two different types of complexity: accidental complexity and essential complexity. Essential complexity is caused by the problem to be solved, and nothing can remove it. Accidental complexity relates to problems which engineers create and can fix; for example, the details of writing and optimizing assembly code or the delays caused by batch processing. -->
 
-<ZoomImg src="/assets/accidental_complexity.png"/>
+<!-- <ZoomImg src="/assets/accidental_complexity.png"/>
 
 We desperately need to simplify and make it easier for developers to deliver these systems swiftly and at a lower cost.
 
 > Where the big technology companies can cope with this complexity,
 
-
-
+ -->
+<!--
 ## The need for a universal application communication protocol
 
 * An aplication protocol (L7)
@@ -100,7 +100,7 @@ We desperately need to simplify and make it easier for developers to deliver the
 TBD
 
 ## Bondy: WAMP Revival and Beyond
-TBD
+TBD -->
 
 
 
