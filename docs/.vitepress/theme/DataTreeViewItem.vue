@@ -272,6 +272,14 @@ code.property{
   font-size: 0.95em !important;
 }
 
+.object-description th {
+  font-size: 0.95em !important;
+}
+
+.value-description th {
+  font-size: 0.95em !important;
+}
+
 .data-tree-item:not(.root-item) {
     /* margin-left: 25px; */
     border-left-color: #eaeaea;
