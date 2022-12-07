@@ -168,36 +168,33 @@ TBD
 <DataTreeView :data="response" :maxDepth="10" />
 
 ## Defaults Object
-The defaults object is used to defined default values for the API specification objects properties.
+The defaults object is used to define default values for the API specification objects properties.
 
-<DataTreeView :data="defaults" :maxDepth="10" />
+The API Specification parser will use this object to find a default value for the following keys when evaluating the different objects:
 
-- security Security
-- body_max_byte integer
-- body_read_bytes integer
-- body_read_seconds integer
-- headers map
-- **accepts** array
-An array of content types. The supported content types are:
-    - `application/json`
-    - `application/json; charset=utf-8`
-    - `application/msgpack`
-    - `application/msgpack; charset=utf-8`
-    - `application/x-www-form-urlencoded`
-- **provides** array
-An array of content types. The supported content types are:
-    - `application/json`
-    - `application/json; charset=utf-8`
-    - `application/msgpack`
-    - `application/msgpack; charset=utf-8`
-- timeout integer
-- connect_timeout integer
-- retries integer
-- retry_timeout integer
+* `schemes`
+* `accepts`
+* `provides`
+* `headers`
+* `security`
+* `body_max_byte`
+* `body_read_bytes`
+* `body_read_seconds`
+* `timeout`
+* `connect_timeout`
+* `retries`
+* `retry_timeout`
+
 
 ## Security Object
+The Security Object defines the authentication method to be used for an API Version. The supported authentication methods are:
 
-One of the following objects.
+* Basic Authentication
+* API Key
+* OAuth2
+    * Client Credentials
+    * Resource Owner Password
+
 
 ### Basic Authentication
 
@@ -308,7 +305,7 @@ const headers = {
     "type": "map",
     "required": false,
     "mutable": false,
-    "description": "A mapping of HTTP headers to their corresponding values to be returned with the response"
+    "description": "A mapping of HTTP headers to their corresponding values."
 };
 
 const accepts = {
@@ -335,7 +332,7 @@ const apiRequest = {
     "type": "object",
     "required": false,
     "mutable": false,
-    "description": "the HTTP request data and metadata for each request.",
+    "description": "The HTTP request data and metadata for each request.",
     "properties": {
         "id": {
             "type": "string",
@@ -347,13 +344,7 @@ const apiRequest = {
             "type": "string",
             "required": false,
             "mutable": false,
-            "description": "The HTTP method of the request. One of the following values: `delete`, `get`, `head`, `options`, `patch`, `post`, `put`."
-        },
-        "scheme": {
-            "type": "string",
-            "required": false,
-            "mutable": false,
-            "description": "The scheme used by the request i.e. `http` or `https`."
+            "description": "The HTTP method of the request. One of the following values:\n- `delete`\n- `get`\n- `head`\n- `options`\n- `patch`\n- `post`\n- `put`."
         },
         "peername": {
             "type": "string",
