@@ -6,7 +6,24 @@ Bondy HTTP API Gateway is an HTTP/REST API management subsystem that sits betwee
 
 ## Overview
 
-The API Gateway hosts one or more APIs. Each API is defined using the API Specification Object, a JSON data structure that can contain static values or expressions that are evaluated against the HTTP request data in runtime.
+The API Gateway hosts one or more APIs. Each API is defined using an [API Specification Object](#api-specification-object), a JSON data structure that can contain static values or [expressions](#api-expression-language) that are evaluated against the HTTP request data at runtime.
+
+## API Context
+
+The API context is a map that at runtime contains the HTTP Request data and the results of parsing and evaluating the definitions and expressions defined in an API Specification Object against itself. That is, the evaluation of the expressions is done incrementally, where the input values of an expression can be the result of another expression.
+
+This map can contains the following pre-defined keys:
+
+<DataTreeView :data="context" :maxDepth="10" />
+
+
+::: info Accessing Request Object's properties
+These properties are addressable by the expression language using the key `request` e.g. the following expression will evaluate to the contents of the request body.
+
+```
+{{request.body}}
+```
+:::
 
 ## API Specification Object
 
@@ -215,22 +232,7 @@ NOT IMPLEMENTED
 
 <DataTreeView :data="oauth2" :maxDepth="10" />
 
-## API Context
 
-The API context is a map that at runtime contains the results of parsing and evaluating the definitions and expressions defined in an API Specification Object.
-
-This map contains the following keys:
-
-<DataTreeView :data="apiContext" :maxDepth="10" />
-
-
-::: info Accessing Request Object's properties
-These properties are addressable by the expression language using the key `request` e.g. the following expression will evaluate to the contents of the request body.
-
-```
-{{request.body}}
-```
-:::
 
 ## API Expression Language
 
