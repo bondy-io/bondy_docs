@@ -881,7 +881,7 @@ const wampAction = {
         "type": "string",
         "required": true,
         "mutable": false,
-        "description": "One of the following values:\n- `wamp_call`\n- `wamp_publish`\n- `wamp_register`\n- `wamp_unregister`\n- `wamp_subscribe`\n- `wamp_unsubscribe`"
+        "description": "One of the following values:\n- `wamp_call`\n- `wamp_publish`"
     },
     "options": {
         "type": "map",
