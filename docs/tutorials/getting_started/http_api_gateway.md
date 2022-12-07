@@ -1,5 +1,14 @@
 ---
 draft: true
+related:
+    - text: Marketplace
+      type: Tutorial
+      link: /tutorials/getting_started/marketplace
+      description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
+    - text: HTTP API Gateway
+      type: Reference
+      link: /reference/configuration/http_api_gateway.html#api-specification-object
+      description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over those procedures and topics.
 ---
 
 # Marketplace HTTP API Gateway
@@ -10,7 +19,7 @@ In this tutorial we are going to pick up where we left off with the [Marketplace
 
 The idea is to now expose the WAMP API we have developed to HTTP. The goal is to demonstrate how one can use Bondy's capabilities to integrate HTTP clients into the application network.
 
-The steps in the following sections will demonstrate how to create an HTTP [API Specification Object](reference/configuration/http_api_gateway.html#api-specification-object) from scratch, loading it in Bondy and demonstrating how we can call the resulting HTTP API using an HTTP client.
+The steps in the following sections will demonstrate how to create an HTTP [API Specification Object](/reference/configuration/http_api_gateway.html#api-specification-object) from scratch, loading it in Bondy and demonstrating how we can call the resulting HTTP API using an HTTP client.
 
 ## Context
 

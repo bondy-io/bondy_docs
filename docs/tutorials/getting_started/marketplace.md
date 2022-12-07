@@ -1,3 +1,14 @@
+---
+related:
+    - text: Marketplace HTTP API Gateway
+      type: Tutorial
+      link: /tutorials/getting_started/http_api_gateway
+      description: A tutorial that demonstrates how to add an HTTP API to an existing project using the HTTP API Gateway.
+    - text: HTTP API Gateway
+      type: Reference
+      link: /reference/configuration/http_api_gateway.html#api-specification-object
+      description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over those procedures and topics.
+---
 # Marketplace
 A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
 
