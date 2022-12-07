@@ -877,6 +877,12 @@ export default {
               link: '/reference/http_api/realm',
               isFeature: true,
               description:"Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status."
+            },
+            {
+              text: 'HTTP API Gateway',
+              link: '/reference/http_api/api_gateway',
+              isFeature: true,
+              description: "Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics."
             }
           ]
         }
