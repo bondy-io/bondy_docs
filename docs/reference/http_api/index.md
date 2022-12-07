@@ -9,7 +9,7 @@ const { theme } = useData()
 </script>
 
 # Introduction
-Bondy povides an HTTP API Gateway that exposes some of the WAMP Admin and Meta APIs via HTTP.
+Bondy can be configured, managed and monitored via an HTTP API that exposes some of the  Procedures and Events found in the WAMP API.
 
 In Bondy, a Realm and all its entities are dynamically managed using a WAMP API. Some additional resource in Bondy can also be managed via the WAMP API.
 
