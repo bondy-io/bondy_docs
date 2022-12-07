@@ -6,7 +6,23 @@ Bondy HTTP API Gateway is an HTTP/REST API management subsystem that sits betwee
 
 ## Overview
 
-The API Gateway hosts one or more APIs. Each API is defined using an [API Specification Object](#api-specification-object), a JSON data structure that can contain static values or [expressions](#api-expression-language) that are evaluated against the HTTP request data at runtime.
+The API Gateway hosts one or more APIs.
+
+Each API is defined using an [API Specification Object](#api-specification-object), a JSON data structure that can contain static values and/or [expressions](#api-expression-language) that are evaluated against the HTTP request data at runtime to determine which action to perform e.g. `CALL` or `PUBLISH` and how to transform the input data.
+
+
+::: definition Evaluation
+More specifically, the definitions found by the API Gateway in an [API Specification Object](#api-specification-object) are evaluated at runtime against the [API Context](#api-context) which contains the HTTP [Request object](#request-object).
+:::
+
+
+
+
+## Request object
+
+The object represents the contents (data and metadata) for each HTTP request that will be can be accessed by an [API Specification Object](#api-specification-object).
+
+<DataTreeView :data="request" :maxDepth="10" />
 
 ## API Context
 
@@ -330,11 +346,11 @@ const provides = {
     "description": "An array of content types. The supported content types are:\n* `application/json`\n* `application/json; charset=utf-8`\n* `application/msgpack` \n* `application/msgpack; charset=utf-8`"
 };
 
-const apiRequest = {
+const request = {
     "type": "object",
     "required": false,
     "mutable": false,
-    "description": "The HTTP request data and metadata for each request.",
+    "description": "The contents (data and metadata) for each HTTP request.",
     "properties": {
         "id": {
             "type": "string",
@@ -348,6 +364,7 @@ const apiRequest = {
             "mutable": false,
             "description": "The HTTP method of the request. One of the following values:\n- `delete`\n- `get`\n- `head`\n- `options`\n- `patch`\n- `post`\n- `put`."
         },
+        "scheme": schemes,
         "peername": {
             "type": "string",
             "required": false,
@@ -384,13 +401,13 @@ const apiRequest = {
             "type": "string",
             "required": false,
             "mutable": false,
-            "description": "The HTTP query string. See query_params."
+            "description": "The HTTP query string. See `query_params`."
         },
         "query_params": {
             "type": "map",
             "required": false,
             "mutable": false,
-            "description": "A map of query params to values. This is the result of parsing the query_string. Example: for HTTP request `GET [http://example.com/users?region=us&type=individual](http://example.com/v1/foo?x=100&y=200)` the value of this property will be the map `{\"region\": \"us\", \"type\": \"individual\"}` ."
+            "description": "A map of query params to values. This is the result of parsing the `query_string`.\n\nExample: for HTTP request `GET [http://example.com/users?region=us&type=individual](http://example.com/v1/foo?x=100&y=200)` the value of this property will be the map `{\"region\": \"us\", \"type\": \"individual\"}` ."
         },
         "bindings": {
             "type": "string",
@@ -402,7 +419,7 @@ const apiRequest = {
             "type": "any",
             "required": false,
             "mutable": false,
-            "description": "The body of the request. This is the result of decoding the HTTP body using the encoding determined by the [Path Object](https://www.notion.so/HTTP-API-Gateway-b87c2e0d529e4485875a74e4bb987618) `accepts` property which defines the content-types allowed for `POST`, `PUT` and `PATCH`."
+            "description": "The body of the request. This is the result of decoding the HTTP body using the encoding determined by the [Path Object](#path-object) `accepts` property which defines the content-types allowed for `POST`, `PUT` and `PATCH`."
         },
         "body_length": {
             "type": "integer",
@@ -413,8 +430,13 @@ const apiRequest = {
     }
 };
 
-const apiContext = {
-    "request": apiRequest,
+const context = {
+    "request": {
+        "type": "RequestObject",
+        "required": false,
+        "mutable": true,
+        "description": "The contents (data and metadata) for each HTTP request."
+    },
     "security": {
         "type": "SecurityObject",
         "required": false,
@@ -947,6 +969,7 @@ const defaults = {
     "schemes": schemes,
     "accepts": accepts,
     "provides": provides,
+    "headers": headers,
     "security": {
         "type": "SecurityObject",
         "required": false,
@@ -978,7 +1001,8 @@ const defaults = {
 export default {
     data() {
         return {
-            apiContext: JSON.stringify(apiContext),
+            request: JSON.stringify(request),
+            context: JSON.stringify(context),
             api: JSON.stringify(api),
             version: JSON.stringify(version),
             path: JSON.stringify(path),
