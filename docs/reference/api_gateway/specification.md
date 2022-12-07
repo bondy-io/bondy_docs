@@ -1,6 +1,14 @@
 ---
 draft: false
 related:
+    - text: Network Listeners
+      type: Configuration Reference
+      link: /reference/configuration/listeners#api-gateway-http-listener
+      description: Configure the network listeners for the HTTP API Gateway.
+    - text: Security
+      type: Configuration Reference
+      link: /reference/configuration/security#authentication-oauth2
+      description: Configure OAuth2 authentication for HTTP APIs
     - text: HTTP API Gateway
       type: HTTP API Reference
       link: /reference/http_api/api_gateway
@@ -10,21 +18,38 @@ related:
       link: /tutorials/getting_started/marketplace
       description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
 ---
-# HTTP API Gateway Configuration Reference
-Bondy HTTP API Gateway is an HTTP/REST API management subsystem that sits between an HTTP client and a realm's WAMP RPC procedures and PubSub Topics. It acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over those procedures and topics.
+# HTTP API Gateway Specification Reference
+An API gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP APIs.
 
 ## Overview
+The API Gateway can hosts one or more APIs and runs on top of your WAMP API and also in front of any external HTTP API.
 
-The API Gateway hosts one or more APIs.
+Each API is defined using an [API Gateway Specification](#api-gateway-specification) document, a JSON data structure consisting of an object graph where the object properties can contain static values and/or dynamically evaluated values via [expressions](#api-expression-language) that are resolved against the HTTP request data at runtime.
 
-Each API is defined using an [API Specification Object](#api-specification-object), a JSON data structure that can contain static values and/or [expressions](#api-expression-language) that are evaluated against the HTTP request data at runtime to determine which action to perform e.g. `CALL` or `PUBLISH` and how to transform the input data.
+For each incoming request, Bondy will determine which action to perform e.g. make a WAMP operation or forward the request to an external HTTP API, and how to transform the input data based on this specification.
 
 
 ::: definition Evaluation
-More specifically, the definitions found by the API Gateway in an [API Specification Object](#api-specification-object) are evaluated at runtime against the [API Context](#api-context) which contains the HTTP [Request object](#request-object).
+More specifically, the definitions found by the [API Gateway Specification](#api-gateway-specification) are evaluated at runtime against the [API Context](#api-context) which contains the HTTP [Request object](#request-object).
 :::
 
 
+## API Gateway Specification
+
+The API Specification is a JSON document with the structure represented by the following object tree:
+
+- [API Object](#api-object)
+    - [Version Object 1](#version-object)
+        - [Path Object 1](#path-object)
+            - An [Operation Object](#operation-object) per HTTP verb
+                - [Action Object](#action-object)
+                - [Response Object](#response-object)
+        - ... path objects
+    - ... version objects
+
+The following diagram shows the object structure in detail, including all properties and types.
+
+<ZoomImg src="/assets/api_gateway_spec.png"/>
 
 
 ## Request object
@@ -35,7 +60,7 @@ The object represents the contents (data and metadata) for each HTTP request tha
 
 ## API Context
 
-The API context is a map that at runtime contains the HTTP Request data and the results of parsing and evaluating the definitions and expressions defined in an API Specification Object against itself. That is, the evaluation of the expressions is done incrementally, where the input values of an expression can be the result of another expression.
+The API context is a recursive map data structure that at runtime contains the HTTP Request data and the results of parsing and evaluating the definitions and expressions defined in an API Specification Object against itself. That is, the evaluation of the expressions is done incrementally, where the input values of an expression can be the result of another expression updating the context.
 
 This map can contains the following pre-defined keys:
 
@@ -50,22 +75,62 @@ These properties are addressable by the expression language using the key `reque
 ```
 :::
 
-## API Specification Object
 
-The API Specification is a JSON object with the structure represented by the following tree:
+## API Expression Language
 
-- [API Object](#api-object)
-    - [Version Object 1](#version-object)
-        - [Path Object 1](#path-object)
-            - An [Operation Object](#operation-object) per HTTP verb
-                - [Action Object](#action-object)
-                - [Response Object](#response-object)
-        - ... path objects
-    - ... version objects
+Most API Specification object properties support expressions using an embedded logic-less domain-specific language (internally called "mops") for data transformation and dynamic configuration.
 
-The following diagram shows the object structure in detail, including all properties and types.
+This same language is also used by the [Broker Bridge Specification](/reference/configuration/broker_bridge).
 
-<ZoomImg src="/assets/api_gateway_spec.png"/>
+The expression language operates on the [API Context](#api-context), a recursive map data structure that at runtime time contains the API [Request object](#request-object). It works by expanding keys (or key paths) provided in a context object and adding or updating keys in the same context object.
+
+::: info Usage Example
+To understand how expressions are used let's first explore a very simple and non-Bondy related example.
+
+For the sake of simplicity (and because Bondy configuration files use JSON) we will use JSON to represent our data structures in the example.
+
+Let's say we have a Customer Order object we want to transform in a number of ways before we send it to someone else.
+
+```javascript
+{
+    "id" : 12345
+    "sku" : "ZPK1972",
+    "price" : 13.99,
+    "customer": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "email" : "john.doe@foo.com"
+    },
+    "ship_to": {
+        "first_name": "May",
+        "last_name": "Poppins",
+        "address" : "3 High Street",
+        "town" : "Guildford",
+        "county" : "Surrey",
+        "zip"   : "GU1 1AF"
+    },
+    "bill_to": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "address" : "13 Sandy Lane",
+        "town" : "Esher",
+        "county" : "Surrey",
+        "zip"   : "KT11 2PQ"
+    }
+}
+```
+
+Let's explore a some example mops expressions to demonstrate how you can use mops in Bondy's configuration objects. Given the previous object, evaluating the expression on the "Expression" column will return the value in the "Evaluates To" column.
+
+|Expression|Evaluates To|
+|---|---|
+|`{{"\{\{sku\}\}"}}`|"ZPK1972"|
+|`{{"\{\{customer.first_name\}\}"}}`|"John"|
+|`{{"\{\{customer.first_name\}\} \{\{customer.last_name\}\}"}}`|"John Doe"|
+|`{{"The sku number is \{\{sku\}\}"}}`|"The sku number is ZPK1972"|
+
+:::
+
 
 ## API Object
 The API object is the root of an API Specification. It contains one or more [API Version](#version-object) objects.
@@ -103,6 +168,7 @@ The API object is the root of an API Specification. It contains one or more [API
   ]
 }
 ```
+
 
 ## Version Object
 The Version Object represents a particular API version.
@@ -256,63 +322,6 @@ NOT IMPLEMENTED
 ### OAuth2 AUthentication
 
 <DataTreeView :data="oauth2" :maxDepth="10" />
-
-
-
-## API Expression Language
-
-Most API Specification object properties support expressions using an embedded logic-less domain-specific language (internally called "mops") for data transformation and dynamic configuration.
-
-This same language is also used by the [Broker Bridge Specification](/reference/configuration/broker_bridge).
-
-The expression language operates on the [API Context](#api-context), a recursive map data structure that at design time contains an API Request object.
-
-Mops works by **expanding keys (or key paths) provided in a context object and adding or updating keys in the same context object.**
-
-To understand how mops is used in those use cases let's first explore a very simple and non-Bondy related example to understand how Mops works.
-
-For the sake of simplicity (and because Bondy configuration files use JSON) we will use JSON to represent our data structures in the example.
-
-Let's say we have a Customer Order object we want to transform in a number of ways before we send it to someone else.
-
-```javascript
-{
-    "id" : 12345
-    "sku" : "ZPK1972",
-    "price" : 13.99,
-    "customer": {
-        "first_name": "John",
-        "last_name": "Doe",
-        "email" : "john.doe@foo.com"
-    },
-    "ship_to": {
-        "first_name": "May",
-        "last_name": "Poppins",
-        "address" : "3 High Street",
-        "town" : "Guildford",
-        "county" : "Surrey",
-        "zip"   : "GU1 1AF"
-    },
-    "bill_to": {
-        "first_name": "John",
-        "last_name": "Doe",
-        "address" : "13 Sandy Lane",
-        "town" : "Esher",
-        "county" : "Surrey",
-        "zip"   : "KT11 2PQ"
-    }
-}
-```
-
-Let's explore a some example mops expressions to demonstrate how you can use mops in Bondy's configuration objects. Given the previous object, evaluating the expression on the "Expression" column will return the value in the "Evaluates To" column.
-
-|Expression|Evaluates To|
-|---|---|
-|`{{"\{\{sku\}\}"}}`|"ZPK1972"|
-|`{{"\{\{customer.first_name\}\}"}}`|"John"|
-|`{{"\{\{customer.first_name\}\} \{\{customer.last_name\}\}"}}`|"John Doe"|
-|`{{"The sku number is \{\{sku\}\}"}}`|"The sku number is ZPK1972"|
-
 
 
 <script>

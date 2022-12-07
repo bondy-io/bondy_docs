@@ -7,7 +7,7 @@ related:
       description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
     - text: HTTP API Gateway
       type: Configuration Reference
-      link: /reference/configuration/http_api_gateway.html#api-specification-object
+      link: /reference/api_gateway/specification.html#api-specification-object
       description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics.
     - text: HTTP API Gateway
       type: HTTP API Reference
@@ -23,7 +23,7 @@ In this tutorial we are going to pick up where we left off with the [Marketplace
 
 The idea is to now expose the WAMP API we have developed to HTTP. The goal is to demonstrate how one can use Bondy's capabilities to integrate HTTP clients into the application network.
 
-The steps in the following sections will demonstrate how to create an HTTP [API Specification Object](/reference/configuration/http_api_gateway.html#api-specification-object) from scratch, loading it in Bondy and demonstrating how we can call the resulting HTTP API using an HTTP client.
+The steps in the following sections will demonstrate how to create an HTTP [API Specification Object](/reference/api_gateway/specification.html#api-specification-object) from scratch, loading it in Bondy and demonstrating how we can call the resulting HTTP API using an HTTP client.
 
 ## Context
 
@@ -106,7 +106,7 @@ In addition, the realm had the following users defined:
 ## Configuration Steps
 
 ::: info Note
-Please refer to [API Specification Object](/reference/configuration/http_api_gateway.html#api-specification-object) for detailed information.
+Please refer to [API Specification Object](/reference/api_gateway/specification.html#api-specification-object) for detailed information.
 :::
 
 ### Pre-conditions
@@ -124,7 +124,7 @@ The demo is already running locally using the `make` command (for detailed infor
     
     In this part we try to show how we can create and configure the api spec to be able to expose some endpoints to call registered wamp procedures:
     
-    1. As a first step we need to define the "headers" for the [API Object](/reference/configuration/http_api_gateway.html#api-object). In this case we are configuring it with the **id** `com.market.demo` on the **realm** `com.market.demo` and with **oauth2** as security enabled and also some other defaults and configuration. Example below:
+    1. As a first step we need to define the "headers" for the [API Object](/reference/api_gateway/specification.html#api-object). In this case we are configuring it with the **id** `com.market.demo` on the **realm** `com.market.demo` and with **oauth2** as security enabled and also some other defaults and configuration. Example below:
         - **API Object**
             
             ```json
@@ -189,7 +189,7 @@ The demo is already running locally using the `make` command (for detailed infor
             }
             ```
             
-    2. Then we need to define the [Version Object](/reference/configuration/http_api_gateway.html#version-object) and its path. In this case we are defining the **version** `1.0.0` and it is part of the default path (optional). Example below:
+    2. Then we need to define the [Version Object](/reference/api_gateway/specification.html#version-object) and its path. In this case we are defining the **version** `1.0.0` and it is part of the default path (optional). Example below:
         - **Version Object**
             
             ```json
@@ -215,7 +215,7 @@ The demo is already running locally using the `make` command (for detailed infor
             }
             ```
             
-    3. Then we need to define the paths using the [Path Object](/reference/configuration/http_api_gateway.html#path-object) with the proper HTTP method, action type, WAMP procedures, arguments and responses. Example below for the `/market` GET endpoint calling to the proper `com.market.get` WAMP procedure without any args nor kwargs. Example below:
+    3. Then we need to define the paths using the [Path Object](/reference/api_gateway/specification.html#path-object) with the proper HTTP method, action type, WAMP procedures, arguments and responses. Example below for the `/market` GET endpoint calling to the proper `com.market.get` WAMP procedure without any args nor kwargs. Example below:
         
         ::: info Note
         👉 In the configured path you can notice, for example, the property is_collection: true due to the result of this endpoint is a list of items

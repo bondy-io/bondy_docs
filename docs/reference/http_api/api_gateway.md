@@ -3,7 +3,7 @@ draft: true
 related:
     - text: HTTP API Gateway
       type: Configuration Reference
-      link: /reference/configuration/http_api_gateway.html#api-specification-object
+      link: /reference/api_gateway/specification.html#api-specification-object
       description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics.
     - text: Marketplace HTTP API Gateway
       type: Tutorial

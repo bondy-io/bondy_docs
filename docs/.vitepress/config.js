@@ -300,6 +300,11 @@ export default {
               activeMatch: '/reference/http_api'
             },
             {
+              text: 'HTTP API Gateway Specification',
+              link: '/reference/api_gateway/specification',
+              activeMatch: '/reference/api_gateway'
+            },
+            {
               text: 'WAMP Client Libraries',
               link: '/reference/wamp_clients/index',
               activeMatch: '/reference/wamp_clients'
@@ -769,12 +774,6 @@ export default {
               description: 'Configure several WAMP features like URI strictness, RPC timeouts and message retention',
               link: '/reference/configuration/wamp',
               isFeature: true
-            },
-            {
-              text: 'HTTP API Gateway',
-              link: '/reference/configuration/http_api_gateway',
-              isFeature: true,
-              description: "Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics."
             }
           ]
         },
@@ -882,8 +881,9 @@ export default {
               text: 'HTTP API Gateway',
               link: '/reference/http_api/api_gateway',
               isFeature: true,
-              description: "Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics."
+              description: "Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP APIs."
             }
+
           ]
         }
     ]
