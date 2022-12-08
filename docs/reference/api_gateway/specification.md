@@ -25,15 +25,17 @@ An API Gateway specification is a document that tells Bondy how to route incomin
 
 
 ## Overview
-The API Gateway can hosts one or more APIs and runs on top of your WAMP API and also in front of any external HTTP API.
 
-Each API is defined _declaratively_ using an API Gateway Specification document, a JSON data structure that _declaratively_ defines how Bondy should handle each HTTP Request e.g. convert into a WAMP operation or forward it to an external HTTP API. This includes capabilities for data transformation.
+
+An API Gateway Specification document, a JSON data structure that _declaratively_ defines an HTTP API and how Bondy should handle each HTTP Request e.g. by converting it into a WAMP operation or forwarding it to an upstream (external) HTTP API. This includes capabilities for data transformation.
 
 ::: definition A declarative Finite State Machine (FSM)
-In effect an API Gateway Specification is a declarative definition of an API Gateway Finite State Machine that exposes an HTTP (REST) API and converts its nouns and verbs to either WAMP or HTTP [actions](#action-object).
+In effect, an API Gateway Specification is a declarative definition of an API Gateway Finite State Machine that exposes an HTTP (REST) API and converts its nouns and verbs to either WAMP or HTTP [actions](#action-object).
+
+
+:::
 
 With this approach you can create a whole REST HTTP API from scratch without any coding.
-:::
 
 The API Gateway Specification document has a structure represented by the following object tree:
 
@@ -54,20 +56,21 @@ The following diagram shows the object tree in detail, including all properties 
 
 The properties of the objects in the object tree can contain static values and/or dynamically evaluated values via [expressions](#expression-language) that are resolved against the HTTP request data at runtime.
 
-More specifically, an API Gateway Specification is the basis for, and is evaluated against, an [API Context](#api-context).
+::: definition FSM State
+The [API Context](#api-context) is the state of the API Gateway FSM. It is is [incrementally](#incremental-evaluation) an [recursively](#recursive-evaluation) constructed.
+:::
+
+So an API Gateway Specification is the basis of an [API Context](#api-context) but also it is evaluated against it, primarily because the context will contain the [Request Object](#request-object) at runtime.
+
+::: tip
+You key to the definition of an API Gateway Specification is understanting the [API Context](#api-context), since defining a specification implies writing expressions that target (read and/or update) the context.
+:::
+
 
 ## API Context
 
 The API context is map data structure, created by the API Gateway, that
 at runtime contains the HTTP Request data and the results of parsing and evaluating the definitions and expressions defined in an API Gateway Specification.
-
-::: definition FSM State
-You can think of the API Context as the state of the API Gateway FSM.
-
-The API Context is [incrementally](#incremental-evaluation) an [recursively](#recursive-evaluation) constructed.
-:::
-
-You define an API Gateway Specification by applying expressions that target (read or update) some of the context keys.
 
 The context contains the following keys:
 
