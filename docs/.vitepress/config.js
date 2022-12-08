@@ -488,6 +488,18 @@ export default {
           ]
         },
         {
+          text: 'Programming with HTTP',
+          collapsible: true,
+          items: [
+            {
+              text: 'Loading an API Gateway Specification',
+              link: '/guides/programming/loading_api_spec',
+              isFeature: true,
+              description: "Learn how to load an API Gateway Specification using the HTTP Admin API."
+            }
+          ]
+        },
+        {
           text: 'Configuration',
           collapsible: true,
           items: [
