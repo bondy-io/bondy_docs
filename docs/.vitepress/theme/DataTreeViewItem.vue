@@ -13,7 +13,7 @@
             <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
             <span v-if="data.computed" class="value-tag">COMPUTED</span>
             <div class="object-description " v-html="md.render( data.description)"></div>
-            <div v-if="data.default" class="object-default" v-html="md.renderInline( 'Default: ' + data.default)"></div>
+            <div v-if="data.default" class="object-default" v-html="md.renderInline( '_Default:_ ' + data.default)"></div>
           <button
             v-if="data.type === 'object' || data.arrayType === 'object' || data.arrayType === 'array'"
             class="property-toggle"
@@ -47,7 +47,7 @@
       >
         <!-- Root -->
         <span class="value-key"><code class="property">{{ data.key }}</code></span>
-        <span v-if="data.type === 'string' || data.type === 'integer' || data.type === 'bigInt' || data.type === 'boolean' || data.type === 'undefined' || data.type === 'map'"
+        <span v-if="data.type === 'any' || data.type === 'string' || data.type === 'integer' || data.type === 'bigInt' || data.type === 'boolean' || data.type === 'undefined' || data.type === 'map' || data.type.startsWith('()')"
         class="value-type">{{ data.type }}</span>
         <span v-else class="value-type">
           <a :href="slug">{{ data.type }}</a>
@@ -56,7 +56,7 @@
         <span v-if="isImmutable" class="value-tag">IMMUTABLE</span>
         <span v-if="data.computed" class="value-tag">COMPUTED</span>
         <div class="value-description " v-html="md.render( data.description)"/>
-        <div v-if="data.default" class="value-default" v-html="md.renderInline( 'Default: ' + data.default)"></div>
+        <div v-if="data.default" class="value-default" v-html="md.renderInline( '_Default:_ ' + data.default)"></div>
       </div>
   </div>
 </template>
@@ -91,7 +91,7 @@ export enum ItemType {
 }
 
 export type ValueTypes =
-  | unknown
+  | any
   | string
   | number
   | bigint
@@ -170,7 +170,7 @@ export default defineComponent({
         value === "number" ||
         value === "bigint" ||
         value === "boolean" ||
-        value === "unknown" ||
+        value === "any" ||
         value === "undefined";
     }
 
@@ -180,7 +180,7 @@ export default defineComponent({
         .is((v) => v === "number", then("var(--jtv-number-color)"))
         .is((v) => v === "bigint", then("var(--jtv-number-color)"))
         .is((v) => v === "boolean", then("var(--jtv-boolean-color)"))
-        .is((v) => v === "unknown", then("var(--jtv-null-color)"))
+        .is((v) => v === "any", then("var(--jtv-null-color)"))
         .is((v) => v === "undefined", then("var(--jtv-null-color)"))
         .default(then("var(--jtv-valueKey-color)"));
     }
