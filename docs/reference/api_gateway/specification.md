@@ -792,7 +792,8 @@ const path = {
     "timeout" : {
         "type": "integer",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "default": "The value defined for configuration option `wamp.call_timeout` ([See reference](/reference/configuration/wamp.html#call-timeout))."
     },
     "connect_timeout" : {
         "type": "integer",
@@ -997,7 +998,8 @@ const fwdAction = {
     "timeout": {
         "type": "integer",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "default": "The parent [Path Object](#path-object) `timeout` value."
     },
     "connect_timeout": {
         "type": "integer",
@@ -1047,7 +1049,8 @@ const wampAction = {
     "timeout": {
         "type": "integer",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "default": "The parent [Path Object](#path-object) `timeout` value."
     },
     "connect_timeout": {
         "type": "integer",
