@@ -9,7 +9,7 @@
 
 @[config](wamp.call_timeout,duration_time_units,30s,v0.1.0)
 
-The default timeout for WAMP (RPC) Calls when the CALL.Options.timeout
+The default timeout for WAMP (RPC) Calls when the `CALL.Options.timeout`
 property is not used. This value will be restricted by the
 [`wamp.max_call_timeout`](#wamp.max_call_timeout) property.
 
@@ -29,7 +29,9 @@ According to WAMP, an unspecified timeout or a value of `0` disables the  featur
 
 @[config](wamp.message_retention.default_ttl,time_duration_units,0,v0.9.0)
 
+
 @[config](wamp.message_retention.enabled,on|off,on,v0.9.0)
+
 
 @[config](wamp.message_retention.max_memory,byte_size_units,1GB,v0.9.0)
 
