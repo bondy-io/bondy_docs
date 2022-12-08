@@ -24,7 +24,13 @@ Bondy API Gateway is a reverse proxy that lets you manage, configure, and route 
 ## Overview
 The API Gateway can hosts one or more APIs and runs on top of your WAMP API and also in front of any external HTTP API.
 
-Each API is defined using an API Gateway Specification document, a JSON data structure that defines how for each incoming request, Bondy will determine which action to perform e.g. make a WAMP operation or forward the request to an external HTTP API, and how to transform the input data based on this specification.
+Each API is defined _declaratively_ using an API Gateway Specification document, a JSON data structure that defines how for each incoming request, Bondy will determine which action to perform e.g. make a WAMP operation or forward the request to an external HTTP API, and how to transform the input data based on this specification.
+
+::: info Declarative programming
+As you might have noticed, APIs are developed declaratively by using the API Gateway Specification document. With this approach you can create a whole REST HTTP API from scratch without any coding.
+
+
+:::
 
 The API Gateway Specification document has a structure represented by the following object tree:
 
@@ -43,6 +49,8 @@ The following diagram shows the object structure in detail, including all proper
 
 The properties of the objects in the object tree can contain static values and/or dynamically evaluated values via [expressions](#expression-language) that are resolved against the HTTP request data at runtime.
 
+More specifically, an API Gateway Specification is the basis for, and is evaluated against, an [API Context](#api-context).
+
 ## API Context
 
 The API context is map data structure that
@@ -52,10 +60,10 @@ It is used by the API Gateway to evaluate an API Gateway Specification.
 
 The context [incrementally](#incremental-evaluation) an [recursively](#recursive-evaluation) constructed.
 
-
-This context has the following schema:
-
 <DataTreeView :data="context" :maxDepth="10" />
+
+
+## Specification Evaluation
 
 ### Incremental Evaluation
 
@@ -78,16 +86,16 @@ Most API Specification object properties support expressions using an embedded l
 
 This same language is also used by the [Broker Bridge Specification](/reference/configuration/broker_bridge).
 
-The expression language operates on the [API Context](#api-context), a recursive map data structure that at runtime time contains the API [Request object](#request-object). It works by expanding keys (or key paths) provided in a context object and adding or updating keys in the same context object.
+The expression language operates on the [API Context](#api-context) and it works by expanding keys (or key paths) provided in a context object and adding or updating keys in the same context object.
 
 
-::: info Accessing Request Object's properties
+####  Accessing Context properties
 These properties are addressable by the expression language using the key `request` e.g. the following expression will evaluate to the contents of the request body.
 
 ```
 {{request.body}}
 ```
-:::
+
 
 ::: info Usage Example
 To understand how expressions are used let's first explore a very simple and non-Bondy related example.
