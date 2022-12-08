@@ -37,7 +37,7 @@ The above assumption means the `bondy.conf` file which you use to start Bondy co
 
 ## Loading the API Specification
 
-The following command will load the API specification, validate it and if successful it will be compiled and activate it.
+The following command will load the API Specification, validate it and if successful it will be compiled and activate it.
 
 :::::: tabs code
 ::: tab HTTP

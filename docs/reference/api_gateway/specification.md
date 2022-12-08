@@ -63,49 +63,33 @@ The context [incrementally](#incremental-evaluation) an [recursively](#recursive
 <DataTreeView :data="context" :maxDepth="10" />
 
 
-## Specification Evaluation
+## Request object
 
-### Incremental Evaluation
-
-This  evaluation performed in two stages.
-
-The first stage happens during validation and parsing. All API specification expressions will be evaluated to either a (final) value or a `future`. Futures occur when an expression dependes directly or indirectly (transitive closure) on HTTP request data. This results in a context object.
-
-The second stage occurs in runtime, during HTTP request handling. The context created in the first stage is updated with the HTTP request data and the API Specification is evaluated again using the updated context, yielding the actions to be performed with all futures evaluated to values.
-
-### Recursive Evaluation
-We say it is constructed recursively as the evaluation of the expressions in the API Gateway Specification is done by passing the context recursively throughout the specification object tree and at each stage the evaluation can result in updating the context itself.
-
-At each level of the tree expression children nodes can
-can use the values of the certain properties defined in the ancestor node, override them and/or add updated the context.
+The object represents the contents (data and metadata) of an HTTP request.  At runtime the API Gateway writes this object in the [API Context](#api-context) `request` property.
 
 
-### Expression Language
+<DataTreeView :data="request" :maxDepth="10" />
 
-Most API Specification object properties support expressions using an embedded logic-less domain-specific language (internally called "mops") for data transformation and dynamic configuration.
+You access the values in this object by writing expressions using the [API Specification expression language](#expression-language).
+
+
+## Expression Language
+
+Most API Specification object properties support expressions using an embedded logic-less domain-specific language (internally called _"mops"_) for data transformation and dynamic configuration.
 
 This same language is also used by the [Broker Bridge Specification](/reference/configuration/broker_bridge).
 
 The expression language operates on the [API Context](#api-context) and it works by expanding keys (or key paths) provided in a context object and adding or updating keys in the same context object.
 
+### Reading values
 
-####  Accessing Context properties
-These properties are addressable by the expression language using the key `request` e.g. the following expression will evaluate to the contents of the request body.
+Let's assume that we receive the following HTTP request:
 
-```
-{{request.body}}
-```
-
-
-::: info Usage Example
-To understand how expressions are used let's first explore a very simple and non-Bondy related example.
-
-For the sake of simplicity (and because Bondy configuration files use JSON) we will use JSON to represent our data structures in the example.
-
-Let's say we have a Customer Order object we want to transform in a number of ways before we send it to someone else.
-
-```javascript
-{
+```bash
+curl -X "POST" "http://localhost:18081/accounts/" \
+-H 'Content-Type: application/json; charset=utf-8' \
+-H 'Accept: application/json; charset=utf-8' \
+--data-binary '{
     "id" : 12345
     "sku" : "ZPK1972",
     "price" : 13.99,
@@ -130,29 +114,48 @@ Let's say we have a Customer Order object we want to transform in a number of wa
         "county" : "Surrey",
         "zip"   : "KT11 2PQ"
     }
-}
+}'
 ```
 
-Let's explore a some example mops expressions to demonstrate how you can use mops in Bondy's configuration objects. Given the previous object, evaluating the expression on the "Expression" column will return the value in the "Evaluates To" column.
+Let's explore a some example to demonstrate how you can use expression in Bondy's configuration objects to read data from the HTTP Request.
 
-|Expression|Evaluates To|
+The following table shows some example expressions being evaluated against the API Context for the above HTTP Request.
+
+|Expression String|Evaluates To|
 |---|---|
-|`{{"\{\{sku\}\}"}}`|"ZPK1972"|
-|`{{"\{\{customer.first_name\}\}"}}`|"John"|
-|`{{"\{\{customer.first_name\}\} \{\{customer.last_name\}\}"}}`|"John Doe"|
-|`{{"The sku number is \{\{sku\}\}"}}`|"The sku number is ZPK1972"|
-
-:::
-
-### Reading values
+|`{{"\{\{request.method\}\}"}}`|`POST`|
+|`{{"\{\{request.body\}\}"}}`|`{"id": 12345, "bill_to":...}`|
+|`{{"\{\{request.body.sku\}\}"}}`|`"ZPK1972"`|
+|`{{"The sku number is \{\{request.body.sku\}\}"}}`|`"The sku number is ZPK1972"`|
+|`{{"\{\{request.body.price\}\}"}}`|`"13.99"`|
+|`{{"\{\{request.body.price \|> float\}\}"}}`|`13.99`|
+|`{{"\{\{request.body.price \|> integer\}\}"}}`|`13`|
+|`{{"\{\{request.body.customer.first_name\}\}"}}`|`"John"`|
+|`{{"\{\{request.body.customer.first_name\}\}"}} {{"\{\{request.body.customer.last_name\}\}"}}`|`"John Doe"`|
+|`{{"\{\{variables.foo\}\}"}}`|Returns the value of the `foo` variable|
+|`{{"\{\{defaults.status_codes\}\}"}}`|Returns the status codes map|
 
 ### Setting Values
+You can use expressions to set values in the [API Context](#api-context).
 
-## Request object
+::: warning TODO
+examples
+:::
 
-The object represents the contents (data and metadata) for each HTTP request that will be can be accessed by an [API Specification Object](#api-specification-object).
+## Specification Evaluation
 
-<DataTreeView :data="request" :maxDepth="10" />
+### Incremental Evaluation
+
+The API Specification evaluation performed incrementally in two stages:
+
+1. **_During loading, validation and parsing_**. All API Specification expressions will be evaluated to either a (final) value or a `future`. Futures occur when an expression dependes directly or indirectly (transitive closure) on HTTP request data. This results in a context object.
+1. **_During HTTP request handling at runtime_**. The context created in the first stage is updated with the HTTP request data and the API Specification is evaluated again using the updated context, yielding the actions to be performed with all futures evaluated to values (grounded).
+
+### Recursive Evaluation
+The evaluation of the expressions in the API Gateway Specification is done by passing the [API Context](#api-context) recursively throughout the specification object tree.
+
+At each level of the tree children nodes can
+can use the values of the certain properties defined in the ancestor node (through expressions), override them and/or update the [API Context](#api-context).
 
 
 
@@ -161,7 +164,7 @@ The API object is the root of an API Specification. It contains one or more [API
 
 <DataTreeView :data="api" :maxDepth="10" />
 
-### Example
+::: details API Object example
 
 ```javascript
 {
@@ -192,6 +195,7 @@ The API object is the root of an API Specification. It contains one or more [API
   ]
 }
 ```
+:::
 
 
 ## Version Object
@@ -199,11 +203,11 @@ The Version Object represents a particular API version.
 
 <DataTreeView :data="version" :maxDepth="10" />
 
-### Example
-
+::: details Version Object example
 ```javascript
 TBD
 ```
+:::
 
 ## Path Object
 
@@ -211,10 +215,7 @@ A path specification to be used as a value to a key in the `paths` property of a
 
 <DataTreeView :data="path" :maxDepth="10" />
 
-### Path Patterns and Bindings
-TBD
-
-### Example
+::: details Path Object example
 
 ```javascript
 {
@@ -252,10 +253,17 @@ TBD
     }
 }
 ```
+:::
 
 ## Operation Object
 
 <DataTreeView :data="operation" :maxDepth="10" />
+
+::: details Operation Object example
+```javascript
+TBD
+```
+:::
 
 ## Action Object
 
@@ -267,29 +275,31 @@ An action that returns a static response.
 
 <DataTreeView :data="staticAction" :maxDepth="10" />
 
-#### Example
-
+::: details Action Object example
 ```javascript
 TBD
 ```
+:::
+
+
 
 ### Forward Action
 An action that forwards the incoming HTTP request to an upstream HTTP endpoint.
 
 <DataTreeView :data="fwdAction" :maxDepth="10" />
 
-#### Example
-
+::: details Forward Action Object example
 ```javascript
 TBD
 ```
+:::
 
 ### WAMP Action
 An action that transforms an incoming HTTP request to a WAMP operation.
 
 <DataTreeView :data="wampAction" :maxDepth="10" />
 
-::: details WAMP Action Example
+::: details WAMP Action example
 
 ```javascript 6-12
 {
@@ -322,7 +332,7 @@ The outcome is obtained from the [API Context](#api-context) `action` property b
 
 <DataTreeView :data="response" :maxDepth="10" />
 
-::: details WAMP Response Example
+::: details WAMP Response Object Example
 ```javascript 10-27
 {
     ...
