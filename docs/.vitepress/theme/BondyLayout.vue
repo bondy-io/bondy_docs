@@ -54,8 +54,7 @@ const router = useRouter()
 
 <style>
 /* First paragraph after H1 */
-
-main > div > div > p:first-of-type {
+h1 + p{
   line-height: 1.9rem;
   font-size:1.23529rem !important;
 }
