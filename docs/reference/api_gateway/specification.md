@@ -41,30 +41,35 @@ The following diagram shows the object structure in detail, including all proper
 
 <ZoomImg src="/assets/api_gateway_spec.png"/>
 
-The properties of the objects in the object graph can contain static values and/or dynamically evaluated values via [expressions](#expression-language) that are resolved against the HTTP request data at runtime.
-
-::: definition Evaluation
-More specifically, the definitions found by the API Gateway Specification are evaluated at runtime against the [API Context](#api-context) which contains the HTTP [Request object](#request-object).
-:::
+The properties of the objects in the object tree can contain static values and/or dynamically evaluated values via [expressions](#expression-language) that are resolved against the HTTP request data at runtime.
 
 ## API Context
 
-The API context is a recursive map data structure that at runtime contains the HTTP Request data and the results of parsing and evaluating the definitions and expressions defined in an API Specification Object against itself.
+The API context is map data structure that
+at runtime contains the HTTP Request data and the results of parsing and evaluating the definitions and expressions defined in an API Gateway Specification.
 
-We say it is recursive as the evaluation of the expressions is done incrementally, where the input values of an expression can be the result of another expression that has updated the values in context.
+It is used by the API Gateway to evaluate an API Gateway Specification.
+
+The context [incrementally](#incremental-evaluation) an [recursively](#recursive-evaluation) constructed.
+
 
 This context has the following schema:
 
 <DataTreeView :data="context" :maxDepth="10" />
 
+### Incremental Evaluation
 
-::: info Accessing Request Object's properties
-These properties are addressable by the expression language using the key `request` e.g. the following expression will evaluate to the contents of the request body.
+This  evaluation performed in two stages.
 
-```
-{{request.body}}
-```
-:::
+The first stage happens during validation and parsing. All API specification expressions will be evaluated to either a (final) value or a `future`. Futures occur when an expression dependes directly or indirectly (transitive closure) on HTTP request data. This results in a context object.
+
+The second stage occurs in runtime, during HTTP request handling. The context created in the first stage is updated with the HTTP request data and the API Specification is evaluated again using the updated context, yielding the actions to be performed with all futures evaluated to values.
+
+### Recursive Evaluation
+We say it is constructed recursively as the evaluation of the expressions in the API Gateway Specification is done by passing the context recursively throughout the specification object tree and at each stage the evaluation can result in updating the context itself.
+
+At each level of the tree expression children nodes can
+can use the values of the certain properties defined in the ancestor node, override them and/or add updated the context.
 
 
 ### Expression Language
@@ -74,6 +79,15 @@ Most API Specification object properties support expressions using an embedded l
 This same language is also used by the [Broker Bridge Specification](/reference/configuration/broker_bridge).
 
 The expression language operates on the [API Context](#api-context), a recursive map data structure that at runtime time contains the API [Request object](#request-object). It works by expanding keys (or key paths) provided in a context object and adding or updating keys in the same context object.
+
+
+::: info Accessing Request Object's properties
+These properties are addressable by the expression language using the key `request` e.g. the following expression will evaluate to the contents of the request body.
+
+```
+{{request.body}}
+```
+:::
 
 ::: info Usage Example
 To understand how expressions are used let's first explore a very simple and non-Bondy related example.
@@ -267,15 +281,70 @@ An action that transforms an incoming HTTP request to a WAMP operation.
 
 <DataTreeView :data="wampAction" :maxDepth="10" />
 
-#### Example
+::: details WAMP Action Example
 
-```javascript
-TBD
+```javascript 6-12
+{
+    ...
+    "paths": {
+        "/accounts" : {
+            "post": {
+                "action": {
+                    "type": "wamp_call",
+                    "procedure": "com.example.account",
+                    "options": {"timeout": 15000},
+                    "args" : ["{{request.body}}"],
+                    "kwargs" : {}
+                },
+                "response": {,
+                    ...
+                }
+            }
+        }
+    }
+}
 ```
+:::
 
 ## Response Object
+The response object defines what the API Gateway should respond in case of a successful result or error. The purpose of this declaration is to be able to customise the outcome of the action performed according to the [Action Object](#action-object) declaration.
+
+The outcome is obtained from the [API Context](#api-context) `action` property by using an expression such as `{{"\{\{action.result.PROP\}\}"}}` (in case of a successful result) and `{{"\{\{action.error.PROP\}\}"}}` (in case of an error) where `PROP` will depend on the type of action performed.
+
 
 <DataTreeView :data="response" :maxDepth="10" />
+
+::: details WAMP Response Example
+```javascript 10-27
+{
+    ...
+    "paths": {
+        "/accounts" : {
+            "post": {
+                "action": {
+                    "type": "wamp_call",
+                    ...
+                },
+                "response": {,
+                    "on_result": {
+                        "body": "{{action.result.args |> head}}"
+                    },
+                    "on_error": {
+                        "status_code": "{{status_codes |> get({{action.error.error_uri}}, 500) |> integer}}",
+                        "body": {
+                            "error_uri": "{{action.error.error_uri}}",
+                            "args": "{{action.error.args}}",
+                            "kwargs": "{{action.error.kwargs}}",
+                            "details": "{{action.error.details}}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+:::
 
 ## Defaults Object
 The defaults object is used to define default values for the API specification objects properties.
@@ -294,7 +363,6 @@ The API Specification parser will use this object to find a default value for th
 * `connect_timeout`
 * `retries`
 * `retry_timeout`
-
 
 
 ## Security Object
@@ -490,19 +558,19 @@ const context = {
         "type": "RequestObject",
         "required": false,
         "mutable": true,
-        "description": "The contents (data and metadata) of the HTTP request being evaluated."
+        "description": "The contents (data and metadata) of the HTTP request being evaluated. The request data is available at runtime, so any expression defined during design time will result in a `future` that will be evaluated to a value when handling the HTTP request."
     },
     "security": {
         "type": "SecurityObject",
         "required": false,
         "mutable": true,
-        "description": "An instance of the [Security Object](#security-object) provided"
+        "description": "An instance of the [Security Object](#security-object). Its initial value comes from the [API Object](#api-object) `defaults.security` or `variables.security` property. It is then possibly overriden recursively during evaluation by each [Path Object]#(path-object) definition."
     },
     "action": {
         "type": "ActionObject",
         "required": false,
         "mutable": true,
-        "description": "Will contain the result or error of the action performed by the Gateway during an HTTP request."
+        "description": "At runtime it will contain the result or error of the action performed by the API Gateway during the handling of an HTTP request."
     },
     "variables": {
         "type": "map",
@@ -520,8 +588,8 @@ const context = {
         "type": "map",
         "required": false,
         "mutable": true,
-        "description": "A mapping of WAMP Error URIs to HTTP Status Codes. This entries of this map are obtained during the parsing of the API Object tree. At each level of the tree this property will merge in the values of the target object's `status_codes` property, so children nodes can access the entries defined in the ancestors, override them and/or add new status codes to the context.",
-        "default":"Check the [default values below](#status-codes)"
+        "description": "A mapping of WAMP Error URIs to HTTP Status Codes, to be used when the [Operation Object](#operation-object) is a WAMP Action. The entries of this map are [recursively updated](#recursive-evaluation) during evaluation. At each level of the tree this property will merge in the values of the target object's `status_codes` property, so children nodes can access the entries defined in the ancestors, override them and/or add new status codes to the context.",
+        "default":"The value of the [API Object](#api-object) `defaults` property."
     }
 };
 
@@ -567,7 +635,8 @@ const api = {
         "type": "map",
         "required": false,
         "mutable": false,
-        "description": "A mapping of attributes to their default values. This values are inherited by children objects as defaults when their value is unset."
+        "description": "A mapping of attributes to their default values. This values are inherited by children objects as defaults when their value is unset.",
+        "default": "Check the [default values below](#status-codes)."
     },
     "status_codes": {
         "type": "map",
@@ -998,25 +1067,55 @@ const wampAction = {
 };
 
 
+
 const response = {
-    "headers": headers,
-    "body": {
-        "type": "undefined",
-        "required": false,
-        "mutable": false,
-        "description": "The body to be returned with the response."
+    "on_result": {
+        "type": "object",
+        "required": true,
+        "mutable": true,
+        "description": "A declaration of the desired HTTP response in case the action (as defined in the sibling `action` object) was successful.",
+        "properties": {
+            "headers": headers,
+            "body": {
+                "type": "undefined",
+                "required": true,
+                "mutable": true,
+                "description": "The value to be returned with the HTTP response. Either a static value or an expression (`string`). For a no-return using the empty string."
+            },
+            "uri": {
+                "type": "string",
+                "required": false,
+                "mutable": true,
+                "description": "In the case of an HTTP `POST` this value tells the API Gateway that a new resource has been created and as a consequence the HTTP response will have the uri as the value for the HTTP `Location` header and status code set to HTTP `201 created`. In case of the HTTP request not being a `POST` or if undefined, the status code will be set to HTTP `200 OK` or the value defined by `status_code`."
+            },
+            "status_code": {
+                "type": "integer",
+                "required": false,
+                "mutable": true,
+                "description": "The HTTP status code for the response. This can be an `integer` or an expression that evaluates to an integer."
+            }
+        }
     },
-    "status_code": {
-        "type": "integer",
-        "required": false,
-        "mutable": false,
-        "description": "The HTTP status code for the response"
-    },
-    "uri": {
-        "type": "string",
-        "required": false,
-        "mutable": false,
-        "description": "The URI for the response. If defined, the status code will the redirect code."
+    "on_error": {
+        "type": "object",
+        "required": true,
+        "mutable": true,
+                "description": "A declaration of the desired HTTP response in case the action (as defined in the sibling `action` object) failed.",
+        "properties": {
+            "headers": headers,
+            "body": {
+                "type": "undefined",
+                "required": true,
+                "mutable": true,
+                "description": "The value to be returned with the HTTP response. Either a static value or an expression (`string`). For a no-return using the empty string."
+            },
+            "status_code": {
+                "type": "integer",
+                "required": false,
+                "mutable": true,
+                "description": "The HTTP status code for the response. This can be an `integer` or an expression that evaluates to an integer. For example, the following expression uses the [API Context](#api-context) `status_codes` property to extract a code and uses `500` as fallback value: \n\n```javascript\n{{status_codes |> get({{action.error.error_uri}}, 500) |> integer}}\n```"
+            }
+        }
     }
 };
 
