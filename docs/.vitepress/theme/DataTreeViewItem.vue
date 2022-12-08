@@ -355,7 +355,7 @@ code.property{
 .value-key.can-select {
 	 cursor: pointer;
 }
- .value-key.can-select:hover {
+.value-key.can-select:hover {
 	 background-color: rgba(0, 0, 0, 0.08);
 }
  .value-key.can-select:focus {
