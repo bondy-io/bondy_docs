@@ -291,7 +291,7 @@ export default {
             },
             {
               text: 'HTTP API Gateway Specification',
-              link: '/reference/api_gateway/specification',
+              link: '/reference/api_gateway/index',
               activeMatch: '/reference/api_gateway'
             },
             {
@@ -351,6 +351,7 @@ export default {
       '/reference/configuration': configurationSidebar(),
       '/reference/wamp_api': wampAPISidebar(),
       '/reference/http_api': httpAPISidebar(),
+      '/reference/api_gateway': httpAPIGatewaySidebar(),
       '/concepts/': conceptsSidebar()
     }
   }
@@ -894,6 +895,34 @@ export default {
               link: '/reference/http_api/api_gateway',
               isFeature: true,
               description: "Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP APIs."
+            }
+
+          ]
+        }
+    ]
+  }
+
+    function httpAPIGatewaySidebar() {
+    return [
+        {
+          text: 'HTTP API Gateway Reference',
+          items: [
+            {
+              text: 'Introduction',
+              link: '/reference/api_gateway/index',
+              isFeature: false
+            },
+            {
+              text: 'API Gateway Specification',
+              link: '/reference/api_gateway/specification',
+              isFeature: true,
+              description: "An API Gateway specification is a document that tells Bondy how to route incoming HTTP requests to your WAMP APIs or to external HTTP APIs."
+            },
+            {
+              text: 'API Gateway Expressions',
+              link: '/reference/api_gateway/expressions',
+              isFeature: true,
+              description: "Bondy API Specification use a logic-less domain-specific language for data transformation and dynamic configuration."
             }
 
           ]

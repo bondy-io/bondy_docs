@@ -1,5 +1,6 @@
 ---
 draft: false
+outline: [2,3]
 related:
     - text: Network Listeners
       type: Configuration Reference
@@ -18,18 +19,20 @@ related:
       link: /tutorials/getting_started/marketplace
       description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
 ---
-# HTTP API Gateway Specification Reference
-Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP APIs. It Bondy to be integrated into an existing HTTP/REST API ecosystem.
+# HTTP API Gateway Specification
+An API Gateway specification is a document that tells Bondy how to route incoming HTTP requests to your WAMP APIs or to external HTTP APIs.
+
+
 
 ## Overview
 The API Gateway can hosts one or more APIs and runs on top of your WAMP API and also in front of any external HTTP API.
 
-Each API is defined _declaratively_ using an API Gateway Specification document, a JSON data structure that defines how for each incoming request, Bondy will determine which action to perform e.g. make a WAMP operation or forward the request to an external HTTP API, and how to transform the input data based on this specification.
+Each API is defined _declaratively_ using an API Gateway Specification document, a JSON data structure that _declaratively_ defines how Bondy should handle each HTTP Request e.g. convert into a WAMP operation or forward it to an external HTTP API. This includes capabilities for data transformation.
 
-::: info Declarative programming
-As you might have noticed, APIs are developed declaratively by using the API Gateway Specification document. With this approach you can create a whole REST HTTP API from scratch without any coding.
+::: definition A declarative Finite State Machine (FSM)
+In effect an API Gateway Specification is a declarative definition of an API Gateway Finite State Machine that exposes an HTTP (REST) API and converts its nouns and verbs to either WAMP or HTTP [actions](#action-object).
 
-
+With this approach you can create a whole REST HTTP API from scratch without any coding.
 :::
 
 The API Gateway Specification document has a structure represented by the following object tree:
@@ -37,13 +40,15 @@ The API Gateway Specification document has a structure represented by the follow
 - [API Object](#api-object)
     - [Version Object 1](#version-object)
         - [Path Object 1](#path-object)
-            - An [Operation Object](#operation-object) per HTTP verb
-                - [Action Object](#action-object)
-                - [Response Object](#response-object)
-        - ... path objects
-    - ... version objects
+            - `get`
+                - [Operation Object](#operation-object)
+                    - [Action Object](#action-object)
+                    - [Response Object](#response-object)
+            - ... other HTTP methods
+        - ... other path objects
+    - ... other version objects
 
-The following diagram shows the object structure in detail, including all properties and types.
+The following diagram shows the object tree in detail, including all properties and types.
 
 <ZoomImg src="/assets/api_gateway_spec.png"/>
 
@@ -53,17 +58,23 @@ More specifically, an API Gateway Specification is the basis for, and is evaluat
 
 ## API Context
 
-The API context is map data structure that
+The API context is map data structure, created by the API Gateway, that
 at runtime contains the HTTP Request data and the results of parsing and evaluating the definitions and expressions defined in an API Gateway Specification.
 
-It is used by the API Gateway to evaluate an API Gateway Specification.
+::: definition FSM State
+You can think of the API Context as the state of the API Gateway FSM.
 
-The context [incrementally](#incremental-evaluation) an [recursively](#recursive-evaluation) constructed.
+The API Context is [incrementally](#incremental-evaluation) an [recursively](#recursive-evaluation) constructed.
+:::
+
+You define an API Gateway Specification by applying expressions that target (read or update) some of the context keys.
+
+The context contains the following keys:
 
 <DataTreeView :data="context" :maxDepth="10" />
 
 
-## Request object
+### Request Object
 
 The object represents the contents (data and metadata) of an HTTP request.  At runtime the API Gateway writes this object in the [API Context](#api-context) `request` property.
 
@@ -72,16 +83,24 @@ The object represents the contents (data and metadata) of an HTTP request.  At r
 
 You access the values in this object by writing expressions using the [API Specification expression language](#expression-language).
 
+### Result Object
+
+#### WAMP Result
+
+<DataTreeView :data="wampResult" :maxDepth="10" />
+
+#### HTTP Forward Result
+
+### Error Object
+
 
 ## Expression Language
 
-Most API Specification object properties support expressions using an embedded logic-less domain-specific language (internally called _"mops"_) for data transformation and dynamic configuration.
+Most API Specification object properties support expressions using an embedded logic-less domain-specific language (internally called _"Mops"_) for data transformation and dynamic configuration.
 
 This same language is also used by the [Broker Bridge Specification](/reference/configuration/broker_bridge).
 
 The expression language operates on the [API Context](#api-context) and it works by expanding keys (or key paths) provided in a context object and adding or updating keys in the same context object.
-
-### Reading values
 
 Let's assume that we receive the following HTTP request:
 
@@ -127,19 +146,16 @@ The following table shows some example expressions being evaluated against the A
 |`{{"\{\{request.body\}\}"}}`|`{"id": 12345, "bill_to":...}`|
 |`{{"\{\{request.body.sku\}\}"}}`|`"ZPK1972"`|
 |`{{"The sku number is \{\{request.body.sku\}\}"}}`|`"The sku number is ZPK1972"`|
-|`{{"\{\{request.body.price\}\}"}}`|`"13.99"`|
-|`{{"\{\{request.body.price \|> float\}\}"}}`|`13.99`|
+|`{{"\{\{request.body.price\}\}"}}`|`13.99`|
 |`{{"\{\{request.body.price \|> integer\}\}"}}`|`13`|
+|`{{"\{\{request.body.price \|> string\}\}"}}`|`"13.99"`|
 |`{{"\{\{request.body.customer.first_name\}\}"}}`|`"John"`|
 |`{{"\{\{request.body.customer.first_name\}\}"}} {{"\{\{request.body.customer.last_name\}\}"}}`|`"John Doe"`|
 |`{{"\{\{variables.foo\}\}"}}`|Returns the value of the `foo` variable|
 |`{{"\{\{defaults.status_codes\}\}"}}`|Returns the status codes map|
 
-### Setting Values
-You can use expressions to set values in the [API Context](#api-context).
-
-::: warning TODO
-examples
+::: info Learn more
+Expressions also allow to set values in the context and use functions to manipulate the request data. Learn more about expressions in the [API Specification Expressions](/reference/api_gateway/expressions) reference section.
 :::
 
 ## Specification Evaluation
@@ -369,19 +385,8 @@ The defaults object is used to define default values for the API specification o
 
 The API Specification parser will use this object to find a default value for the following keys when evaluating the different objects:
 
-* `schemes`
-* `accepts`
-* `provides`
-* `headers`
-* `security`
-* `body_max_byte`
-* `body_read_bytes`
-* `body_read_seconds`
-* `timeout`
-* `connect_timeout`
-* `retries`
-* `retry_timeout`
 
+<DataTreeView :data="defaults" :maxDepth="10" />
 
 ## Security Object
 The Security Object defines the authentication method to be used for an API Version. The supported authentication methods are:
@@ -400,13 +405,11 @@ The Security Object defines the authentication method to be used for an API Vers
 
 ### API Key Authentication
 
+<DataTreeView :data="apiKeySecurity" :maxDepth="10" />
 ::: warning
-NOT IMPLEMENTED
+CURRENTLY NOT IMPLEMENTED
 :::
 
-<!-- - type = api_key string
-- schemes SCHEME[]
-- header_name string -->
 
 ### OAuth2 AUthentication
 
@@ -461,7 +464,7 @@ const schemes = {
 };
 
 const headers = {
-    "type": "map",
+    "type": "() => map",
     "required": false,
     "mutable": false,
     "description": "A mapping of HTTP headers to their corresponding values."
@@ -585,9 +588,19 @@ const context = {
         "description": "An instance of the [Security Object](#security-object). Its initial value comes from the [API Object](#api-object) `defaults.security` or `variables.security` property. It is then possibly overriden recursively during evaluation by each [Path Object]#(path-object) definition."
     },
     "action": {
-        "type": "ActionObject",
+        "type": "object",
         "required": false,
         "mutable": true,
+        "properties": {
+            "result" : {
+                "type": "ResultObject",
+                "description": "If the action was successful the value will be the result of evaluating the [Response Object](#response-object) `on_result` property associated with the [Operation Object](#operation-object) executed for this HTTP Request."
+            },
+            "error" : {
+                "type": "ErrorObject",
+                "description": "If the action failed the value will be the result of evaluating the [Response Object](#response-object) `on_error` property associated with the [Operation Object](#operation-object) executed for this HTTP Request."
+            }
+        },
         "description": "At runtime it will contain the result or error of the action performed by the API Gateway during the handling of an HTTP request."
     },
     "variables": {
@@ -609,6 +622,44 @@ const context = {
         "description": "A mapping of WAMP Error URIs to HTTP Status Codes, to be used when the [Operation Object](#operation-object) is a WAMP Action. The entries of this map are [recursively updated](#recursive-evaluation) during evaluation. At each level of the tree this property will merge in the values of the target object's `status_codes` property, so children nodes can access the entries defined in the ancestors, override them and/or add new status codes to the context.",
         "default":"The value of the [API Object](#api-object) `defaults` property."
     }
+};
+
+
+const wampResult = {
+    "type": "object",
+    "properties": {
+        "request_id":{
+            "type": "integer",
+            "required": false,
+            "mutable": false,
+            "description": "The WAMP `RESULT.id`."
+        },
+        "details": {
+            "type": "map",
+            "required": false,
+            "mutable": false,
+            "description": "The WAMP `RESULT.details`."
+        },
+        "args": {
+            "type": "array",
+            "items": {
+                "type": "any"
+            },
+            "required": false,
+            "mutable": false,
+            "description": "The WAMP `RESULT.args`."
+        },
+        "kwargs": {
+            "type": "() => map",
+            "required": false,
+            "mutable": false,
+            "description": "The WAMP `RESULT.kwargs`."
+        }
+    }
+};
+
+const error = {
+
 };
 
 const api = {
@@ -647,20 +698,20 @@ const api = {
         "type": "map",
         "required": false,
         "mutable": false,
-        "description": "A mapping of arbitrary variable names to values or MOPS expressions. This variables can be referenced by MOPS expressions in the children objects of this object."
+        "description": "A mapping of arbitrary variable names to values or  expressions. This variables can be referenced by expressions in the children objects of this object."
     },
     "defaults": {
         "type": "map",
         "required": false,
         "mutable": false,
-        "description": "A mapping of attributes to their default values. This values are inherited by children objects as defaults when their value is unset.",
-        "default": "Check the [default values below](#status-codes)."
+        "description": "A mapping of attributes to their default values. This values are inherited by children objects as defaults when their value is unset."
     },
     "status_codes": {
         "type": "map",
         "required": false,
         "mutable": false,
-        "description": "A mapping of WAMP Error URIs to HTTP Status Codes."
+        "description": "A mapping of WAMP Error URIs to HTTP Status Codes. This values are inherited by children objects as defaults when their value is unset.",
+        "default": "Check the [default values below](#status-codes)."
     },
     "versions": {
         "type": "array",
@@ -729,13 +780,13 @@ const version = {
         "type": "map",
         "required": false,
         "mutable": false,
-        "description": "A mapping of arbitrary variable names to values or MOPS expressions. This variables can be referenced by MOPS expressions in the children objects of this object. These values are merged with and thus override the ones inherited from the API Object variables property."
+        "description": "A mapping of arbitrary variable names to values or expressions. This variables can be referenced by expressions in the children objects of this object. These values are merged with and thus override the ones inherited from the [API Object](#api-object) `variables` property."
     },
     "defaults": {
         "type": "map",
         "required": false,
         "mutable": false,
-        "description": "A mapping of attributes to their default values. This values are inherited by children objects as defaults when their value is unset. These values are merged with and thus override the ones inherited from the API Object default property."
+        "description": "A mapping of attributes to their default values. This values are inherited by children objects as defaults when their value is unset. These values are merged with and thus override the ones inherited from the [API Object](#api-object) `defaults` property."
     },
     "status_codes": {
         "type": "map",
@@ -773,7 +824,7 @@ const path = {
         "type": "map",
         "required": false,
         "mutable": false,
-        "description": "A mapping of arbitrary variable names to values or MOPS expressions. This variables can be referenced by MOPS expressions in the children objects of this object. These values are merged with and thus override the ones inherited from the API Object variables property."
+        "description": "A mapping of arbitrary variable names to values or expressions. This variables can be referenced by expressions in the children objects of this object. These values are merged with and thus override the ones inherited from the [API Object](#api-object) variables property."
     },
     "defaults": {
         "type": "map",
@@ -792,7 +843,7 @@ const path = {
     "accepts": accepts,
     "provides": provides,
     "schemes": schemes,
-    "body_max_byte" : {
+    "body_max_bytes" : {
         "type": "integer",
         "required": false,
         "mutable": false
@@ -884,7 +935,23 @@ const basicSecurity = {
         "mutable": false,
         "description": "A value of `basic`."
     },
-    "schemes": schemes
+    "schemes": {...schemes, "default": '`["http"]`'}
+};
+
+const apiKeySecurity = {
+    "\ttype": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "description": "A value of `api_key`."
+    },
+    "schemes": {...schemes, "default": '`["http"]`'},
+    "header_name": {
+        "type": "string",
+        "required": true,
+        "mutable": false,
+        "default": '`"authorization"`'
+    }
 };
 
 const oauth2 = {
@@ -894,7 +961,7 @@ const oauth2 = {
         "mutable": false,
         "description": "A value of `oauth2`."
     },
-    "schemes": schemes,
+    "schemes": {...schemes, "default": '`["http"]`'},
     "flow": {
         "type": "string",
         "required": true,
@@ -903,15 +970,17 @@ const oauth2 = {
     },
     "token_path": {
         "type": "string",
-        "required": true,
+        "required": false,
         "mutable": false,
-        "description": "The path to use for the obtain and refresh token action. Normally `/oauth/token`."
+        "description": "The relative path to use for the obtain/refresh token action.",
+        "default": '`"/oauth/token"`'
     },
     "revoke_token_path": {
         "type": "string",
-        "required": true,
+        "required": false,
         "mutable": false,
-        "description": "The path to use for the revoke token action. Normally `/oauth/revoke`."
+        "description": "The relative path to use for the revoke token action.",
+        "default": '`"/oauth/revoke"`'
     }
 };
 
@@ -935,7 +1004,7 @@ const operation = {
         "mutable": false,
         "description": ""
     },
-    "body_max_byte" : {
+    "body_max_bytes" : {
         "type": "integer",
         "required": false,
         "mutable": false,
@@ -968,7 +1037,7 @@ const staticAction = {
     },
     "headers": headers,
     "body": {
-        "type": "undefined",
+        "type": "() => any",
         "required": false,
         "mutable": false,
         "description": "The body to be returned with the response."
@@ -989,48 +1058,48 @@ const fwdAction = {
         "description": "The HTTP method to be used when forwarding the request to the upstream endpoint. It must be on of the HTTP methods:\n- `delete`\n- `get`\n- `head`\n- `options`\n- `patch`\n- `post`\n- `put`"
     },
     "host" : {
-        "type": "string",
+        "type": "() => string",
         "required": true,
         "mutable": false,
         "description": "The upstream host."
     },
     "path" : {
-        "type": "string",
+        "type": "() => string",
         "required": true,
         "mutable": false,
         "description": "The upstream path."
     },
     "query_string" : {
-        "type": "string",
+        "type": "() => string",
         "required": false,
         "mutable": false,
         "description": "The upstream query string."
     },
     "headers": headers,
     "body": {
-        "type": "undefined",
+        "type": "() => any",
         "required": false,
         "mutable": false,
         "description": "The body to be forwarded to the upstream endpoint."
     },
     "timeout": {
-        "type": "integer",
+        "type": "() => integer",
         "required": false,
         "mutable": false,
         "default": "The parent [Path Object](#path-object) `timeout` value."
     },
     "connect_timeout": {
-        "type": "integer",
+        "type": "() => integer",
         "required": false,
         "mutable": false
     },
     "retries": {
-        "type": "integer",
+        "type": "() => integer",
         "required": false,
         "mutable": false
     },
     "retry_timeout": {
-        "type": "integer",
+        "type": "() => integer",
         "required": false,
         "mutable": false
     }
@@ -1047,43 +1116,49 @@ const wampAction = {
         "type": "map",
         "required": false,
         "mutable": false,
-        "description": "The WAMP message `options`."
+        "description": "The WAMP message `options`.",
+        "default": "`{}`"
     },
     "args": {
         "type": "array",
         "items": {
-            "type": "undefined"
+            "type": "() => any"
         },
         "required": false,
         "mutable": false,
-        "description": "The WAMP message `args`."
+        "description": "The WAMP message `args`.",
+        "default": "`[]`"
     },
     "kwargs": {
-        "type": "map",
+        "type": "() => map",
         "required": false,
         "mutable": false,
-        "description": "The WAMP message `kwargs`."
+        "description": "The WAMP message `kwargs`.",
+        "default": "`{}`"
     },
     "timeout": {
-        "type": "integer",
+        "type": "() => integer",
         "required": false,
         "mutable": false,
-        "default": "The parent [Path Object](#path-object) `timeout` value."
+        "default": "`\"{{defaults.timeout}}\"` i.e. the parent [Path Object](#path-object) `timeout` value"
     },
     "connect_timeout": {
-        "type": "integer",
+        "type": "() => integer",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "default": "`\"{{defaults.connected_timeout}}\"` i.e. the parent [Path Object](#path-object) `connected_timeout` value"
     },
     "retries": {
-        "type": "integer",
+        "type": "() => integer",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "default": "`\"{{defaults.retries}}\"` i.e. the parent [Path Object](#path-object) `retries` value"
     },
     "retry_timeout": {
-        "type": "integer",
+        "type": "() => integer",
         "required": false,
-        "mutable": false
+        "mutable": false,
+        "default": "`\"{{defaults.retry_timeout}}\"` i.e. the parent [Path Object](#path-object) `retry_timeout` value"
     }
 };
 
@@ -1098,19 +1173,19 @@ const response = {
         "properties": {
             "headers": headers,
             "body": {
-                "type": "undefined",
+                "type": "() => any",
                 "required": true,
                 "mutable": true,
                 "description": "The value to be returned with the HTTP response. Either a static value or an expression (`string`). For a no-return using the empty string."
             },
             "uri": {
-                "type": "string",
+                "type": "() => string",
                 "required": false,
                 "mutable": true,
                 "description": "In the case of an HTTP `POST` this value tells the API Gateway that a new resource has been created and as a consequence the HTTP response will have the uri as the value for the HTTP `Location` header and status code set to HTTP `201 created`. In case of the HTTP request not being a `POST` or if undefined, the status code will be set to HTTP `200 OK` or the value defined by `status_code`."
             },
             "status_code": {
-                "type": "integer",
+                "type": "() => integer",
                 "required": false,
                 "mutable": true,
                 "description": "The HTTP status code for the response. This can be an `integer` or an expression that evaluates to an integer."
@@ -1125,13 +1200,13 @@ const response = {
         "properties": {
             "headers": headers,
             "body": {
-                "type": "undefined",
+                "type": "() => any",
                 "required": true,
                 "mutable": true,
                 "description": "The value to be returned with the HTTP response. Either a static value or an expression (`string`). For a no-return using the empty string."
             },
             "status_code": {
-                "type": "integer",
+                "type": "() => integer",
                 "required": false,
                 "mutable": true,
                 "description": "The HTTP status code for the response. This can be an `integer` or an expression that evaluates to an integer. For example, the following expression uses the [API Context](#api-context) `status_codes` property to extract a code and uses `500` as fallback value: \n\n```javascript\n{{status_codes |> get({{action.error.error_uri}}, 500) |> integer}}\n```"
@@ -1141,36 +1216,71 @@ const response = {
 };
 
 
+
 const defaults = {
     "schemes": schemes,
-    "accepts": accepts,
-    "provides": provides,
-    "headers": headers,
+    "accepts": {
+        ...accepts,
+        "default": '`["application/json", "application/msgpack"]`'
+    },
+    "provides": {
+        ...provides,
+        "default": '`["application/json", "application/msgpack"]`'
+    },
+    "headers": {
+        ...headers,
+        "default": "`{}`"
+    },
     "security": {
         "type": "SecurityObject",
         "required": false,
         "mutable": true,
+        "default": "`{}`"
     },
-    "body_max_byte" : {
+    "body_max_bytes" : {
         "type": "integer",
         "required": false,
         "mutable": false,
         "description": "",
-        "default": "The parent Path Object's `body_max_byte` value."
+        "default": 25_000_000
     },
     "body_read_bytes" : {
         "type": "integer",
         "required": false,
         "mutable": false,
         "description": "",
-        "default": "The parent Path Object's `body_read_bytes` value."
+        "default": 8_000_000
     },
     "body_read_seconds" : {
         "type": "integer",
         "required": false,
         "mutable": false,
         "description": "",
-        "default": "The parent Path Object's `body_read_seconds` value."
+        "default": 15_000
+    },
+    "timeout": {
+        "type": "() => integer",
+        "required": false,
+        "mutable": false,
+        "default": "`\"{{defaults.timeout}}\"` i.e. the parent [Path Object](#path-object) `timeout` value"
+    },
+    "connect_timeout": {
+        "type": "() => integer",
+        "required": false,
+        "mutable": false,
+        "default": "`\"{{defaults.connected_timeout}}\"` i.e. the parent [Path Object](#path-object) `connected_timeout` value"
+    },
+    "retries": {
+        "type": "() => integer",
+        "required": false,
+        "mutable": false,
+        "default": "`\"{{defaults.retries}}\"` i.e. the parent [Path Object](#path-object) `retries` value"
+    },
+    "retry_timeout": {
+        "type": "() => integer",
+        "required": false,
+        "mutable": false,
+        "default": "`\"{{defaults.retry_timeout}}\"` i.e. the parent [Path Object](#path-object) `retry_timeout` value"
     }
 };
 
@@ -1188,8 +1298,10 @@ export default {
             wampAction: JSON.stringify(wampAction),
             response: JSON.stringify(response),
             basicSecurity: JSON.stringify(basicSecurity),
+            apiKeySecurity: JSON.stringify(apiKeySecurity),
             oauth2: JSON.stringify(oauth2),
-            defaults: JSON.stringify(defaults)
+            defaults: JSON.stringify(defaults),
+            wampResult: JSON.stringify(wampResult)
         }
     }
 };
