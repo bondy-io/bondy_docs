@@ -26,7 +26,7 @@ An API Gateway specification is a document that tells Bondy how to route incomin
 An API Gateway Specification document is a JSON data structure that _declaratively_ defines an HTTP/REST API and how Bondy should handle each HTTP Request e.g. by converting it into a WAMP operation or forwarding it to an upstream (external) HTTP/REST API. This includes capabilities for data transformation.
 
 ::: definition A declarative Finite State Machine (FSM)
-In effect, an API Gateway Specification is a declarative definition of an API Gateway Finite State Machine that exposes an HTTP/REST API and converts its nouns and verbs to either WAMP or HTTP [actions](#action-object).
+In effect, an API Gateway Specification is a declarative definition of an API Gateway Finite State Machine that exposes an HTTP/REST API and converts its nouns and verbs to either WAMP or other HTTP/REST [actions](#action-object).
 :::
 
 With this approach you can create a whole HTTP/REST API from scratch without any coding.
@@ -56,8 +56,12 @@ The [API Context](#api-context) is the state of the API Gateway FSM. It is is [i
 
 So an API Gateway Specification is the basis of an [API Context](#api-context) but also it is evaluated against it, primarily because the context will contain the [Request Object](#request-object) at runtime.
 
-::: tip
 You key to the definition of an API Gateway Specification is understanting the [API Context](#api-context), since defining a specification implies writing expressions that target (read and/or update) the context.
+
+::: info On the Open API standard
+[Open API (formerly Swagger)](https://www.openapis.org) defines a standard on how HTTP APIs are described, not its implementation. An API Gateway Specification describes and API and the behaviour of the Gateway, that is, it also defines its implementation in terms of the actions that the Gateway need to perform.
+
+Having said that we see future version of the API Gateway aligning with Open APIs and the API Gateway implementation being able to produce and serve an Open API specification of your APIs defined in Bondy.
 :::
 
 
