@@ -3,13 +3,18 @@ export default {
     ignoreDeadLinks: true,
     // These are app level configs.
     lang: 'en-GB',
-    title: 'Bondy Docs',
     titleTemplate: false,
-    head: [
-      ['meta', { property: 'og:description', content: 'Bondy Documentation Website' }],
-    ],
+    title: 'Bondy Developer',
     // This will render as a <meta> tag in the page HTML.
-    description: 'Bondy Documentation Website',
+    description: 'Learn how to develop, deploy and manage distributed applications using Bondy. Bondy is an open source, always-on and scalable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple communication protocol.',
+    head: [
+      ['meta', { property: 'og:title', content: 'Bondy Developer'}],
+      ['meta', { property: 'description', content: 'Learn how to develop, deploy and manage distributed applications using Bondy. Bondy is an open source, always-on and scalable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple communication protocol.' }],
+      ['meta', { property: 'og:description', content: 'Learn how to develop, deploy and manage distributed applications using Bondy. Bondy is an open source, always-on and scalable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple communication protocol.' }],
+      ['meta', { property: 'keywords', content: "distributed application, application networking platform, universal protocol, remote procedure call, RPC, service mesh, publish-subscribe, publish/subscribe, event mesh, authorization, authentication, web application messaging protocol, router, WAMP, wamp router, API gateway, kubernetes"
+        }]
+    ],
+
     appearance: true,
     lastUpdated: true,
 
