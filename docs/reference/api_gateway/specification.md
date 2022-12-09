@@ -14,9 +14,9 @@ related:
       type: HTTP API Reference
       link: /reference/http_api/api_gateway
       description: Load and manage API Gateway specifications.
-    - text: Marketplace
+    - text: Marketplace HTTP API Gateway
       type: Tutorial
-      link: /tutorials/getting_started/marketplace
+      link: /tutorials/getting_started/http_api_gateway
       description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
 ---
 # HTTP API Gateway Specification
