@@ -10,7 +10,7 @@ This license allows you to use the material in this documentation, whole or in p
 
 Please use the following attribution details when using this work:
 
-> Copyright by Leapsight Technologies Limited, material licensed under the CC-BY-SA 4.0, provided as-is without any warranties, Bondy documentation (http://developer.bondy.io).
+> Copyright by Leapsight Technologies Limited, material licensed under the CC-BY-SA 4.0, provided as-is without any warranties, Bondy documentation (https://developer.bondy.io).
 
 ### Contributions
 
