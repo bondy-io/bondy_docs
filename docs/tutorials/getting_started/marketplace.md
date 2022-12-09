@@ -2,7 +2,7 @@
 related:
     - text: Marketplace HTTP API Gateway
       type: Tutorial
-      link: /tutorials/getting_started/http_api_gateway
+      link: /tutorials/getting_started/marketplace_api_gateway
       description: A tutorial that demonstrates how to add an HTTP API to an existing project using the HTTP API Gateway.
     - text: HTTP API Gateway
       type: Reference
