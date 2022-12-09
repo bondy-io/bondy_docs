@@ -1,3 +1,22 @@
+---
+related:
+    - text: Network Listeners
+      type: Configuration Reference
+      link: /reference/configuration/listeners#api-gateway-http-listener
+      description: Configure the network listeners for the HTTP API Gateway.
+    - text: Security
+      type: Configuration Reference
+      link: /reference/configuration/security#authentication-oauth2
+      description: Configure OAuth2 authentication for HTTP APIs
+    - text: HTTP API Gateway
+      type: HTTP API Reference
+      link: /reference/http_api/api_gateway
+      description: Load and manage API Gateway specifications.
+    - text: Marketplace HTTP API Gateway
+      type: Tutorial
+      link: /tutorials/getting_started/http_api_gateway
+      description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
+---
 <script setup>
 import { useData } from 'vitepress'
 const { theme } = useData()
