@@ -37,6 +37,10 @@ article:hover {
   /*background-color: var(--vp-c-bg-soft);*/
 }
 
+h3 {
+  margin-top:16px;
+}
+
 .icon {
   display: flex;
   justify-content: center;
@@ -55,10 +59,11 @@ article:hover {
 
 .type {
   display: block;
-  position: absolute;
+  position: relative;
   top:20px;
   text-transform: uppercase;
   font-size:10px;
+  color: var(--vp-c-text-2);
 }
 
 .title {
