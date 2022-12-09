@@ -47,7 +47,7 @@
       >
         <!-- Root -->
         <span class="value-key"><code class="property">{{ data.key }}</code></span>
-        <span v-if="data.type === 'any' || data.type === 'string' || data.type === 'integer' || data.type === 'bigInt' || data.type === 'boolean' || data.type === 'undefined' || data.type === 'map' || data.type.startsWith('()')"
+        <span v-if="isValueType(data.type)"
         class="value-type">{{ data.type }}</span>
         <span v-else class="value-type">
           <a :href="slug">{{ data.type }}</a>
@@ -165,12 +165,13 @@ export default defineComponent({
     }
 
     function isValueType(value: string): string {
-      return
-        value === "string" ||
-        value === "number" ||
+      return value.startsWith('()') ||
+        value === "any" ||
+        value === "integer" ||
+        value === "bigInt" ||
         value === "bigint" ||
         value === "boolean" ||
-        value === "any" ||
+        value === "string" ||
         value === "undefined";
     }
 
