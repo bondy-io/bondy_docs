@@ -2,7 +2,6 @@
 import DefaultTheme from 'vitepress/theme'
 import {VPHomeHero} from 'vitepress/theme'
 
-
 // Custom Layout
 import BondyLayout from './BondyLayout.vue'
 
@@ -15,10 +14,10 @@ import Tabs from './Tabs.vue'
 import Tab from './Tab.vue'
 
 import './custom.css'
-// import './custom_home.css'
 
 export default {
     ...DefaultTheme,
+
     // override the Layout with a wrapper component that
     // injects the slots
     Layout: BondyLayout,
