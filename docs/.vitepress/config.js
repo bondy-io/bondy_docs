@@ -941,7 +941,7 @@ export default {
               text: 'HTTP API Gateway',
               link: '/reference/http_api/api_gateway',
               isFeature: true,
-              description: "Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP APIs."
+              description: "Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP/REST APIs."
             }
 
           ]
@@ -963,7 +963,7 @@ export default {
               text: 'API Gateway Specification',
               link: '/reference/api_gateway/specification',
               isFeature: true,
-              description: "An API Gateway specification is a document that tells Bondy how to route incoming HTTP requests to your WAMP APIs or to external HTTP APIs."
+              description: "An API Gateway specification is a document that tells Bondy how to route incoming HTTP requests to your WAMP APIs or to external HTTP/REST APIs."
             },
             {
               text: 'API Gateway Expressions',

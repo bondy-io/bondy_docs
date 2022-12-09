@@ -11,4 +11,4 @@ related:
       description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
 ---
 # HTTP API Gateway
-Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP APIs. It allows Bondy to be integrated into an existing HTTP/REST API ecosystem.
+Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP/REST APIs. It allows Bondy to be integrated into an existing HTTP/REST API ecosystem.

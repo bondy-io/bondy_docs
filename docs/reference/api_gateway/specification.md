@@ -20,16 +20,16 @@ related:
       description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
 ---
 # HTTP API Gateway Specification
-An API Gateway specification is a document that tells Bondy how to route incoming HTTP requests to your WAMP APIs or to external HTTP APIs.
+An API Gateway specification is a document that tells Bondy how to route incoming HTTP requests to your WAMP APIs or to external HTTP/REST APIs.
 
 ## Overview
-An API Gateway Specification document, a JSON data structure that _declaratively_ defines an HTTP API and how Bondy should handle each HTTP Request e.g. by converting it into a WAMP operation or forwarding it to an upstream (external) HTTP API. This includes capabilities for data transformation.
+An API Gateway Specification document is a JSON data structure that _declaratively_ defines an HTTP/REST API and how Bondy should handle each HTTP Request e.g. by converting it into a WAMP operation or forwarding it to an upstream (external) HTTP/REST API. This includes capabilities for data transformation.
 
 ::: definition A declarative Finite State Machine (FSM)
-In effect, an API Gateway Specification is a declarative definition of an API Gateway Finite State Machine that exposes an HTTP (REST) API and converts its nouns and verbs to either WAMP or HTTP [actions](#action-object).
+In effect, an API Gateway Specification is a declarative definition of an API Gateway Finite State Machine that exposes an HTTP/REST API and converts its nouns and verbs to either WAMP or HTTP [actions](#action-object).
 :::
 
-With this approach you can create a whole REST HTTP API from scratch without any coding.
+With this approach you can create a whole HTTP/REST API from scratch without any coding.
 
 The API Gateway Specification document has a structure represented by the following object tree:
 
@@ -183,7 +183,7 @@ The API object is the root of an API Specification. It contains one or more [API
 
 ::: details API Object example
 
-```javascript
+```json
 {
   "id": "example-api",
   "name" : "Bonding in HTTP",
@@ -221,7 +221,7 @@ The Version Object represents a particular API version.
 <DataTreeView :data="version" :maxDepth="10" />
 
 ::: details Version Object example
-```javascript
+```json
 TBD
 ```
 :::
@@ -234,7 +234,7 @@ A path specification to be used as a value to a key in the `paths` property of a
 
 ::: details Path Object example
 
-```javascript
+```json
 {
     "id": "example-api",
     ...,
@@ -277,7 +277,7 @@ A path specification to be used as a value to a key in the `paths` property of a
 <DataTreeView :data="operation" :maxDepth="10" />
 
 ::: details Operation Object example
-```javascript
+```json
 TBD
 ```
 :::
@@ -293,7 +293,7 @@ An action that returns a static response.
 <DataTreeView :data="staticAction" :maxDepth="10" />
 
 ::: details Action Object example
-```javascript
+```json
 TBD
 ```
 :::
@@ -306,7 +306,7 @@ An action that forwards the incoming HTTP request to an upstream HTTP endpoint.
 <DataTreeView :data="fwdAction" :maxDepth="10" />
 
 ::: details Forward Action Object example
-```javascript
+```json
 TBD
 ```
 :::
@@ -318,7 +318,7 @@ An action that transforms an incoming HTTP request to a WAMP operation.
 
 ::: details WAMP Action example
 
-```javascript 6-12
+```json 6-12
 {
     ...
     "paths": {
@@ -350,7 +350,7 @@ The outcome is obtained from the [API Context](#api-context) `action` property b
 <DataTreeView :data="response" :maxDepth="10" />
 
 ::: details WAMP Response Object Example
-```javascript 10-27
+```json 10-27
 {
     ...
     "paths": {
@@ -421,7 +421,7 @@ CURRENTLY NOT IMPLEMENTED
 ### Status Codes
 The following are the default values used to initialise the [API Context](#api-context).
 
-```javascript
+```json
 {
     "bondy.error.already_exists": 400, // BAD REQUEST
     "bondy.error.not_found": 404, // NOT FOUND

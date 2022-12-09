@@ -38,7 +38,7 @@ Read more about this differences in [What is Bondy](https://www.notion.so/What-i
 
 At its core Bondy implements the Web Application Messaging Protoco (WAMP). Learn why this is important in [Why Bondy](/concepts/why_bondy).
 
-However, Bondy was envisioned as a multi-protocol router. Bondy already offers "REST" HTTP API Gateway capabilities, allowing to configure a mapping between arbitrary HTTP messages to WAMP messages, covering both RPC and Publish/Subscribe interactions.  Bondy also currently provides a Kafka Bridge, allowing to configure a mapping from WAMP topics to Kafka topics.
+However, Bondy was envisioned as a multi-protocol router. Bondy already offers HTTP API Gateway capabilities, allowing to configure a mapping between arbitrary HTTP messages to WAMP messages, covering both RPC and Publish/Subscribe interactions.  Bondy also currently provides a Kafka Bridge, allowing to configure a mapping from WAMP topics to Kafka topics.
 
 In the near future, Bondy will incorporate additional protocols and communication patterns, but always maintaining its core capability: being able to offer multiple communication patterns under a single protocol (when using WAMP) and a single networking application platform.
 
