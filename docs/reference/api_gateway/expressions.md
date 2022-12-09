@@ -22,8 +22,10 @@ Expressions are strings containing one or more [Tags](#tags).
 
 You can use an expression in an API Gateway Specification object property when its value is of type `expression`.
 
-::: definition Expression Type
-The expression type syntax used across the documentation is `() => DATATYPE` where `DATATYPE` is the type the expression should evaluate to i.e. `() => string` means that once evaluated the expression should return a `string` type.
+An expression is a _promise_ i.e. a proxy for a value not necessarily known when the promise is created.
+
+::: definition Promise Type
+The promise type syntax used across the documentation is `() => DATATYPE` where `DATATYPE` is the type of value the promise should be fulfilled with i.e. `() => string` means that once the expression is evaluated, and thus the promise fulfilled, the value should be of type `string`.
 :::
 
 

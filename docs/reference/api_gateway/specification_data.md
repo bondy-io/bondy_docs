@@ -128,7 +128,7 @@ const context = {
         "type": "RequestObject",
         "required": false,
         "mutable": true,
-        "description": "The contents (data and metadata) of the HTTP request being evaluated. The request data is available at runtime, so any expression defined during design time will result in a `future` that will be evaluated to a value when handling the HTTP request."
+        "description": "The contents (data and metadata) of the HTTP request being evaluated. The request data is available at runtime, so any expression defined during design time will result in a `promise` that will be evaluated to a value when handling the HTTP request."
     },
     "security": {
         "type": "SecurityObject",

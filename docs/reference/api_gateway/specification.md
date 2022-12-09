@@ -22,8 +22,6 @@ related:
 # HTTP API Gateway Specification
 An API Gateway specification is a document that tells Bondy how to route incoming HTTP requests to your WAMP APIs or to external HTTP APIs.
 
-
-
 ## Overview
 An API Gateway Specification document, a JSON data structure that _declaratively_ defines an HTTP API and how Bondy should handle each HTTP Request e.g. by converting it into a WAMP operation or forwarding it to an upstream (external) HTTP API. This includes capabilities for data transformation.
 
@@ -38,7 +36,7 @@ The API Gateway Specification document has a structure represented by the follow
 - [API Object](#api-object)
     - [Version Object 1](#version-object)
         - [Path Object 1](#path-object)
-            - `get`
+            - `HTTP METHOD`
                 - [Operation Object](#operation-object)
                     - [Action Object](#action-object)
                     - [Response Object](#response-object)
@@ -85,13 +83,17 @@ You access the values in this object by writing expressions using the [API Speci
 ### Result Object
 
 #### WAMP Result
+The result for a [WAMP Action](#wamp-action).
+
+This object will be accesible with the expression `{{"\{\{action.result\}\}"}}`.
 
 <DataTreeView :data="wampResult" :maxDepth="10" />
 
 #### HTTP Forward Result
 
 ### Error Object
-
+::: warning TBD
+:::
 
 ## Expression Language
 
@@ -163,8 +165,8 @@ Expressions also allow to set values in the context and use functions to manipul
 
 The API Specification evaluation performed incrementally in two stages:
 
-1. **_During loading, validation and parsing_**. All API Specification expressions will be evaluated to either a (final) value or a `future`. Futures occur when an expression dependes directly or indirectly (transitive closure) on HTTP request data. This results in a context object.
-1. **_During HTTP request handling at runtime_**. The context created in the first stage is updated with the HTTP request data and the API Specification is evaluated again using the updated context, yielding the actions to be performed with all futures evaluated to values (grounded).
+1. **_During loading, validation and parsing_**. All API Specification expressions will be evaluated to either a (final) value or a `promise`. Promises occur when an expression dependes directly or indirectly (transitive closure) on HTTP request data. This results in a context object.
+1. **_During HTTP request handling at runtime_**. The context created in the first stage is updated with the HTTP request data and the API Specification is evaluated again using the updated context, yielding the actions to be performed with all promises evaluated to values (grounded).
 
 ### Recursive Evaluation
 The evaluation of the expressions in the API Gateway Specification is done by passing the [API Context](#api-context) recursively throughout the specification object tree.
