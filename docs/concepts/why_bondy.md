@@ -22,7 +22,7 @@ But creating those connections has become shockingly complicated due to the shee
 
 If you are using a microservices architectural style or if you are integrating multiple different customer/user touchpoints across Web, Mobile (and possibly IoT devices) you are developing a distributed application.
 
-Distributed applications are very hard to design, develop and maintain. They require multiple application communication patterns such as Remote Procedure Call (RPC) for point-to-point synchronous request-response and Publish/Subscribe for many-to-many asynchronous communications. Unfortunately, this is where things get really complicated, because typically each pattern requires a separate frameworks and infrastructure component.
+Distributed applications are very hard to design, develop and maintain. They require multiple application communication patterns such as Remote Procedure Call (RPC) for point-to-point synchronous request-response and Publish/Subscribe for many-to-many asynchronous communications. Unfortunately, this is where things get really complicated, because typically each pattern requires separate frameworks and infrastructure components e.g. HTTP Gateway, Authentication and Authorization services, gRPC, service mesh, message brokers (a.k.a. event mesh).
 
 <!-- But should they be that difficult? Aren't we shooting ourselves in the foot by -->
 
@@ -30,17 +30,19 @@ Distributed applications are very hard to design, develop and maintain. They req
 
 > The fragmentation means that the fundamental activity in building a distributed application has now become **integration**. -->
 
-The tools that we were using to integrate the 3-tier application monoliths of a not that distant past are the same we pretent to use to integrate 10s, 100s and in some cases even 1000s of microservices that resulted from the monolith decomposition. The decomposition allowed us to scale the social aspects of development, enabling us to tackle the increasing number of requirements (essential complexity) but due to the tools we are using we have now created a massive wave of accidental complexity.
+Moreover, most of these frameworks and infrastructre components were designed for the 3-tier application monoliths of a not so distant past but not really for the integration of 100s and in some cases even 1000s of microservices deployed on a cloud-native infrastructure.
 
-As a result, developers have to cope with too many protocols, driving the number of client libraries, cloud services and infrastructure components.
+The decomposition of the monolithic applications allowed us to scale the social aspects of development, enabling us to tackle the increasing number of requirements―_essential complexity_―but due to the tools we are using we have now created a massive wave of _accidental complexity_[^fbrooks].
 
-Why are we doing this? Because most protocols where designed as silos, covering a very specific application use case or requirement.
+The result in a complex technology solution prone to inefficiencies, delays and fatigue hindering the success of business initiatives as developers have to cope with too many protocols, client libraries, cloud services and infrastructure components.
 
-But do we really need them?
+But, why are we doing this? Because most protocols where designed as silos, covering a very specific application use case or requirement.
 
-The result in a complex technology solution prone to inefficiencies, delays and fatigue hindering the success of business initiatives.
+Bondy is our contribution to solve the problem and it was born out of our own necessity. We have used Bondy in production for serveral years achieving a reduction in accidental complexity leading to a reduction in time-to-market.
 
-Bondy is our contribution to solve the problem and it was born out of our own necessity. We have used Bondy in production for serveral years achieving a reduction in time-to-market.
+**Bondy brings back the joy to distributed application development.**
+
+[^fbrooks]: In [No Silver Bullet — Essence and Accident in Software Engineering](https://en.wikipedia.org/wiki/No_Silver_Bullet), Fred Brooks distinguishes between two different types of complexity: accidental complexity and essential complexity. Essential complexity is caused by the problem to be solved, and nothing can remove it. Accidental complexity relates to problems which engineers create and can fix; for example, the details of writing and optimizing assembly code or the delays caused by batch processing.
 
 <!--
 ## An overwhelming accidental complexity
@@ -75,7 +77,7 @@ The growing need to deliver innovative customer experiences in a hypersegmented 
 
 In order to deliver these systems developers need to integrate and ever increasing number of technologies (protocols, clients, dependencies, infrastructure components). This dramatically increments the accidental complexity[^fbrooks].
 
-[^fbrooks]: In [No Silver Bullet — Essence and Accident in Software Engineering](https://en.wikipedia.org/wiki/No_Silver_Bullet), Fred Brooks distinguishes between two different types of complexity: accidental complexity and essential complexity. Essential complexity is caused by the problem to be solved, and nothing can remove it. Accidental complexity relates to problems which engineers create and can fix; for example, the details of writing and optimizing assembly code or the delays caused by batch processing. -->
+ -->
 
 <!-- <ZoomImg src="/assets/accidental_complexity.png"/>
 
