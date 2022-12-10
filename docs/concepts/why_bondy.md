@@ -24,6 +24,8 @@ If you are using a microservices architectural style or if you are integrating m
 
 Distributed applications are very hard to design, develop and maintain. They require multiple application communication patterns such as Remote Procedure Call (RPC) for point-to-point synchronous request-response and Publish/Subscribe for many-to-many asynchronous communications. Unfortunately, this is where things get really complicated, because typically each pattern requires separate frameworks and infrastructure components e.g. HTTP Gateway, Authentication and Authorization services, gRPC, service mesh, message brokers (a.k.a. event mesh).
 
+<ZoomImg src="/assets/accidental_complexity.png"/>
+
 <!-- But should they be that difficult? Aren't we shooting ourselves in the foot by -->
 
 <!-- The industry's tendency to build layers over the existing layers without retiring the ones below and most importantly, the tendency to solve specific problems with vertical solutions, creating technology silos is dramatically increasing fragmentation of the technology landscape.
