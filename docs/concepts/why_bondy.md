@@ -40,6 +40,9 @@ The result in a complex technology solution prone to inefficiencies, delays and 
 
 But, why are we doing this? Because most protocols where designed as silos, covering a very specific application use case or requirement.
 
+<ZoomImg src="/assets/without_with.png"/>
+
+
 Bondy is our contribution to solve the problem and it was born out of our own necessity. We have used Bondy in production for serveral years achieving a reduction in accidental complexity leading to a reduction in time-to-market.
 
 **Bondy brings back the joy to distributed application development.**
