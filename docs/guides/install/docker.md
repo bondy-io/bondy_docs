@@ -143,10 +143,10 @@ You should get the following output:
 
 We will run an official Bondy Docker image using the `docker run` command with an image name using the following syntax: `leapsight/bondy:{VERSION}[-{VARIANT}]` where:
 
-- `{VERSION}` can be `master`, `develop` or a tag like `1.0.0-beta.56`
+- `{VERSION}` can be `master`, `develop` or a tag like `1.0.0-beta.68`
 - `{VARIANT}` can be null or `slim` (we will provide the `alpine` variant in the future).
 
-For example to run the `1.0.0-beta.64` release you would use:
+For example to run the `1.0.0-beta.68` release you would use:
 
 :::: tabs code
 ::: tab Debian
@@ -162,7 +162,7 @@ docker run \
     -u 0:1000 \
     --name bondy \
     -v "${PWD}/bondy-docker/etc:/bondy/etc" \
-    -d leapsight/bondy:1.0.0-beta.64
+    -d leapsight/bondy:1.0.0-beta.68
 ```
 :::
 ::: tab Alpine
@@ -178,7 +178,7 @@ docker run \
     -u 0:1000 \
     --name bondy \
     -v "${PWD}/bondy-docker/etc:/bondy/etc" \
-    -d leapsight/bondy:1.0.0-beta.64-alpine
+    -d leapsight/bondy:1.0.0-beta.68-alpine
 ```
 :::
 ::::
