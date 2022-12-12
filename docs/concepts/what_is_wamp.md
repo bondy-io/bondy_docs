@@ -12,13 +12,15 @@ By combining the two main application communication patterns–Remote Procedure 
 
 WAMP is a community effort and the [protocol specification](https://wamp-proto.org/wamp_latest_ietf.html) is made available for free under an open license for everyone to use or implement.
 
+::: info Like D-Bus over a network
+[D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions. It offers the same two basic workflows as WAMP, but whereas WAMP is designed for use over a network, D-Bus is designed for inter-process communication (IPC) on a single host.
+:::
+
 ## Key Characteristics
 
 * **It is a routed protocol**<br>All components connecting to a [Router](/concepts/router), where the router performs message routing between [Clients](/concepts/client).
 
-::: info Like D-Bus over a network
-[D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions. It offers the same two basic workflows as WAMP, but whereas WAMP is designed for use over a network, D-Bus is designed for inter-process communication (IPC) on a single host.
-:::
+
 
 ## Unified routing for both RPC and Pub/Sub
 
