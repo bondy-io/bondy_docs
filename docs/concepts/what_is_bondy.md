@@ -17,7 +17,10 @@ Bondy routes application messages between Internet-connected devices such as bro
 An application network is a dynamic [overlay network](https://en.wikipedia.org/wiki/Overlay_network) formed by one or several Bondy nodes (a Bondy cluster) and software running on the connected devices (embedding a client library that speaks a protocol supported by Bondy).
 :::
 
-<ZoomImg src="/assets/bondy_diagram.png" caption="Bondy application network"/>
+<ZoomImg
+  src="/assets/bondy_diagram.png"
+  caption="Bondy application network"
+  width="600"/>
 
 At its core, Bondy implements the [Web Application Messaging Protocol (WAMP)](/concepts/what_is_wamp) an open protocol that unifies the **key services required by every distributed application**:
 1. **Authentication**, providing multiple authentication methods
