@@ -22,9 +22,13 @@ A tutorial that demonstrates how to add an HTTP/REST API to an existing project 
 ## Goal
 In this tutorial we are going to pick up where we left off with the [Marketplace tutorial](/tutorials/getting_started/marketplace).
 
-The idea is to now expose the WAMP API we have developed to HTTP. The goal is to demonstrate how one can use Bondy's capabilities to integrate HTTP clients into the application network.
+The idea is to now expose the Marketplace WAMP API to HTTP. The goal is to demonstrate how one can use Bondy's capabilities to integrate HTTP clients into the a Bondy Application Network.
 
 The steps in the following sections will demonstrate how to create an HTTP [API Specification Object](/reference/api_gateway/specification#api-specification-object) from scratch, loading it in Bondy and demonstrating how we can call the resulting HTTP/REST API using an HTTP client.
+
+::: definition API Gateway Specification
+An API Gateway Specification is a document, a JSON data structure, that _declaratively_ defines an HTTP/REST API and how Bondy should handle each HTTP Request e.g. by converting it into a WAMP operation or forwarding it to an upstream (external) HTTP/REST API.
+:::
 
 ## Background
 
@@ -48,19 +52,20 @@ The [Marketplace](/tutorials/getting_started/marketplace) offers the following W
     - item deadline (in minutes)
 
 :::::: warning Note
-Since we wrote the Marketplace tutorial we have updated it so that the `com.example.demo` realm is already configured to support for OAuth2 authentication:
-* `oauth2` and `password` authmethods enabled
-* users, groups and grants to be able to perform the OAuth2 flow.
+Since we wrote the Marketplace tutorial we have updated the [Marketplace Demo repository](https://github.com/bondy-io/bondy-demo-marketplace) so that the `com.example.demo` realm is already configured to support for OAuth2 authentication.
 
-So make sure you **update you local copy** of the Marketplace Demo repository to the latest.
+These changes include:
 
-In addition, the realm had the following users defined:
+* adding `oauth2` and `password` to the realm's `authmethods`
+* adding users, groups and grants to be able to perform the OAuth2 flow, including:
+    - `postman`: Postman app user for testing purposes that belongs to the `api_clients` group
+    - `victor`: An end user for testing purposes that belongs to the `resource_owners` group
 
-- `postman`: Postman app user for testing purposes that belongs to the `api_clients` group
-- `victor`: An end user for testing purposes that belongs to the `resource_owners` group
+Make sure you update your local copy of the Marketplace repository to the latest.
 
 ::: details Check the changes we made to the realm
-You can see them in the lines highlighted below.
+
+As you can see in the lines highlighted below we added `oauth2` and `password` authmethods.
 
 ```json 5-6
 {
@@ -114,106 +119,94 @@ You can see them in the lines highlighted below.
 
 ## 1. Run the Marketplace Demo
 
-Follow the instructions in the [Marketplace tutorial](/tutorials/getting_started/marketplace#_2-build-and-run-the-demo).
+If you do not have a local copy of the [Marketplace Demo repository](https://github.com/bondy-io/bondy-demo-marketplace) follow the instructions in the [Marketplace tutorial](/tutorials/getting_started/marketplace#_2-build-and-run-the-demo) to download it.
+
+Otherwise (assuming the repo it is under your home directory) do:
+
+``` bash
+cd ~/bondy-demo-marketplace
+git pull
+```
+
+Make sure Docker is running and run the demo by using `make`.
+
+```bash
+make
+```
+
+
 
 ## 2. Defining an API Gateway Spec
-In this part we try to show how we can create and configure the api spec to be able to expose some endpoints to call registered wamp procedures:
+In this part we try to show how we can define an API Gateway Specification to be able to expose some HTTP endpoints that will be maped to registered WAMP procedures:
 
 ### 2.1. Define an API Object
 
 As a first step we need to declare and [API Object](/reference/api_gateway/specification#api-object). In this case we are configuring it with the **id** `com.market.demo` on the **realm** `com.market.demo` and with **oauth2** as security enabled and also some other defaults and configuration.
 
-Example below:
+Lets define a skeleton of our API Object
+
 ```json
 {
     "id":"com.market.demo",
+    "realm_uri":"com.market.demo",
     "name":"Marketplace Demo API",
     "host":"_",
-    "realm_uri":"com.market.demo",
-    "meta":{
-    },
-    "variables":{
-        "oauth2":{
-            "type":"oauth2",
-            "flow":"resource_owner_password_credentials",
-            "token_path":"/oauth/token",
-            "revoke_token_path":"/oauth/revoke",
-            "schemes":"{{variables.schemes}}"
-        },
-        "query_spec":"{{request.query_params |> with([_q,_p,_limit,_sort,_page,_include,_from,_to])}}",
-        "query_match":"{{request.query_params |> without([_q,_p,_limit,_sort,_page,_include,_from,_to])}}",
-        "schemes":[
-            "http"
-        ],
-        "forward_spec":{
-            "action":{
-                "type":"forward",
-                "host":"{{variables.host}}"
-            },
-            "response":{
-                "on_error":{
-                    "body":"{{variables.wamp_error_body}}"
-                },
-                "on_result":{
-                    "uri":"{{action.result.uri}}",
-                    "body":"{{action.result.body}}"
-                }
-            }
-        },
-        "cors_headers":{
-            "access-control-allow-origin":"*",
-            "access-control-allow-credentials":"true",
-            "access-control-allow-methods":"GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
-            "access-control-allow-headers":"origin,x-requested-with,content-type,accept,authorization,accept-language",
-            "access-control-max-age":"86400"
-        },
-        "wamp_error_body":"{{action.error.kwargs |> put(code, {{action.error.error_uri}})}}"
-    },
-    "defaults":{
-        "retries":0,
-        "timeout":15000,
-        "connect_timeout":5000,
-        "schemes":"{{variables.schemes}}",
-        "security":"{{variables.oauth2}}",
-        "headers":"{{variables.cors_headers}}"
-    },
-    "status_codes": {
-        "com.example.error.not_found": 404,
-        "com.example.error.unknown_error": 500,
-        "com.example.error.internal_error": 500
-    },
-    ...
+    "defaults":{},
+    "meta":{},
+    "variables":{},
+    "status_codes": {},
+    "versions": {}
 }
 ```
 
-2. Then we need to define the [Version Object](/reference/api_gateway/specification#version-object) and its path. In this case we are defining the **version** `1.0.0` and it is part of the default path (optional).
+In lines 2-3 we are declaring that our API has a unique id `com.market.demo` and that it will be attached a realm of the same name.
 
-Example below:
+In line 4 we give it a `name`, this can be anything.
+
+Finally in line 5 we set the `host` property to the wildcard `_`. This means that it will match any incoming HTTP request, regardless of the HTTP `HOST` header value.
+
+::: info Note
+In production, you will normally assign the `host` property the name of your domain or a pattern matching expression e.g. `www.example.com` or `.example.com`.
+
+This is key when you have more than one API on different subdomains.
+:::
+
+So far this API does nothing as we need to define a value for `versions`.
+
+
+### 2.2. Define the Versions Object
+
+An API Object has one or more versions of an API. Its `versions` property takes a mapping from _version names_ to [Version Object](/reference/api_gateway/specification#version-object) instances.
+
+Lets start defining a value for `versions`.
 
 ```json
 {
-    ..
+    ...
     "versions": {
-        "1.0.0":{
+        "v1.0":{
             "base_path":"/[v1.0]",
             "variables":{
                 "host":"http://localhost:8080"
             },
-            "defaults":{
-                "timeout":20000
-            },
-            "languages":[
-                "en"
-            ],
-            "paths":{
-                 ...
-            }
+            "defaults":{},
+            "languages":["en"],
+            "paths":{}
         }
     }
 }
 ```
 
-3. Then we need to define the paths using the [Path Object](/reference/api_gateway/specification#path-object) with the proper HTTP method, action type, WAMP procedures, arguments and responses. Example below for the `/market` GET endpoint calling to the proper `com.market.get` WAMP procedure without any args nor kwargs. Example below:
+We are going to define a single version called `v1.0`. As it is the only version we want the API Gateway to default to this version every time it handles a request with a path not containing a specific version.
+
+So what we want is for request `GET /path/to/resource` to be equivalent to `GET /v1.0/path/to/resource`. We achieve that by using the expression `/[v1.0]` where the brackets mean "optional" as you can see
+
+So we will add some more content to the document we defined in step 2.1.
+
+
+
+### 2.3 Define a Path Object
+Then we need to define the paths using the [Path Object](/reference/api_gateway/specification#path-object) with the proper HTTP method, action type, WAMP procedures, arguments and responses. Example below for the `/market` GET endpoint calling to the proper `com.market.get` WAMP procedure without any args nor kwargs. Example below:
 
 ::: info Note
 In the configured path you can notice, for example, the property `is_collection: true` due to the result of this endpoint is a list of items
@@ -255,7 +248,7 @@ In the configured path you can notice, for example, the property `is_collection:
                         "response":{
                             "on_error":{
                                 "status_code":"{{status_codes |> get({{action.error.error_uri}}, 500) |> integer}}",
-                                "body":"{{variables.wamp_error_body}}"
+                                "body":"{{action.error.kwargs |> put(code, {{action.error.error_uri}})}}"
                             },
                             "on_result":{
                                 "body":"{{action.result.args |> head}}"
