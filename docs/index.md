@@ -12,7 +12,7 @@ hero:
       link: /guides/index.html#get-bondy
     - theme: alt
       text: Getting Started
-      link: /tutorials/getting_started/get_bondy.html
+      link: /tutorials/index#getting-started-with-wamp
     - theme: sponsor
       text: What is Bondy?
       link: /concepts/what_is_bondy
