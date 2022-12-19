@@ -27,7 +27,7 @@ This documentation work includes adaptations of the following licensed works:
 
 ## Trademarks
 
-- "Leapsight" and "Bondy" are registered trademark of Leapsight Technologies Limited.
+- "Bondy" and "Leapsight" are registered trademarks of Leapsight Technologies Limited.
 - "Riak" is a registered trademark of Hillside (Technology) Limited.
 - "WAMP" is a trademark of Crossbar.io Technologies GmbH.
 

@@ -290,7 +290,7 @@ export default {
         // The footer will displayed only when the page doesn't contain sidebar
         // due to design reason.
         footer: {
-            message: 'Except where otherwise noted, content on this site is licensed under a Creative Commons Attribution-ShareAlike (CC-BY-SA) 4.0 International license.<br> Bondy and Leapsight are registered trademarks.',
+            message: 'Except where otherwise noted, content on this site is licensed under a Creative Commons Attribution-ShareAlike (CC-BY-SA) 4.0 International license.<br> Bondy and Leapsight are registered trademarks of Leapsight Technologies Ltd.',
             copyright: 'Copyright © 2022 Leapsight'
         },
 
