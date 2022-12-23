@@ -56,7 +56,7 @@ Congratulations, that's all we need to define this realm as an SSO realm!
 Also notice that on line 4 we disallow connections. This means no user can open a session attached to this realm (which is the recommended option) as the role of this realm is just to become a shared Identity Provider for other realms.
 
 ::: info Note
-Notice that dissallowing connections doesn't affect our abiilty to manage the realm, because to do it we need to open as session attached to the [Master Realm](/concepts/realms#master-realm) anyway.
+Notice that disallowing connections doesn't affect our abiilty to manage the realm, because to do it we need to open as session attached to the [Master Realm](/concepts/realms#master-realm) anyway.
 :::
 
 ## 2. Creating the user realms

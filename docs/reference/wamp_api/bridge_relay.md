@@ -820,7 +820,7 @@ const bridgeData = {
                 "type": "integer",
                 "required": true,
                 "mutable": false,
-                "description": "The maximun backoff time in milliseconds.",
+                "description": "The maximum backoff time in milliseconds.",
                 "default": "60000"
             },
             "backoff_min": {

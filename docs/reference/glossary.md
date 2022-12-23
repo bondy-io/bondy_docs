@@ -65,7 +65,7 @@ There are two types of mesh topology:
 * full mesh topology
 * partial mesh topology
 
-## Microservices Achitecture
+## Microservices Architecture
 An architectural style where applications are constructed from services that communicate over the network using RPC and are developed, scaled and deployed independently.
 
 The key goal of a microservices architecture is to modularize application development into independent yet collaborating components, each delivered by smaller team of developers that don't need to understand the entire application and allowing each team to work at their own cadence[^cmeik].

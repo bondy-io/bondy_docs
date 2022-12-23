@@ -13,7 +13,7 @@ The following diagram shows the scopes and mechanism for managing each configura
 <ZoomImg src="/assets/configuration_scopes.png"/>
 
 ::: tip Documentation Scope
-This refence documentation covers only the **Bondy node runtime configuration** using environment variables and the `bondy.conf` file.
+This reference documentation covers only the **Bondy node runtime configuration** using environment variables and the `bondy.conf` file.
 :::
 
 To learn more about **Multi-tenancy security configuration** check the [WAMP](/reference/wamp_api/index) and [HTTP](/reference/http_api/index) references.
@@ -43,7 +43,7 @@ In previous version of Bondy these options where configured using the `bondy.con
 ## The Bondy configuration file
 Bondy configuration file, named `bondy.conf`, is used to set a wide variety of **node runtime configuration options**.
 
-During node startup, Bondy will check the existance of the file, parse it and validate its contents. In case of a syntax or validation error, Bondy will stop printing the reason to standard output.
+During node startup, Bondy will check the existence of the file, parse it and validate its contents. In case of a syntax or validation error, Bondy will stop printing the reason to standard output.
 
 If a configuration file is not found at the [expected location](#file-location), Bondy will create one using default values.
 
@@ -61,7 +61,7 @@ The default file location depends on the installation method you've used as show
 |Source tarball|`/etc/bondy.conf`|
 |[Official Docker image](https://hub.docker.com/r/leapsight/bondy)|`/bondy/etc/bondy.conf`|
 
-The location can be overriden using the `BONDY_ETC_DIR` environment variable.
+The location can be overridden using the `BONDY_ETC_DIR` environment variable.
 
 ### File Syntax
 The file uses a sysctl-like syntax that looks like this:
@@ -143,7 +143,7 @@ broker_bridge.config_file = $(platform_etc_dir)/bb_conf.json
 
 If you want to use environment variables in the `bondy.conf` you have to rename the file to `bondy.conf.template`.
 
-During startup, Bondy considers all files with suffix `.template` for OS variable sustitution and if successful results in a new file of the same name stripped of the `.template` suffix and where all environment variables have been replaced.
+During startup, Bondy considers all files with suffix `.template` for OS variable substitution and if successful results in a new file of the same name stripped of the `.template` suffix and where all environment variables have been replaced.
 
 The syntax for environment variables is `${VAR_NAME}`.
 

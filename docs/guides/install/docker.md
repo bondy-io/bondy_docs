@@ -15,7 +15,7 @@ These are located at the Bondy's Github repository under the ["deployment" direc
 
 ### 1. Setup directory
 
-Bondy needs access to a configuration file and the ability to store its embeded database. Choose a directory (or create one) e.g. `bondy-docker`.
+Bondy needs access to a configuration file and the ability to store its embedded database. Choose a directory (or create one) e.g. `bondy-docker`.
 
 ```bash
 mkdir ~/bondy-docker
@@ -31,7 +31,7 @@ cd etc
 
 ### 2. Prepare a `security.config.json` file
 
-Using your prefered text editor, create a file named `security.config.json` (
+Using your preferred text editor, create a file named `security.config.json` (
 This file can have any other name you like but make sure to use the same name in the following step.).
 
 The copy the following content and save the file in the `etc` directory we created in the previous step.

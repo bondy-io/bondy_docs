@@ -137,7 +137,7 @@ make
 
 
 ## 2. Defining an API Gateway Spec
-In this part we try to show how we can define an API Gateway Specification to be able to expose some HTTP endpoints that will be maped to registered WAMP procedures:
+In this part we try to show how we can define an API Gateway Specification to be able to expose some HTTP endpoints that will be mapped to registered WAMP procedures:
 
 ### 2.1. Define an API Object
 
@@ -296,7 +296,7 @@ From the Bondy side, you can see in the logs the following lines:
         --data-urlencode 'password=Victor123456!' \
         --data-urlencode 'grant_type=password'
 
-        # where 'cG9zdG1hbjpQb3N0bWFuMTIzNDU2IQ==' is the base64 enconding of postman:Postman123456!
+        # where 'cG9zdG1hbjpQb3N0bWFuMTIzNDU2IQ==' is the base64 encoding of postman:Postman123456!
         ```
 
     - Response example
@@ -384,7 +384,7 @@ From the Bondy side, you can see in the logs the following lines:
             From the Market side, you can see in the logs the following lines:
 
             ```python
-            2022-12-06 11:17:31 market  | ale left, cancel thier bids.
+            2022-12-06 11:17:31 market  | ale left, cancel their bids.
             ```
 
 3. Invoking an endpoint with invalid credentials

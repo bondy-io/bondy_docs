@@ -43,7 +43,7 @@ But, why are we doing this? Because most protocols where designed as silos, cove
 <ZoomImg src="/assets/without_with.png"/>
 
 
-Bondy is our contribution to solve the problem and it was born out of our own necessity. We have used Bondy in production for serveral years achieving a reduction in accidental complexity leading to a reduction in time-to-market.
+Bondy is our contribution to solve the problem and it was born out of our own necessity. We have used Bondy in production for several years achieving a reduction in accidental complexity leading to a reduction in time-to-market.
 
 **Bondy brings back the joy to distributed application development.**
 
@@ -72,7 +72,7 @@ Fortunately, the advances in distributed computing over the last 10 years have g
 
 But this will come at an additional cost: new protocols, APIs and libraries we need to learn and depend on.
 
-Moreover, these technologies implement a single application comunication pattern e.g. point-to-point RPCs or Publish-Subscribe (PubSub). If your application, needs both communication patterns, you need to adopt, learn and use two different client libraries and infrastructure components. Moreover, some protocols are not web-native so if you want to integrate say PubSub on your web-based app you might need to resort to integrate also a cloud based solution, again this means yet another protocol/client dependency. -->
+Moreover, these technologies implement a single application communication pattern e.g. point-to-point RPCs or Publish-Subscribe (PubSub). If your application, needs both communication patterns, you need to adopt, learn and use two different client libraries and infrastructure components. Moreover, some protocols are not web-native so if you want to integrate say PubSub on your web-based app you might need to resort to integrate also a cloud based solution, again this means yet another protocol/client dependency. -->
 
 <!-- Frameworks pretend to solve this by adding yet more features, more adapters, more callbacks. Most of the time implemented using proprietary Software Development Kits (SDKs) in a specific programming language. This SDKs evolve over time and require those adapters to be rebuilt. Moreover sometimes those adapters have to be deployed within the infrastructure component, which complicates its maintenance, support and operating characteristics. -->
 <!--
@@ -94,7 +94,7 @@ We desperately need to simplify and make it easier for developers to deliver the
 <!--
 ## The need for a universal application communication protocol
 
-* An aplication protocol (L7)
+* An application protocol (L7)
 * Support for multiple (all) application communication patterns
 * P2P programming model (nobody is dumb anymore)
 * Extensible (without committee approvals)

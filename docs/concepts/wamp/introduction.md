@@ -18,7 +18,7 @@ The following diagram shows a number of connected devices, browser-based, mobile
 
 <ZoomImg src="/assets/wamp_routing.png"/>
 
-::: info Peer-to-peer programing model
+::: info Peer-to-peer programming model
 Notice there is no difference between apps and services, they are all equal peers, each being able to send and receive messages.
 :::
 
@@ -30,7 +30,7 @@ Six key features makes WAMP unique amongst alternative application messaging pro
 1. **Session-oriented**. All messages are routed within an established session. Sessions are authenticated and all messages are authorised.
 2. **Designed for multi-tenancy** through the use of Realms for both security and routing. Realms are virtual so it does not impose additional infrastructure requirements e.g. dedicated ports. Sessions are attached to a single Realm at a time.
 3. **Provides both application messaging patterns**, Publish-Subscribe (PubSub) and Routed Remote Procedure Calls (rRPC) a dynamic RPC variant where Caller and Callee are completely decoupled and no direct connection exists between them.
-4. **Provides a peer-to-peer programming model**, as any distributed application component can play any and the same roles simultaneously: Caller and Callee (RPC), Publisher and Subscriber. This is in contrast to protocols that distiguish between RPC Client and RPC Server, treating the client as dumb e.g. HTTP and gRPC.
+4. **Provides a peer-to-peer programming model**, as any distributed application component can play any and the same roles simultaneously: Caller and Callee (RPC), Publisher and Subscriber. This is in contrast to protocols that distinguish between RPC Client and RPC Server, treating the client as dumb e.g. HTTP and gRPC.
 5. **Supports multiple-transports** and each client can choose which one to use. WAMP can run over any transport which is message-oriented, ordered, reliable, and bi-directional such as Websockets, TCP, Unix domain socket, etc.
 6. **Supports multiple serializations** and each session can choose which one to use e.g. JSON, Msgpack, etc.
 
@@ -51,7 +51,7 @@ All messages are routed separately for each individual realm (isolation) so sess
 Realms also have permissions defined and can limit the clients to perform a subset of the operations available on the available procedures and topics.
 
 ::: info Realms in Bondy
-Realms in Bondy can be statically defined (via configuration) or dinamically defined (via API). Learn more about realms in the [Realm API Reference documentation](/reference/wamp_api/realm).
+Realms in Bondy can be statically defined (via configuration) or dynamically defined (via API). Learn more about realms in the [Realm API Reference documentation](/reference/wamp_api/realm).
 :::
 
 ### Establishing a Session
@@ -80,7 +80,7 @@ The following diagram shows on Publisher (A) and two Subscribers (B) and (C) exc
 - **publish**: a *Publisher* (A) publishes events on a topic, by providing the topic URI. The Router (using its Broker role) routes the event to all subscribers (in this case (B) and (C)).
 
 ::: info Delivery Guarantees
-In WAMP ther Router does not perform any additional effort to guarantee message delivery. This is what literature refers to as "fire and forget" and provides the same guarantee as the underlying trasport e.g. WebSockets or TCP/IP.
+In WAMP ther Router does not perform any additional effort to guarantee message delivery. This is what literature refers to as "fire and forget" and provides the same guarantee as the underlying transport e.g. WebSockets or TCP/IP.
 
 WAMP offers a feature called Event History, in essence a session queue, that can store events while the Subscriber is offline.
 

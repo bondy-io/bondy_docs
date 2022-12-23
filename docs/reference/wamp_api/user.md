@@ -818,7 +818,7 @@ None.
 
 ##### Positional Results
 The call result is a single positional argument containing a list of users.
-An empty list is returned when the provided realm uri doens't exist.
+An empty list is returned when the provided realm uri doesn't exist.
 
 <DataTreeView :data="listResult" :maxDepth="10" />
 

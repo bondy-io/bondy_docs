@@ -134,7 +134,7 @@ const context = {
         "type": "SecurityObject",
         "required": false,
         "mutable": true,
-        "description": "An instance of the [Security Object](#security-object). Its initial value comes from the [API Object](#api-object) `defaults.security` or `variables.security` property. It is then possibly overriden recursively during evaluation by each [Path Object]#(path-object) definition."
+        "description": "An instance of the [Security Object](#security-object). Its initial value comes from the [API Object](#api-object) `defaults.security` or `variables.security` property. It is then possibly overridden recursively during evaluation by each [Path Object]#(path-object) definition."
     },
     "action": {
         "type": "object",

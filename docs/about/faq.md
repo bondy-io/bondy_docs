@@ -4,7 +4,7 @@
 
 ### What is Bondy?
 
-Bondy is an open source, always-on and scaleable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple and secured communication protocol.
+Bondy is an open source, always-on and scalable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple and secured communication protocol.
 
 Read more about Bondy in the [What is Bondy](/concepts/what_is_bondy) section.
 
@@ -36,7 +36,7 @@ Read more about this differences in [What is Bondy](https://www.notion.so/What-i
 
 ### Is Bondy multi-protocol?
 
-At its core Bondy implements the Web Application Messaging Protoco (WAMP). Learn why this is important in [Why Bondy](/concepts/why_bondy).
+At its core Bondy implements the Web Application Messaging Protocol (WAMP). Learn why this is important in [Why Bondy](/concepts/why_bondy).
 
 However, Bondy was envisioned as a multi-protocol router. Bondy already offers HTTP API Gateway capabilities, allowing to configure a mapping between arbitrary HTTP messages to WAMP messages, covering both RPC and Publish/Subscribe interactions.  Bondy also currently provides a Kafka Bridge, allowing to configure a mapping from WAMP topics to Kafka topics.
 
@@ -55,9 +55,9 @@ Bondy is implemented in Erlang, a wonderful programming language and operating s
 
 ### Why does Bondy use an eventually consistent model?
 
-Because we wanted Bondy to be scaleable and always-on in the cases of inter- and/or intra-datacentre connectivity disruptions.
+Because we wanted Bondy to be scalable and always-on in the cases of inter- and/or intra-datacentre connectivity disruptions.
 
-We think it is really stupid to design super scaleable and fault-tolerant backend architectures using NoSQL databases, eventually consistency and more sophisticated techniques like CRDTs only to then define a message routing and/or API gateway layer that relies on strong consistency e.g. SQL database. All the hard work you've done in the backend to provide an always-on system is then hampered by an entry point which is not!
+We think it is really stupid to design super scalable and fault-tolerant backend architectures using NoSQL databases, eventually consistency and more sophisticated techniques like CRDTs only to then define a message routing and/or API gateway layer that relies on strong consistency e.g. SQL database. All the hard work you've done in the backend to provide an always-on system is then hampered by an entry point which is not!
 
 ## Realms
 

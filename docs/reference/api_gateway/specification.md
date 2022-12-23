@@ -89,7 +89,7 @@ You access the values in this object by writing expressions using the [API Speci
 #### WAMP Result
 The result for a [WAMP Action](#wamp-action).
 
-This object will be accesible with the expression `{{"\{\{action.result\}\}"}}`.
+This object will be accessible with the expression `{{"\{\{action.result\}\}"}}`.
 
 <DataTreeView :data="wampResult" :maxDepth="10" />
 

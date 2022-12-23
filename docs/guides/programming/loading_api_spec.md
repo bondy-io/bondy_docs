@@ -56,7 +56,7 @@ If this node is part of a Bondy cluster, the API will be automatically replicate
 
 ## Verifying the API Specification has been loaded
 
-If the previous command didn't fail the API has been loaded and activated. However, to be entirely sure you can use the following command which should retreive the API Specification.
+If the previous command didn't fail the API has been loaded and activated. However, to be entirely sure you can use the following command which should retrieve the API Specification.
 
 :::::: tabs code
 ::: tab HTTP

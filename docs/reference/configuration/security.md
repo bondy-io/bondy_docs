@@ -146,7 +146,7 @@ they are incompatible with the idea of tickets.
 
 Defines whether Bondy will allow a valid ticket to be used for
 authentication when a local copy of the ticket has not been found in
-storage. This might happen if the ticket data has not yet been syncrhonised
+storage. This might happen if the ticket data has not yet been synchronised
 to the node handling the authentication request.
 
 

@@ -368,11 +368,11 @@ compressed output even if it is not set appropriately.
 
 @[config](wamp.websocket.deflate.server_context_takeover,takeover|no_takeover,takeover,v1.0.0)
 
-Using `no_takeover` can severly limit the usefulness of compression.
+Using `no_takeover` can severely limit the usefulness of compression.
 
 @[config](wamp.websocket.deflate.client_context_takeover,takeover|no_takeover,takeover,v1.0.0)
 
-Using no_takeover can severly limit the usefulness of compression.
+Using no_takeover can severely limit the usefulness of compression.
 
 @[config](wamp.websocket.deflate.server_max_window_bits,8..15,11,v1.0.0)
 

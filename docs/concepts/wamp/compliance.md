@@ -102,7 +102,7 @@ There is no guarantee regarding the order of return for multiple subsequent subs
 
 </tab>
 <tab name="Implementation">
-A Bondy node will deliver the events in order locally i.e. when Pulisher and Subscriber are on the same node. However, when it comes to publishing events to a remote subscriber, Bondy tries its best to deliver them in the order required by the protocol, but this is not currently guaranteed.
+A Bondy node will deliver the events in order locally i.e. when Publisher and Subscriber are on the same node. However, when it comes to publishing events to a remote subscriber, Bondy tries its best to deliver them in the order required by the protocol, but this is not currently guaranteed.
 </tab>
 <tab name="Rationale">
 Bondy was designed as a distributed router with continuous availability as its main goal. Bondy uses an eventually consistent model avoiding coordination between nodes at all cost.

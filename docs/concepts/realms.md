@@ -52,7 +52,7 @@ However, the master realm has some limitations:
 
 Prototypical inheritance allows us to reuse the properties (including RBAC definitions) from one realm to another through a reference URI configured on the `prototype_uri` property.
 
-Key charactaristics:
+Key characteristics:
 
 * Prototypical inheritance is a form of single inheritance i.e. realms can only inherit from a single prototype.
 * The `prototype_uri` property is defined as an **irreflexive property** i.e. a realm cannot have itself as prototype.

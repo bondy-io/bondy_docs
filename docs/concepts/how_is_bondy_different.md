@@ -27,7 +27,7 @@ All nodes in a Bondy cluster are equal peers, there are no special nodes.
 This enables Bondy's operational simplicity.
 
 ### Low latency data replication
-All nodes in a Bondy cluster share a global state which is replicated through a highly scaleable and low latency eventually consistency model. Data is diseminated in real-time using epidemic broadcast trees (gossip)[^ebt].
+All nodes in a Bondy cluster share a global state which is replicated through a highly scalable and low latency eventually consistency model. Data is diseminated in real-time using epidemic broadcast trees (gossip)[^ebt].
 
 [^ebt]: [Epidemic broadcast trees](https://www.gsd.inesc-id.pt/~ler/reports/srds07.pdf), João Leitão, José Pereira and Luís Rodrigues
 
