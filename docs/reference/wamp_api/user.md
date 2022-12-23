@@ -1268,9 +1268,76 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ## Topics
 
 ### bondy.user.added{.wamp-topic}
+##### Positional Results
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'description' : 'The username of the user you have added.'
+		}
+	})"
+/>
+
+##### Keyword Results
+None.
+
 ### bondy.user.updated{.wamp-topic}
+##### Positional Results
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'description' : 'The realm uri.'
+		},
+		'1':{
+			'type': 'string',
+			'description' : 'The username of the user you have updated.'
+		}
+	})"
+/>
+
+##### Keyword Results
+None.
+
 ### bondy.user.credentials_changed{.wamp-topic}
+##### Positional Results
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'description' : 'The realm uri.'
+		},
+		'1':{
+			'type': 'string',
+			'description' : 'The username of the user you have changed its credentials.'
+		}
+	})"
+/>
+
+##### Keyword Results
+None.
+
 ### bondy.user.deleted{.wamp-topic}
+##### Positional Results
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'description' : 'The realm uri.'
+		},
+		'1':{
+			'type': 'string',
+			'description' : 'The username of the user you have deleted.'
+		}
+	})"
+/>
+
+##### Keyword Results
+None.
 
 <script>
 const authorizationData = {

@@ -912,6 +912,11 @@ export default {
               isFeature: true,
               description: "Creating, retrieving and managing Bridge Relay (Edge) connections."
             },
+            { text: 'HTTP API Gateway',
+              link: '/reference/wamp_api/api_gateway',
+              isFeature: true,
+              description: "Load and manage API Gateway specifications."
+            },
             { text: 'Error URIs',
               link: '/reference/wamp_api/errors/index',
               isFeature: true,
