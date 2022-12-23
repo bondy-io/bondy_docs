@@ -8,7 +8,7 @@
   "license": "CC-BY-SA-4.0",
   "private": false,
   "devDependencies": {
-    "vitepress": "^1.0.0-alpha.1"
+    "vitepress": "^1.0.0-alpha.33"
   },
   "scripts": {
     "docs:dev": "vitepress dev docs",
@@ -25,7 +25,7 @@
     "markdown-it-footnote": "^3.0.2",
     "markdown-it-katex": "^2.0.3",
     "markdown-it-task-lists": "^2.1.1",
-    "medium-zoom": "^1.0.6",
+    "medium-zoom": "^1.0.8",
     "sitemap": "^7.1.1",
     "switch-ts": "^1.0.9"
   }
