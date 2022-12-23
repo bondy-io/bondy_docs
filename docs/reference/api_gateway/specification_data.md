@@ -850,7 +850,25 @@ export default {
             apiKeySecurity: JSON.stringify(apiKeySecurity),
             oauth2: JSON.stringify(oauth2),
             defaults: JSON.stringify(defaults),
-            wampResult: JSON.stringify(wampResult)
+            wampResult: JSON.stringify(wampResult),
+            apiArgOrRes: JSON.stringify({
+                0: {
+                    "type": "object",
+                    "description": "The api spec data",
+                    "properties": api
+                }
+            }),
+            apiListRes: JSON.stringify({
+                0: {
+                    "type": "array",
+                    "description": "The list of all loaded api specs.",
+                    "items": {
+                        "type": "object",
+                        "description": "The api spec data",
+                        "properties": api
+                    }
+                }
+            })
         }
     }
 };

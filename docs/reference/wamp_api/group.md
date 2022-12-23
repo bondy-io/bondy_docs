@@ -626,8 +626,61 @@ call bondy.group.update \
 ## Topics
 
 ### bondy.group.added{.wamp-topic}
+##### Positional Results
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'description' : 'The realm uri.'
+		},
+		'1':{
+			'type': 'string',
+			'description' : 'The name of the group you have added.'
+		}
+	})"
+/>
+
+##### Keyword Results
+None.
+
 ### bondy.group.updated{.wamp-topic}
+##### Positional Results
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'description' : 'The realm uri.'
+		},
+		'1':{
+			'type': 'string',
+			'description' : 'The name of the group you have updated.'
+		}
+	})"
+/>
+
+##### Keyword Results
+None.
+
 ### bondy.group.deleted{.wamp-topic}
+##### Positional Results
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'description' : 'The realm uri.'
+		},
+		'1':{
+			'type': 'string',
+			'description' : 'The name of the group you have deleted.'
+		}
+	})"
+/>
+
+##### Keyword Results
+None.
 
 <script>
 const groupData = {

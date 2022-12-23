@@ -33,7 +33,7 @@ Bondy's Ticket-based authentication does not work on its own it requires a base 
 :::
 
 #### oauth2
-With OAuth2-based authentication, the client needs to present the router an authentication "token". See the [OAuth2](/reference/wamp_api/oauth2) documentation page for more details.
+With OAuth2-based authentication, the client needs to present the router an authentication "token". See the [OAuth2](/reference/wamp_api/oauth2_token) documentation page for more details.
 
 ::: warning Important
 Bondy's Oauth2-based authentication does not work on its own it requires a base authentication method for the user to obtain the token. The base method can be either `wampcra` or `cryptosign`. So keep this in mind when defining sources for a user as you will need to add both rules one for `ticket` and another one for the base method.
