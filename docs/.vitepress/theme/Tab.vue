@@ -52,7 +52,8 @@ export default {
     const deleteTab = inject('deleteTab')
 
     const header = props.prefix + props.name + props.suffix
-    const computedId = props.id ? props.id : props.name.toLowerCase().replace(/ /g, '-')
+    const computedId = props.id ? props.id : props.name.toLowerCase().replace(/ /g, '-') + Math.random()
+
     const hash = '#' + (!props.isDisabled ? computedId : '')
 
     watch(
