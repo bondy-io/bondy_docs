@@ -170,12 +170,9 @@ export default {
             },
             render: function(tokens, idx) {
               var m = tokens[idx].info.trim().match(/^tabs\s+(.*)$/);
-                  if (tokens[idx].nesting === 1) {
+              if (tokens[idx].nesting === 1) {
                 // opening tag
-                var className = m[1] === 'code' ? 'code' : '';
-
-                return '<tabs cache-lifetime="1000" class="'
-                + className + '">';
+                return '<tabs cache-lifetime="1000">';
 
               } else {
                 // closing tag
