@@ -433,6 +433,9 @@ table.property-table > tbody > tr > td {
 }
 
 
+code {
+  white-space : pre-wrap !important;
+}
 
 @media (max-width: 600px) {
 
