@@ -148,9 +148,8 @@ We will run an official Bondy Docker image using the `docker run` command with a
 
 For example to run the `1.0.0-beta.68` release you would use:
 
-:::: tabs code
-::: tab Debian
-```bash
+::: code-group
+```bash [Debian]
 cd ~/bondy-docker
 docker run \
     -e BONDY_ERL_NODENAME=bondy1@127.0.0.1 \
@@ -164,9 +163,8 @@ docker run \
     -v "${PWD}/bondy-docker/etc:/bondy/etc" \
     -d leapsight/bondy:1.0.0-beta.68
 ```
-:::
-::: tab Alpine
-```bash
+
+```bash [Alpine]
 cd ~/bondy-docker
 docker run \
     -e BONDY_ERL_NODENAME=bondy1@127.0.0.1 \
@@ -181,6 +179,6 @@ docker run \
     -d leapsight/bondy:1.0.0-beta.68-alpine
 ```
 :::
-::::
+
 
 

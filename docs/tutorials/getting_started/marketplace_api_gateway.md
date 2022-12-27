@@ -171,7 +171,7 @@ In production, you will normally assign the `host` property the name of your dom
 This is key when you have more than one API on different subdomains.
 :::
 
-So far this API does nothing as we need to define a value for `versions`.
+So far this API does nothing as yet we need to define a value for `versions`.
 
 
 ### 2.2. Define the Versions Object
@@ -197,20 +197,19 @@ Lets start defining a value for `versions`.
 }
 ```
 
-We are going to define a single version called `v1.0`. As it is the only version we want the API Gateway to default to this version every time it handles a request with a path not containing a specific version.
+Here we have defined a single version called `v1.0`.
 
-So what we want is for request `GET /path/to/resource` to be equivalent to `GET /v1.0/path/to/resource`. We achieve that by using the expression `/[v1.0]` where the brackets mean "optional" as you can see
+As it is the only version we want the API Gateway to default to this version every time it handles a request with a path not containing a specific version.
+So what we want is for request `GET /path/to/resource` to be equivalent to `GET /v1.0/path/to/resource`. We achieve that by using the expression `/[v1.0]` where the brackets mean "optional" as you can see in line 5.
 
-So we will add some more content to the document we defined in step 2.1.
-
+Now lets add the actual HTTP/REST API content.
 
 
 ### 2.3 Define a Path Object
-Then we need to define the paths using the [Path Object](/reference/api_gateway/specification#path-object) with the proper HTTP method, action type, WAMP procedures, arguments and responses. Example below for the `/market` GET endpoint calling to the proper `com.market.get` WAMP procedure without any args nor kwargs. Example below:
+We define the actual paths of our HTTP/API using the [Path Object](/reference/api_gateway/specification#path-object) with the proper HTTP method, action type, WAMP procedures, arguments and responses.
 
-::: info Note
-In the configured path you can notice, for example, the property `is_collection: true` due to the result of this endpoint is a list of items
-:::
+The snippet below does implements the HTTP equivalent of thw WAMP procedure `com.market.get` using the `/market`. This call doesn't require any args nor kwargs.
+
 
 ```json
 {
@@ -261,6 +260,10 @@ In the configured path you can notice, for example, the property `is_collection:
      }
 }
 ```
+
+::: info HTTP Resource Collections
+In line 8 you will notice the property `is_collection` is given the value `true`. This is required so that the API Gateway can return the correct HTTP codes for the operations. In this case, this is true, as `/market` invokes `com.market.get` which returns a list of items.
+:::
 
 ## 3. Loading the API Gateway Spec
 

@@ -32,9 +32,8 @@ The first thing we need to do is create the SSO Realm. Let's call it `com.exampl
 
 The following shows how to create it using the [Realm WAMP API](/reference/wamp_api/realm) to do it.
 
-:::::: tabs code
-::: tab Javascript
-```javascript 6-7
+::: code-group
+```Javascript 6-7
 // Session is attached to Master Realm
 // and user has been granted permission
 // to call the procedure
@@ -47,7 +46,6 @@ session.call("bondy.realm.create", [{
 }])
 ```
 :::
-::::::
 
 Notice that in line 3 we set property `is_sso_realm` to true.
 
@@ -64,9 +62,8 @@ Now that we have the SSO realm we can put it to work. We now need to create the 
 
 To do that we just need to use the following declaration, replacing the value for `uri` property with the respective ones defined in the previous section.
 
-:::::: tabs code
-::: tab Javascript
-```javascript 6-7
+::: code-group
+```Javascript 6-7
 // Session is attached to Master Realm
 // and user has been granted permission
 // to call the procedure
@@ -89,7 +86,6 @@ session.call("bondy.realm.create", {
 }
 ```
 :::
-::::::
 
 Line 7 tells the `com.example.realm.1` realm to delegate the management of credentials and authentication to the `com.example.sso` realm.
 
@@ -107,9 +103,8 @@ We have two options:
 
 In the following example we will use **Indirect Option** to create the user `Linda` in the three realms realm **which will result in the user being also created in the SSO realm** and linked to it.
 
-:::::: tabs code
-::: tab Javascript
-```javascript 11
+::: code-group
+```Javascript 11
 // Session is attached to Master Realm
 // and user has been granted permission
 // to call the procedure
@@ -125,7 +120,6 @@ session.call("bondy.user.add", [
 ])
 ```
 :::
-::::::
 
 ::: warning
 If the user already existed in the SSO realm we would get and `already_exists`error.

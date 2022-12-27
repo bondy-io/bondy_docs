@@ -8,7 +8,7 @@
     --vp-c-green-dimm-2: rgba(150, 198, 35, 0.25);
     --vp-c-green-dimm-3: rgba(150, 198, 35, 0.05);
 
-
+    --vp-code-tab-active-bar-color: #ff6442;
     --vp-c-brand: #171916;
     --vp-c-brand-light: #323232;
     --vp-c-brand-lighter: #323232;
@@ -57,14 +57,14 @@ sub {
   top: 0.4em;
 }
 
-pre > code {
+/*pre > code {
     padding-left: 40px !important;
-}
+}*/
 
-.line-numbers-mode{
+/*.line-numbers-mode{
     padding-left: 0px !important;
 }
-
+*/
 
 .dark {
   --vp-c-brand: #FFFFFF;

@@ -39,16 +39,14 @@ The above assumption means the `bondy.conf` file which you use to start Bondy co
 
 The following command will load the API Specification, validate it and if successful it will be compiled and activate it.
 
-:::::: tabs code
-::: tab HTTP
-```bash
+::: code-group
+```bash [HTTP]
 curl -X "POST" "http://localhost:18081/services/load_api_spec" \
 -H 'Content-Type: application/json; charset=utf-8' \
 -H 'Accept: application/json; charset=utf-8' \
 --data-binary "@my_api.json"
 ```
 :::
-::::::
 
 ::: warning Cluster deployments
 If this node is part of a Bondy cluster, the API will be automatically replicated and activated in all nodes.
@@ -58,10 +56,8 @@ If this node is part of a Bondy cluster, the API will be automatically replicate
 
 If the previous command didn't fail the API has been loaded and activated. However, to be entirely sure you can use the following command which should retrieve the API Specification.
 
-:::::: tabs code
-::: tab HTTP
-```bash
+::: code-group
+```bash [HTTP]
 curl -X "GET" "http://localhost:18081/api_specs/com.example.my_api"
 ```
 :::
-::::::

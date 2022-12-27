@@ -92,16 +92,11 @@ The following are the set of acceptable datatypes used in the documentation.
 
 #### Example
 
-<tabs cache-lifetime="1000" class="code">
-<tab name="bondy.conf">
-
-```text
+```text [bondy.conf]
 nodename = bondy@127.0.0.1
 distributed_cookie = bondy
 security.allow_anonymous_user = off
 ```
-</tab>
-</tabs>
 
 
 ### Default values
@@ -130,14 +125,10 @@ Within the `bondy.conf` file you can use the following variables which Bondy wil
 
 The following is an example of how to use variable substitution.
 
-<tabs cache-lifetime="1000" class="code">
-<tab name="bondy.conf">
 
-```
+```text [bondy.conf]
 broker_bridge.config_file = $(platform_etc_dir)/bb_conf.json
 ```
-</tab>
-</tabs>
 
 ## User environment variable substitution
 
@@ -151,18 +142,13 @@ Notice the `BONDY_*` variables mentioned above will always be used by Bondy.
 
 #### Example
 
-<tabs cache-lifetime="1000" class="code">
-<tab name="bondy.conf.template">
 
-```text
+```text [bondy.conf.template]
 nodename = ${BONDY_NODENAME}
 distributed_cookie = bondy
 security.allow_anonymous_user = off
 security.config_file = ${BONDY_SECURITY_CONF_FILE}
 ```
-</tab>
-</tabs>
-
 
 ## Operating System Configuration
 

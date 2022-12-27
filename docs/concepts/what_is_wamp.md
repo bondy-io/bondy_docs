@@ -68,9 +68,8 @@ The clients send these messages using the two high-level primitives that are rou
 #### Register
 A client (*Callee*) exposes a procedure to be called remotely with an URI (also a URI pattern if Router provides this feature).
 
-:::::: tabs code
-::: tab Javascript
-```javascript
+::: code-group
+```javascript [Javascript]
 session.register(
     "com.example.add", // procedure URI
     function(a, b){return a + b;}, // callback
@@ -81,15 +80,13 @@ session.register(
 );
 ```
 :::
-::::::
 
 
 #### Call
 A client (*Caller*) asks the *Router* to invoke procedure from another client by providing the procedure URI.
 
-:::::: tabs code
-::: tab Javascript
-```javascript
+::: code-group
+```javascript [Javascript]
 Res = session.call(
     "com.example.add", // procedure URI
     [3, 4] // positional args
@@ -102,7 +99,6 @@ Res = session.call(
 );
 ```
 :::
-::::::
 
 ### Publish/Subscribe
 

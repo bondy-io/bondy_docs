@@ -24,11 +24,8 @@ draft: true
 
 ## Establishing a connection
 
-<client-only>
-<tabs cache-lifetime="1000" class="code">
-<tab name="Python">
-
-```python
+::: code-group
+```Python
 import os
 import signal
 
@@ -85,20 +82,7 @@ if __name__ == "__main__":
     connect = Connect()
     connect.start()
 ```
-
-</tab>
-<tab name="JS">
-
-```javascript
-```
-</tab>
-<tab name="Erlang">
-
-```erlang
-```
-</tab>
-</tabs>
-</client-only>
+:::
 
 
 
@@ -114,10 +98,8 @@ Typically, you will place you procedure registration on the session's `on_join` 
 
 In the following snippet we register the procedure `com.example.add` which takes two integers as arguments.
 
-<tabs cache-lifetime="1000" class="code">
-<tab name="Python">
-
-```python
+::: code-group
+```Python
 async def _on_join(self, session, details):
     self._session = session
     self._session.register(self.add, "com.example.add")
@@ -137,21 +119,12 @@ def add(self, x, y):
     else:
         return z
 ```
-</tab>
-<tab name="JS">
-Second tab content
-</tab>
-<tab name="Erlang">
-Third tab content
-</tab>
-</tabs>
+:::
 
 ## Making a Call
 
-<tabs cache-lifetime="1000" class="code">
-<tab name="Python">
-
-```python
+::: code-group
+```Python
 # The user provides and input for x and y
 try:
     z = await self._session.call("com.example.add", x, y)
@@ -163,14 +136,7 @@ else:
     print(f"{x} + {y} = {z}")
 
 ```
-</tab>
-<tab name="JS">
-Second tab content
-</tab>
-<tab name="Erlang">
-Third tab content
-</tab>
-</tabs>
+:::
 
 
 ## Call Timeouts

@@ -30,15 +30,13 @@ It allows to retrieve the requested api spec id.
 
 This endpoint is useful for example to be entirely sure to check if the api spec definition was properly loaded and activated.
 
-:::::: tabs code
-::: tab Request
-```bash
+::: code-group
+```bash [Request]
 curl -X "GET" "http://localhost:18081/api_specs/com.market.demo" \
 -H 'Content-Type: application/json; charset=utf-8' | jq
 ```
-:::
-::: tab Response
-```json
+
+```json [Response]
 {
   "defaults": {
     "connect_timeout": 5000.00000000000000000,
@@ -64,15 +62,15 @@ curl -X "GET" "http://localhost:18081/api_specs/com.market.demo" \
 }
 ```
 :::
-::::::
+
 
 #### Errors
 
 * `bondy.error.not_found`: when the provided api spec id is not found.
 
-:::::: tabs code
-::: tab bondy.error.not_found
-```json
+
+::: code-group
+```json [bondy.error.not_found]
 {
   "code": "bondy.error.not_found",
   "description": "",
@@ -80,21 +78,19 @@ curl -X "GET" "http://localhost:18081/api_specs/com.market.demo" \
 }
 ```
 :::
-::::::
+
 
 ### API Get Info
 
 It allows to retrieve the info (some attributes) of the requested api spec id.
 
-:::::: tabs code
-::: tab Request
-```bash
+::: code-group
+```bash [Request]
 curl -X "GET" "http://localhost:18081/api_specs/com.market.demo/info" \
 -H 'Content-Type: application/json; charset=utf-8' | jq
 ```
-:::
-::: tab Response
-```json
+
+```json [Response]
 {
   "host": "_",
   "id": "com.market.demo",
@@ -105,15 +101,14 @@ curl -X "GET" "http://localhost:18081/api_specs/com.market.demo/info" \
 }
 ```
 :::
-::::::
 
 #### Errors
 
 * `bondy.error.not_found`: when the provided api spec id is not found.
 
-:::::: tabs code
-::: tab bondy.error.not_found
-```json
+
+::: code-group
+```json [bondy.error.not_found]
 {
   "code": "bondy.error.not_found",
   "description": "",
@@ -121,21 +116,20 @@ curl -X "GET" "http://localhost:18081/api_specs/com.market.demo/info" \
 }
 ```
 :::
-::::::
+
 
 ### API List
 
 It allows to retrieve the all loaded apis spec.
 
-:::::: tabs code
-::: tab Request
-```bash
+
+::: code-group
+```bash [Request]
 curl -X "GET" "http://localhost:18081/api_specs" \
 -H 'Content-Type: application/json; charset=utf-8' | jq
 ```
-:::
-::: tab Response
-```json
+
+```json [Response]
 [
   {
     "defaults": {
@@ -262,7 +256,7 @@ curl -X "GET" "http://localhost:18081/api_specs" \
 ]
 ```
 :::
-::::::
+
 
 #### Errors
 
@@ -277,32 +271,31 @@ There are two endpoints you can use to load the api spec definition with the sam
 - **/api_specs**
 :::
 
-:::::: tabs code
-::: tab Request 1
-```bash
+
+::: code-group
+```bash [Request-1]
 curl -X "POST" "http://localhost:18081/api_specs" \
 -H 'Content-Type: application/json; charset=utf-8' \
 -H 'Accept: application/json; charset=utf-8' \
 --data-binary "@my_api.json"
 ```
-:::
-::: tab Request 2
-```bash
+
+```bash [Request-2]
 curl -X "POST" "http://localhost:18081/services/load_api_spec" \
 -H 'Content-Type: application/json; charset=utf-8' \
 -H 'Accept: application/json; charset=utf-8' \
 --data-binary "@my_api.json"
 ```
 :::
-::::::
+
 
 #### Errors
 
 * `wamp.error.invalid_argument`: when there is an invalid number of positional arguments. 
 
-:::::: tabs code
-::: tab wamp.error.invalid_argument
-```json
+
+::: code-group
+```json [wamp.error.invalid_argument]
 {
   "code": "wamp.error.invalid_argument",
   "description": "",
@@ -310,4 +303,3 @@ curl -X "POST" "http://localhost:18081/services/load_api_spec" \
 }
 ```
 :::
-::::::
