@@ -851,6 +851,8 @@ export default {
             oauth2: JSON.stringify(oauth2),
             defaults: JSON.stringify(defaults),
             wampResult: JSON.stringify(wampResult),
+            // used by other pages
+
             apiArgOrRes: JSON.stringify({
                 0: {
                     "type": "object",

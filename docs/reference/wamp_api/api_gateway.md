@@ -15,7 +15,7 @@ Bondy API Gateway is a reverse proxy that lets you manage, configure, and route 
 
 
 ## Procedures
-The following wamp api is used to configure and manage the [Gateway Specification](../api_gateway/specification):
+The following wamp api is used to configure and manage the [API Gateway Specification](/reference/api_gateway/specification):
 
 |Name|URI|
 |:---|:---|
@@ -47,14 +47,14 @@ This procedure is useful for example to be entirely sure to check if the api spe
 
 ##### Positional Args
 <DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The id of the api spec you want to retrieve.'
-		}
-	})"
+  :maxDepth="10"
+  :data="JSON.stringify({
+    '0':{
+      'type': 'string',
+      'required': true,
+      'description' : 'The id of the api spec you want to retrieve.'
+    }
+  })"
 />
 
 ##### Keyword Args
@@ -75,16 +75,18 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
+:::::: details Success Call
+
+:: code-group
+
+```bash [Request]
 ./wick --url ws://localhost:18080/ws \
 --realm com.leapsight.bondy \
 call bondy.http_gateway.api.get \
 'com.market.demo' | jq
 ```
-- Response:
-```json
+
+```json [Response]
 [
   {
     "defaults": {
@@ -113,6 +115,8 @@ call bondy.http_gateway.api.get \
 ```
 :::
 
+::::::
+
 ### API List
 
 bondy.http_gateway.api.list() -> result([api_spec]) {.wamp-procedure}
@@ -139,21 +143,20 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
+:::::: details Success Call
+::: code-group
+```bash [Request]
 ./wick --url ws://localhost:18080/ws \
 --realm com.leapsight.bondy \
 call bondy.http_gateway.api.load \
 
 ```
-- Response:
-
 :::
+::::::
 
 ### API Load
 
-bondy.http_gateway.api.load(api_spec_data) {.wamp-procedure}
+bondy.http_gateway.api.load(api_spec_data){.wamp-procedure}
 
 Validates, loads and activates the api spec definition.
 
@@ -182,9 +185,10 @@ None.
 
 Below there is an example loading the partial spec of the Marketplace api spec you can find at [api_gateway_config.json](https://github.com/bondy-io/bondy-demo-marketplace/blob/main/resources/api_gateway_config.json)
 
-::: details Success Call
-- Request
-```bash
+:::::: details Success Call
+::: code-group
+
+```bash [Request]
 ./wick --url ws://localhost:18080/ws \
 --realm com.leapsight.bondy \
 call bondy.http_gateway.api.load \
@@ -193,7 +197,7 @@ call bondy.http_gateway.api.load \
     "name":"Marketplace Demo API",
     "host":"_",
     "realm_uri":"com.market.demo",
-    "meta":{   
+    "meta":{
     },
     "variables":{
     },
@@ -214,6 +218,12 @@ call bondy.http_gateway.api.load \
     }
 }' | jq
 ```
-- Response:
+
+```text [Response]
 None if it was loaded successfully
+```
 :::
+::::::
+
+
+<!--@include: ../api_gateway/specification_data.md-->
