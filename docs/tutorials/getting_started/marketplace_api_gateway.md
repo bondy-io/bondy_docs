@@ -208,7 +208,7 @@ Now lets add the actual HTTP/REST API content.
 ### 2.3 Define a Path Object
 We define the actual paths of our HTTP/API using the [Path Object](/reference/api_gateway/specification#path-object) with the proper HTTP method, action type, WAMP procedures, arguments and responses.
 
-The snippet below does implements the HTTP equivalent of thw WAMP procedure `com.market.get` using the `/market`. This call doesn't require any args nor kwargs.
+The snippet below does implements the HTTP equivalent of the WAMP procedure `com.market.get` using the `/market`. This call doesn't require any args nor kwargs.
 
 
 ```json

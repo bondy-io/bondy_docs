@@ -38,7 +38,7 @@ Github Issues
 ::::::
 
 ## How to contribute
-We are always very happy to have contributions fro the community. If you are planning on contributing to the project please carefully read the [Contributors](/about/contributors) section.
+We are always very happy to have contributions from the community. If you are planning on contributing to the project please carefully read the [Contributors](/about/contributors) section.
 
 :::::: columns buttons
 :::: column 2

@@ -24,7 +24,7 @@ In this example we will have a user called `Linda` and three realms `com.example
 
 `Linda` needs to have access to all realms.Without SSO Realms `Linda` will have separate credentials per realm.
 
-So the goal of this tutorial is to teach you how to use SSO Realms to allow these users to be able to authenticate in all three realms usign a single set of credentials.
+So the goal of this tutorial is to teach you how to use SSO Realms to allow these users to be able to authenticate in all three realms using a single set of credentials.
 
 
 ## 1. Creating the SSO realm
@@ -161,7 +161,7 @@ The following diagram shows the end result:
 
 <ZoomImg src="/assets/sso_example.png"/>
 
-Now `Linda` can authenticate to all three realms using a single set of credentuals. Moreover, performing a password change on any of the thre realms will actually change it in the SSO realm, having immediate effect across all associated realms.
+Now `Linda` can authenticate to all three realms using a single set of credentuals. Moreover, performing a password change on any of the three realms will actually change it in the SSO realm, having immediate effect across all associated realms.
 
 
 

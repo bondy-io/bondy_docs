@@ -98,7 +98,7 @@ const realmPublic = {
         "type": "boolean",
         "required": false,
         "mutable": true,
-        "description": "Wether security is enabled or not.",
+        "description": "Whether security is enabled or not.",
         "default": "undefined"
     },
     "users" :  {

@@ -80,7 +80,7 @@ In this comparison, we will be featuring NATS, Apache Kafka, RabbitMQ, Apache Pu
 
 |Project|Features and Capabilities|
 |---|---|
-|Bondy|As a WAMP router, Bondy provides support for publish/subscribe and Routed RPC, a first-class RPC implementation supporting URI-based discovery, call timeouts, failover/standy and load balancing. Payload pass-through mode supported.|
+|Bondy|As a WAMP router, Bondy provides support for publish/subscribe and Routed RPC, a first-class RPC implementation supporting URI-based discovery, call timeouts, failover/standby and load balancing. Payload pass-through mode supported.|
 |NATS|Streams and Services through built-in publish/subscribe, request-reply, and load-balanced queue subscriber patterns. Dynamic request permissioning and request subject obfuscation is supported.|
 |gRPC|One service, which may have streaming semantics, per channel. Load Balancing for a service can be done either client-side or by using a proxy.|
 |Kafka|Streams through publish/subscribe. Load balancing can be achieved with consumer groups. Application code must correlate requests with replies over multiple topics for a service (request-reply) pattern.|

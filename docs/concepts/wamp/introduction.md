@@ -80,7 +80,7 @@ The following diagram shows on Publisher (A) and two Subscribers (B) and (C) exc
 - **publish**: a *Publisher* (A) publishes events on a topic, by providing the topic URI. The Router (using its Broker role) routes the event to all subscribers (in this case (B) and (C)).
 
 ::: info Delivery Guarantees
-In WAMP ther Router does not perform any additional effort to guarantee message delivery. This is what literature refers to as "fire and forget" and provides the same guarantee as the underlying transport e.g. WebSockets or TCP/IP.
+In WAMP the Router does not perform any additional effort to guarantee message delivery. This is what literature refers to as "fire and forget" and provides the same guarantee as the underlying transport e.g. WebSockets or TCP/IP.
 
 WAMP offers a feature called Event History, in essence a session queue, that can store events while the Subscriber is offline.
 

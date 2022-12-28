@@ -92,7 +92,7 @@ cluster.peer_discovery.config.keyB = valueB
 
 The configuration for the selected strategy in `cluster.peer_discovery.type`. Refer to each strategy documentation.
 
-Example: The selecte type requires two params `keyA` and `keyB` where the latter takes an array of values.
+Example: The selected type requires two params `keyA` and `keyB` where the latter takes an array of values.
 
 ```
 cluster.peer_discovery.config.keyA = value1

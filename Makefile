@@ -1,5 +1,5 @@
 CODESPELL       = $(shell which codespell)
-SPELLCHECK      = $(CODESPELL) --skip="./node_modules,.git,./docs/.vitepress/dist/*.*" -L applys,nd,accout,mattern,pres,fo
+SPELLCHECK      = $(CODESPELL) --skip="./node_modules,.git,./docs/.vitepress/*.*" -L applys,nd,accout,mattern,pres,fo
 SPELLFIX      	= $(SPELLCHECK) -i 3 -w
 
 .PHONY: spellcheck spellfix

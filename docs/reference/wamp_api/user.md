@@ -15,7 +15,7 @@ The following names are reserved and Bondy will not allow them to be used as a v
 <ZoomImg src="/assets/rbac.png"/>
 
 ### Aliasing
-Provides the ability for a user to authenticate using differents usernames (authid).
+Provides the ability for a user to authenticate using different usernames (authid).
 A user can have a maximum of 5 aliases.
 
 ## Types

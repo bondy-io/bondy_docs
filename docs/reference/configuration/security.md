@@ -40,7 +40,7 @@ password migrations. A password migration occurs when Bondy changes the
 internal representation of the password object to accommodate new protocols,
 features or bug fixes. Normally some of this changes can be done without
 user input, but when these changes include a re-calculation of the salted
-hash they can only happend during authentication or when the user changes
+hash they can only happened during authentication or when the user changes
 the password.
 
 If this option is set to `on`, then Bondy will try to upgrade the password
