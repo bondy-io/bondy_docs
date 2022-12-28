@@ -126,7 +126,7 @@ From the Docker containers' logs you will notice the microservices are trying to
 
 ### 3. Join the marketplace
 
-To sell an item and see the bots competing, just open the Web App from a browser pointing at [http://localhost:8080/](http://localhost:8080/).
+To sell an item and see the bots competing, just open the Web App from a browser pointing at `http://localhost:8080`.
 
 ::: info Note
 Again, since Bondy needs a few seconds to start, you may notice the Web App spinning (`Loading... Please wait`) before successfully connecting and printing `No items to show`.

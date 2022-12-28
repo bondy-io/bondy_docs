@@ -51,7 +51,7 @@ cluster.peer_discovery.config.service_name = ${BONDY_SERVICE_NAME}
 cluster.tls.enabled = off
 ```
 
-For more information about this options check the [Complete Configuration Reference]() section.
+For more information about this options check the [Complete Configuration Reference](/reference/configuration/index) section.
 
 
 ## Default Port Numbers
