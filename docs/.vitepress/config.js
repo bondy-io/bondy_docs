@@ -904,7 +904,7 @@ export default {
               link: '/reference/wamp_api/cluster',
               isFeature: true
             },
-            { text: 'Bridge Relay',
+            { text: 'Bridge Relay (Edge)',
               link: '/reference/wamp_api/bridge_relay',
               isFeature: true,
               description: "Creating, retrieving and managing Bridge Relay (Edge) connections."

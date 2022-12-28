@@ -1,4 +1,6 @@
-# Bridge Relay
+# Bridge Relay (Edge)
+A Bridge Relay are connections between one or more realms across two Bondy clusters.
+
 Generally speaking an edge router is a router located at a network boundary or on-premises (office, home) that enables an internal network to connect to external networks.
 
 
