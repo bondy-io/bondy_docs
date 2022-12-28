@@ -336,11 +336,6 @@ export default {
               activeMatch: '/reference/configuration'
             },
             {
-              text: 'HTTP API Gateway Specification',
-              link: '/reference/api_gateway/index',
-              activeMatch: '/reference/api_gateway'
-            },
-            {
               text: 'WAMP API Reference',
               link: '/reference/wamp_api/index',
               activeMatch: '/reference/wamp_api'
@@ -349,6 +344,11 @@ export default {
               text: 'HTTP API Reference',
               link: '/reference/http_api/index',
               activeMatch: '/reference/http_api'
+            },
+            {
+              text: 'HTTP API Gateway Specification',
+              link: '/reference/api_gateway/index',
+              activeMatch: '/reference/api_gateway'
             },
             {
               text: 'WAMP Client Libraries',
