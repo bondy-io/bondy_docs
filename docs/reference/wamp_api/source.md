@@ -408,7 +408,7 @@ const sourceData = {
 		"type": "array",
 		"required": true,
 		"mutable": false,
-		"description": "A list of usernames.",
+		"description": "The string 'all' or a list of usernames.",
         "items": {
 			"type": "string"
 		}
