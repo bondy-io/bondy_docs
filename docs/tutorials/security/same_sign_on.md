@@ -172,4 +172,19 @@ No. Same Sign-on still requires the user to authenticate again when opening a se
 
 Authorization is still performed by the realm the user is connecting to. That means the permissions will be those granted by the local RBAC configuration for the realm. Bondy Same Sign-on only handles authentication.
 
+### Do I need to change the clients code to use Same Sign-on?
+
+There is no need to change the client code to use Same Sign-on. The user can login using its credentials to any of the realms it belongs to.
+
+### Which realm should I use for changing an SSO user credentials?
+
+Changing credentials (`password` or `authorized_keys`) can be done by calling the Bondy APIs while logged-in on **any of the realms the user is associated with**, Bondy will forward the operation to the linked SSO realm.
+
+## Can I create local (non SSO) users on my realm?
+
+Yes. Users can still be created just on your realm (aka a "Local" user). T
+
+To do this we just create the user without specifying a value for the property `sso_realm_uri` or setting it to `null`.
+
+
 
