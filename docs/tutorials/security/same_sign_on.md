@@ -180,7 +180,7 @@ There is no need to change the client code to use Same Sign-on. The user can log
 
 Changing credentials (`password` or `authorized_keys`) can be done by calling the Bondy APIs while logged-in on **any of the realms the user is associated with**, Bondy will forward the operation to the linked SSO realm.
 
-## Can I create local (non SSO) users on my realm?
+### Can I create local (non SSO) users on my realm?
 
 Yes. Users can still be created just on your realm (aka a "Local" user). T
 
