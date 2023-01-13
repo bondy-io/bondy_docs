@@ -163,5 +163,13 @@ The following diagram shows the end result:
 
 Now `Linda` can authenticate to all three realms using a single set of credentuals. Moreover, performing a password change on any of the three realms will actually change it in the SSO realm, having immediate effect across all associated realms.
 
+## FAQs
+### Is this the same as Single Sign-on?
+
+No. Same Sign-on still requires the user to authenticate again when opening a session on a realm. See [Bondy Single Sign-on](/concepts/single_sign_on).
+
+### Where does the authorization happen?
+
+Authorization is still performed by the realm the user is connecting to. That means the permissions will be those granted by the local RBAC configuration for the realm. Bondy Same Sign-on only handles authentication.
 
 
