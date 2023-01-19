@@ -4,7 +4,7 @@
 
 ### What is Bondy?
 
-Bondy is an open source, always-on and scalable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple and secured communication protocol.
+Bondy is an open-source, always-on and scalable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple and secured communication protocol.
 
 Read more about Bondy in the [What is Bondy](/concepts/what_is_bondy) section.
 
@@ -93,7 +93,7 @@ Please refer to [Why does Bondy use its own embedded database?](https://www.noti
 
 Yes.
 
-### Is Bondy open source software?
+### Is Bondy open-source software?
 
 Yes. See [How is Bondy licensed?](https://www.notion.so/FAQs-f4c4d6b48cfa40e7b3e6fc6d0173ac87).
 

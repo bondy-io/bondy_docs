@@ -8,7 +8,7 @@ related:
 ---
 
 # What is Bondy
-Bondy is an open source, always-on and scalable **application networking platform** connecting all elements of a distributed application—offering event and service mesh capabilities combined.
+Bondy is an open-source, always-on and scalable **application networking platform** connecting all elements of a distributed application—offering event and service mesh capabilities combined.
 
 ## What does Bondy do?
 Bondy routes application messages between Internet-connected devices such as browsers, phones, servers and IoT (Internet of Things) devices in realtime by creating an application network.
@@ -33,7 +33,7 @@ As a result, Bondy offers event and service mesh capabilities combined. But as y
 
 ### Key Characteristics
 
-- **Open Source**<br>Bondy is open source software licensed under the Apache License Version 2.0. The source code is available on [Github](https://github.com/bondy-io/bondy).
+- **Open-source**<br>Bondy is open-source software licensed under the Apache License Version 2.0. The source code is available on [Github](https://github.com/bondy-io/bondy).
 - **Scalable**<br>Bondy was designed from the ground up as a distributed router. It can leverage different network topologies for data replication and routing allowing it to scale to thousands of nodes[^topo]. Bondy is written in Erlang/OTP which offers unprecedented soft real-time, high concurrency and self-healing capabilities. A single node can handle millions of concurrent client connections.
 - **Always-on**<br>Bondy replicates state across the cluster using a masterless architecture (all nodes are equal) and a gossip-based eventually consistent reliable state dissemination protocol which keeps state synchronised across nodes in the cluster without compromising availability. In addition, Bondy uses active anti-entropy to repair missing or divergent state as a result of node failure, physical data loss or corruption, and quickly bring additional nodes up-to-date. The combination of these features allow Bondy to be highly available even under network partitions, message loss and node failures.
 - **Dynamic**<br>Bondy offers dynamic message routing automatically and efficiently delivering RPC and Publish/Subscribe messages between clients connected to separate nodes in the cluster. Clustering formation is automatic and self-healing which saves operators the hassle of maintaining cluster connectivity.
