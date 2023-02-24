@@ -27,7 +27,7 @@ features:
   - title: Peer-to-peer programming model
     details: Bondy can connect all elements of a distributed application, all using a single protocol with client libraries available on the most popular programming languages. When using WAMP, all peers are the same, unlocking the potential of distributed applications.
   - title: Scalable & Always-on
-    details: Bondy scales horizontally to hundreds of nodes or even thousands of nodes. Bondy is written in Erlang/OTP which offers unprecedented soft real-time and high concurrency. Its convergence-based data replication and self-healing capabilities ensures its highly available even under network partitions, message loss and node failures.
+    details: Bondy scales horizontally to hundreds of nodes. Bondy is written in Erlang/OTP which offers unprecedented soft real-time and high concurrency. Its convergence-based data replication and self-healing capabilities ensures its highly available even under network partitions, message loss and node failures.
   - title: Deploy Anywhere, no dependencies
     details: Bondy can be deployed as a binary on bare metal or virtual machine. It can also be deployed on containers with or without container orchestration e.g. Kubernetes. Bondy can be deployed on low-resource ARM64 computers and boards too.
 
