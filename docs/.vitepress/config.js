@@ -56,7 +56,12 @@ export default {
     ['link', { rel: "icon", type: "image/png", sizes: "16x16", href: "/assets/favicons/favicon-16x16.png"}],
       ['link', { rel: "manifest", href: "/assets/favicons/site.webmanifest"}],
       ['link', { rel: "mask-icon", href: "/assets/favicons/safari-pinned-tab.svg", color: "#171916"}],
-      ['link', { rel: "shortcut icon", href: "/assets/favicons/favicon.ico"}]
+      ['link', { rel: "shortcut icon", href: "/assets/favicons/favicon.ico"}],
+      ['script',{
+        defer: true,
+        'data-domain':"bondy.dev",
+        src:"https://plausible.io/js/script.js"
+      }]
     ],
 
     appearance: true,
