@@ -61,6 +61,11 @@ export default {
         defer: true,
         'data-domain':"bondy.dev",
         src:"https://plausible.io/js/script.js"
+      }],
+      ['script',{
+        defer: true,
+        'data-domain':"bondy.dev",
+        src:"https://plausible.io/js/script.local.js"
       }]
     ],
 
