@@ -69,19 +69,18 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.realm.create \
 '{
     "uri":"com.leapsight.test_creation_1",
     "description":"A test creation realm"
 }' | jq
 ```
-- Response:
-```json
+
+```json [Result]
 {
   "description": "A test creation realm",
   "is_prototype": false,
@@ -161,15 +160,13 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.realm.get "com.leapsight.test_creation_1" | jq
 ```
-- Response
-```json
+
+```json [Result]
 {
   "description": "A test creation realm",
   "is_prototype": false,
@@ -245,11 +242,9 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.realm.update \
 "com.leapsight.test_creation_1" \
 '{
@@ -272,8 +267,8 @@ call bondy.realm.update \
     ]
 }' | jq
 ```
-- Response:
-```json
+
+```json [Result]
 {
   "allow_connections": true,
   "authmethods": [
@@ -344,15 +339,13 @@ The call result is a single positional argument containing a list of all realms:
 ##### Keyword Results
 None.
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.realm.list | jq
 ```
-- Response:
-```json
+
+```json [Result]
 [
     {
         "authmethods": [
@@ -714,22 +707,19 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.realm.delete "com.leapsight.test_creation_1"
 ```
-:::
-::: details Success Call with force option
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+
+```bash [Call with force option]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.realm.delete "com.leapsight.test_creation_1" --kwarg force=true
 ```
 :::
+
 
 ### Retrieve if a realm security is enabled
 
@@ -769,15 +759,13 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.realm.security.is_enabled "com.leapsight.test_creation_1"
 ```
-- Response:
-```json
+
+```json [Result]
 true
 ```
 :::
@@ -819,11 +807,9 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-/wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+/wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.realm.security.enable "com.leapsight.test_creation_1"
 ```
 :::
@@ -874,11 +860,9 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-/wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+/wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.realm.security.disable "com.leapsight.test_creation_1"
 ```
 :::
@@ -921,15 +905,13 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.realm.security.status "com.leapsight.test_creation_1"
 ```
-- Response:
-```json
+
+```json [Result]
 "enabled"
 ```
 :::

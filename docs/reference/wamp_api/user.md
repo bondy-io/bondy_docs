@@ -86,16 +86,14 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.add \
 "com.leapsight.test_creation_1" '{"username":"user_1"}' | jq
 ```
-- Response:
-```json
+
+```json [Result]
 {
   "authorized_keys": [],
   "enabled": true,
@@ -110,16 +108,15 @@ call bondy.user.add \
 }
 ```
 :::
-::: details Success Call with Groups
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+
+::: code-group
+```bash [Call w/Groups]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.add \
 "com.leapsight.test_creation_1" '{"username":"user_3", "groups":["group_1"], "password":"my_password"}' | jq
 ```
-- Response:
-```json
+
+```json [Result]
 {
   "authorized_keys": [],
   "enabled": true,
@@ -186,23 +183,19 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.add_alias \
 "com.leapsight.test_creation_1" "user_3" "user3_alias1"
 ```
-- Checking the updated user Response
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+
+```bash [Checking the updated user]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
-- Response
-```json
+
+```json [Result]
 {
   "aliases": [
     "user3_alias1"
@@ -222,16 +215,17 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 }
 ```
 :::
-::: details Success Call checking if the authentication succeed with the alias
-- Request
-```bash
+
+::: code-group
+
+```bash [Checking if the authentication succeed with the alias]
 ./wick --url ws://localhost:18080/ws \
 --realm com.leapsight.test_creation_1 \
 --authmethod=wampcra --authid="user3_alias1" --secret="my_password" \
 call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
-- Response
-```json
+
+```json [Result]
 {
   "aliases": [
     "user3_alias1"
@@ -299,23 +293,19 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.add_group \
 "com.leapsight.test_creation_1" "user_3" "group_1"
 ```
-- Checking the updated user Response
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+
+```bash [Checking the updated user]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
-- Response
-```json
+
+```json [Result]
 {
   "authorized_keys": [],
   "enabled": true,
@@ -383,23 +373,19 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.add_groups \
 "com.leapsight.test_creation_1" "user_3" '["group_1","group_2"]'
 ```
-- Checking the updated user Response
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+
+```bash [Checking the updated user]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
-- Response
-```json
+
+```json [Result]
 {
   "authorized_keys": [],
   "enabled": true,
@@ -474,24 +460,21 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.change_password \
 "com.leapsight.test_creation_1" "user_3" "my_new_password"
 ```
-- Checking if the new password was changed
-- Request
-```bash
+
+```bash [Checking if the new password was changed]
 ./wick --url ws://localhost:18080/ws \
 --realm com.leapsight.test_creation_1 \
 --authmethod=wampcra --authid="user_3" --secret="my_new_password" \
 call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
-- Response
-```json
+
+```json [Result]
 {
   "aliases": [
     "user3_alias5",
@@ -518,11 +501,10 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 }
 ```
 :::
-::: details Success Call with old password
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+
+::: code-group
+```bash [Call w/old password]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.change_password \
 "com.leapsight.test_creation_1" "user_3" "my_password" "my_new_password"
 ```
@@ -570,11 +552,9 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.delete "com.leapsight.test_creation_1" "user_1"
 ```
 :::
@@ -617,11 +597,9 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.disable "com.leapsight.test_creation_1" "user_1"
 ```
 :::
@@ -664,11 +642,9 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.enable "com.leapsight.test_creation_1" "user_1"
 ```
 :::
@@ -715,15 +691,13 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.get "com.leapsight.test_creation_1" "user_1" | jq
 ```
-- Response
-```json
+
+```json [Result]
 {
   "authorized_keys": [],
   "enabled": true,
@@ -780,15 +754,13 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.is_enabled "com.leapsight.test_creation_1" "user_1"
 ```
-- Response
-```json
+
+```json [Result]
 true
 ```
 :::
@@ -830,16 +802,14 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.list \
 "com.leapsight.test_creation_1" | jq
 ```
-- Response:
-```json
+
+```json [Result]
 [
   {
     "authorized_keys": [],
@@ -934,23 +904,19 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.remove_alias \
 "com.leapsight.test_creation_1" "user_3" "user3_alias1"
 ```
-- Checking the updated user Response
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+
+```bash [Checking the updated user]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
-- Response
-```json
+
+```json [Result]
 {
   "aliases": [
     "user3_alias5",
@@ -1023,23 +989,19 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.remove_group \
 "com.leapsight.test_creation_1" "user_3" "group_1"
 ```
-- Checking the updated user Response
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+
+```bash [Checking the updated user]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
-- Response
-```json
+
+```json [Result]
 {
   "aliases": [
     "user3_alias5",
@@ -1113,23 +1075,20 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.remove_groups \
 "com.leapsight.test_creation_1" "user_3" '["group_1","group_2"]'
 ```
-- Checking the updated user Response
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+-
+
+```bash [Checking the updated user]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
-- Response
-```json
+
+```json [Result]
 {
   "aliases": [
     "user3_alias5",
@@ -1187,11 +1146,9 @@ None.
 
 #### Examples
 
-::: details Success Call
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.bondy \
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.update \
 "com.leapsight.test_creation_1" "user_3" \
 '{
@@ -1200,8 +1157,8 @@ call bondy.user.update \
 	"authorized_keys":["1766c9e6ec7d7b354fd7a2e4542753a23cae0b901228305621e5b8713299ccdd"]
 }' | jq
 ```
-- Response:
-```json
+
+```json [Result]
 {
   "aliases": [
     "user3_alias5",

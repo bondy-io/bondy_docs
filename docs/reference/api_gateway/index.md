@@ -23,6 +23,7 @@ const { theme } = useData()
 </script>
 
 
+
 # Introduction
 Bondy HTTP API Gateway is a reverse proxy that lets you manage, configure, and route incoming HTTP requests to your WAMP APIs or to external HTTP/REST APIs. It allows Bondy to be easily integrated into an existing HTTP/REST API ecosystem.
 

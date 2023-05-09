@@ -1,9 +1,13 @@
 :root {
-    --vp-c-green: #42b883;
-    --vp-c-green-light: #b9d96c;
-    --vp-c-green-lighter: #dcecb5;
-    --vp-c-green-dark: #86a53c;
-    --vp-c-green-darker: #728d33;
+    --vp-c-white: #ffffff;
+    --vp-c-black: #171916;
+
+    --vp-c-gray: #8e8e93;
+    --vp-c-green: #96c623;
+    --vp-c-green-light: #b0d45a;
+    --vp-c-green-lighter: #cae291;
+    --vp-c-green-dark: #779e1b;
+    --vp-c-green-darker: #597614;
     --vp-c-green-dimm-1: rgba(150, 198, 35, 0.5);
     --vp-c-green-dimm-2: rgba(150, 198, 35, 0.25);
     --vp-c-green-dimm-3: rgba(150, 198, 35, 0.05);
@@ -27,6 +31,7 @@
     --vp-button-sponsor-hover-border: var(--vp-button-alt-hover-border);
     --vp-button-sponsor-hover-text: var(--vp-button-alt-hover-text);
     --vp-button-sponsor-hover-bg: #FFFFFF;
+    --vp-button-brand-hover-bg: var(--vp-c-green);
 /*    --vp-button-sponsor-active-border;
     --vp-button-sponsor-active-text;
     --vp-button-sponsor-active-bg;*/
@@ -433,9 +438,7 @@ table.property-table > tbody > tr > td {
 }
 
 
-code {
-  white-space : pre-wrap !important;
-}
+
 
 @media (max-width: 600px) {
 

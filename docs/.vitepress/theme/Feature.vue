@@ -6,17 +6,17 @@ defineProps<{
   text: string
   link: string
   linkText?: string
-  description: string
+  description?: string
 }>()
 </script>
 
 <template>
-  <a :href="link" :target='_blank'>
+  <a :href="link" style="text-decoration: none;">
   <article class="Feature">
     <div v-if="icon" class="icon">{{ icon }}</div>
     <span v-if="type" class="type">{{ type }}</span>
     <h3 class="title">{{ text }}</h3>
-    <p class="details">{{ description }}</p>
+    <p class="details" v-if="description">{{ description }}</p>
     <p v-if="linkText" class="link-text">{{ linkText }}&nbsp;&rarr;</p>
   </article>
   </a>
@@ -25,7 +25,7 @@ defineProps<{
 <style scoped>
 
 .Feature {
-  border: 1px solid var(--vp-c-divider-light);
+  border: 1px solid var(--vp-c-divider);
   border-radius: 12px;
   padding: 0px 24px 24px 24px;
   height: 100%;
@@ -33,8 +33,12 @@ defineProps<{
 }
 
 article:hover {
-  border: 1px solid var(--vp-c-brand);
+  border: 1px solid var(--vp-c-green-dark);
   /*background-color: var(--vp-c-bg-soft);*/
+}
+
+article:hover > .title {
+  color:var(--vp-c-green-dark);
 }
 
 h3 {
