@@ -8,7 +8,7 @@ Web Application Messaging Protocol (WAMP) is an open standard protocol for (soft
 
 The Web Application Messaging Protocol (WAMP) is intended to provide application developers with the semantics they need to handle messaging between components in distributed applications.
 
-By combining the two main application communication patterns–Remote Procedure Calls and Publish/Subscribe– into a single protocol, it can be used for the entire messaging requirements of a distributed application, thus reducing technology stack complexity, as well as networking overheads.
+By supporting multiple transports and combining the two main application communication patterns (Remote Procedure Calls and Publish/Subscribe) into a **single protocol**, it can be used for all messaging requirements of a distributed application, including North-South and East-West traffic. This reduces technology stack complexity and networking overheads.
 
 WAMP is a community effort and the [protocol specification](https://wamp-proto.org/wamp_latest_ietf.html) is made available for free under an open license for everyone to use or implement.
 
