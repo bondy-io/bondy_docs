@@ -13,54 +13,56 @@ related:
 # Realms
 The realm is a central and fundamental concept in Bondy. It does not only serve as an authentication and authorization domain but also as a message routing domain. Bondy ensures no messages routed in one realm will leak into another realm.
 
-## Description
+## Overview
 ::: definition Realm
 Realms are routing and administrative domains that act as namespaces. All resources in Bondy belong to a Realm. Messages are routed separately for each individual realm so sessions attached to a realm won’t see message routed on another realm.
 :::
 
-
 <ZoomImg src="/assets/realm_diagram.png"/>
 
-In Bondy a realm is represented by a control plane object and is identified by a WAMP URI e.g. `com.mycompany.myrealm`.
+In Bondy, a realm is represented by a control plane object and is identified by a WAMP URI e.g. `com.mycompany.myrealm`.
 
 Realms (and the associated users, credentials, groups, sources and permissions) are persisted to disk and replicated across the cluster by Bondy's control plane data replication service.
 
 As a Bondy administrator[^admin] you can dynamically create (and manage) any number of realms using the [WAMP](/reference/wamp_api/realm) and [HTTP](/reference/http_api/realm) APIs when connected to the [Master Realm](#master-realm).
 
-[^admin]: What constitutes an administrator i.e. what permissions and administrator has and which user is an administrator is actually defined by you using the security configuration.
+[^admin]: The definition of an administrator, including their permissions and which user(s) have administrative privileges, is determined by your realm's security configuration.
 
 ::: info How many realms?
-Because a realm is a control plane data object, there is no limit to the number of realms you can have. However, since part of the realm data is stored both in memory and disk, the actual limit is determined by the amount of memory and storage a Bondy node has access to.
+Since a realm is a control plane object, there is no defined limit to the number of realms you can have. However, the amount of memory and storage available to a Bondy node determines the actual limit, as part of the realm data is stored in both memory and disk.
 
-Notice that since realms are globally replicated, the smallest node in a Bondy cluster (in terms of memory and storage) will be the one determining the actual limit.
+It's important to note that since realms are globally replicated, the smallest node in a Bondy cluster (in terms of memory and storage) will determine the actual limit.
 :::
 
 
 ## Master Realm
-When you start Bondy for the first time it creates and stores the Bondy Master realm identifiedm with the uri `bondy` (also the now deprecated `com.leapsight.bondy`).
+When you start Bondy for the first time it creates and stores the Bondy Master realm identified with the uri `bondy` (also the now deprecated `com.leapsight.bondy`).
 
-This realm is the root realm which allows an admin user to create, list, modify and delete other realms. The realm can be customised either through the `bondy.conf` file or dynamically using the [WAMP](/reference/wamp_api/realm) and [HTTP](/reference/http_api/realm) APIs.
+This realm is the root realm, which allows administrative users to create, list, modify, and delete other realms, among other administrative capabilities.
 
-However, the master realm has some limitations:
+The master realm can be customised either through the `bondy.conf` file or dynamically using the [WAMP](/reference/wamp_api/realm) and [HTTP](/reference/http_api/realm) APIs. However, the master realm has some limitations:
 
 * It cannot be deleted
 * It cannot use [Prototype Inheritance](#prototype-inheritance)
 * It cannot use [Same Sign-on](#same-sign-on)
+* Sessions attached to the realm are not permitted to register procedures (RPC) or publish messages (Pub/Sub)
 
 
 ## Prototype Inheritance
 
-Prototypical inheritance allows us to reuse the properties (including RBAC definitions) from one realm to another through a reference URI configured on the `prototype_uri` property.
+Prototypical inheritance enables properties, including RBAC definitions, from a parent realm to be reused in a child realm.
 
 Key characteristics:
 
 * Prototypical inheritance is a form of single inheritance i.e. realms can only inherit from a single prototype.
-* The `prototype_uri` property is defined as an **irreflexive property** i.e. a realm cannot have itself as prototype.
+* The `prototype_uri` property is defined as an **irreflexive** property i.e. a realm cannot have itself as prototype.
 * In addition **a prototype cannot inherit from another prototype**. This means the inheritance chain is bounded to one level.
 
 ::: definition Prototype Realm
 A **Prototype Realm** is a realm that acts as a prototype for the construction of other realms. It is a normal realm whose property `is_prototype` has been set to `true`.
 :::
+
+To enable prototypical inheritance on a realm, you must set the prototype realm's URI on the child's `prototype_uri` property.
 
 The following is the list of properties which a realm inherits from a prototype when those properties have not been assigned a value. Setting a value to these properties is equivalent to overriding the prototype's.
 
@@ -77,22 +79,44 @@ based on the following rules:
 3. A group defined in a realm overrides any homonym group in its prototype. This works at all levels of the group membership chain.
 4. The previous rule does not apply to the special group `all`. Permissions granted to `all` are merged between a realm and its prototype.
 
-
 ## Security
 
-Each realm has its own Security service, which provides Authentication and Authorization.
+A realm can be seen as a self-contained Identity and Access Management (IAM) Service. Bondy uses a Role-based Access Control (RBAC) system where users, groups and permissions for a realm are managed by the realm itself and are segregated from other realms.
 
-A realm's security service may be checked, enabled, or disabled by an administrator through the APIs. This allows an administrator to change security settings of a realm on the whole cluster quickly without needing to change settings on a node-by-node basis.
+In addition, a realm defines which authentication methods are available and allows to restrict the available methods based on the connection’s source IP address (CIDR).
+
+Realms provides these capabilities internally without the need for an external IAM.
+
+### Identity and Access Management (IAM)
+User credentials and data are stored in Bondy's embedded database and are replicated across all nodes in the cluster.
+
+All users exists within a realm. However, Bondy allows an administrator to configure a user access to multiple realms by using [Same Sign-on](/concepts/realms#same-sign-on-sso).
+
+Users have attributes associated with them, such as a username, credentials (password or authorized keys), and metadata determined by the client application.
+
+Users can also be assigned group memberships.
+
+## Authentication
+A Realm supports one or more authentication methods. Authentication methods can be assigned to users directly or via the group membership relationship.
+
+The following methods can be used via WAMP:
+
+- `anonymous`: Allows access to clients which connect without credentials, assigning them as members of the 'anonymous' group. You can configure the allowed sources for the anonymous user and the permissions assigned to the anonymous group - but you cannot make the anonymous group a member of another group.
+- `password`: Allows access to clients which connect with an existing username (WAMP authid field) and password, where the password is send in clear-text and is therefore vulnerable to password “sniffing” attacks, unless the connection is protected by TLS encryption. It should be avoided and replaced by the use of **wamp-cra** or **wamp-scram** challenge-response methods if possible.
+- `trust`: Allows access to clients which connect with an existing username (WAMP authid field) but does not request them to authenticate. This is to be used in conjunction with source definition e.g. trust only clients within a defined network (CIDR).
+- `cookie`
+- `wampcra`
+- `cryptosign`
+<!-- - `wamp-scram` -->
+- `ticket`: Allows access to clients which connect with an existing username (WAMP authid field) and a ticket previously generated by Bondy. If the transport is not encrypted, this method is vulnerable to ticket “sniffing” attacks, a man-in-the-middle can sniff and possibly hijack the ticket. If the ticket value is reused, that might enable replay attacks. It should be used only when the connection is protected by TLS encryption.
+- `oauth2`: TBD
 
 ## Same Sign-on (SSO)
 Bondy SSO (Same Sign-on) is a feature that allows users to access multiple realms using just one set of credentials.
 
-To use SSO one needs first create a realm (A) as an SSO realm (by setting its `is_sso_realm` property to `true`).
+To use SSO, you first need to create a realm (A) as an SSO realm. This can be done by setting its `is_sso_realm` property to `true`.
 
 Subsequently one or more realms can use realm A as their SSO Realm by respectively setting their property `sso_realm_uri` to the URI of realm A.
-
-- It requires the user to authenticate when opening a session in a realm.
-- Changing credentials e.g. updating password can be performed while connected to any realm.
 
 To learn more about this topic review the [Same Sign-on page](/concepts/same_sign_on).
 

@@ -17,9 +17,7 @@ related:
 Bondy SSO (Same Sign-on) is a feature that allows users to authenticate into multiple realms using just one set of credentials.
 
 ## Background
-A realm can be seen as a self-contained Identity Provider and Authorization Service: all users, groups and permissions for a realm are managed by the realm itself in a (virtual) private database.
-
-In addition, a realm defines which authentication methods are available and allows to restrict the available methods to a user or group of users based on the connection’s source IP address (CIDR).
+As explained in the [Realms](/concepts/realms) section, all users, groups and permissions for a realm are managed by the realm itself.
 
 When your distributed system design requires users to belong to multiple realms this creates the problem of each user having multiple credentials (one per realm) e.g. passwords and/or public keys, which are not synchronised amongst them.
 

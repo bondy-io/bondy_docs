@@ -3,7 +3,7 @@ Learn about the Bondy runtime configuration, the Bondy configuration file, its s
 
 The complete behaviour of Bondy is defined by the combination of 3 types of "configuration" data:
 
-1. **Bondy node runtime configuration**, which controls things like network listeners, availability of optional services, security defaults, clustering and load regulation. This is mostly static configuration done by modifying the `bondy.conf` file and a set of environment variables.
+1. **Bondy node runtime configuration**, which controls things like network listeners, availability of optional services, security defaults, clustering and load regulation. This is mostly **static configuration** done by modifying the `bondy.conf` file and a set of environment variables.
 1. **Multi-tenancy security configuration**, which controls the definition of realms and its security including user identities, authentication and authorizacion policies, Same Sign-on and Single Sign-on. This is done dynamically by via the [Admin API](/reference/wamp_api/index). However, it can also be configured via the `bondy.conf` file.
 1. **RPC and Pub/Sub configuration**, a.k.a **Control Plane**, which defines the available RPC procedures–their invocation policies e.g. load balancing–and PubSub subscriptions and their respective routing information. This is dynamic configured by clients and maintained in the Registry via [WAMP](/concepts/what_is_wamp).
 

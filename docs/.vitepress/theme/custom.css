@@ -20,10 +20,14 @@
     --vp-c-text-dark-1: rgba(255, 255, 255, .87);
     --vp-button-alt-bg: hwb(0 89% 11%);
     /*--vp-c-bg-alt: #f9f9f9;*/
+
     --vp-c-text-code: rgb(30, 30, 30);
-    --vp-font-family-base: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont, 'Montserrat','Helvetica Neue', Helvetica, Arial, 'Noto Sans', sans-serif,'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --vp-font-family-mono: ui-monospace,system-ui,-apple-system,BlinkMacSystemFont, 'SF Mono','Inconsolata','Menlo','Courier',monospace;
-    --vp-code-font-size: 15px;
+    --vp-c-mute: rgba(180, 212, 238, 0.3);
+    --vp-custom-block-info-code-bg: var(--vp-c-mute);
+
+    --vp-font-family-base: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans',Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji';
+    --vp-font-family-mono: ui-monospace,system-ui,-apple-system,BlinkMacSystemFont,'SF Mono','Inconsolata','Menlo','Courier',monospace;
+    --vp-code-font-size: 16px;
 
     --vp-button-sponsor-border: var(--vp-button-alt-border);
     --vp-button-sponsor-text: var(--vp-button-alt-text);
@@ -35,6 +39,7 @@
 /*    --vp-button-sponsor-active-border;
     --vp-button-sponsor-active-text;
     --vp-button-sponsor-active-bg;*/
+    --vp-custom-block-code-font-size: var(--vp-code-font-size);
 }
 
 body {
@@ -226,10 +231,15 @@ table.property-table > tbody > tr > td {
   margin-bottom: 30px !important;
 }
 
+.custom-block code {
+  background-color: var(--vp-custom-block-info-code-bg);
+  font-weight:400!important;
+}
+
 .custom-block.definition {
   border-color: rgba(23, 25, 22, 1.00);
   color: rgba(23, 25, 22, 1.00);
-  background-color: rgba(180, 212, 238, 0.15);
+  background-color: rgba(180, 212, 238, 0.35)
 }
 
 .custom-block.definition code {

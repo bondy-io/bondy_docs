@@ -66,7 +66,9 @@ There are two types of mesh topology:
 * partial mesh topology
 
 ## Microservices Architecture
-An architectural style where applications are constructed from services that communicate over the network using RPC and are developed, scaled and deployed independently.
+The microservice architecture is an evolutionary approach to building effective, manageable, and scalable distributed applications. Using this approach an application is structured as a collection of small, independent services that communicate with each other over a network.
+
+Each microservice is treated as a black box that exposes an API, and is responsible for a single specific task. It can be developed and deployed independently of the other services. This allows for greater deployment flexibility and scalability, as well as easier maintenance and evolution.
 
 The key goal of a microservices architecture is to modularize application development into independent yet collaborating components, each delivered by smaller team of developers that don't need to understand the entire application and allowing each team to work at their own cadence[^cmeik].
 
