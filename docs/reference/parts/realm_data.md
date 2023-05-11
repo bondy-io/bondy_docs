@@ -61,7 +61,7 @@ const realmPublic = {
         "type": "uri",
         "required": false,
         "mutable": false,
-        "description": "If present, this it the URI of the the realm prototype this realm inherits some of its behaviour and features from."
+        "description": "If present, this it the URI of the the realm prototype this realm inherits some of its behaviour and features from. This is an **irreflexive** property i.e. a realm cannot have itself as prototype."
     },
     "is_sso_realm": {
         "type": "boolean",

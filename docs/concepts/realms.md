@@ -15,14 +15,20 @@ The realm is a central and fundamental concept in Bondy. It does not only serve 
 
 ## Overview
 ::: definition Realm
-Realms are authentication, authorization, routing and administrative domains that act as namespaces. All resources in Bondy belong to a Realm. Messages are routed separately for each individual realm so sessions attached to a realm won’t see message routed on another realm.
+A realm is a logical grouping of application network resources that are managed under a common administrative authority. It represents an administrative boundary within an application network and allows for centralized control and management of resources, connections, user accounts, security policies, and other application network-related configurations.
 :::
+
+All resources in Bondy belong to a realm. Messages are routed separately for each individual realm, so sessions attached to a realm won’t see messages routed on another realm.
+
+It is the equivalent of a domain in computer networks.
 
 <ZoomImg src="/assets/realm_diagram.png"/>
 
+## The Realm object
+
 In Bondy, a realm is represented by a control plane object and is identified by a WAMP URI e.g. `com.mycompany.myrealm`.
 
-Realms (and the associated users, credentials, groups, sources and permissions) are persisted to disk and replicated across the cluster by Bondy's control plane data replication service.
+Realms (and the associated configuration) are persisted to disk and replicated across the cluster by Bondy's control plane data replication service.
 
 As a Bondy administrator[^admin] you can dynamically create (and manage) any number of realms using the [WAMP](/reference/wamp_api/realm) and [HTTP](/reference/http_api/realm) APIs when connected to the [Master Realm](#master-realm).
 
@@ -34,50 +40,6 @@ Since a realm is a control plane object, there is no defined limit to the number
 It's important to note that since realms are globally replicated, the smallest node in a Bondy cluster (in terms of memory and storage) will determine the actual limit.
 :::
 
-
-## Master Realm
-When you start Bondy for the first time it creates and stores the Bondy Master realm identified with the uri `bondy` (also the now deprecated `com.leapsight.bondy`).
-
-This realm is the root realm, which allows administrative users to create, list, modify, and delete other realms, among other administrative capabilities.
-
-The master realm can be customised either through the `bondy.conf` file or dynamically using the [WAMP](/reference/wamp_api/realm) and [HTTP](/reference/http_api/realm) APIs. However, the master realm has some limitations:
-
-* It cannot be deleted
-* It cannot use [Prototype Inheritance](#prototype-inheritance)
-* It cannot use [Same Sign-on](#same-sign-on-sso)
-* Sessions attached to the realm are not permitted to register procedures (RPC) or publish messages (Pub/Sub)
-
-
-## Prototype Inheritance
-
-Prototypical inheritance enables properties, including RBAC definitions, from a parent realm to be reused in a child realm.
-
-Key characteristics:
-
-* Prototypical inheritance is a form of single inheritance i.e. realms can only inherit from a single prototype.
-* The `prototype_uri` property is defined as an **irreflexive** property i.e. a realm cannot have itself as prototype.
-* In addition **a prototype cannot inherit from another prototype**. This means the inheritance chain is bounded to one level.
-
-::: definition Prototype Realm
-A **Prototype Realm** is a realm that acts as a prototype for the construction of other realms. It is a normal realm whose property `is_prototype` has been set to `true`.
-:::
-
-To enable prototypical inheritance on a realm, you must set the prototype realm's URI on the child's `prototype_uri` property.
-
-The following is the list of properties which a realm inherits from a prototype when those properties have not been assigned a value. Setting a value to these properties is equivalent to overriding the prototype's.
-
-- `security_enabled`
-- `allow_connections`
-- `sso_realm_uri`
-- `authmethods`
-
-In addition **realms inherit Groups, Sources and Grants** from their prototype.
-based on the following rules:
-
-1. Users cannot be defined for a Prototype Realm i.e. no user inheritance.
-2. A realm has access to all groups defined in its prototype i.e. from a realm perspective the prototype groups operate in the same way as if they have been defined in the realm itself. This enables roles (users and groups) in a realm to be members of groups defined in its prototype.
-3. A group defined in a realm overrides any homonym group in its prototype. This works at all levels of the group membership chain.
-4. The previous rule does not apply to the special group `all`. Permissions granted to `all` are merged between a realm and its prototype.
 
 ## Identity Management
 
@@ -161,8 +123,74 @@ Allows users with previously obtained tokens from an [HTTP API Gateway](/referen
 This authentication method is primarily designed for clients to share a token between HTTP and WAMP sessions. If you are only using WAMP, we recommend using the Ticket method instead.
 :::
 
-## Authorization
-Once a user
+### Authorization
+WAMP enables authenticated users perform various actions, including:
+
+- Registering procedures using fully qualified URIs or URI patterns to receive invocations.
+- Calling procedures using fully qualified URIs or URI patterns.
+- Subscribing to topics using fully qualified URIs or URI patterns to receive events.
+- Publishing events to fully qualified URIs.
+
+To perform these actions, users must have been granted the correct permissions. Permissions for a realm are defined using the RBAC.
+
+::: tip
+Unlike the WAMP specification, which only allows a single active role (group) per session, Bondy allows for multiple active groups. To achieve this, pass a comma-separated string of the desired groups in the `authrole` session request details or simply leave the property undefined.
+:::
+
+### Accounting/Auditing
+::: info
+To be implemented.
+
+Records the action ("operation") taken on a URI or URI pattern for a Realm, as well as the Principal ("user") who requested it, and whether the action was allowed or denied.
+
+:::
+
+
+
+## Master Realm
+When you start Bondy for the first time it creates and stores the Bondy Master realm identified with the uri `bondy` (also the now deprecated `com.leapsight.bondy`).
+
+This realm is the root realm, which allows administrative users to create, list, modify, and delete other realms, among other administrative capabilities.
+
+The master realm can be customised either through the `bondy.conf` file or dynamically using the [WAMP](/reference/wamp_api/realm) and [HTTP](/reference/http_api/realm) APIs. However, it has some limitations when compared with user realms:
+
+
+* Sessions attached to the realm are not permitted to register procedures or publish events
+* It cannot be deleted
+* It cannot use [Prototype Inheritance](#prototype-inheritance)
+* It cannot use [Same Sign-on](#same-sign-on-sso) or [Single Sign-on](#single-sign-on)
+
+## Prototype Inheritance
+
+::: definition Prototype Realm
+A **Prototype Realm** is a realm that acts as a prototype for the construction of other realms. It is a normal realm whose property `is_prototype` has been set to `true`.
+:::
+
+
+Prototypical inheritance enables properties, including authentication and authorization definitions, from a parent realm to be reused in a child realm.
+
+Key characteristics:
+
+* Prototypical inheritance is a form of *single inheritance* i.e. realms can only inherit from a single prototype.
+* A realm cannot inherit from itself (*irreflexive* relationship).
+* In addition *a prototype cannot inherit from another prototype*. This means the inheritance chain is bounded to one level.
+
+
+To enable prototypical inheritance on a realm, you must set the prototype realm's URI on the child's `prototype_uri` property.
+
+The following is the list of properties which a realm inherits from a prototype when those properties have not been assigned a value. Setting a value to these properties is equivalent to overriding the prototype's.
+
+- `security_enabled`
+- `allow_connections`
+- `sso_realm_uri`
+- `authmethods`
+
+In addition, *realms inherit Groups, Sources and Grants* from their prototype based on the following rules:
+
+1. Users cannot be defined for a Prototype Realm, which means there is no user inheritance.
+2. A realm has access to all groups defined in its prototype. From the realm's perspective, the prototype groups operate in the same way as if they had been defined in the realm itself. This enables roles (users and groups) in a realm to be members of groups defined in its prototype.
+3. A group defined in a realm overrides any homonym group in its prototype. This works at all levels of the group membership chain.
+4. The previous rule does not apply to the special group `all`. Permissions granted to `all` are merged between a realm and its prototype.
 
 ## Same Sign-on (SSO)
 Bondy SSO (Same Sign-on) is a feature that allows users to access multiple realms using just one set of credentials.
