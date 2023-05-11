@@ -78,8 +78,8 @@ That is, when using a configuration file Bondy treats it as a declarative config
 
 ### Is this the same as Single Sign-on?
 
-No. Same Sign-on still requires the user to authenticate again when opening a session on a realm.
+No. Same Sign-on still requires the user to authenticate again when opening a session on a realm. It is the combination of Same Sign-on with [Ticket](/concepts/realms#ticket) authentication method that enables Single Sign-on.
 
 ### Where does the authorization happen?
 
-Authorization is still performed by the realm the user is connecting to. That means the permissions will be those granted by the local RBAC configuration for the realm. Bondy SSO only handles authentication.
+Authorization is still performed by the realm to which the user is connecting. This means that the user's permissions will be governed by the local RBAC configuration for that realm. Same Sign-on is only used for authentication.
