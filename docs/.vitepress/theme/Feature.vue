@@ -31,6 +31,9 @@ defineProps<{
   height: 100%;
   /*background-color: var(--vp-c-bg-soft);*/
 }
+a {
+  color: inherit;
+}
 
 article:hover {
   border: 1px solid var(--vp-c-green-dark);
@@ -38,6 +41,10 @@ article:hover {
 }
 
 article:hover > .title {
+  color:var(--vp-c-green-dark);
+}
+
+article:hover > .type {
   color:var(--vp-c-green-dark);
 }
 

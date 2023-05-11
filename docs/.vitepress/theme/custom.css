@@ -13,21 +13,26 @@
     --vp-c-green-dimm-3: rgba(150, 198, 35, 0.05);
 
     --vp-code-tab-active-bar-color: #ff6442;
-    --vp-c-brand: #171916;
+/*    --vp-c-brand: #171916;
     --vp-c-brand-light: #323232;
-    --vp-c-brand-lighter: #323232;
+    --vp-c-brand-lighter: #323232;*/
+    --vp-c-brand: var(--vp-c-green-dark);
+    --vp-c-brand-light: var(--vp-c-green-light);
+    --vp-c-brand-lighter: var(--vp-c-green-lighter);
+
     --vp-c-text-1: #454545;
     --vp-c-text-dark-1: rgba(255, 255, 255, .87);
     --vp-button-alt-bg: hwb(0 89% 11%);
     /*--vp-c-bg-alt: #f9f9f9;*/
 
-    --vp-c-text-code: rgb(30, 30, 30);
-    --vp-c-mute: rgba(180, 212, 238, 0.3);
-    --vp-custom-block-info-code-bg: var(--vp-c-mute);
-
     --vp-font-family-base: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans',Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji';
     --vp-font-family-mono: ui-monospace,system-ui,-apple-system,BlinkMacSystemFont,'SF Mono','Inconsolata','Menlo','Courier',monospace;
     --vp-code-font-size: 16px;
+
+    --vp-c-text-code: rgb(30, 30, 30);
+    --vp-c-mute: rgba(180, 212, 238, 0.2);
+    --vp-custom-block-info-code-bg: var(--vp-c-mute);
+    --vp-custom-block-code-font-size: var(--vp-code-font-size);
 
     --vp-button-sponsor-border: var(--vp-button-alt-border);
     --vp-button-sponsor-text: var(--vp-button-alt-text);
@@ -35,12 +40,16 @@
     --vp-button-sponsor-hover-border: var(--vp-button-alt-hover-border);
     --vp-button-sponsor-hover-text: var(--vp-button-alt-hover-text);
     --vp-button-sponsor-hover-bg: #FFFFFF;
-    --vp-button-brand-hover-bg: var(--vp-c-green);
 /*    --vp-button-sponsor-active-border;
     --vp-button-sponsor-active-text;
     --vp-button-sponsor-active-bg;*/
-    --vp-custom-block-code-font-size: var(--vp-code-font-size);
+
+    --vp-button-brand-hover-bg: var(--vp-c-green);
+
+
 }
+
+
 
 body {
     font-size: 17px;
