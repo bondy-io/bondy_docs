@@ -31,7 +31,7 @@ All nodes in a Bondy cluster share a global state which is replicated through a 
 
 [^ebt]: [Epidemic broadcast trees](https://www.gsd.inesc-id.pt/~ler/reports/srds07.pdf), João Leitão, José Pereira and Luís Rodrigues
 
-Bondy uses [Partisan](https://github.com/lasp-lang/partisan), a high-performance Distributed Erlang alternative that enables various network topologies and supports larger clusters.
+Bondy uses [Partisan](https://partisan.dev), a high-performance Distributed Erlang alternative that enables various network topologies and supports larger clusters.
 
 ### Easy to operate
 Bondy is easy to operate mainly due to its decentralised peer-to-peer nature, the lack of special nodes, automatic data replication and self-healing.
