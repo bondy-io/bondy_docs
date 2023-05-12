@@ -8,13 +8,13 @@ related:
 ---
 
 # What is Bondy
-Bondy is an open-source, always-on and scalable **application networking platform** connecting all elements of a distributed application—offering event and service mesh capabilities combined.
+Bondy is an open-source, always-on and scalable **application networking platform**{.text-gradient} connecting all elements of a distributed application—offering event and service mesh capabilities combined.
 
 ## What does Bondy do?
 Bondy routes application messages between Internet-connected devices such as browsers, phones, servers and IoT (Internet of Things) devices in realtime by creating an application network.
 
 ::: definition Application network
-An application network is a dynamic [overlay network](https://en.wikipedia.org/wiki/Overlay_network) formed by one or several Bondy nodes (a Bondy cluster) and software running on the connected devices (embedding a client library that speaks a protocol supported by Bondy).
+An application network is a dynamic [overlay network](https://en.wikipedia.org/wiki/Overlay_network) formed by a set of Bondy nodes that interconnects different types of applications and devices, ranging from web and mobile apps to IoT devices and backend microservices.
 :::
 
 <ZoomImg
@@ -28,7 +28,10 @@ At its core, Bondy implements the [Web Application Messaging Protocol (WAMP)](/c
 1. **Remote Procedure Calls (RPC)** incl. Service Discovery, Routing and Traffic management
 1. **Publish/Subscribe** routing
 
-As a result, Bondy offers event and service mesh capabilities combined. But as you will learn in the following sections, Bondy goes further by providing an HTTP API Gateway, Router bridging (a.k.a. Bondy Edge) and additional integration capabilities.
+As a result, Bondy offers combined event and service mesh capabilities. However, as you will learn in the following sections, Bondy goes further by creating an application network that leverages an open, universal application messaging protocol.
+
+Additionally, it offers other integration options, such as an HTTP API Gateway, Router bridging (also referred to as Bondy Edge), bridges to external messaging brokers and other features.
+
 
 
 ### Key Characteristics
@@ -37,6 +40,7 @@ As a result, Bondy offers event and service mesh capabilities combined. But as y
 - **Scalable**<br>Bondy was designed from the ground up as a distributed router. It can leverage different network topologies for data replication and routing allowing it to scale to hundreds of nodes[^topo]. Bondy is written in Erlang/OTP which offers unprecedented soft real-time, high concurrency and self-healing capabilities. A single node can handle millions of concurrent client connections.
 - **Always-on**<br>Bondy replicates state across the cluster using a masterless architecture (all nodes are equal) and a gossip-based eventually consistent reliable state dissemination protocol which keeps state synchronised across nodes in the cluster without compromising availability. In addition, Bondy uses active anti-entropy to repair missing or divergent state as a result of node failure, physical data loss or corruption, and quickly bring additional nodes up-to-date. The combination of these features allow Bondy to be highly available even under network partitions, message loss and node failures.
 - **Dynamic**<br>Bondy offers dynamic message routing automatically and efficiently delivering RPC and Publish/Subscribe messages between clients connected to separate nodes in the cluster. Clustering formation is automatic and self-healing which saves operators the hassle of maintaining cluster connectivity.
+- **Polyglot**<br>Bondy clients implement an open protocol that works with multiple transports and serialization formats. With Bondy your distributed application components can choose the programming languages and frameworks yet be integrated without adapters.
 - **Easy to deploy anywhere**<br>Bondy can be deployed anywhere from resource-constrained AMD64/ARM64 edge devices to private, hybrid and public clouds running bare metal, virtual machines and containers. Bondy provides out-of-the-box automatic clustering formation based on DNS which allows deploying a cluster on one go.
 
 ## Why should I use Bondy?
@@ -69,8 +73,10 @@ Bondy is a **reliable application message router, designed for availability and 
 Learn more in the [How is Bondy different](/concepts/how_is_bondy_different) section.
 
 ::: info Like a distributed D-Bus over a network
-[D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions. As Bondy, it offers RPC and Pub-Sub, but whereas  D-Bus is designed for inter-process communication (IPC) on a single host, Bondy is designed to be distributed over a set of hosts (cluster) and used over a network.
+[D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions.
+
+As well as Bondy, it offers both Remote Procedure Call and Publish/Subscribe functionality. However, while D-Bus is intended for inter-process communication (IPC) on a single host, Bondy is designed to be distributed over a set of hosts and used over a network.
 :::
 
 
-[^topo]: Bondy uses [Partisan](https://github.com/lasp-lang/partisan) allowing it to use different network topologies. Currently Bondy can only be deployed using the full-mesh topology that can scale to hundreds of nodes. A peer-to-peer (partial mesh) topology based on Partisan HyParView implementation is in development. Partisan HyParView that has been proven to scale up to 2,000 nodes.
+[^topo]: Bondy uses [Partisan](https://partisan.dev), which allows it to use different network topologies. Currently, Bondy can only be deployed using the full-mesh topology, which can scale to hundreds of nodes. However, a peer-to-peer (partial mesh) topology based on Partisan HyParView implementation is currently in development. Partisan HyParView has been proven to scale up to 2,000 nodes. Partisan is currently maintained by the same team that created Bondy.

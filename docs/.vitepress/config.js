@@ -607,6 +607,12 @@ export default {
               description: "A high-level description of Bondy, its key features and the key benefits it delivers."
             },
             {
+              text: 'What is an Application Network',
+              link: '/concepts/application_networks',
+              isFeature: true,
+              description: "Learn about application networks, their characteristics and benefits, and how Bondy is implementing them. "
+            },
+            {
               text: 'What is WAMP',
               link: '/concepts/what_is_wamp' ,
               isFeature: true,

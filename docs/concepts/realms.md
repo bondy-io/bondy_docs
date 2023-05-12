@@ -11,7 +11,7 @@ related:
       description: Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status.
 ---
 # Realms
-The realm is a central and fundamental concept in Bondy. It does not only serve as an authentication and authorization domain but also as a message routing domain. Bondy ensures no messages routed in one realm will leak into another realm.
+The realm is a central and fundamental concept in Bondy, serving as an application network domain that segregates authentication, authorization, and message routing. Bondy ensures that no messages routed in one realm will leak into another realm.
 
 ## Overview
 ::: definition Realm

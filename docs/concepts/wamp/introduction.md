@@ -8,7 +8,7 @@ The Web Application Messaging Protocol (WAMP) is a routed protocol for polyglot 
 In WAMP, agents that want to interact with each other, called WAMP clients, connect to a WAMP Router. The WAMP Router is in effect an **L7 application networking platform**.
 
 ::: info Like D-Bus over a network
-[D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions. As WAMP, it offers RPC and Pub-Sub, but whereas WAMP is designed for be used over a network, D-Bus is designed for inter-process communication (IPC) on a single host.
+[D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions. As WAMP, it offers RPC and Pub/Sub, but whereas WAMP is designed for be used over a network, D-Bus is designed for inter-process communication (IPC) on a single host.
 :::
 
 You will learn later on that these clients can be written in different programming languages, use different transports and use different message serialization formats.
