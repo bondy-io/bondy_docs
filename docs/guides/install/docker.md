@@ -11,22 +11,20 @@ These are located at the Bondy's Github repository under the ["deployment" direc
 ## Prerequisites
 * A Docker-enabled system with proper Docker access
 
-## Steps
+## Steps    
 
 ### 1. Setup directory
 
-Bondy needs access to a configuration file and the ability to store its embedded database. Choose a directory (or create one) e.g. `bondy-docker`.
+Bondy needs access to a configuration file and the ability to store its embedded database. Choose a directory (or create one) e.g. `bondy-docker` and define it as `BONDY_HOME`.
 
 ```bash
-mkdir ~/bondy-docker
+BONDY_HOME=~/bondy-docker
 ```
 
 Create an `etc` directory within your chosen directory.
 
 ```bash
-cd ~/bondy-docker
-mkdir etc
-cd etc
+mkdir -p ${BONDY_HOME}/etc
 ```
 
 ### 2. Prepare a `security.config.json` file
@@ -34,7 +32,7 @@ cd etc
 Using your preferred text editor, create a file named `security.config.json` (
 This file can have any other name you like but make sure to use the same name in the following step.).
 
-The copy the following content and save the file in the `etc` directory we created in the previous step.
+The copy the following content and save the file in the `${BONDY_HOME}/etc` directory we created in the previous step.
 
 ```json
 [
@@ -118,7 +116,7 @@ For production use make sure you understand Bondy's Security system and configur
 
 ### 3. Prepare the `bondy.conf` file
 
-Again using your text editor create a file name `bondy.conf` in the `etc` directory we created in the previous steps, containing the following content:
+Again using your text editor create a file name `bondy.conf` in the `${BONDY_HOME}/etc` directory we created in the previous steps, containing the following content:
 
 ```text
 security.config_file = /bondy/etc/security_config.json
@@ -127,7 +125,7 @@ security.config_file = /bondy/etc/security_config.json
 ### 4. Verify your setup
 
 ```bash
-cd ~/bondy-docker
+cd ${BONDY_HOME}
 tree -L 2
 ```
 
@@ -150,7 +148,6 @@ For example to run the `1.0.0-beta.68` release you would use:
 
 ::: code-group
 ```bash [Debian]
-cd ~/bondy-docker
 docker run \
     -e BONDY_ERL_NODENAME=bondy1@127.0.0.1 \
     -e BONDY_ERL_DISTRIBUTED_COOKIE=bondy \
@@ -160,12 +157,11 @@ docker run \
     -p 18086:18086 \
     -u 0:1000 \
     --name bondy \
-    -v "${PWD}/bondy-docker/etc:/bondy/etc" \
+    -v "${BONDY_HOME}/etc:/bondy/etc" \
     -d leapsight/bondy:1.0.0-beta.68
 ```
 
 ```bash [Alpine]
-cd ~/bondy-docker
 docker run \
     -e BONDY_ERL_NODENAME=bondy1@127.0.0.1 \
     -e BONDY_ERL_DISTRIBUTED_COOKIE=bondy \
@@ -175,7 +171,7 @@ docker run \
     -p 18086:18086 \
     -u 0:1000 \
     --name bondy \
-    -v "${PWD}/bondy-docker/etc:/bondy/etc" \
+    -v "${BONDY_HOME}/etc:/bondy/etc" \
     -d leapsight/bondy:1.0.0-beta.68-alpine
 ```
 :::
