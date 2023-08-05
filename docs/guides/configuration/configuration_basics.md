@@ -61,9 +61,9 @@ security.config_file = /bondy/etc/security_conf.json
 
 Bondy can accumulate a large number of open file handles during operation. The creation of numerous data files is normal, and the storage backend performs periodic merges of data file collections to avoid accumulating file handles.
 
-To accommodate this you should increase the open files limit on your system. We recommend setting a soft limit of `65536`` and a hard limit of `200000``.
+To accommodate this you should increase the open files limit on your system. We recommend setting a soft limit of `65536` and a hard limit of `200000`.
 
-Most operating systems can check and change the open-files limit for the current shell session using the `ulimit`command.
+Most operating systems can check and change the open-files limit for the current shell session using the `ulimit` command.
 
 Start by checking the current open file limit values with:
 
