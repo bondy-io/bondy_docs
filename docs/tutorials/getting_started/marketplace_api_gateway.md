@@ -320,6 +320,8 @@ From the Bondy side, you can see in the logs the following lines:
 
             ```bash
             curl --location --request POST 'http://localhost:18080/market/item' \
+            --header 'Authorization: Bearer eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20ubWFya2V0LmRlbW8iLCJleHAiOjkwMCwiZ3JvdXBzIjpbInJlc291cmNlX293bmVycyJdLCJpYXQiOjE2NzAzMzQ2ODAsImlkIjoxMjEwNjU1ODA2NTU3MzIsImlzcyI6InBvc3RtYW4iLCJraWQiOiI4MzMwOTAxMSIsIm1ldGEiOnsiZGVzY3JpcHRpb24iOiJWaWN0b3IgZW5kIHVzZXIgZm9yIHRlc3RpbmcgcHVycG9zZXMifSwic3ViIjoidmljdG9yIn0.fQ0Ctl9RV4TYzfcusHy1f6aDuqIVuMkffx08vJ9dFq-x8at3fdZR3alCrF1I2lYT5vJFA7YJqjHPb-rbDB2Y1A' \
+            --header 'Content-Type: application/json' \
             --data-raw '{
                 "name": "first item",
                 "price": 1,
