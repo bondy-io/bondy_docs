@@ -1,41 +1,11 @@
 // Sitemap
 import { createWriteStream } from 'node:fs'
 import { resolve } from 'node:path'
-import { SitemapStream } from 'sitemap'
+// import { SitemapStream } from 'sitemap'
 
 const links = []
 
 export default {
-    transformHtml: (_, id, { pageData }) => {
-      if (!/[\\/]404\.html$/.test(id))
-        links.push({
-          // you might need to change this if not using clean urls mode
-          url: pageData.relativePath.replace(/((^|\/)index)?\.md$/, '$2'),
-          lastmod: pageData.lastUpdated
-        })
-    },
-    buildEnd: async ({ outDir }) => {
-      const sitemap = new SitemapStream({
-        hostname: 'https://vitepress.vuejs.org/'
-      })
-      const writeStream = createWriteStream(resolve(outDir, 'sitemap.xml'))
-      sitemap.pipe(writeStream)
-      links.forEach((link) => sitemap.write(link))
-      sitemap.end()
-      await new Promise((r) => writeStream.on('finish', r))
-    },
-
-    // buildEnd: () => {
-    //   sitemap({
-    //     hostname: 'https://www.bondy.io',
-    //     outDir: '.vitepress/dist',
-    //     robots: [],
-    //     readable: false
-    //   })
-    // },
-    cleanUrls: 'with-subfolders',
-    // Set to false for publishing
-    ignoreDeadLinks: true,
     // These are app level configs.
     lang: 'en-GB',
     titleTemplate: false,
@@ -68,7 +38,9 @@ export default {
         src:"https://plausible.io/js/script.local.js"
       }]
     ],
-
+    sitemap: {
+        hostname: 'https://developer.bondy.io/'
+    },
     appearance: true,
     lastUpdated: true,
 
@@ -309,7 +281,31 @@ export default {
         nav: nav(),
 
         sidebar: sidebars()
-    }
+    },
+
+
+    // transformHtml: (_, id, { pageData }) => {
+    //   if (!/[\\/]404\.html$/.test(id))
+    //     links.push({
+    //       // you might need to change this if not using clean urls mode
+    //       url: pageData.relativePath.replace(/((^|\/)index)?\.md$/, '$2'),
+    //       lastmod: pageData.lastUpdated
+    //     })
+    // },
+    // buildEnd: async ({ outDir }) => {
+    //   const sitemap = new SitemapStream({
+    //     hostname: 'https://vitepress.vuejs.org/'
+    //   })
+    //   const writeStream = createWriteStream(resolve(outDir, 'sitemap.xml'))
+    //   sitemap.pipe(writeStream)
+    //   links.forEach((link) => sitemap.write(link))
+    //   sitemap.end()
+    //   await new Promise((r) => writeStream.on('finish', r))
+    // },
+    //
+    cleanUrls: 'with-subfolders',
+    // Set to false for publishing
+    ignoreDeadLinks: false,
   }
 
   // Top navigation
