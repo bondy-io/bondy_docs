@@ -18,7 +18,7 @@ WAMP is a community effort and the [protocol specification](https://wamp-proto.o
 
 ## Key Characteristics
 
-* **It is a routed protocol**<br>All components connecting to a [Router](/concepts/router), where the router performs message routing between [Clients](/concepts/client).
+* **It is a routed protocol**<br>All components connecting to a Router, where the router performs message routing between Clients.
 
 
 

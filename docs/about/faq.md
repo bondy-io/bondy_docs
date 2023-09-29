@@ -24,7 +24,7 @@ As its name implies, Publish & Subscribe offers at most once semantics a.k.a fir
 
 Being an extensible protocol means we can extend the message delivery guarantees and we have plans to do so e.g. at least once.
 
-For a further comparison with other products and technologies we invite you to review the [Bondy Compared](/about/bondy_compared) section and the [WAMP Compared article](https://wamp-proto.org/comparison.html) in the protocol specification website.
+For a further comparison with other products and technologies we invite you to review the [How is Bondy different](/concepts/how_is_bondy_different) section and the [WAMP Compared article](https://wamp-proto.org/comparison.html) in the protocol specification website.
 
 ### How is Bondy different than other WAMP routers?
 
