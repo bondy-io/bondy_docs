@@ -1,6 +1,6 @@
 ---
-outline: [2,3]
-draft: true
+outline: [2,4]
+draft: false
 related:
     - text: Marketplace
       type: Tutorial
@@ -116,9 +116,9 @@ As you can see in the lines highlighted below we added `oauth2` and `password` a
 
 ::::::
 
+## Steps
 
-## 1. Run the Marketplace Demo
-
+### Run the Marketplace Demo
 If you do not have a local copy of the [Marketplace Demo repository](https://github.com/bondy-io/bondy-demo-marketplace) follow the instructions in the [Marketplace tutorial](/tutorials/getting_started/marketplace#_2-build-and-run-the-demo) to download it.
 
 Otherwise (assuming the repo it is under your home directory) do:
@@ -136,10 +136,10 @@ make
 
 
 
-## 2. Defining an API Gateway Spec
+### Defining an API Gateway Spec
 In this part we try to show how we can define an API Gateway Specification to be able to expose some HTTP endpoints that will be mapped to registered WAMP procedures:
 
-### 2.1. Define an API Object
+#### Define an API Object
 
 As a first step we need to declare and [API Object](/reference/api_gateway/specification#api-object). In this case we are configuring it with the **id** `com.market.demo` on the **realm** `com.market.demo` and with **oauth2** as security enabled and also some other defaults and configuration.
 
@@ -174,7 +174,7 @@ This is key when you have more than one API on different subdomains.
 So far this API does nothing as yet we need to define a value for `versions`.
 
 
-### 2.2. Define the Versions Object
+#### Define the Versions Object
 
 An API Object has one or more versions of an API. Its `versions` property takes a mapping from _version names_ to [Version Object](/reference/api_gateway/specification#version-object) instances.
 
@@ -205,7 +205,7 @@ So what we want is for request `GET /path/to/resource` to be equivalent to `GET 
 Now lets add the actual HTTP/REST API content.
 
 
-### 2.3 Define a Path Object
+#### Define a Path Object
 We define the actual paths of our HTTP/API using the [Path Object](/reference/api_gateway/specification#path-object) with the proper HTTP method, action type, WAMP procedures, arguments and responses.
 
 The snippet below does implements the HTTP equivalent of the WAMP procedure `com.market.get` using the `/market`. This call doesn't require any args nor kwargs.
@@ -265,7 +265,7 @@ The snippet below does implements the HTTP equivalent of the WAMP procedure `com
 In line 8 you will notice the property `is_collection` is given the value `true`. This is required so that the API Gateway can return the correct HTTP codes for the operations. In this case, this is true, as `/market` invokes `com.market.get` which returns a list of items.
 :::
 
-## 3. Loading the API Gateway Spec
+### Loading the API Gateway Spec
 
 Load the defined api spec using the [Bondy Administrative API](/reference/http_api/index)
 
