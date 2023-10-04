@@ -888,7 +888,8 @@ export default {
             },
             { text: 'Ticket',
               link: '/reference/wamp_api/ticket',
-              isFeature: true
+              isFeature: true,
+              description: "Issuing and revoking tickets."
             },
             { text: 'OAuth2 Token',
               link: '/reference/wamp_api/oauth2_token',

@@ -27,7 +27,7 @@
 
     --vp-font-family-base: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans',Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji';
     --vp-font-family-mono: ui-monospace,system-ui,-apple-system,BlinkMacSystemFont,'SF Mono','Inconsolata','Menlo','Courier',monospace;
-    --vp-code-font-size: 16px;
+    --vp-code-font-size: 15px;
 
     --vp-c-text-code: rgb(30, 30, 30);
     --vp-c-mute: rgba(180, 212, 238, 0.2);
@@ -265,7 +265,7 @@ table.property-table > tbody > tr > td {
   display: inline-flex;
   justify-content: space-between;
   font-family: var(--vp-font-family-mono);
-  font-size:1.0rem !important;
+  font-size:0.95rem !important;
   font-weight:500!important;
   width:100%;
   margin-top:30px !important;
