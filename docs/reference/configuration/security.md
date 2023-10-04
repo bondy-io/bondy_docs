@@ -195,6 +195,14 @@ Bondy Security can be completely configured dynamically via API, read more about
 
 This options is for those cases when you want to ensure a given configuration is applied every time Bondy restarts.
 
+:::warning
+Notice that every node will apply the security configuration on startup persisting it to the embedded replica of the database. Eventually, when joins a cluster this will trigger an actiove-anti entropy exchange, synchronising the data with peer nodes.
+
+This is not a major problem when the configuration file has static data. However, the Realm object will generate signing keys if those are not provided in its definition, which means every new node will create new keys, effectively disabling the previous ones, this might trigger authentication tickets obtain in other nodes to be invalidated.
+
+At the moment the way to avoid this is by either not this option and using dynamic configuration via HTTP or WAMP Admin APIs instead, or by configuring the signing keys in the Realm object, so that Bondy always applies the same keys.
+:::
+
 
 
 
