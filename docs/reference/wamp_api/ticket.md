@@ -1,7 +1,7 @@
 # Ticket
 An authentication ticket is a signed (and possibly encrypted) assertion of a user's identity, that a client can use to authenticate the user without the need to ask it to re-enter its credentials.
 
-## Overview
+## Description
 Tickets MUST be issued by a session that was opened using an authentication
 method that is neither `ticket` nor `anonymous` authentication.
 
