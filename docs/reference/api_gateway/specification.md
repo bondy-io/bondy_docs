@@ -56,19 +56,18 @@ The [API Context](#api-context) is the state of the API Gateway FSM. It is is [i
 
 So an API Gateway Specification is the basis of an [API Context](#api-context) but also it is evaluated against it, primarily because the context will contain the [Request Object](#request-object) at runtime.
 
-You key to the definition of an API Gateway Specification is understanting the [API Context](#api-context), since defining a specification implies writing expressions that target (read and/or update) the context.
+The key to the definition of an API Gateway Specification is understanting the [API Context](#api-context), since defining a specification implies writing expressions that target (read and/or update) the context.
 
 ::: info On the Open API standard
 [Open API (formerly Swagger)](https://www.openapis.org) defines a standard on how HTTP APIs are described, not its implementation. An API Gateway Specification describes and API and the behaviour of the Gateway, that is, it also defines its implementation in terms of the actions that the Gateway need to perform.
 
-Having said that we see future version of the API Gateway aligning with Open APIs and the API Gateway implementation being able to produce and serve an Open API specification of your APIs defined in Bondy.
+A Future version of the API Gateway will aligning with Open API. In addition, the API Gateway implementation will be able to produce and serve an Open API specification of the APIs defined in Bondy.
 :::
 
 
 ## API Context
 
-The API context is map data structure, created by the API Gateway, that
-at runtime contains the HTTP Request data and the results of parsing and evaluating the definitions and expressions defined in an API Gateway Specification.
+The API context is a map data structure created by the API Gateway. At runtime, it contains the HTTP Request data as well as the results of parsing and evaluating the definitions and expressions defined in an API Gateway Specification.
 
 The context contains the following keys:
 
@@ -77,7 +76,7 @@ The context contains the following keys:
 
 ### Request Object
 
-The object represents the contents (data and metadata) of an HTTP request.  At runtime the API Gateway writes this object in the [API Context](#api-context) `request` property.
+The object represents the contents (data and metadata) of an HTTP request.  At runtime, the API Gateway writes this object in the [API Context](#api-context) `request` property.
 
 
 <DataTreeView :data="request" :maxDepth="10" />
@@ -169,7 +168,7 @@ Expressions also allow to set values in the context and use functions to manipul
 
 The API Specification evaluation performed incrementally in two stages:
 
-1. **_During loading, validation and parsing_**. All API Specification expressions will be evaluated to either a (final) value or a `promise`. Promises occur when an expression dependes directly or indirectly (transitive closure) on HTTP request data. This results in a context object.
+1. **_During loading, validation and parsing_**. All API Specification expressions will be evaluated to either a (final) value or a `promise`. Promises occur when an expression depends directly or indirectly (transitive closure) on HTTP request data. This results in a context object.
 1. **_During HTTP request handling at runtime_**. The context created in the first stage is updated with the HTTP request data and the API Specification is evaluated again using the updated context, yielding the actions to be performed with all promises evaluated to values (grounded).
 
 ### Recursive Evaluation

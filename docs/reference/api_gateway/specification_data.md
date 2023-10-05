@@ -150,7 +150,7 @@ const context = {
                 "description": "If the action failed the value will be the result of evaluating the [Response Object](#response-object) `on_error` property associated with the [Operation Object](#operation-object) executed for this HTTP Request."
             }
         },
-        "description": "At runtime it will contain the result or error of the action performed by the API Gateway during the handling of an HTTP request."
+        "description": "At runtime, it will contain the result or error of the action performed by the API Gateway during the handling of an HTTP request."
     },
     "variables": {
         "type": "map",

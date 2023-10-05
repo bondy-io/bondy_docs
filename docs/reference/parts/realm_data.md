@@ -6,9 +6,8 @@ The representation of the realm returned by the read or write operations e.g. `g
 <DataTreeView :data="realm" :maxDepth="10" />
 
 ### input_data{.datatype}
-The object used to create or update a realm. Notice this object contains more information than the actually create realm e.g. users, groups, etc.
+The object used to create or update a realm. Notice this object contains more information than the actually created realm e.g. users, groups, etc.
 
-The object represents as overview of the all realm properties but the available properties are detailed in each particular operation.
 
 <DataTreeView :data="inputCreateData" :maxDepth="10" />
 
@@ -81,7 +80,7 @@ const realmPublic = {
         "type": "boolean",
         "required": true,
         "mutable": true,
-        "description": "If true this realm is allowing connections from clients. It is normally set to false when the realm is an SSO Realm. Prototype realms never allow connections.",
+        "description": "If `true` this realm will allow connections from clients. It is normally set to `false` when the realm is an SSO Realm.  \n:::info\nPrototype realms never allow connections, so if you set `is_prototype` to `true` this property will be assumed to be `false`.\n:::",
         "default": "undefined"
     },
     "authmethods": {
