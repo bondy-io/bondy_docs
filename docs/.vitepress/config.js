@@ -1,7 +1,6 @@
 // Sitemap
 import { createWriteStream } from 'node:fs'
 import { resolve } from 'node:path'
-// import { SitemapStream } from 'sitemap'
 
 const links = []
 
