@@ -11,17 +11,17 @@ related:
       description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics.
 ---
 # Marketplace
-A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
+This tutorial demonstrates how to build a marketplace using Python microservices and a VueJS Web App. The goal is to showcase the ease of setting up an application network with Bondy, where components communicate using RPC and Publish/Subscribe.
 
 
-## Goal
+## Objective
 
-In this tutorial we are going to build a marketplace where people can buy and sell items.
+In this tutorial, we will build a marketplace where individuals can buy and sell items.
 
-The goal is to demonstrate how quick and easy it is to setup an application network with Bondy where all components communicate using RPC and Publish/Subscribe.
+The objective is to showcase how fast and simple it is to set up an application network with Bondy. In this network, all components communicate using RPC and Publish/Subscribe.
 
 
-## Demo Architecture
+## Marketplace Architecture
 
 ### Domain Model
 
@@ -48,7 +48,7 @@ Bid
 The architecture design of the example application is depicted in the following diagram.
 
 <ZoomImg src="/assets/tutorials/marketplace/marketplace.png"/>
-
+<br>
 The diagram shows the following components:
 
 Market
@@ -76,7 +76,7 @@ Interactive CLI
 
 All components open a single WAMP session to Bondy on the `com.market.demo` realm.
 
-## Running the Demo
+## Steps
 
 ::: warning Requirements
 
@@ -84,17 +84,17 @@ All components open a single WAMP session to Bondy on the `com.market.demo` real
 * `git`
 * `make`
 
-Make sure that Docker is running.
+Make sure that Docker is running before you start.
 
 :::
 
-### 1. Clone the Demo repository
+### Clone the Demo repository
 
 ``` bash
 $ git clone https://github.com/bondy-io/bondy-demo-marketplace.git
 ```
 
-### 2. Build and run the Demo
+### Build and run the Demo
 
 The following command uses Docker compose to download and/or build the images for the components [mentioned before](#technical-view).
 
@@ -104,15 +104,16 @@ $ make
 
 This will result in the following Docker containers:
 * 1 instance of Bondy
-* 1 instance of the Web App
+* 1 instance of the Marketplace Web App
 * 1 instance of the Market service
-* 4 instances of the Bot service, each one ready to bid (with names `alice`, `tom`, `victor`, `mary`)
+* 4 instances of the Bot service, each one ready to bid (with names `alice`, `tom`, `victor` and `mary`)
 
-<ZoomImg alt="Docker Dashboard showing " src="/assets/tutorials/marketplace/docker_dashboard.png"/>
+<ZoomImg alt="Docker Dashboard showing all containers" src="/assets/tutorials/marketplace/docker_dashboard.png"/>
 
 ::: info Note
-Bondy needs a few seconds to start and be ready to accept connections.
-From the Docker containers' logs you will notice the microservices are trying to reconnect with logs like the following, do not worry. The microservice will keep on retrying to connect to Bondy.
+Bondy needs a few seconds to start and be ready to accept connections, this is because Bondy is validating and indexing the internal database. This can actualle be controlled via [configuration](/reference/configuration/startup_shutdown).
+
+From the Docker containers' logs you might notice microservices are trying to reconnect with logs like the following, do not worry, they will keep on retrying to connect to Bondy.
 
 ```text
 2022-11-07T15:37:51 Connection failed with OS error:
@@ -124,7 +125,7 @@ From the Docker containers' logs you will notice the microservices are trying to
 :::
 
 
-### 3. Join the marketplace
+### Join the marketplace
 
 To sell an item and see the bots competing, just open the Web App from a browser pointing at `http://localhost:8080`.
 
@@ -140,7 +141,7 @@ You should see something similar to the following screen capture:
 
 The screen capture shows the market docker instance log window below the web app, you might want to do the same and open the logs to see what is going on, although the Web App will print all events as well.
 
-### 4. Sell one or more items
+### Sell one or more items
 
 Using the Web App again, click on the `SELL ITEM` button to sell an item.
 
@@ -156,7 +157,7 @@ In the following example we add an item called `apple`. You can repeat this oper
 
 Notice that once we enter the item the app receives a notification (Publish/Subscribe event) shown in the green banner below.
 
-### 5. See the bots bidding for your items
+### See the bots bidding for your items
 
 Once you click on `Save`, you'll see the bots starting to compete for the item, placing bids, unless your initial price is too high, i.e. more than $10,000.
 
@@ -172,13 +173,11 @@ Now let see how this was done and what is happening.
 
 #### Connection to Bondy
 
-The connection to bondy is performed through a component that requires a fairly light configuration.
-
-This component uses [AutobhanPython](https://github.com/crossbario/autobahn-python), the WAMP client.
+The connection to bondy is performed through a component that requires a fairly light configuration. This component uses [AutobhanPython](https://github.com/crossbario/autobahn-python), the WAMP client.
 
 The client will handle the WAMP protocol interactions and let us focus on the business logic.
 
-[See Demo Source Code](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/market.py#L25-L29)
+See the source code for the connection [here](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/market.py#L25-L29).
 ``` python
 class Market:
   def __init__(self):
@@ -234,7 +233,7 @@ A registration is performed by simply calling the `register` method on the sessi
 
 For example:
 
-[See Demo Source Code](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/market.py#L40-L51)
+See the source code for the registrations [here](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/market.py#L40-L51).
 
 ``` python
 def _on_join(self, session, details):
@@ -258,7 +257,7 @@ This is performed by calling the session's object `publish` method.
 
 In the following example no arguments are needed since the event has no payload, but some can be provided in a more general case.
 
-[See Demo Source Code](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/market.py#L40-L51)
+See the source code for the publications [here](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/market.py#L40-L51).
 
 ``` python
 def _on_join(self, session, details):
@@ -281,13 +280,14 @@ However, upon successful connections, the bots will only subscribe to the `com.m
 
 The subscription is simply done by calling `subscribe` on the session:
 
-[See Demo Source Code](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/bot.py#L48-L57)
+See the source code for the bots [here](https://github.com/bondy-io/bondy-demo-marketplace/blob/d7debe86c5f3b16c38de58704bef8811b28a8cc3/bot.py#L48-L57).
+
 ``` python
 def _on_join(self, session, details):
     session.subscribe(self._on_market_opening, "com.market.opened")
 ```
 
-Once the marketplace is open, the bots do many things, the most important ones being:
+Once the marketplace is open, the bots will perform several important tasks, including:
 * Join the marketplace by identifying themselves.
     * Making a call to `com.market.bidder.add`
 * Query the marketplace for all currently available items
