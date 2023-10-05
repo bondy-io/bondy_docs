@@ -73,6 +73,8 @@ import {
 import { then, when } from "switch-ts";
 import slugify from '@sindresorhus/slugify'
 import MarkdownIt from 'markdown-it'
+import Katex from 'markdown-it-katex'
+import Container from 'markdown-it-container'
 
 
 export interface SelectedData {
@@ -186,7 +188,24 @@ export default defineComponent({
         .default(then("var(--jtv-valueKey-color)"));
     }
 
-    const md = new MarkdownIt();
+    var md = new MarkdownIt();
+    md.use(Katex);
+    md.use(Container, 'info', {
+      validate: function(params) {
+        return params.trim().match(/^info(?:\s.+)?$/);
+      },
+      render: function(tokens, idx) {
+        var m = tokens[idx].info.trim().match(/^info(?:\s.+)?$/);
+        if (tokens[idx].nesting === 1) {
+          const title = md.renderInline(m[1] || 'INFO')
+          return `<div class="info custom-block"><p class="custom-block-title">${title}</p>\n`;
+        } else {
+          return `</div>\n`;
+        }
+      }
+    });
+
+
 
     const classes = computed((): unknown => {
       return {
