@@ -1,3 +1,6 @@
+---
+outline: [2,3]
+---
 # Source
 Source is an access control rule used to restrict access based for a user based on the combination of the incoming IP address (CIDR masks) and the authentication method being used.
 
@@ -19,6 +22,12 @@ Anonymous authentication allows establishing a session without prompting the use
 #### cryptosign
 WAMP-Cryptosign is a WAMP authentication method based on public-private key cryptography. Specifically, it is based on Ed25519 digital signatures as described in [RFC8032](https://www.rfc-editor.org/info/rfc8032).
 
+::: info Cryptosign vs. Passkey
+WAMP-Cryptosign is a passwordless authentication method which is very similar to the new [Passkey](https://en.wikipedia.org/wiki/Passkey_(credential)) standard. It uses the same underlying crypto algorithm and principles.
+
+WAMP-cryptosign was defined in the WAMP Protocol Specification way before Passkey was proposed and adopted by key industry players like Apple and Google.
+:::
+
 #### wampcra
 WAMP Challenge-Response ("WAMP-CRA") authentication is a simple, secure authentication mechanism using a shared secret i.e. a password. The client and the router share a secret. The secret never travels the wire, hence WAMP-CRA can be used via non-TLS connections.
 
@@ -29,14 +38,14 @@ The WAMP Salted Challenge Response Authentication Mechanism ("WAMP-SCRAM"), is a
 With Ticket-based authentication, the client needs to present the router an authentication "ticket". See the [Ticket](/reference/wamp_api/ticket) documentation page for more details.
 
 ::: warning Important
-Bondy's Ticket-based authentication does not work on its own it requires a base authentication method for the user to obtain the ticket. The base method can be either `wampcra` or `cryptosign`. So keep this in mind when defining sources for a user as you will need to add both rules one for `ticket` and another one for the base method.
+Bondy's Oauth2-based authentication does not work on its own, it requires a user to be authenticated using either `wampcra` or `cryptosign` (base method) before the user can obtain the token. So keep this in mind when defining sources for a user as you will need to add both rules: one for `ticket` and another one for the base method.
 :::
 
 #### oauth2
 With OAuth2-based authentication, the client needs to present the router an authentication "token". See the [OAuth2](/reference/wamp_api/oauth2_token) documentation page for more details.
 
 ::: warning Important
-Bondy's Oauth2-based authentication does not work on its own it requires a base authentication method for the user to obtain the token. The base method can be either `wampcra` or `cryptosign`. So keep this in mind when defining sources for a user as you will need to add both rules one for `ticket` and another one for the base method.
+Bondy's Oauth2-based authentication does not work on its own, it requires a user to be authenticated using either `wampcra` or `cryptosign` (base method) before the user can obtain the token. So keep this in mind when defining sources for a user as you will need to add both rules: one for `oauth2` and another one for the base method.
 
 Obtaining an OAuth2 token requires the use of HTTP (Bondy HTTP Gateway). If you are using WAMP mainly, just use [`ticket`](#ticket)
 :::
@@ -50,17 +59,17 @@ But what happens if one source is applied to `all` and a different source is app
 
 ```json
 {
-	usernames: "all",
-	cidr: "127.0.0.1/32",
-	authmethod:'cryptosign'
+	"usernames": "all",
+	"cidr": "127.0.0.1/32",
+	"authmethod": "cryptosign"
 }
 ```
 
 ```json
 {
-	usernames: ["alice"],
-	cidr: "127.0.0.1/32",
-	authmethod:'wampcra'
+	"usernames": ["alice"],
+	"cidr": "127.0.0.1/32",
+	"authmethod": "wampcra"
 }
 ```
 
@@ -90,7 +99,7 @@ The representation of the source returned by the read or write operations e.g. `
 |[Find sources from a realm](#find-sources-from-a-realm)|`bondy.source.match`|
 
 ### Add a source to a realm
-### bondy.source.add(realm_uri(), input_data()) -> source() {.wamp-procedure}
+#### bondy.source.add(realm_uri(), input_data()) -> source() {.wamp-procedure}
 Creates a new source and add it on the provided realm uri. This operation is **idempotent** and works also as update.
 
 Publishes an event under topic [bondy.source.added](#bondy-source-added){.uri} after the source has been created.
@@ -148,7 +157,7 @@ call bondy.source.add \
 :::
 
 ### Remove a source from a realm
-### bondy.source.delete(realm_uri(), [username()] | all | anonymous, cidr()) -> source() {.wamp-procedure}
+#### bondy.source.delete(realm_uri(), [username()] | all | anonymous, cidr()) -> source() {.wamp-procedure}
 Removes an existing source from the provided realm uri.
 
 Publishes an event under topic [bondy.source.deleted](#bondy-source-deleted){.uri} after the source has been removed.
@@ -216,7 +225,7 @@ Not implemented. At the moment `wamp.error.no_such_procedure` is returned.
 :::
 
 ### List all sources from a realm
-### bondy.source.list(realm_uri()) -> [source()] {.wamp-procedure}
+#### bondy.source.list(realm_uri()) -> [source()] {.wamp-procedure}
 Lists all sources of the provided realm uri.
 
 #### Call
@@ -276,7 +285,7 @@ call bondy.source.list \
 :::
 
 ### Find sources from a realm
-### bondy.source.match(realm_uri() | realm_uri(), username() | realm_uri(), username(), ip()) -> [source()] {.wamp-procedure}
+#### bondy.source.match(realm_uri() | realm_uri(), username() | realm_uri(), username(), ip()) -> [source()] {.wamp-procedure}
 Finds the requested sources on the provided realm uri according the search criteria.
 
 If the realm uri doesn't exist it returns the default sources on the master realm
@@ -399,8 +408,8 @@ call bondy.source.match "com.leapsight.test_creation_1" "user_1" | jq
 Not implemented.
 :::
 
-### bondy.source.added{.wamp-topic}
-### bondy.source.deleted{.wamp-topic}
+#### bondy.source.added{.wamp-topic}
+#### bondy.source.deleted{.wamp-topic}
 
 <script>
 const sourceData = {

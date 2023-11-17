@@ -1,4 +1,5 @@
 ---
+outline: [2,3]
 related:
     - type: concepts
       text: Realms
@@ -32,7 +33,7 @@ Creating, retrieving and managing realms and also enabling, disabling and checki
 
 ### Create a realm
 
-bondy.realm.create(input_data) -> result(realm){.wamp-procedure}
+#### bondy.realm.create(input_data) -> result(realm){.wamp-procedure}
 
 Creates a new realm based on the provided data. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
@@ -123,7 +124,7 @@ call bondy.realm.create \
 
 ### Retrieve a realm
 
-bondy.realm.get(uri) -> result(realm){.wamp-procedure}
+#### bondy.realm.get(uri) -> result(realm){.wamp-procedure}
 
 Retrieves the requested realm uri.
 
@@ -209,7 +210,7 @@ call bondy.realm.get "com.leapsight.test_creation_1" | jq
 
 ### Update a realm
 
-bondy.realm.update(uri, input_data) -> <br>result(realm) {.wamp-procedure}
+#### bondy.realm.update(uri, input_data) -> <br>result(realm) {.wamp-procedure}
 
 Updates the data of the provided realm uri. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
@@ -317,7 +318,7 @@ call bondy.realm.update \
 
 ### List all realms
 
-bondy.realm.list() -> result([realm]) {.wamp-procedure}
+#### bondy.realm.list() -> result([realm]) {.wamp-procedure}
 
 Lists all configured realms.
 
@@ -654,7 +655,7 @@ call bondy.realm.list | jq
 
 ### Delete a realm
 
-bondy.realm.delete(uri; force=boolean -> result() {.wamp-procedure}
+#### bondy.realm.delete(uri; force=boolean -> result() {.wamp-procedure}
 
 Deletes the realm and all its associated objects.
 
@@ -723,7 +724,7 @@ call bondy.realm.delete "com.leapsight.test_creation_1" --kwarg force=true
 
 ### Retrieve if a realm security is enabled
 
-bondy.realm.security.is_enabled(uri) -> results(boolean) {.wamp-procedure}
+#### bondy.realm.security.is_enabled(uri) -> results(boolean) {.wamp-procedure}
 
 Returns `true` if security is enabled for the realm identified with `uri`. Otherwise returns `false`.
 Realm security is `enabled` by default.
@@ -772,7 +773,7 @@ true
 
 ### Enable realm security
 
-bondy.realm.security.enable(uri) -> result() {.wamp-procedure}
+#### bondy.realm.security.enable(uri) -> result() {.wamp-procedure}
 
 Enables the security for the realm identified with `uri`.
 
@@ -816,7 +817,7 @@ call bondy.realm.security.enable "com.leapsight.test_creation_1"
 
 ### Disable realm security
 
-bondy.realm.security.disable(uri) -> result() {.wamp-procedure}
+#### bondy.realm.security.disable(uri) -> result() {.wamp-procedure}
 
 Disables security for the realm identified with `uri`.
 
@@ -869,7 +870,7 @@ call bondy.realm.security.disable "com.leapsight.test_creation_1"
 
 ### Retrieve a realm security status
 
-bondy.realm.security.status(uri) -> 'enabled' | 'disabled' {.wamp-procedure}
+#### bondy.realm.security.status(uri) -> 'enabled' | 'disabled' {.wamp-procedure}
 
 Returns the security status (`enabled` or `disabled`) for the realm identified by `uri`.
 Realm security is `enabled` by default.
@@ -918,7 +919,8 @@ call bondy.realm.security.status "com.leapsight.test_creation_1"
 
 ## Topics
 
-### bondy.realm.created{.wamp-topic}
+### Realm Created
+#### bondy.realm.created{.wamp-topic}
 ##### Positional Results
 <DataTreeView
 	:maxDepth="10"
@@ -933,7 +935,8 @@ call bondy.realm.security.status "com.leapsight.test_creation_1"
 ##### Keyword Results
 None.
 
-### bondy.realm.updated{.wamp-topic}
+### Realm Updated
+#### bondy.realm.updated{.wamp-topic}
 ##### Positional Results
 <DataTreeView
 	:maxDepth="10"
@@ -948,7 +951,8 @@ None.
 ##### Keyword Results
 None.
 
-### bondy.realm.deleted{.wamp-topic}
+### Realm Deleted
+#### bondy.realm.deleted{.wamp-topic}
 ##### Positional Results
 <DataTreeView
 	:maxDepth="10"

@@ -1,3 +1,6 @@
+---
+outline: [2,3]
+---
 # User
 A user is an identity that is able to authenticate into a Bondy Realm.
 
@@ -52,7 +55,7 @@ The representation of the user returned by the read or write operations e.g. `ge
 |[Update an user into a realm](#update-an-user-into-a-realm)|`bondy.user.update`|
 
 ### Add an user to a realm
-### bondy.user.add(realm_uri(), input_data()) -> user() {.wamp-procedure}
+#### bondy.user.add(realm_uri(), input_data()) -> user() {.wamp-procedure}
 Creates a new user and add it on the provided realm uri.
 
 Publishes an event under topic [bondy.user.added](#bondy-user-added){.uri} after the user has been created.
@@ -135,7 +138,7 @@ call bondy.user.add \
 :::
 
 ### Add an alias to an user
-### bondy.user.add_alias(realm_uri(), username(), alias()) {.wamp-procedure}
+#### bondy.user.add_alias(realm_uri(), username(), alias()) {.wamp-procedure}
 Adds an alias to an existing user.
 
 If the user is an SSO user, the alias is added on the SSO Realm only.
@@ -247,7 +250,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 :::
 
 ### Add a group to an user
-### bondy.user.add_group(realm_uri(), username(), group_name()) {.wamp-procedure}
+#### bondy.user.add_group(realm_uri(), username(), group_name()) {.wamp-procedure}
 Adds a group name to an existing user.
 
 #### Call
@@ -324,7 +327,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 :::
 
 ### Add groups to an user
-### bondy.user.add_groups(realm_uri(), username(), [group_name()]) {.wamp-procedure}
+#### bondy.user.add_groups(realm_uri(), username(), [group_name()]) {.wamp-procedure}
 Adds a list of group names to an existing user.
 
 #### Call
@@ -405,7 +408,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 :::
 
 ### Change the user password
-### bondy.user.change_password(realm_uri(), username(), new_password(), old_password()) {.wamp-procedure}
+#### bondy.user.change_password(realm_uri(), username(), new_password(), old_password()) {.wamp-procedure}
 It allows to change the password to an existing user.
 
 Publishes an event under topic [bondy.user.credentials_changed](#bondy-user-credentials-changed){.uri} after the user's password has been changed.
@@ -511,7 +514,7 @@ call bondy.user.change_password \
 :::
 
 ### Delete an user from a realm
-### bondy.user.delete(realm_uri(), username()) {.wamp-procedure}
+#### bondy.user.delete(realm_uri(), username()) {.wamp-procedure}
 Deletes the requested username from the provided realm uri.
 
 Publishes an event under topic [bondy.user.deleted](#bondy-user-deleted){.uri} after the user has been deleted.
@@ -560,7 +563,7 @@ call bondy.user.delete "com.leapsight.test_creation_1" "user_1"
 :::
 
 ### Disable an user in a realm
-### bondy.user.disable(realm_uri(), username()) {.wamp-procedure}
+#### bondy.user.disable(realm_uri(), username()) {.wamp-procedure}
 Disables the requested username on the provided realm uri.
 
 #### Call
@@ -605,7 +608,7 @@ call bondy.user.disable "com.leapsight.test_creation_1" "user_1"
 :::
 
 ### Enable an user in a realm
-### bondy.user.enable(realm_uri(), username()) {.wamp-procedure}
+#### bondy.user.enable(realm_uri(), username()) {.wamp-procedure}
 Enables the requested username on the provided realm uri.
 
 #### Call
@@ -650,7 +653,7 @@ call bondy.user.enable "com.leapsight.test_creation_1" "user_1"
 :::
 
 ### Retrieve an user from a realm
-### bondy.user.get(realm_uri(), username()) -> user() {.wamp-procedure}
+#### bondy.user.get(realm_uri(), username()) -> user() {.wamp-procedure}
 Retrieves the requested username on the provided realm uri.
 
 #### Call
@@ -714,7 +717,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_1" | jq
 :::
 
 ### Check if an user is enabled
-### bondy.user.is_enable(realm_uri(), username()) -> boolean() {.wamp-procedure}
+#### bondy.user.is_enable(realm_uri(), username()) -> boolean() {.wamp-procedure}
 Allows to check if the requested username on the provided realm uri is enabled.
 
 #### Call
@@ -766,7 +769,7 @@ true
 :::
 
 ### List all users from a realm
-### bondy.user.list(realm_uri()) -> [user()] {.wamp-procedure}
+#### bondy.user.list(realm_uri()) -> [user()] {.wamp-procedure}
 Lists all users of the provided realm uri.
 
 #### Call
@@ -856,7 +859,7 @@ call bondy.user.list \
 :::
 
 ### Remove an alias from an user
-### bondy.user.remove_alias(realm_uri(), username(), alias()) {.wamp-procedure}
+#### bondy.user.remove_alias(realm_uri(), username(), alias()) {.wamp-procedure}
 Removes an existing alias from an existing user.
 
 If the user is an SSO user, the alias is removed from the SSO Realm only.
@@ -944,7 +947,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 :::
 
 ### Remove a group from an user
-### bondy.user.remove_group(realm_uri(), username(), group_name()) {.wamp-procedure}
+#### bondy.user.remove_group(realm_uri(), username(), group_name()) {.wamp-procedure}
 Removes an existing group name from an existing user.
 
 #### Call
@@ -1027,7 +1030,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 :::
 
 ### Remove groups from an user
-### bondy.user.remove_groups(realm_uri(), username(), [group_name()]) {.wamp-procedure}
+#### bondy.user.remove_groups(realm_uri(), username(), [group_name()]) {.wamp-procedure}
 Removes a list of group names from an existing user.
 
 #### Call
@@ -1112,7 +1115,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 :::
 
 ### Update an user into a realm
-### bondy.user.update(realm_uri(), username(), input_data()) -> user() {.wamp-procedure}
+#### bondy.user.update(realm_uri(), username(), input_data()) -> user() {.wamp-procedure}
 Updates an existing user.
 
 Publishes an event under topic [bondy.user.updated](#bondy-user-updated){.uri} after the user has been updated.
@@ -1224,7 +1227,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 
 ## Topics
 
-### bondy.user.added{.wamp-topic}
+#### bondy.user.added{.wamp-topic}
 ##### Positional Results
 <DataTreeView
 	:maxDepth="10"
@@ -1239,7 +1242,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ##### Keyword Results
 None.
 
-### bondy.user.updated{.wamp-topic}
+#### bondy.user.updated{.wamp-topic}
 ##### Positional Results
 <DataTreeView
 	:maxDepth="10"
@@ -1258,7 +1261,7 @@ None.
 ##### Keyword Results
 None.
 
-### bondy.user.credentials_changed{.wamp-topic}
+#### bondy.user.credentials_changed{.wamp-topic}
 ##### Positional Results
 <DataTreeView
 	:maxDepth="10"
@@ -1277,7 +1280,7 @@ None.
 ##### Keyword Results
 None.
 
-### bondy.user.deleted{.wamp-topic}
+#### bondy.user.deleted{.wamp-topic}
 ##### Positional Results
 <DataTreeView
 	:maxDepth="10"

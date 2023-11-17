@@ -1,3 +1,6 @@
+---
+outline: [2,3]
+---
 # Ticket
 An authentication ticket is a signed (and possibly encrypted) assertion of a user's identity, that a client can use to authenticate the user without the need to ask it to re-enter its credentials.
 
@@ -96,7 +99,7 @@ the WAMP permission required to call the procedures.
 ## Procedures
 
 
-### bondy.ticket.issue(realm_uri;expiry_time_secs=,...) -> [] {.wamp-procedure}
+#### bondy.ticket.issue(realm_uri;expiry_time_secs=,...) -> [] {.wamp-procedure}
 #### Call
 
 ##### Positional Args
@@ -125,7 +128,7 @@ The call result is a single positional argument containing the encoded and signe
 ##### Keyword Args
 None.
 
-### bondy.ticket.revoke_all(realm_uri, authid) -> [] {.wamp-procedure}
+#### bondy.ticket.revoke_all(realm_uri, authid) -> [] {.wamp-procedure}
 #### Call
 ##### Positional Args
 <DataTreeView

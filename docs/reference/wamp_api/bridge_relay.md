@@ -1,3 +1,6 @@
+---
+outline: [2,3]
+---
 # Bridge Relay (Edge)
 A Bridge Relay are connections between one or more realms across two Bondy clusters.
 
@@ -48,7 +51,7 @@ The following wamp api is used to configure and manage the proper Edge:
 |[Check spec of a bridge](#check-spec-of-a-bridge)|`bondy.router.bridge.check_spec`|
 
 ### Add a bridge
-### bondy.router.bridge.add(input_data()) -> bridge() {.wamp-procedure}
+##### bondy.router.bridge.add(input_data()) -> bridge() {.wamp-procedure}
 Adds a Bridge Relay specification and optionally starts the bridge.
 
 #### Call
@@ -80,11 +83,11 @@ None.
 
 * [bondy.error.already_exists](/reference/wamp_api/errors/already_exists): when the provided bridge name already exists.
 
-#### Examples
+#### Example
 
-::: details Success Call
-- Request
-```bash
+::: code-group
+
+```bash [Call]
 ./wick --url ws://localhost:19080/ws \
 --realm com.leapsight.bondy \
 call bondy.router.bridge.add \
@@ -106,8 +109,7 @@ call bondy.router.bridge.add \
     "ping": {"enabled":true}
 }' --kwarg autostart=true | jq
 ```
-- Response:
-```json
+```json [Result]
 {
   "connect_timeout": 5000,
   "enabled": false,
@@ -156,8 +158,10 @@ call bondy.router.bridge.add \
 ```
 :::
 
+
+
 ### Remove a bridge
-### bondy.router.bridge.remove() {.wamp-procedure}
+##### bondy.router.bridge.remove() {.wamp-procedure}
 Removes the definition of a bridge from the bridge manager.
 
 Returns an error if undefined or if the bridge is running, but no errors if the bridge doesn't exist or it is removed successfully.
@@ -191,19 +195,22 @@ None.
 
 * [bondy.error.running](): when the bridge is running.
 
-#### Examples
+#### Example
 
-::: details Success Call
-- Request
-```bash
+::: code-group
+
+```bash [Call]
 ./wick --url ws://localhost:19080/ws \
 --realm com.leapsight.bondy \
 call bondy.router.bridge.remove "edge_test"
 ```
+
+```json [Response]
+```
 :::
 
 ### Start a bridge
-### bondy.router.bridge.start(name()) {.wamp-procedure}
+##### bondy.router.bridge.start(name()) {.wamp-procedure}
 Starts a bridge which has already been defined using `bondy.router.bridge.add`.
 
 #### Call
@@ -249,7 +256,7 @@ call bondy.router.bridge.start "edge_test"
 :::
 
 ### Stop a bridge
-### bondy.router.bridge.stop(name()) {.wamp-procedure}
+##### bondy.router.bridge.stop(name()) {.wamp-procedure}
 Stops an existing running bridge.
 
 Returns an error if the bridge is not running or undefined.
@@ -296,7 +303,7 @@ call bondy.router.bridge.stop "edge_test"
 :::
 
 ### Retrieve a bridge
-### bondy.router.bridge.get(name()) -> bridge() {.wamp-procedure}
+##### bondy.router.bridge.get(name()) -> bridge() {.wamp-procedure}
 Retrieves a Bridge Object specification by name
 
 #### Call
@@ -391,7 +398,7 @@ call bondy.router.bridge.get "edge_test" | jq
 :::
 
 ### List all bridges
-### bondy.router.bridge.list() -> [bridge()] {.wamp-procedure}
+##### bondy.router.bridge.list() -> [bridge()] {.wamp-procedure}
 Returns a list of all installed bridges in the system.
 
 #### Call
@@ -476,7 +483,7 @@ call bondy.router.bridge.list | jq
 :::
 
 ### Check status of a bridge
-### bondy.router.bridge.status() -> bridgeStatus() {.wamp-procedure}
+##### bondy.router.bridge.status() -> bridgeStatus() {.wamp-procedure}
 Returns an object where the key is an installed bridge name and the value is the bridge status object.
 
 The status object has the following properties:
@@ -525,7 +532,7 @@ call bondy.router.bridge.status | jq
 :::
 
 ### Check spec of a bridge
-### bondy.router.bridge.check_spec(input()) -> bridge() {.wamp-procedure}
+##### bondy.router.bridge.check_spec(input()) -> bridge() {.wamp-procedure}
 Checks the validity of a Bridge Relay Object.
 
 #### Call
@@ -670,13 +677,13 @@ const bridgeData = {
         "type": "required",
         "required": true,
 		"mutable": true,
-		"description": "The IP Address or Hostname and port e.g myhost:9075"
+		"description": "The IP Address or Hostname and port e.g `myhost:9075`"
     },
     "transport": {
         "type": "string",
         "required": true,
 		"mutable": false,
-		"description": "The connection transport. The allowed values are: tls and tcp.",
+		"description": "The connection transport. The allowed values are: `tls` and `tcp`.",
         "default": '"tcp"'
     },
     "tls_opts": {
@@ -767,15 +774,15 @@ const bridgeData = {
         "type": "string",
         "required": true,
 		"mutable": false,
-		"description": "Defines when a terminated bridge must be restarted. The allowed values are: permanent and transient. A permanent bridge is always restarted, even after recovering from a Bondy node crash or when the node is manually stopped and re-started. Bondy persists the configuration of permanent bridges in the database and reads them during startup. A transient bridge is restarted only if it terminated abnormally. In case of a node crash or manually stopped and re-started they will not be restarted.",
+		"description": "Defines when a terminated bridge must be restarted. The allowed values are: `permanent` and `transient`. \n* A `permanent` bridge is always restarted, even after recovering from a Bondy node crash or when the node is manually stopped and re-started. Bondy persists the configuration of permanent bridges in the database and reads them during startup.\n* A `transient` bridge is restarted only if it terminated abnormally. In case of a node crash or manually stopped and re-started they will not be restarted.",
         "default": "transient"
     },
     "idle_timeout": {
         "type": "integer | infinity",
         "required": true,
 		"mutable": false,
-		"description": "Time in milliseconds that Bondy will allow for a connection with no activity to be kept alive. Bondy will close the connection after this time. Default is 24 hours.",
-        "default": "86400000"
+		"description": "Time in milliseconds that Bondy will allow for a connection with no activity to be kept alive. Bondy will close the connection after this time.",
+        "default": "86400000 (24 hs)"
     },
     "hibernate": {
         "type": "string",
@@ -795,7 +802,7 @@ const bridgeData = {
         "type": "integer | infinity",
         "required": true,
 		"mutable": false,
-		"description": "Network connection timeout in milliseconds, waiing for network connected event.",
+		"description": "Time in milliseconds that Bondy will wait for a network connected event. When a connection is dropped, Bondy Bridge Relay connection will wait for the host to have at least one non-loopback network interface address to be available before starting a connection retry. \n\nThis is mainly to avoid logging failed connection attempts when Bondy knows there is no network interface address available.",
         "default": "30000"
     },
     "max_frame_size": {
@@ -809,13 +816,13 @@ const bridgeData = {
         "type": "object",
         "required": true,
 		"mutable": false,
-		"description": "Enables or disables the reconnect feature. Once a connection is established but fails due to an unknown error or by the connecting being aborted by the remote with an error that is recoverable, we might want to ask Bondy to retry the connection e.g. when connecting with realm A the remote aborts the connection with reason `no_such_realm', in this case maybe the realm has not yet been provisioned, so we want the connection to retry indefinitely.",
+		"description": "Enables or disables the reconnect feature. Once a connection is established but fails due to an unknown error or by the connecting being aborted by the remote with an error that is recoverable, we might want to ask Bondy to retry the connection e.g. when connecting with realm A the remote aborts the connection with reason `no_such_realm`, in this case maybe the realm has not yet been provisioned, so we want the connection to retry indefinitely.",
         "properties": {
             "enabled": {
                 "type": "boolean",
                 "required": true,
                 "mutable": false,
-                "description": "If the reconnection is enabled.",
+                "description": "Set to the `true` to enable the reconnect feature, `false` to disabled it.",
                 "default": "`true`"
             },
             "backoff_max": {
@@ -836,7 +843,7 @@ const bridgeData = {
                 "type": "string",
                 "required": true,
                 "mutable": false,
-                "description": "Allowed values: normal and jitter. The backoff strategy to be used, ‘jitter’ implements an exponential backoff and is the recommended option.",
+                "description": "Allowed values: `normal` and `jitter`. The backoff strategy to be used, `jitter` implements an exponential backoff and is the recommended option.",
                 "default": "jitter"
             },
             "max_retries": {
@@ -858,7 +865,7 @@ const bridgeData = {
                 "type": "boolean",
                 "required": true,
                 "mutable": false,
-                "description": "If the ping is enabled.",
+                "description": "Set to the `true` to enable the ping feature, `false` to disabled it.",
                 "default": "`true`"
             },
             "idle_timeout": {
@@ -938,7 +945,7 @@ const bridgeData = {
                             "type": "string",
                             "required": false,
                             "mutable": false,
-                            "description": "The name of the shell executable that will ask the Secure Element to compute the signature. The executables should accept at least two arguments (pubkey and challenge both as byte array of hexstrings)."
+                            "description": "The name of the shell executable that will compute the signature e.g. to interact with a Secure Element. The executable should accept at least two arguments (`pubkey` and `challenge` both as byte array of hexstrings)."
                         }
                     }
                 },

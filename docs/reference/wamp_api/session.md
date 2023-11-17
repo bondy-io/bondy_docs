@@ -1,4 +1,5 @@
 ---
+outline: [2,3]
 draft: true
 ---
 # Session
@@ -26,7 +27,7 @@ Key characteristics:
 
 
 ### Retrieve a session
-### wamp.session.get(id) -> session() {.wamp-procedure}
+##### bondy.session.get(id) -> session() {.wamp-procedure}
 Retrieves information on a specific session
 
 #### Call
@@ -55,7 +56,7 @@ None.
 
 ## Topics
 
-### wamp.session.on_join{.wamp-topic}
+##### bondy.session.on_join{.wamp-topic}
 ##### Positional Results
 <DataTreeView
     :maxDepth="10"
@@ -70,7 +71,7 @@ None.
 ##### Keyword Results
 None.
 
-### wamp.session.on_leave{.wamp-topic}
+### bondy.session.on_leave{.wamp-topic}
 ##### Positional Results
 <DataTreeView
     :maxDepth="10"

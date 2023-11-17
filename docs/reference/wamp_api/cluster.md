@@ -1,4 +1,5 @@
 ---
+outline: [2,3]
 draft: true
 ---
 # Cluster API Reference
@@ -34,16 +35,16 @@ None.
 
 #### Errors
 
-### bondy.cluster.leave/1
+#### bondy.cluster.leave/1
 
-### bondy.cluster.leave/2
+#### bondy.cluster.leave/2
 
-### bondy.cluster.members
+#### bondy.cluster.members
 
-### bondy.cluster.connections
+#### bondy.cluster.connections
 
-### bondy.cluster.status
+#### bondy.cluster.status
 
-### bondy.cluster.member
+#### bondy.cluster.member
 
 ## Topics

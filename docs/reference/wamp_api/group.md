@@ -1,3 +1,6 @@
+---
+outline: [2,3]
+---
 # Group
 Group is a named collection of user or group identifiers. It can have permissions assigned to them directly or via the group membership, but cannot be authenticated.
 
@@ -39,7 +42,7 @@ The representation of the group returned by the read or write operations e.g. `g
 |[Update a group into a realm](#update-a-group-into-a-realm)|`bondy.group.update`|
 
 ### Add a group to a realm
-### bondy.group.add(realm_uri(), input_data()) -> group() {.wamp-procedure}
+#### bondy.group.add(realm_uri(), input_data()) -> group() {.wamp-procedure}
 Creates a new group and add it on the provided realm uri.
 
 Publishes an event under topic [bondy.group.added](#bondy-group-added){.uri} after the group has been created.
@@ -114,7 +117,7 @@ call bondy.group.add \
 :::
 
 ### Add a group to a group
-### bondy.group.add_group(realm_uri(), name(), name()) {.wamp-procedure}
+#### bondy.group.add_group(realm_uri(), name(), name()) {.wamp-procedure}
 Adds an existing group name to another existing group name.
 
 #### Call
@@ -180,7 +183,7 @@ call bondy.group.get "com.leapsight.test_creation_1" "group_1" | jq
 :::
 
 ### Add groups to a group
-### bondy.group.add_groups(realm_uri(), name(), [name()]) {.wamp-procedure}
+#### bondy.group.add_groups(realm_uri(), name(), [name()]) {.wamp-procedure}
 Adds a list of existing group names to another existing group name.
 
 #### Call
@@ -249,7 +252,7 @@ call bondy.group.get "com.leapsight.test_creation_1" "group_1" | jq
 :::
 
 ### Delete a group from a realm
-### bondy.group.delete(realm_uri(), name()) {.wamp-procedure}
+#### bondy.group.delete(realm_uri(), name()) {.wamp-procedure}
 Deletes an existing group from the provided realm uri.
 
 Publishes an event under topic [bondy.group.deleted](#bondy-group-deleted){.uri} after the group has been deleted.
@@ -301,7 +304,7 @@ call bondy.group.delete \
 :::
 
 ### Retrieve a group from a realm
-### bondy.group.get(realm_uri(), name()) -> group() {.wamp-procedure}
+#### bondy.group.get(realm_uri(), name()) -> group() {.wamp-procedure}
 Retrieves the requested group name on the provided realm uri.
 
 #### Call
@@ -364,7 +367,7 @@ call bondy.group.get "com.leapsight.test_creation_1" "group_2" | jq
 :::
 
 ### List all groups from a realm
-### bondy.group.list(realm_uri()) -> [group()] {.wamp-procedure}
+#### bondy.group.list(realm_uri()) -> [group()] {.wamp-procedure}
 Lists all groups of the provided realm uri.
 
 :::warning TO_CHECK
@@ -433,7 +436,7 @@ call bondy.group.list \
 :::
 
 ### Remove a group from a group
-### bondy.group.remove_group(realm_uri(), name(), name()) {.wamp-procedure}
+#### bondy.group.remove_group(realm_uri(), name(), name()) {.wamp-procedure}
 Removes an existing group name from another existing group name.
 
 #### Call
@@ -500,7 +503,7 @@ call bondy.group.get "com.leapsight.test_creation_1" "group_1" | jq
 :::
 
 ### Remove groups from a group
-### bondy.group.remove_groups(realm_uri(), name(), [name()]) {.wamp-procedure}
+#### bondy.group.remove_groups(realm_uri(), name(), [name()]) {.wamp-procedure}
 Removes a list of existing group names from another existing group name.
 
 #### Call
@@ -569,7 +572,7 @@ call bondy.group.get "com.leapsight.test_creation_1" "group_1" | jq
 :::
 
 ### Update a group into a realm
-### bondy.group.update(realm_uri(), name(), input_data()) -> group() {.wamp-procedure}
+#### bondy.group.update(realm_uri(), name(), input_data()) -> group() {.wamp-procedure}
 Updates an existing group.
 
 Publishes an event under topic [bondy.group.updated](#bondy-group-updated){.uri} after the group has been updated.
@@ -625,7 +628,7 @@ call bondy.group.update \
 
 ## Topics
 
-### bondy.group.added{.wamp-topic}
+#### bondy.group.added{.wamp-topic}
 ##### Positional Results
 <DataTreeView
 	:maxDepth="10"
@@ -644,7 +647,7 @@ call bondy.group.update \
 ##### Keyword Results
 None.
 
-### bondy.group.updated{.wamp-topic}
+#### bondy.group.updated{.wamp-topic}
 ##### Positional Results
 <DataTreeView
 	:maxDepth="10"
@@ -663,7 +666,7 @@ None.
 ##### Keyword Results
 None.
 
-### bondy.group.deleted{.wamp-topic}
+#### bondy.group.deleted{.wamp-topic}
 ##### Positional Results
 <DataTreeView
 	:maxDepth="10"
