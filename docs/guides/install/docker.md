@@ -1,6 +1,12 @@
+<script setup>
+import { inject } from 'vue';
+
+const globalMetadata = inject('globalMetadata');
+const bondyVersion = globalMetadata.bondyVersion;
+</script>
+
 # Install using Docker
 This guide provides steps to install and configure Bondy on Docker using the official Docker images.
-
 
 ::: tip Using your own image instead
 
@@ -145,13 +151,13 @@ You should get the following output:
 
 We will run an official Bondy Docker image using the `docker run` command with an image name using the following syntax: `leapsight/bondy:{VERSION}[-{VARIANT}]` where:
 
-- `{VERSION}` can be `master`, `develop` or a tag like {{latestBondyVersion}}
+- `{VERSION}` can be `master`, `develop` or a tag like <BondyVersion/>
 - `{VARIANT}` can be null or `slim` (we will provide the `alpine` variant in the future).
 
-For example to run the `1.0.0-rc.4` release you would use:
+For example to run the <BondyVersion/> release you would use:
 
 ::: code-group
-```bash [Debian]
+```bash-vue [Debian]
 docker run \
     -e BONDY_ERL_NODENAME=bondy1@127.0.0.1 \
     -e BONDY_ERL_DISTRIBUTED_COOKIE=bondy \
@@ -163,10 +169,10 @@ docker run \
     --name bondy \
     -v "${BONDY_HOME}/etc:/bondy/etc" \
     -v "${BONDY_HOME}/data:/bondy/data" \
-    -d leapsight/bondy:1.0.0-rc.4
+    -d leapsight/bondy:{{bondyVersion}}
 ```
 
-```bash [Alpine]
+```bash-vue [Alpine]
 docker run \
     -e BONDY_ERL_NODENAME=bondy1@127.0.0.1 \
     -e BONDY_ERL_DISTRIBUTED_COOKIE=bondy \
@@ -178,7 +184,7 @@ docker run \
     --name bondy \
     -v "${BONDY_HOME}/etc:/bondy/etc" \
     -v "${BONDY_HOME}/data:/bondy/data" \
-    -d leapsight/bondy:1.0.0-rc.4-alpine
+    -d leapsight/bondy:{{bondyVersion}}-alpine
 ```
 :::
 

@@ -12,6 +12,7 @@ import Features from './Features.vue'
 import Badge from './Badge.vue'
 import Tabs from './Tabs.vue'
 import Tab from './Tab.vue'
+import BondyVersion from './BondyVersion.vue'
 
 import './custom.css'
 
@@ -29,5 +30,9 @@ export default {
         app.component('DataTreeView', DataTreeView)
         app.component('ZoomImg', ZoomImg)
         app.component('Features', Features)
+        app.component('BondyVersion', BondyVersion)
+        app.provide('globalMetadata', {
+            bondyVersion: '1.0.0-rc.4'
+        })
     }
 }
