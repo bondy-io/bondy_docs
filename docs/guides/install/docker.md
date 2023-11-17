@@ -1,6 +1,7 @@
 # Install using Docker
 This guide provides steps to install and configure Bondy on Docker using the official Docker images.
 
+
 ::: tip Using your own image instead
 
 If you want to build and use your own Docker image, make sure you check the official images sources first as you might want to use them as your template.
@@ -21,18 +22,21 @@ Bondy needs access to a configuration file and the ability to store its embedded
 BONDY_HOME=~/bondy-docker
 ```
 
-Create an `etc` directory within your chosen directory.
+Create the `etc` and `data` directories within your chosen directory.
 
 ```bash
 mkdir -p ${BONDY_HOME}/etc
+mkdir -p ${BONDY_HOME}/data
 ```
+
+Thew `etc` directory will be used by you to store Bondy's configuration, while the `data` directory will be used by Bondy to store its embedded database files.
 
 ### 2. Prepare a `security.config.json` file
 
 Using your preferred text editor, create a file named `security.config.json` (
 This file can have any other name you like but make sure to use the same name in the following step.).
 
-The copy the following content and save the file in the `${BONDY_HOME}/etc` directory we created in the previous step.
+Then copy the following content and save the file in the `${BONDY_HOME}/etc` directory we created in the previous step.
 
 ```json
 [
@@ -141,10 +145,10 @@ You should get the following output:
 
 We will run an official Bondy Docker image using the `docker run` command with an image name using the following syntax: `leapsight/bondy:{VERSION}[-{VARIANT}]` where:
 
-- `{VERSION}` can be `master`, `develop` or a tag like `1.0.0-beta.68`
+- `{VERSION}` can be `master`, `develop` or a tag like {{latestBondyVersion}}
 - `{VARIANT}` can be null or `slim` (we will provide the `alpine` variant in the future).
 
-For example to run the `1.0.0-beta.68` release you would use:
+For example to run the `1.0.0-rc.4` release you would use:
 
 ::: code-group
 ```bash [Debian]
@@ -158,7 +162,8 @@ docker run \
     -u 0:1000 \
     --name bondy \
     -v "${BONDY_HOME}/etc:/bondy/etc" \
-    -d leapsight/bondy:1.0.0-beta.68
+    -v "${BONDY_HOME}/data:/bondy/data" \
+    -d leapsight/bondy:1.0.0-rc.4
 ```
 
 ```bash [Alpine]
@@ -172,7 +177,8 @@ docker run \
     -u 0:1000 \
     --name bondy \
     -v "${BONDY_HOME}/etc:/bondy/etc" \
-    -d leapsight/bondy:1.0.0-beta.68-alpine
+    -v "${BONDY_HOME}/data:/bondy/data" \
+    -d leapsight/bondy:1.0.0-rc.4-alpine
 ```
 :::
 

@@ -281,8 +281,8 @@ If the loading and applying was OK, th curl hasn’t result; detailed response w
 From the Bondy side, you can see in the logs the following lines:
 
 ```erlang
-2022-12-06 10:48:11 bondy | when=2022-12-06T13:48:11.600576+00:00 level=notice pid=<0.1855.0> at=bondy_http_gateway:rebuild_dispatch_tables/0:223 description="Rebuilding HTTP Gateway dispatch tables" node=bondy@127.0.0.1 router_vsn=1.0.0-beta.68
-2022-12-06 10:48:11 bondy | when=2022-12-06T13:48:11.604499+00:00 level=info pid=<0.1855.0> at=bondy_http_gateway:load_dispatch_tables/0:830 description="Loading and parsing API Gateway specification from store" node=bondy@127.0.0.1 router_vsn=1.0.0-beta.68 timestamp=-576460723125 name="Marketplace Demo API" id=com.market.demo
+2022-12-06 10:48:11 bondy | when=2022-12-06T13:48:11.600576+00:00 level=notice pid=<0.1855.0> at=bondy_http_gateway:rebuild_dispatch_tables/0:223 description="Rebuilding HTTP Gateway dispatch tables" node=bondy@127.0.0.1 router_vsn=1.0.0-rc.4
+2022-12-06 10:48:11 bondy | when=2022-12-06T13:48:11.604499+00:00 level=info pid=<0.1855.0> at=bondy_http_gateway:load_dispatch_tables/0:830 description="Loading and parsing API Gateway specification from store" node=bondy@127.0.0.1 router_vsn=1.0.0-rc.4 timestamp=-576460723125 name="Marketplace Demo API" id=com.market.demo
 ```
 
 
