@@ -201,6 +201,7 @@ table.property-table > tbody > tr > td {
   border:1px solid rgba(147, 147, 147, 0.3);
   display:inline-block;
   font-family: var(--vp-font-family-mono);
+  text-transform: lowercase;
   font-size:1.0rem !important;
   font-weight:500!important;
   margin-top:10px !important;
@@ -222,6 +223,7 @@ table.property-table > tbody > tr > td {
   border:1px solid hsla(0,0%,46.3%,.3);
   display:inline-block;
   font-family: var(--vp-font-family-mono);
+  text-transform: lowercase;
   font-size:1.0rem !important;
   font-weight:500!important;
   margin-top:20px;
