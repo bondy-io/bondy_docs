@@ -38,7 +38,7 @@ The decomposition of the monolithic applications allowed us to scale the social 
 
 The result in a complex technology solution prone to inefficiencies, delays and fatigue hindering the success of business initiatives as developers have to cope with too many protocols, client libraries, cloud services and infrastructure components.
 
-But, why are we doing this? Because most protocols where designed as silos, covering a very specific application use case or requirement.
+But, why are we doing this? Because most protocols were designed as silos, covering a very specific application use case or requirement.
 
 <ZoomImg src="/assets/without_with.png"/>
 
