@@ -27,7 +27,7 @@ WAMP is a community effort and the [protocol specification](https://wamp-proto.o
 <ZoomImg src="/assets/wamp_flows.png" width="600"/>
 
 ## Peer-to-peer programming model
-In WAMP all clients are peers — i.e., they can play all and the same roles.
+In WAMP, all clients are peers — i.e., they can play all and the same roles.
 
 ### Multi-tenancy
 
