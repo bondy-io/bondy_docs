@@ -32,13 +32,13 @@ Distributed applications are very hard to design, develop and maintain. They req
 
 > The fragmentation means that the fundamental activity in building a distributed application has now become **integration**. -->
 
-Moreover, most of these frameworks and infrastructre components were designed for the 3-tier application monoliths of a not so distant past but not really for the integration of 100s and in some cases even 1000s of microservices deployed on a cloud-native infrastructure.
+Moreover, most of these frameworks and infrastructure components were designed for the 3-tier application monoliths of a not so distant past but not really for the integration of 100s and in some cases even 1000s of microservices deployed on a cloud-native infrastructure.
 
 The decomposition of the monolithic applications allowed us to scale the social aspects of development, enabling us to tackle the increasing number of requirements―_essential complexity_―but due to the tools we are using we have now created a massive wave of _accidental complexity_[^fbrooks].
 
 The result in a complex technology solution prone to inefficiencies, delays and fatigue hindering the success of business initiatives as developers have to cope with too many protocols, client libraries, cloud services and infrastructure components.
 
-But, why are we doing this? Because most protocols where designed as silos, covering a very specific application use case or requirement.
+But, why are we doing this? Because most protocols were designed as silos, covering a very specific application use case or requirement.
 
 <ZoomImg src="/assets/without_with.png"/>
 
