@@ -1,4 +1,4 @@
-/---
+---
 outline: [2,3]
 related:
     - text: Marketplace HTTP API Gateway
