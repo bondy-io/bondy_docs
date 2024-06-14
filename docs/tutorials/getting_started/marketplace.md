@@ -54,12 +54,12 @@ The diagram shows the following components:
 Market
 : A Python microservice implementing a simple marketplace.
 
-    Uses [AutobhanPython](https://github.com/crossbario/autobahn-python), WAMP client to open a session  on `com.example.demo` realm in Bondy and registers the WAMP procedures URIs (RPCs) the Web App and Bot instances will use to sell and buy goods.
+    Uses [AutobahnPython](https://github.com/crossbario/autobahn-python), WAMP client to open a session  on `com.example.demo` realm in Bondy and registers the WAMP procedures URIs (RPCs) the Web App and Bot instances will use to sell and buy goods.
 
 Bot
 : A Python microservice that creates named bots (via its CLI). Once a bot is created it will automatically bid for items.
 
-    Uses [AutobhanPython](https://github.com/crossbario/autobahn-python)
+    Uses [AutobahnPython](https://github.com/crossbario/autobahn-python)
 
     ::: info Configuration
     The demo spawns 5 bots that are configured to:
@@ -173,7 +173,7 @@ Now let see how this was done and what is happening.
 
 #### Connection to Bondy
 
-The connection to bondy is performed through a component that requires a fairly light configuration. This component uses [AutobhanPython](https://github.com/crossbario/autobahn-python), the WAMP client.
+The connection to bondy is performed through a component that requires a fairly light configuration. This component uses [AutobahnPython](https://github.com/crossbario/autobahn-python), the WAMP client.
 
 The client will handle the WAMP protocol interactions and let us focus on the business logic.
 
@@ -207,7 +207,7 @@ In line 3 we call a util function that returns the following dictionary:
 }
 ```
 
-This tells Autobhan to open a websocket session with Bondy attached to the `com.market.demo` realm and using WAMP Cryptosign authentication.
+This tells Autobahn to open a websocket session with Bondy attached to the `com.market.demo` realm and using WAMP Cryptosign authentication.
 
 ::: info Note
 The `com.market.demo` realm is configured by the Make target responsible to running the Bondy docker instance.
