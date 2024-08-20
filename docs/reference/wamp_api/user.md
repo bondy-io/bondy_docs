@@ -509,7 +509,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```bash [Call w/old password]
 ./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.change_password \
-"com.leapsight.test_creation_1" "user_3" "my_password" "my_new_password"
+"com.leapsight.test_creation_1" "user_3" "my_new_password" "my_password"
 ```
 :::
 

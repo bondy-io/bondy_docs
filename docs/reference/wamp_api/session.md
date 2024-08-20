@@ -23,7 +23,7 @@ Key characteristics:
 
 |Name|URI|
 |:---|:---|
-|[Retrieve a session](#retrieve-a-realm)|`wamp.session.get`|
+|[Retrieve a session](#retrieve-a-session)|`wamp.session.get`|
 
 
 ### Retrieve a session
