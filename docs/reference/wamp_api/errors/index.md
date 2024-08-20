@@ -11,6 +11,7 @@ The catalogue of all error URIs used by Bondy and WAMP.
 * [bondy.error.badmap]():
 * [bondy.error.bad_gateway]():
 * [bondy.error.bad_signature](/reference/wamp_api/errors/bad_signature): when the provided password doesn't match with the previous one.
+* [bondy.error.duplicate_roles](/reference/wamp_api/errors/duplicate_roles): when there are duplicated roles.
 * [bondy.error.http_gateway.invalid_expression]():
 * [bondy.error.inconsistency_error]():
 * [bondy.error.internal_error](/reference/wamp_api/errors/internal_error): when there is an internal or unexpected error.
