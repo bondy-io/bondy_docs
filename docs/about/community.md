@@ -3,28 +3,18 @@
 
 ## Where to talk
 
-:::::: columns titles
-::: column 1
-### User Forums
-The Bondy Users Forum is a place for Bondy users to communicate about anything and everything related to Bondy.
-:::
-::: column 2
 ### Chat
 Development of Bondy, and general chatter happens on Slack.
-:::
-::::::
 
 :::::: columns buttons
 :::: column 1
-::: big-button https://discuss.bondy.io
-Visit Forum
-::::
-:::: column 2
 ::: big-button https://join.slack.com/t/bondy-group/shared_invite/zt-1j1fbpr04-BUesuqeWBbblbqUPsXrP1A
 Slack
 :::
 ::::
 ::::::
+
+
 
 ### Reporting an issue
 Please report any new issues using Bondy's Github Issues page. Start by searching the known issues, it’s very likely fellow users have raised the same issue.
