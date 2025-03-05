@@ -1,6 +1,12 @@
 // Sitemap
 import { createWriteStream } from 'node:fs'
 import { resolve } from 'node:path'
+import mdDeflist from 'markdown-it-deflist'
+import mdFootnote from 'markdown-it-footnote'
+import mdTaskLists from 'markdown-it-task-lists'
+import mdKatex from 'markdown-it-katex'
+import mdContainer from 'markdown-it-container'
+import mdCustomBlock from 'markdown-it-custom-block'
 
 const links = []
 
@@ -38,7 +44,7 @@ export default {
       }]
     ],
     sitemap: {
-        hostname: 'https://developer.bondy.io/'
+      hostname: 'https://developer.bondy.io/'
     },
     appearance: true,
     lastUpdated: true,
@@ -54,11 +60,11 @@ export default {
           disable: false
         },
         config: (md) => {
-          md.use(require('markdown-it-deflist'))
-          md.use(require('markdown-it-footnote'))
-          md.use(require('markdown-it-task-lists'))
-          md.use(require('markdown-it-katex'))
-          md.use(require('markdown-it-container'), 'big-button', {
+          md.use(mdDeflist)
+          md.use(mdFootnote)
+          md.use(mdTaskLists)
+          md.use(mdKatex)
+          md.use(mdContainer, 'big-button', {
             validate: function(params) {
               return params.trim().match(/^big-button\s+(.*)$/);
             },
@@ -78,7 +84,7 @@ export default {
               }
             }
           })
-          md.use(require('markdown-it-container'), 'definition', {
+          md.use(mdContainer, 'definition', {
             validate: function(params) {
               return params.trim().match(/^definition\s+(.*)$/);
             },
@@ -92,7 +98,7 @@ export default {
               }
             }
           })
-          md.use(require('markdown-it-container'), 'column', {
+          md.use(mdContainer, 'column', {
             validate: function(params) {
               return params.trim().match(/^column\s+(.*)$/);
             },
@@ -109,7 +115,7 @@ export default {
               }
             }
           })
-          md.use(require('markdown-it-container'), 'columns', {
+          md.use(mdContainer, 'columns', {
             validate: function(params) {
               return params.trim().match(/^columns\s+(.*)$/);
             },
@@ -127,7 +133,7 @@ export default {
               }
             }
           })
-          md.use(require('markdown-it-container'), 'tab', {
+          md.use(mdContainer, 'tab', {
             validate: function(params) {
               return params.trim().match(/^tab\s+(.*)$/);
             },
@@ -145,7 +151,7 @@ export default {
               }
             }
           })
-          md.use(require('markdown-it-container'), 'tabs', {
+          md.use(mdContainer, 'tabs', {
             validate: function(params) {
               return params.trim().match(/^tabs\s+(.*)$/);
             },
@@ -161,7 +167,7 @@ export default {
               }
             }
           })
-          md.use(require('markdown-it-custom-block'), {
+          md.use(mdCustomBlock, {
             // URI
             uri (str) {
               let args = str.replace(/\s+/g, '').split(",");
@@ -281,7 +287,6 @@ export default {
 
         sidebar: sidebars()
     },
-
 
     // transformHtml: (_, id, { pageData }) => {
     //   if (!/[\\/]404\.html$/.test(id))

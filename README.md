@@ -17,3 +17,12 @@ yarn docs:build && cp -r docs/assets/. docs/.vitepress/dist/assets/
 ```
 
 For some reason assets are not being copied so we need to do it by hand
+
+
+## Updating dependencies
+
+List outdated dependencies
+
+```bash
+yarn outdated
+```

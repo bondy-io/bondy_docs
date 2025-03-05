@@ -121,6 +121,19 @@ h5 {
     -webkit-text-fill-color: transparent;
 }
 
+.VPHomeHero > div > div.main > h1 > span.text {
+    /* Remove the gradient by setting the background to none */
+    background: none !important;
+
+    /* Reset background clipping to default */
+    -webkit-background-clip: initial !important;
+
+    /* Set a solid text color instead of transparent */
+    -webkit-text-fill-color: #000 !important;
+    font-size: 36px !important;
+    line-height: 45px;
+}
+
 .VPHomeHero > div > div.main > p.text{
   font-size: 36px !important;
   line-height: 45px;
