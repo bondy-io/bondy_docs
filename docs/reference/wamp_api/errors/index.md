@@ -25,9 +25,11 @@ The catalogue of all error URIs used by Bondy and WAMP.
 * [bondy.error.operation_failed]():
 * [bondy.error.timeout](/reference/wamp_api/errors/timeout): when the operation execution can't be performed in the provided timeout.
 * [bondy.error.unknown_group](/reference/wamp_api/errors/unknown_group): when the group with the provided name doesn't exist.
+* [bondy.error.unknown_roles](/reference/wamp_api/errors/unknown_roles): when the role or roles with the provided name doesn't/don't exist.
 
 
 ## WAMP Error URIs
 
 * [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when the given argument type or value is invalid.
 * [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the given authid does not exist.
+* [wamp.error.no_such_realm](/reference/wamp_api/errors/wamp_no_such_realm): when the given realm uri does not exist.
