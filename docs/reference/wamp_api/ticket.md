@@ -6,7 +6,7 @@ An authentication ticket is a signed (and possibly encrypted) assertion of a use
 
 ## Description
 Tickets MUST be issued by a session that was opened using an authentication
-method that is neither `ticket` nor `anonymous` authentication.
+method that is neither `ticket` nor `anonymous`.
 
 
 ### Claims
@@ -21,14 +21,15 @@ on the options used to issue the ticket.
 ### Local scope
 > The ticket can be used to authenticate on the ***session's realm only.***
 
+This is the most common scope and probably the only one you will need.
+
 The ticket was issued with `allow_sso` option set to `false` or when set to
 `true` the user did not have SSO credentials, and the option `client_ticket`
 was not provided.
 
 ::: warning Authorization
 To be able to issue this ticket, the session must have been granted the
-permission `bondy.issue` on the `bondy.ticket.scope.local`
-resource.
+permission `bondy.issue` on the `bondy.ticket.scope.local` resource.
 :::
 
 ### SSO Scope
@@ -37,11 +38,9 @@ resource.
 The ticket was issued with `allow_sso` option set to `true` and the user has
 SSO credentials, and the option `client_ticket` was not provided.
 
-
 ::: warning Authorization
 To be able to issue this ticket, the session must have been granted the
-permission `bondy.issue` on the `bondy.ticket.scope.sso`
-resource.
+permission `bondy.issue` on the `bondy.ticket.scope.sso` resource.
 :::
 
 ### Client-Local scope
@@ -80,7 +79,6 @@ resource.
 
 * `uri()` in the following table refers to the scope realm (not the
 Authentication realm which is used in the prefix)
-
 
 
 ### Permissions Summary
@@ -157,8 +155,6 @@ None.
 None.
 
 
-
-
 <script>
 const issue_opts = {
     expiry_time_secs : {
@@ -222,7 +218,7 @@ const claims = {
     },
     expires_at: {
         type: "string",
-        description: "Identifies the expiration time (a timestamp in seconds) on or after which the ticket MUST NOT be accepted for processing.  The processing of this attribute requires that the current date/time MUST be before the value assigned to this attribute. Bondy considers a small leeway of 2 mins by default",
+        description: "Identifies the expiration time, measured in seconds, on or after which the ticket MUST NOT be accepted for processing.  The processing of this attribute requires that the current date/time MUST be before the value assigned to this attribute. Bondy considers a small leeway of 2 minutes by default.",
         mutable: false,
         required: false
     },
