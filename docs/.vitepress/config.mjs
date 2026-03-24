@@ -1,6 +1,7 @@
 // Sitemap
-import { createWriteStream } from 'node:fs'
+import { createWriteStream, cpSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { SitemapStream } from 'sitemap'
 import mdDeflist from 'markdown-it-deflist'
 import mdFootnote from 'markdown-it-footnote'
 import mdTaskLists from 'markdown-it-task-lists'
@@ -185,7 +186,6 @@ export default {
             },
             // CONFIG
             config (str) {
-              console.log(str);
               let args = str.replace(/\s+/g, '').split(",");
               let param = args.shift();
               var datatype = 'string';
@@ -221,7 +221,6 @@ export default {
             },
             // FOO
             configRef (str) {
-              console.log(str);
               let obj = str.replace(/\s+/g, '');
               var datatype = obj.datatype ? obj.datatype : 'string';
               return `
@@ -275,7 +274,7 @@ export default {
         // due to design reason.
         footer: {
             message: 'Except where otherwise noted, content on this site is licensed under a Creative Commons Attribution-ShareAlike (CC-BY-SA) 4.0 International license.<br> Bondy and Leapsight are registered trademarks of Leapsight Technologies Ltd.',
-            copyright: 'Copyright © 2022 Leapsight'
+            copyright: 'Copyright © 2025 Leapsight'
         },
 
         editLink: {
@@ -288,25 +287,37 @@ export default {
         sidebar: sidebars()
     },
 
-    // transformHtml: (_, id, { pageData }) => {
-    //   if (!/[\\/]404\.html$/.test(id))
-    //     links.push({
-    //       // you might need to change this if not using clean urls mode
-    //       url: pageData.relativePath.replace(/((^|\/)index)?\.md$/, '$2'),
-    //       lastmod: pageData.lastUpdated
-    //     })
-    // },
-    // buildEnd: async ({ outDir }) => {
-    //   const sitemap = new SitemapStream({
-    //     hostname: 'https://vitepress.vuejs.org/'
-    //   })
-    //   const writeStream = createWriteStream(resolve(outDir, 'sitemap.xml'))
-    //   sitemap.pipe(writeStream)
-    //   links.forEach((link) => sitemap.write(link))
-    //   sitemap.end()
-    //   await new Promise((r) => writeStream.on('finish', r))
-    // },
-    //
+    transformHtml: (_, id, { pageData }) => {
+      if (!/[\\/]404\.html$/.test(id))
+        links.push({
+          // you might need to change this if not using clean urls mode
+          url: pageData.relativePath.replace(/((^|\/)index)?\.md$/, '$2'),
+          lastmod: pageData.lastUpdated
+        })
+    },
+    buildEnd: async ({ outDir }) => {
+      // Copy assets directory to build output
+      const assetsSource = resolve(__dirname, '../assets')
+      const assetsDest = resolve(outDir, 'assets')
+      try {
+        cpSync(assetsSource, assetsDest, { recursive: true })
+        console.log('✓ Assets copied successfully')
+      } catch (err) {
+        console.error('Error copying assets:', err)
+      }
+
+      // Generate sitemap
+      const sitemap = new SitemapStream({
+        hostname: 'https://developer.bondy.io/'
+      })
+      const writeStream = createWriteStream(resolve(outDir, 'sitemap.xml'))
+      sitemap.pipe(writeStream)
+      links.forEach((link) => sitemap.write(link))
+      sitemap.end()
+      await new Promise((r) => writeStream.on('finish', r))
+      console.log('✓ Sitemap generated successfully')
+    },
+
     cleanUrls: 'with-subfolders',
     // Set to false for publishing
     ignoreDeadLinks: false,
@@ -667,6 +678,18 @@ export default {
               description: "Learn how to enable Single Sign-on on multiple realms."
             },
             {
+              text: 'OIDC Authentication',
+              link: '/concepts/oidc_authentication',
+              isFeature: true,
+              description: "Learn how to authenticate users via external Identity Providers using OpenID Connect."
+            },
+            {
+              text: 'HTTP Transports (Longpoll & SSE)',
+              link: '/concepts/http_transports',
+              isFeature: true,
+              description: "Learn how to use HTTP long-polling and Server-Sent Events transports for WAMP sessions."
+            },
+            {
               text: 'Clustering',
               link: '/concepts/clustering',
               isFeature: true
@@ -945,6 +968,12 @@ export default {
               link: '/reference/http_api/api_gateway',
               isFeature: true,
               description: "Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP/REST APIs."
+            },
+            {
+              text: 'OIDC',
+              link: '/reference/http_api/oidc',
+              isFeature: true,
+              description: "OIDC login, callback and logout endpoints for OpenID Connect authentication."
             }
 
           ]

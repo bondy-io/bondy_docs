@@ -2,112 +2,139 @@
 draft: false
 ---
 # Why Bondy
-Learn about the need for a unified application networking platform for distributed application development.
 
+The modern distributed application landscape has become unnecessarily complex. Bondy exists to change that.
 
-## TL;DR
->Microservices applications are the most common and complex type of distributed application being built today...We are all now building distributed systems!
->
->— Christopher Meiklejohn[^cmeik]
+## The Distributed Application Complexity Crisis
+
+Microservices applications are the most common and complex type of distributed application being built today. As Christopher Meiklejohn noted at Strangeloop 2022, "We are all now building distributed systems!"[^cmeik] Whether you're developing microservices, integrating multiple customer touchpoints, or connecting IoT devices, you're in the business of distributed computing.
 
 [^cmeik]: Christopher Meiklejohn, Strangeloop 2022 [Resilient Microservices without the Chaos](https://www.youtube.com/watch?v=F32peAwCPlM)
 
-Delivering innovative customer experiences today requires the real-time networked connection of people, process, data and things (devices)[^cisco-ioe].
+And distributed computing is hard. Really hard.
+
+Today's customer experiences demand real-time, networked connections between people, processes, data, and devices[^cisco-ioe]. Yet creating these connections has become shockingly complicated. The typical modern application requires an overwhelming number of infrastructure components, protocols, APIs, and client libraries[^ogrady]. What should be straightforward application logic gets buried under layers of integration code.
 
 [^cisco-ioe]: [The Internet of Everything](https://www.cisco.com/c/dam/en_us/about/business-insights/docs/ioe-value-at-stake-public-sector-analysis-faq.pdf)
 
-But creating those connections has become shockingly complicated due to the sheer number of infrastructure components, associated protocols, APIs and client libraries involved in most modern application development[^ogrady].
-
 [^ogrady]: Stephen O'Grady, [The Developer Experience Gap](https://redmonk.com/sogrady/2020/10/06/developer-experience-gap/)
 
-If you are using a microservices architectural style or if you are integrating multiple different customer/user touchpoints across Web, Mobile (and possibly IoT devices) you are developing a distributed application.
+## The Root Cause: Protocol Fragmentation
 
-Distributed applications are very hard to design, develop and maintain. They require multiple application communication patterns such as Remote Procedure Call (RPC) for point-to-point synchronous request-response and Publish/Subscribe for many-to-many asynchronous communications. Unfortunately, this is where things get really complicated, because typically each pattern requires separate frameworks and infrastructure components e.g. HTTP Gateway, Authentication and Authorization services, gRPC, service mesh, message brokers (a.k.a. event mesh).
+Consider what it takes to build a typical distributed application today. You need:
+
+- **HTTP/REST or gRPC** for synchronous request-response communication
+- **Message brokers** (RabbitMQ, Kafka) for asynchronous event distribution
+- **Service mesh** for service discovery, load balancing, and traffic management
+- **API Gateway** to expose services to external clients
+- **Authentication and authorization services** to secure it all
+- **WebSockets** when HTTP's request-response model isn't enough
+
+Each component brings its own protocol, client libraries, operational complexity, and failure modes. Each requires specialized knowledge to deploy, configure, and maintain. Each adds latency, potential points of failure, and cognitive overhead.
 
 <ZoomImg src="/assets/accidental_complexity.png"/>
 
-<!-- But should they be that difficult? Aren't we shooting ourselves in the foot by -->
+This isn't essential complexity—the inherent difficulty of the problems we're solving. This is accidental complexity—problems we've created for ourselves through the tools we've chosen[^fbrooks].
 
-<!-- The industry's tendency to build layers over the existing layers without retiring the ones below and most importantly, the tendency to solve specific problems with vertical solutions, creating technology silos is dramatically increasing fragmentation of the technology landscape.
+[^fbrooks]: In [No Silver Bullet — Essence and Accident in Software Engineering](https://en.wikipedia.org/wiki/No_Silver_Bullet), Fred Brooks distinguishes between two different types of complexity: accidental complexity and essential complexity. Essential complexity is caused by the problem to be solved, and nothing can remove it. Accidental complexity relates to problems which engineers create and can fix.
 
-> The fragmentation means that the fundamental activity in building a distributed application has now become **integration**. -->
+## Why Are We Doing This?
 
-Moreover, most of these frameworks and infrastructure components were designed for the 3-tier application monoliths of a not so distant past but not really for the integration of 100s and in some cases even 1000s of microservices deployed on a cloud-native infrastructure.
+The answer is simple but frustrating: most protocols were designed as vertical solutions for specific use cases. HTTP was designed for document retrieval. Message queues were designed for asynchronous job processing. gRPC was designed for efficient service-to-service calls. Each solves its particular problem well, but together they create an integration nightmare.
 
-The decomposition of the monolithic applications allowed us to scale the social aspects of development, enabling us to tackle the increasing number of requirements―_essential complexity_―but due to the tools we are using we have now created a massive wave of _accidental complexity_[^fbrooks].
+Moreover, many of these technologies carry assumptions from the three-tier monolithic applications of the past. They weren't designed for the reality of hundreds or thousands of microservices deployed on cloud-native infrastructure. They weren't designed for mobile apps and IoT devices to be first-class participants in application logic. They weren't designed for the peer-to-peer architectures that modern applications increasingly require.
 
-The result in a complex technology solution prone to inefficiencies, delays and fatigue hindering the success of business initiatives as developers have to cope with too many protocols, client libraries, cloud services and infrastructure components.
+## The Cost of Complexity
 
-But, why are we doing this? Because most protocols were designed as silos, covering a very specific application use case or requirement.
+While the industry's largest companies can afford teams of specialists to manage this complexity, most development teams cannot. The result is:
+
+- **Slower time-to-market** as developers navigate multiple technologies and integration patterns
+- **Increased maintenance burden** from managing disparate systems
+- **Higher operational costs** from running and monitoring multiple infrastructure components
+- **Developer fatigue** from context-switching between different paradigms and tools
+- **Fragile systems** with more potential points of failure
+
+Microservices were supposed to help us scale development by decomposing monoliths into manageable pieces. Instead, the tooling ecosystem has created a new monolith—a distributed monolith of tangled infrastructure dependencies.
 
 <ZoomImg src="/assets/without_with.png"/>
 
+## A Better Way
 
-Bondy is our contribution to solve the problem and it was born out of our own necessity. We have used Bondy in production for several years achieving a reduction in accidental complexity leading to a reduction in time-to-market.
+What if you could have all the capabilities you need—RPC, Pub/Sub, service discovery, load balancing, authentication, and authorization—in a single protocol and a single infrastructure component?
 
-**Bondy brings back the joy to distributed application development.**
+What if your web app, mobile app, backend services, and IoT devices could all communicate using the same client library, with the same semantics, over the same connection?
 
-[^fbrooks]: In [No Silver Bullet — Essence and Accident in Software Engineering](https://en.wikipedia.org/wiki/No_Silver_Bullet), Fred Brooks distinguishes between two different types of complexity: accidental complexity and essential complexity. Essential complexity is caused by the problem to be solved, and nothing can remove it. Accidental complexity relates to problems which engineers create and can fix; for example, the details of writing and optimizing assembly code or the delays caused by batch processing.
+What if a browser could not only call server procedures but could also expose procedures for servers to call? What if your architecture could be truly peer-to-peer, not just client-server with extra steps?
 
-<!--
-## An overwhelming accidental complexity
+This isn't a utopian vision. This is what Bondy delivers today.
 
-> A long habit of not thinking a thing wrong, gives it a superficial appearance of being right, and raises at first a formidable outcry in defence of custom.
->
->— Thomas Paine
+## Enter Bondy
 
+Bondy is built on the Web Application Messaging Protocol (WAMP), an open standard that was ahead of its time. WAMP unifies RPC and Pub/Sub in a single protocol with a peer-to-peer programming model. It's transport-agnostic, supports multiple serialization formats, and includes built-in support for multi-tenancy through realms.
 
+But Bondy isn't just a WAMP router. It's a complete, production-ready application networking platform that:
 
-The computer software industry has a tendency to add vertical solutions as silos and build layers over layers without taking things away[^cncf].
+- **Scales horizontally** with a masterless distributed architecture
+- **Ensures high availability** through active anti-entropy and gossip protocols
+- **Provides built-in security** with multiple authentication methods and fine-grained RBAC
+- **Integrates with existing systems** through an HTTP API Gateway and message broker bridges
+- **Deploys anywhere** from edge devices to cloud environments with zero external dependencies
 
-[^cncf]: The Cloud Native Computing Foundation (CNCF), [Cloud Native Interactive Landscape](https://landscape.cncf.io) lists more than 450 technologies. Most of them added in the last 10 years.
+We built Bondy because we needed it ourselves. We were tired of the complexity tax. We wanted to focus on building features, not integrating infrastructure. We've used Bondy in production for years, and it has dramatically reduced our time-to-market and operational overhead.
 
-For example, new modern Remote Procedure Call (RPC) technologies like gRPC and new incarnations of the ubiquitous HTTP protocol still make a distinction between clients and servers. Moreover when smartphones we have in our pockets are more powerful than the supercomputers of the 80s, HTTP still treats the browser running on the them as dumb clients.
+## Perfect for the AI Age
 
-These complicates the implementation of several use cases in which it would be desirable for the "server" to call the "client" or a "client" to call "client".
+As AI agents become ubiquitous in modern applications, Bondy provides the ideal infrastructure for agent-to-agent communication. Unlike emerging protocols like MCP (Model Context Protocol) that offer partial solutions, WAMP—and by extension Bondy—delivers everything AI agent systems need:
 
-Fortunately, the advances in distributed computing over the last 10 years have given us a new horizon, one where we are able to treat our mobile devices as the system or record. I am referrying to peer-to-peer networking and local-first software[^mklepp].
+**Complete Agent Communication Platform**
 
-[^mklepp]: Martin Kleppmann et al., [Local-First Software: Your Own Your Data, in spite of the Cloud](https://martin.kleppmann.com/papers/local-first.pdf)
+AI agents require more than just function calling. They need event coordination, service discovery, authentication, authorization, and the ability to act as both service providers and consumers. Bondy provides all of this out of the box:
 
-But this will come at an additional cost: new protocols, APIs and libraries we need to learn and depend on.
+- **True peer-to-peer** - Agents can expose capabilities and consume them symmetrically
+- **RPC and Pub/Sub unified** - Function calling and event coordination in one protocol
+- **Dynamic discovery** - Agents find each other's capabilities at runtime
+- **Secure multi-tenancy** - Isolate different agent systems through realms
+- **Production-grade infrastructure** - Scale to millions of agents with high availability
 
-Moreover, these technologies implement a single application communication pattern e.g. point-to-point RPCs or Publish-Subscribe (PubSub). If your application, needs both communication patterns, you need to adopt, learn and use two different client libraries and infrastructure components. Moreover, some protocols are not web-native so if you want to integrate say PubSub on your web-based app you might need to resort to integrate also a cloud based solution, again this means yet another protocol/client dependency. -->
+**Beyond Limited Agent Protocols**
 
-<!-- Frameworks pretend to solve this by adding yet more features, more adapters, more callbacks. Most of the time implemented using proprietary Software Development Kits (SDKs) in a specific programming language. This SDKs evolve over time and require those adapters to be rebuilt. Moreover sometimes those adapters have to be deployed within the infrastructure component, which complicates its maintenance, support and operating characteristics. -->
-<!--
-As a result, connecting people, process, data and things has become more and more complex.
+Protocols designed specifically for AI agents often focus narrowly on model-to-tool communication or simple request-response patterns. They lack the comprehensive capabilities needed for sophisticated multi-agent systems:
 
-The growing need to deliver innovative customer experiences in a hypersegmented and hypercompetitive market means developers have to deal with a surge in essential complexity[^fbrooks] new uses cases, new integrations, real-time user interactions.  The key implication is the **need to design and develop multi-platform, polyglot distributed systems**.
+- No native event/pub-sub for agent coordination
+- Client-server hierarchies that constrain agent architectures
+- Missing authentication, authorization, and multi-tenancy primitives
+- Immature infrastructure and limited production deployments
 
-In order to deliver these systems developers need to integrate and ever increasing number of technologies (protocols, clients, dependencies, infrastructure components). This dramatically increments the accidental complexity[^fbrooks].
+Bondy, through WAMP, provides the complete foundation. Deploy one platform, get all capabilities integrated and working together. Your agents can coordinate complex workflows, react to environmental changes, and collaborate in ways that limited protocols simply cannot support.
 
- -->
+Whether you're building multi-agent LLM systems, agentic workflow automation, distributed AI inference, or collaborative agent environments, Bondy's proven, production-ready platform delivers what you need—today, not in some future roadmap.
 
-<!-- <ZoomImg src="/assets/accidental_complexity.png"/>
+Learn more about [WAMP for AI agents](/concepts/what_is_wamp#wamp-for-the-ai-age-agent-to-agent-communication).
 
-We desperately need to simplify and make it easier for developers to deliver these systems swiftly and at a lower cost.
+## The Bondy Difference
 
-> Where the big technology companies can cope with this complexity,
+With Bondy, you replace this:
 
- -->
-<!--
-## The need for a universal application communication protocol
+```
+Web App → API Gateway → gRPC → Service A → Kafka → Service B
+                ↓                          ↓
+          Load Balancer            Message Queue
+                ↓                          ↓
+          Service Mesh             More Services
+```
 
-* An application protocol (L7)
-* Support for multiple (all) application communication patterns
-* P2P programming model (nobody is dumb anymore)
-* Extensible (without committee approvals)
-* Web Native (no WASM)
-* Transport agnostic
-* Multiple serializations
-* P2P network
+With this:
 
-## WAMP: The protocol that was ahead of its time
-TBD
+```
+Web App → Bondy ← Services
+```
 
-## Bondy: WAMP Revival and Beyond
-TBD -->
+Everyone connects to Bondy. Everyone uses the same protocol. Everyone gets RPC, Pub/Sub, authentication, authorization, service discovery, and load balancing out of the box. No adapters, no translation layers, no impedance mismatch.
 
+## Bringing Back the Joy
 
+Distributed application development should be about solving business problems, not wrestling with infrastructure. It should be about delivering value to users, not debugging integration failures.
 
+Bondy brings back the joy to distributed application development by eliminating the accidental complexity that has plagued the industry for too long. It's not a silver bullet for all of distributed computing's challenges—those essential complexities remain. But it removes the accidental ones, letting you focus on what matters: building great applications.
+
+Ready to simplify your architecture? Let's explore [what Bondy is](/concepts/what_is_bondy) and [how it works](/concepts/architecture).

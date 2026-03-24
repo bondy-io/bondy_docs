@@ -19,15 +19,23 @@ The clients send these messages using the two high-level primitives that are rou
 
 - **register**: a client (*Callee*) exposes a procedure to be called remotely with an URI (also a URI pattern if Router provides this feature).
 
-    ```bash
-    session.register("com.example.add", [], {}, fun(a, b){return a + b})
+    ```javascript
+    wampy.register('com.example.add', {
+        rpc: function(args) {
+            return args[0] + args[1];
+        }
+    });
     ```
 
 - **call**: a client (*Caller*) asks the *Router* to invoke procedure from another client by providing the procedure URI.
 
-    ```bash
-    Res = session.call("com.example.add", [3, 4])
-    // Res = 7
+    ```javascript
+    wampy.call('com.example.add', [3, 4], {
+        onSuccess: function(result) {
+            // result = 7
+            console.log('Result:', result);
+        }
+    });
     ```
 
 ## Pub/Sub Message Flows

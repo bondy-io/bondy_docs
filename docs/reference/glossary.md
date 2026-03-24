@@ -80,10 +80,30 @@ Unless otherwise specified in the documentation, the word "process" refers to an
 A Bondy node can manage millions of concurrently executing processes.
 
 ## Publish/Subscribe
-<!-- @TODO -->
+
+Publish/Subscribe (PubSub) is a message-oriented communication pattern where message senders (Publishers) do not program the messages to be sent directly to specific receivers (Subscribers). Instead, published messages are characterized into topics without knowledge of which subscribers, if any, may be interested.
+
+In WAMP's Publish/Subscribe pattern:
+- A **Subscriber** expresses interest in a topic by providing the topic URI (or URI pattern)
+- A **Publisher** publishes events on a topic by providing the topic URI
+- The **Router** routes published messages to all interested subscribers
+- Publishers and Subscribers are decoupled and unaware of each other's existence
+
+This pattern is one of the two core messaging patterns provided by WAMP (the other being [Remote Procedure Call](#remote-procedure-call)).
 
 ## Remote Procedure Call
-<!-- @TODO -->
+
+Remote Procedure Call (RPC) is a communication pattern that allows a program to execute a procedure (subroutine) on a remote system as if it were a local call, abstracting the details of the network communication.
+
+In WAMP's Routed RPC pattern:
+- A **Callee** registers a procedure with the Router by providing the procedure URI (or URI pattern)
+- A **Caller** invokes a remote procedure by sending a call request to the Router with the procedure URI
+- The **Router** routes the call to an appropriate Callee and returns the result back to the Caller
+- Callers and Callees are decoupled and communicate through the Router, enabling peer-to-peer RPC
+
+Unlike traditional RPC frameworks which are addressed directly and strictly unidirectional (client-to-server), WAMP RPCs are routed by the Router and work bidirectionally. This means any WAMP client can act as both Caller and Callee, enabling flexible architectures where browser clients can call procedures on other browser clients.
+
+This pattern is one of the two core messaging patterns provided by WAMP (the other being [Publish/Subscribe](#publish-subscribe)).
 
 ## Service Mesh
 A service mesh is a dedicated network layer that sits above the service layer and enables service-to-service communication. Its communication channels rely on distributed APIs instead of centralized and discrete appliances.

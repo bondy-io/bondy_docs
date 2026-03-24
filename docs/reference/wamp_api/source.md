@@ -219,9 +219,12 @@ call bondy.source.delete \
 :::
 
 ### Retrieve a source from a realm
+#### bondy.source.get(realm_uri, username, cidr) -> source() {.wamp-procedure}
 
-::: info TODO
-Not implemented. At the moment `wamp.error.no_such_procedure` is returned.
+::: warning Not Yet Implemented
+This procedure is not currently implemented. Calling this procedure will return `wamp.error.no_such_procedure`.
+
+For now, use [bondy.source.list](#list-all-sources-from-a-realm) to retrieve all sources and filter on the client side.
 :::
 
 ### List all sources from a realm
@@ -404,12 +407,17 @@ call bondy.source.match "com.leapsight.test_creation_1" "user_1" | jq
 
 ## Topics
 
-::: info TODO
-Not implemented.
+::: warning Not Yet Implemented
+The following topics are not currently implemented. Bondy does not publish events for source lifecycle changes at this time.
+
+Future releases may include these events to allow applications to react to source configuration changes in real-time.
 :::
 
 #### bondy.source.added{.wamp-topic}
+This topic would be published when a new source is added to a realm.
+
 #### bondy.source.deleted{.wamp-topic}
+This topic would be published when a source is deleted from a realm.
 
 <script>
 const sourceData = {

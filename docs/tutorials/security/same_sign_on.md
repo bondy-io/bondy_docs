@@ -37,13 +37,20 @@ The following shows how to create it using the [Realm WAMP API](/reference/wamp_
 // Session is attached to Master Realm
 // and user has been granted permission
 // to call the procedure
-session.call("bondy.realm.create", [{
-   "uri": "com.example.sso",
-   "is_sso_realm": true,
-   "allow_connections": false,
-   "security_enabled": true,
-   "authmethods": []
-}])
+wampy.call('bondy.realm.create', [{
+   'uri': 'com.example.sso',
+   'is_sso_realm': true,
+   'allow_connections': false,
+   'security_enabled': true,
+   'authmethods': []
+}], {
+   onSuccess: function(result) {
+      console.log('SSO realm created successfully');
+   },
+   onError: function(error) {
+      console.error('Failed to create realm:', error);
+   }
+});
 ```
 :::
 
@@ -67,23 +74,30 @@ To do that we just need to use the following declaration, replacing the value fo
 // Session is attached to Master Realm
 // and user has been granted permission
 // to call the procedure
-session.call("bondy.realm.create", {
-   "uri": "com.example.realm.1", // change for realms 2 and 3
-   "is_sso_realm": false,
-   "sso_realm_uri": "com.example.sso",
-   "allow_connections": true,
-   "security_enabled": true,
-   "authmethods": ["wampcra", "cryptosign"],
-   "sources": [
+wampy.call('bondy.realm.create', [{
+   'uri': 'com.example.realm.1', // change for realms 2 and 3
+   'is_sso_realm': false,
+   'sso_realm_uri': 'com.example.sso',
+   'allow_connections': true,
+   'security_enabled': true,
+   'authmethods': ['wampcra', 'cryptosign'],
+   'sources': [
       ...
    ],
-   "groups": [
+   'groups': [
       ...
    ],
-   "grants": [
+   'grants': [
       ...
    ]
-}
+}], {
+   onSuccess: function(result) {
+      console.log('User realm created successfully');
+   },
+   onError: function(error) {
+      console.error('Failed to create user realm:', error);
+   }
+});
 ```
 :::
 
@@ -108,16 +122,23 @@ In the following example we will use **Indirect Option** to create the user `Lin
 // Session is attached to Master Realm
 // and user has been granted permission
 // to call the procedure
-session.call("bondy.user.add", [
-   "com.example.realm.1",
+wampy.call('bondy.user.add', [
+   'com.example.realm.1',
    {
-      "username": "linda@gmail.com",
-      "password": "123456",
-      "groups": ["admin"],
-      "meta" : {"country": "us"},
-      "sso_realm_uri": "com.example.sso"
+      'username': 'linda@gmail.com',
+      'password': '123456',
+      'groups': ['admin'],
+      'meta' : {'country': 'us'},
+      'sso_realm_uri': 'com.example.sso'
    }
-])
+], {
+   onSuccess: function(result) {
+      console.log('User added successfully');
+   },
+   onError: function(error) {
+      console.error('Failed to add user:', error);
+   }
+});
 ```
 :::
 

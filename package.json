@@ -9,12 +9,23 @@
   "license": "CC-BY-SA-4.0",
   "private": false,
   "devDependencies": {
-    "vitepress": "^1.6.3"
+    "markdownlint-cli": "^0.43.0",
+    "prettier": "^3.4.2",
+    "vitepress": "^1.6.4"
   },
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:serve": "vitepress serve docs"
+    "docs:preview": "vitepress preview docs",
+    "docs:serve": "vitepress preview docs",
+    "format": "prettier --write \"docs/**/*.md\" \"*.md\"",
+    "format:check": "prettier --check \"docs/**/*.md\" \"*.md\"",
+    "lint:md": "markdownlint \"docs/**/*.md\" --ignore node_modules",
+    "lint:md:fix": "markdownlint \"docs/**/*.md\" --ignore node_modules --fix",
+    "spellcheck": "make spellcheck",
+    "spellfix": "make spellfix",
+    "outdated": "yarn outdated",
+    "check": "yarn format:check && yarn lint:md && yarn spellcheck"
   },
   "dependencies": {
     "@sindresorhus/slugify": "^2.1.1",

@@ -80,31 +80,38 @@ None.
 #### Examples
 
 ::: code-group
-```javascript [Using AutobahnJS]
-session.call("bondy.grant.create", [
-   "com.leapsight.test",
+```javascript [Using Wampy.js]
+wampy.call('bondy.grant.create', [
+   'com.leapsight.test',
    {
-        "permissions": [
-            "wamp.subscribe",
-            "wamp.unsubscribe",
-            "wamp.call",
-            "wamp.cancel"
+        'permissions': [
+            'wamp.subscribe',
+            'wamp.unsubscribe',
+            'wamp.call',
+            'wamp.cancel'
         ],
-        "resources": [
+        'resources': [
             {
-                "uri": "com.leapsight.example.",
-                "match": "prefix"
+                'uri': 'com.leapsight.example.',
+                'match': 'prefix'
             },
             {
-                "uri": "com.leapsight.test.echo",
-                "match": "exact"
+                'uri': 'com.leapsight.test.echo',
+                'match': 'exact'
             }
         ],
-        "roles": [
-            "client"
+        'roles': [
+            'client'
         ]
     }
-])
+], {
+    onSuccess: function(result) {
+        console.log('Grant created successfully');
+    },
+    onError: function(error) {
+        console.error('Failed to create grant:', error);
+    }
+});
 ```
 ```bash [Using wick]
 ./wick --url ws://localhost:18080/ws \
@@ -162,25 +169,32 @@ None.
 #### Examples
 
 ::: code-group
-```javascript [Using AutobahnJS]
-session.call("bondy.grant.revoke", [
-   "com.leapsight.test",
+```javascript [Using Wampy.js]
+wampy.call('bondy.grant.revoke', [
+   'com.leapsight.test',
    {
-        "permissions": [
-            "wamp.subscribe",
-            "wamp.unsubscribe"
+        'permissions': [
+            'wamp.subscribe',
+            'wamp.unsubscribe'
         ],
-        "resources": [
+        'resources': [
             {
-                "uri": "com.leapsight.example.",
-                "match": "prefix"
+                'uri': 'com.leapsight.example.',
+                'match': 'prefix'
             }
         ],
-        "roles": [
-            "client"
+        'roles': [
+            'client'
         ]
     }
-])
+], {
+    onSuccess: function(result) {
+        console.log('Grant revoked successfully');
+    },
+    onError: function(error) {
+        console.error('Failed to revoke grant:', error);
+    }
+});
 ```
 ```bash [Using wick]
 ./wick --url ws://localhost:18080/ws \
@@ -241,8 +255,15 @@ None.
 #### Examples
 
 ::: code-group
-```javascript [Using AutobahnJS]
-session.call("bondy.realm.grants", ["com.leapsight.test"])
+```javascript [Using Wampy.js]
+wampy.call('bondy.realm.grants', ['com.leapsight.test'], {
+    onSuccess: function(grants) {
+        console.log('Realm grants:', grants);
+    },
+    onError: function(error) {
+        console.error('Failed to retrieve grants:', error);
+    }
+});
 ```
 ```bash [Using wick]
 ./wick --url ws://localhost:18080/ws \
@@ -358,8 +379,15 @@ None.
 #### Examples
 
 ::: code-group
-```javascript [Using AutobahnJS]
-session.call("bondy.group.grants", ["com.leapsight.test", "client"])
+```javascript [Using Wampy.js]
+wampy.call('bondy.group.grants', ['com.leapsight.test', 'client'], {
+    onSuccess: function(grants) {
+        console.log('Group grants:', grants);
+    },
+    onError: function(error) {
+        console.error('Failed to retrieve group grants:', error);
+    }
+});
 ```
 ```bash [Using wick]
 ./wick --url ws://localhost:18080/ws \
@@ -439,8 +467,15 @@ None.
 #### Examples
 
 ::: code-group
-```javascript [Using AutobahnJS]
-session.call("bondy.user.grants", ["com.leapsight.test", "john.doe"])
+```javascript [Using Wampy.js]
+wampy.call('bondy.user.grants', ['com.leapsight.test', 'john.doe'], {
+    onSuccess: function(grants) {
+        console.log('User grants:', grants);
+    },
+    onError: function(error) {
+        console.error('Failed to retrieve user grants:', error);
+    }
+});
 ```
 ```bash [Using wick]
 ./wick --url ws://localhost:18080/ws \

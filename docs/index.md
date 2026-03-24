@@ -1,34 +1,36 @@
 ---
 layout: home
 hero:
-  name: Bondy Developer
+  name: Bondy
   image: /assets/bondy_diagram.png
-  text: Learn how to develop, deploy and manage distributed applications using the application networking platform.
-  # text: Empowering everyone to connect everything
-  tagline: Bondy is an open-source, always-on and scalable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple communication protocol.
+  text: Application networking, simplified
+  tagline: One platform for RPC, Pub/Sub, authentication, authorization, and routing. Replace your API gateway, service mesh, and message broker with a single component—no external dependencies, no complexity.
   actions:
     - theme: brand
+      text: Getting Started
+      link: /tutorials/index#getting-started-with-wamp
+    - theme: alt
       text: Get Bondy
       link: /guides/index.html#get-bondy
     - theme: alt
-      text: Getting Started
-      link: /tutorials/index#getting-started-with-wamp
-    - theme: sponsor
       text: What is Bondy?
       link: /concepts/what_is_bondy
-    - theme: sponsor
+    - theme: alt
       text: What is WAMP?
       link: /concepts/what_is_wamp
 
-
 features:
-  - title: All-in-one application network, providing both event and service mesh capabilities
-    details: Bondy provides both RPC and Pub/Sub communication patterns and secure multi-tenancy for the entire messaging requirements of your distributed applications. This is done with a single infrastructure component and no sidecards.
-  - title: Peer-to-peer programming model
-    details: Bondy can connect all elements of a distributed application, all using a single protocol with client libraries available on the most popular programming languages. When using WAMP, all peers are the same, unlocking the potential of distributed applications.
-  - title: Scalable & Always-on
-    details: Bondy scales horizontally to hundreds of nodes. Bondy is written in Erlang/OTP which offers unprecedented soft real-time and high concurrency. Its convergence-based data replication and self-healing capabilities ensures its highly available even under network partitions, message loss and node failures.
-  - title: Deploy Anywhere, no dependencies
-    details: Bondy can be deployed as a binary on bare metal or virtual machine. It can also be deployed on containers with or without container orchestration e.g. Kubernetes. Bondy can be deployed on low-resource ARM64 computers and boards too.
+  - title: Unified Event & Service Mesh
+    details: RPC and Pub/Sub in one protocol. Built-in authentication, authorization, service discovery, and load balancing. Stop assembling multiple systems—Bondy provides everything your distributed application needs.
+  - title: True Peer-to-Peer Programming
+    details: Any component can call any other component. Browsers can expose procedures. Backend can call frontend. IoT devices orchestrate each other. Unlock architectural patterns impossible with traditional client-server protocols.
+  - title: Distributed & Always-On
+    details: Masterless clustering with automatic failover. Scales horizontally to millions of concurrent connections. Gossip-based replication and self-healing ensure availability even during network partitions and node failures.
+  - title: Zero External Dependencies
+    details: No database, no ZooKeeper, no etcd, no Redis. Everything embedded. Deploy on bare metal, VMs, containers, Kubernetes, or ARM devices. Written in Erlang/OTP for proven reliability and massive concurrency.
+  - title: Multi-Tenant by Design
+    details: Complete isolation through realms—separate routing, authentication, and authorization per tenant. Same Sign-On for shared credentials. Zero overhead—realms are virtual boundaries requiring no additional infrastructure.
+  - title: Perfect for AI Agents
+    details: Complete platform for agent-to-agent communication. RPC, Pub/Sub, discovery, security—everything agents need in one protocol. More complete than MCP or other agent protocols. Production-ready, not experimental.
 
 ---
