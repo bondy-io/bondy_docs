@@ -202,7 +202,7 @@ Ready to simplify your distributed application architecture?
 
 - **Learn the concepts**: Understand [WAMP](/concepts/what_is_wamp) and [Bondy's architecture](/concepts/architecture)
 - **See it in action**: Follow the [getting started tutorial](/tutorials/getting_started/marketplace)
-- **Deploy it**: Check out the [deployment guides](/guides/deployment)
+- **Deploy it**: Check out the [deployment guides](/guides/deployment/running_a_cluster)
 - **Get support**: Join the [community forum](https://github.com/bondy-io/bondy/discussions)
 
 Bondy brings sanity back to distributed application development. It won't solve every problem—essential complexity remains—but it eliminates the accidental complexity that has plagued the industry for too long.

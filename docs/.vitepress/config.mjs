@@ -564,6 +564,12 @@ export default {
               link: '/guides/programming/loading_api_spec',
               isFeature: true,
               description: "Learn how to load an API Gateway Specification using the HTTP Admin API."
+            },
+            {
+              text: 'Using the RPC Gateway',
+              link: '/guides/programming/rpc_gateway',
+              isFeature: true,
+              description: "Bridge WAMP RPC calls to upstream HTTP/REST services with step-by-step examples."
             }
           ]
         },
@@ -688,6 +694,18 @@ export default {
               link: '/concepts/http_transports',
               isFeature: true,
               description: "Learn how to use HTTP long-polling and Server-Sent Events transports for WAMP sessions."
+            },
+            {
+              text: 'HTTP API Gateway',
+              link: '/concepts/api_gateway',
+              isFeature: true,
+              description: "Route incoming HTTP/REST requests to WAMP procedures or external APIs using declarative JSON specifications."
+            },
+            {
+              text: 'RPC Gateway',
+              link: '/concepts/rpc_gateway',
+              isFeature: true,
+              description: "Bridge WAMP RPC calls to upstream HTTP/REST services with automatic auth, retries, and error mapping."
             },
             {
               text: 'Clustering',
@@ -841,6 +859,12 @@ export default {
             {
               text: 'Bridge Relay (Edge)',
               link: '/reference/configuration/bridge_relay',
+              isFeature: true
+            },
+            {
+              text: 'RPC Gateway',
+              description: 'Configure WAMP-to-HTTP service bridges with authentication, connection pools, and secret management.',
+              link: '/reference/configuration/rpc_gateway',
               isFeature: true
             }
           ]
