@@ -866,6 +866,12 @@ export default {
               description: 'Configure WAMP-to-HTTP service bridges with authentication, connection pools, and secret management.',
               link: '/reference/configuration/rpc_gateway',
               isFeature: true
+            },
+            {
+              text: 'Certificate Manager',
+              description: 'Configure the CA trust store, server certificate rotation, and mTLS settings.',
+              link: '/reference/configuration/cert_manager',
+              isFeature: true
             }
           ]
         },
@@ -959,6 +965,11 @@ export default {
               link: '/reference/wamp_api/api_gateway',
               isFeature: true,
               description: "Load and manage API Gateway specifications."
+            },
+            { text: 'Certificate Manager',
+              link: '/reference/wamp_api/cert_manager',
+              isFeature: true,
+              description: "Live TLS certificate rotation, CA trust store management, and mTLS configuration."
             },
             { text: 'Error URIs',
               link: '/reference/wamp_api/errors/index',
