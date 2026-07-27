@@ -591,7 +591,8 @@ export default {
           text: 'Security',
           collapsible:true,
           items: [
-            // { text: 'TLS configuration', link: '/guides/security/tls_configuration'}
+            // { text: 'TLS configuration', link: '/guides/security/tls_configuration'},
+            { text: 'Configuring CORS & HTTP Security Headers', link: '/guides/security/configuring_cors'}
           ]
         },
         {
@@ -829,6 +830,12 @@ export default {
               text: 'Network Listeners',
               description: 'Configure the network listeners for the different protocols and gateways',
               link: '/reference/configuration/listeners',
+              isFeature: true
+            },
+            {
+              text: 'HTTP Security Headers',
+              description: 'Configure CORS, HSTS, X-Frame-Options, CSP, and other HTTP security response headers per listener',
+              link: '/reference/configuration/http_security_headers',
               isFeature: true
             },
             {
