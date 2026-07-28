@@ -29,14 +29,6 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'yarn'
 
-      # @leapsight/vitepress-theme lives in a private repo. This token
-      # (a PAT with read access to Leapsight/vitepress-template) must
-      # be added as a repository secret before this job can install
-      # dependencies.
-      - name: Configure access to the private theme repo
-        run: |
-          git config --global url."https://x-access-token:${{ secrets.TEMPLATE_REPO_TOKEN }}@github.com/".insteadOf "https://github.com/"
-
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 

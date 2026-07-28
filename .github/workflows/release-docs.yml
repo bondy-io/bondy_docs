@@ -31,11 +31,6 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'yarn'
 
-      # @leapsight/vitepress-theme lives in a private repo; see deploy.yml.
-      - name: Configure access to the private theme repo
-        run: |
-          git config --global url."https://x-access-token:${{ secrets.TEMPLATE_REPO_TOKEN }}@github.com/".insteadOf "https://github.com/"
-
       - name: Derive version from tag
         id: version
         run: |

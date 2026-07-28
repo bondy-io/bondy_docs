@@ -15,7 +15,6 @@ Visit [developer.bondy.io](https://developer.bondy.io) to view the live document
 
 - Node.js 20 or higher (use `.nvmrc` with `nvm use`)
 - Yarn package manager
-- GitHub access to the private [`Leapsight/vitepress-template`](https://github.com/Leapsight/vitepress-template) repo — the site depends on `@leapsight/vitepress-theme`, which lives there (see [Technology Stack](#technology-stack))
 
 ### Setup
 
@@ -29,7 +28,7 @@ cd bondy_docs
 ```bash
 yarn install
 ```
-`yarn install` fetches `@leapsight/vitepress-theme` directly from its private git repo, so this step will fail without GitHub access to it (see Prerequisites above).
+`yarn install` fetches `@leapsight/vitepress-template` directly from its (public) git repo — no credentials needed.
 
 3. Start development server
 ```bash
@@ -101,11 +100,10 @@ When a future rewrite needs the same treatment:
 
 | Secret | Value | Used by |
 |---|---|---|
-| `TEMPLATE_REPO_TOKEN` | A PAT (classic `repo` scope, or fine-grained with Contents: Read) with access to the private `Leapsight/vitepress-template` repo | `deploy.yml`, `release-docs.yml` — installing `@leapsight/vitepress-theme` |
 | `NETLIFY_AUTH_TOKEN` | Netlify personal/team access token | `deploy.yml`'s deploy step |
 | `NETLIFY_SITE_ID` | This site's Netlify Site ID | `deploy.yml`'s deploy step |
 
-No secret is needed for downloading or publishing GitHub Releases — those steps use the automatically-provided `GITHUB_TOKEN`.
+No secret is needed for installing `@leapsight/vitepress-template` (it's a public repo) or for downloading/publishing GitHub Releases (those use the automatically-provided `GITHUB_TOKEN`).
 
 **Netlify:**
 
@@ -141,7 +139,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 - [VitePress](https://vitepress.dev/) - Static site generator
 - [Vue 3](https://vuejs.org/) - UI framework
 - [Markdown](https://www.markdownguide.org/) - Content format
-- [`@leapsight/vitepress-theme`](https://github.com/Leapsight/vitepress-template) - Shared layout, components (Tabs, DataTreeView, ZoomImg, the version picker) and markdown kit reused across Leapsight documentation sites
+- [`@leapsight/vitepress-template`](https://github.com/Leapsight/vitepress-template) (imported as `@leapsight/vitepress-template/theme`) - Shared layout, components (Tabs, DataTreeView, ZoomImg, the version picker) and markdown kit reused across Leapsight documentation sites
 - Site-specific components and plugins (`docs/.vitepress/theme/`) for the WAMP/config reference macros and other Bondy-specific markup
 
 ## License

@@ -3,7 +3,7 @@ import { createWriteStream, cpSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { SitemapStream } from 'sitemap'
 import mdCustomBlock from 'markdown-it-custom-block'
-import { withThemeDefaults } from '@leapsight/vitepress-theme/config'
+import { withThemeDefaults } from '@leapsight/vitepress-template/theme/config'
 
 const links = []
 
@@ -75,7 +75,7 @@ export default withThemeDefaults(
         config: (md) => {
           // Bondy-specific `@[name](args)` reference macros. Tabs,
           // buttons, columns and definitions come from the shared
-          // theme's markdown kit (see @leapsight/vitepress-theme/config).
+          // theme's markdown kit (see @leapsight/vitepress-template/theme/config).
           md.use(mdCustomBlock, {
             // URI
             uri (str) {
@@ -296,6 +296,11 @@ function nav() {
             activeMatch: '/reference/wamp_clients'
           },
           {
+            text: 'Metrics Reference',
+            link: '/reference/metrics',
+            activeMatch: '/reference/metrics'
+          },
+          {
             text: 'Glossary',
             link: '/reference/glossary',
             activeMatch: '/reference/glossary'
@@ -381,6 +386,12 @@ function tutorialsSidebar() {
             link: '/tutorials/getting_started/marketplace',
             isFeature:true,
             description: 'A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS web application.'
+          },
+          {
+            text: 'Getting Started with Bondy Connect',
+            link: '/tutorials/getting_started/bondy_connect',
+            isFeature: true,
+            description: 'Connect to Bondy from Erlang or Elixir using bondy_connect: register and call a procedure, then publish and subscribe.'
           }
         ]
       },
@@ -491,7 +502,23 @@ function guidesSidebar() {
         text: 'Administration',
         collapsible: true,
         items: [
-          // { text: 'Simplifying realm management using prototypes', link: '/guides/administration/simplifying_realm_management_using_prototypes'}
+          {
+            text: 'Backup and Restore',
+            link: '/guides/administration/backup_and_restore',
+            isFeature: true,
+            description: 'Back up and restore the write-ahead log and Merkle Search Tree pack store.'
+          },
+          {
+            text: 'Monitoring with Prometheus & Grafana',
+            link: '/guides/administration/monitoring',
+            isFeature: true,
+            description: 'Run the bundled Prometheus and Grafana stack against your cluster.'
+          },
+          {
+            text: 'Simplifying realm management using prototypes',
+            link: '/guides/administration/simplifying_realm_management_using_prototypes',
+            isFeature: true
+          }
         ]
       },
       {
@@ -506,7 +533,13 @@ function guidesSidebar() {
         text: 'Deployment',
         collapsible: true,
         items: [
-          { text: 'Running a cluster', link: '/guides/deployment/running_a_cluster'}
+          { text: 'Running a cluster', link: '/guides/deployment/running_a_cluster'},
+          {
+            text: 'Upgrading to 1.0.0',
+            link: '/guides/deployment/upgrading_to_1_0_0',
+            isFeature: true,
+            description: 'Migrate an existing deployment to the new storage and replication stack.'
+          }
         ]
       }
   ]
@@ -619,6 +652,18 @@ function conceptsSidebar() {
             text: 'Clustering',
             link: '/concepts/clustering',
             isFeature: true
+          },
+          {
+            text: 'Registry Routing (RIB)',
+            link: '/concepts/registry_routing',
+            isFeature: true,
+            description: "How Bondy scales cross-node call and event routing without replicating every registration to every node."
+          },
+          {
+            text: 'Deletion and Reclamation',
+            link: '/concepts/deletion_and_reclamation',
+            isFeature: true,
+            description: "How Bondy safely reclaims space for deleted replicated data."
           },
         ]
       },
@@ -764,6 +809,12 @@ function configurationSidebar() {
             text: 'Active Anti-entropy',
             link: '/reference/configuration/aae',
             isFeature: true
+          },
+          {
+            text: 'Reclamation',
+            link: '/reference/configuration/reclamation',
+            isFeature: true,
+            description: 'Configure deletion reclamation and origin retirement for the storage layer.'
           },
           {
             text: 'Data Storage',
