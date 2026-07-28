@@ -49,7 +49,7 @@ Crossbar.io is the most well-known WAMP router, created by the team that designe
 
 **Data Replication:**
 - **Crossbar.io**: No built-in state replication in open-source version
-- **Bondy**: Embedded globally-replicated database using epidemic broadcast trees; all configuration and control plane data replicated across cluster
+- **Bondy**: Embedded storage and replication layer (`bondy_db`) using per-table CRDTs converged via pull-based anti-entropy; all configuration and control plane data replicated across cluster
 
 **Additional Features:**
 - **Crossbar.io**: Strong application component hosting, extensive protocol bridges
@@ -86,7 +86,7 @@ This comparison includes NATS, Apache Kafka, RabbitMQ, Apache Pulsar, and gRPC. 
 
 |Project|Patterns and Features|
 |---|---|
-|**Bondy**|**Routed RPC** (first-class with URI-based discovery, call timeouts, cancellation, multiple invocation policies, failover) + **Pub/Sub** (pattern-based subscriptions, event retention, filtering). Unified in single protocol. Payload pass-through mode supported.|
+|**Bondy**|**Routed RPC** (first-class with URI-based discovery, call timeouts, cancellation, multiple invocation policies, failover, progressive call results and progressive calls for streaming results/arguments) + **Pub/Sub** (pattern-based subscriptions, event retention, filtering). Unified in single protocol.|
 |**NATS**|**Pub/Sub** (core messaging) + **Request-Reply** (built-in) + **Queue Groups** (load balancing). JetStream adds persistence, replay, and exactly-once semantics. Dynamic request permissioning supported.|
 |**gRPC**|**RPC only** (unary and streaming semantics). One service per channel. Load balancing requires client-side logic or external proxy. No built-in pub/sub; must use separate system.|
 |**Kafka**|**Pub/Sub** (streaming model with consumer groups for load balancing). Request-reply requires application code to correlate messages across topics. Primarily designed for event streaming and log aggregation.|
@@ -141,7 +141,7 @@ This comparison includes NATS, Apache Kafka, RabbitMQ, Apache Pulsar, and gRPC. 
 
 |Project|Retention and Persistence|
 |---|---|
-|**Bondy**|Event retention (last event per topic for late subscribers). Event history on roadmap. In-memory by default; no disk persistence yet. Focus on real-time communication.|
+|**Bondy**|Event retention (last event per topic for late subscribers), configurable to memory, disk, or both. Event history on roadmap. Focus on real-time communication.|
 |**NATS**|Core NATS: in-memory, no persistence. **JetStream**: persistent streams with configurable retention (time/size/count-based), replicated across cluster (R=1,3,5). File or memory storage.|
 |**gRPC**|No persistence—pure RPC framework. Requires application-level implementation or separate storage system.|
 |**Kafka**|**Persistent by design**. All messages written to disk and replicated. Configurable retention (time-based: default 7 days; size-based: per partition). Retention policies: delete or compact.|
@@ -152,7 +152,7 @@ This comparison includes NATS, Apache Kafka, RabbitMQ, Apache Pulsar, and gRPC. 
 
 |Project|HA and Fault Tolerance|
 |---|---|
-|**Bondy**|**Masterless clustering** (all nodes equal). Automatic failover for RPC registrations and subscriptions. Gossip-based state replication + active anti-entropy for self-healing. No leader election. Continues operating during network partitions with eventual consistency.|
+|**Bondy**|**Masterless clustering** (all nodes equal). Automatic failover for RPC registrations and subscriptions. Per-table CRDT state replication with active anti-entropy (Merkle Search Trees) for self-healing. No leader election. Continues operating during network partitions with eventual consistency.|
 |**NATS**|Core: full-mesh clustering with self-healing. **JetStream**: Raft-based clustering for persistence with R=3 (tolerates 1 failure), R=5 (tolerates 2 failures). Sub-millisecond pause times with generational ZGC (2024).|
 |**gRPC**|No built-in HA—client must implement retry logic and connect to healthy servers. Requires external load balancer or service discovery. Often deployed with service mesh for resilience.|
 |**Kafka**|Replication factor R (default 3) with leader-replica model per partition. Tolerates R-1 broker failures. **KRaft mode** (ZooKeeper removal in v4.0, Q3 2024) improves availability. Controller quorum requires majority.|
@@ -174,7 +174,7 @@ This comparison includes NATS, Apache Kafka, RabbitMQ, Apache Pulsar, and gRPC. 
 
 |Project|Monitoring and Observability|
 |---|---|
-|**Bondy**|Prometheus-compatible metrics export. HTTP APIs for querying node status, sessions, registrations, subscriptions. WAMP meta events for real-time monitoring. Admin API for inspection. Built-in observability at routing layer.|
+|**Bondy**|Comprehensive Prometheus metrics across the storage stack, router, and BEAM VM, exported on the Admin API. Ships with a ready-to-run Grafana dashboard set (Docker Compose) covering cluster topology, anti-entropy convergence, and per-area drill-downs. HTTP and WAMP APIs for querying node status, sessions, registrations, subscriptions. WAMP meta events for real-time monitoring.|
 |**NATS**|HTTP endpoints for monitoring. NATS surveyor for metrics collection. Prometheus integration. JetStream advisories published to subjects ($JS.EVENT.ADVISORY.>). Grafana dashboards available.|
 |**gRPC**|OpenTelemetry integration for traces and metrics. Requires external monitoring setup. Health checking protocol built-in. eBPF-based monitoring tools available (2024). No built-in metrics export.|
 |**Kafka**|JMX metrics (hundreds available). Prometheus exporters (third-party). Confluent Control Center (commercial). Cruise Control (open-source) for cluster management. Extensive metrics require expertise to navigate.|

@@ -234,7 +234,7 @@ When a Bondy ticket is issued from an OIDC flow that includes a refresh token, B
 
 - A pool of refresh workers periodically scans for sessions with expiring access tokens.
 - Each worker calls the IdP's token endpoint using `oidcc_token:refresh/3`.
-- On success, the updated tokens are stored in the ticket's PlumDB record.
+- On success, the updated tokens are stored in the ticket's replicated record.
 - If refresh fails (e.g. the refresh token has been revoked), the ticket remains valid until its own expiry but the OIDC tokens become stale.
 
 ::: info

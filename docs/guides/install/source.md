@@ -12,7 +12,7 @@ If this is your first time trying Bondy, you might prefer to start with one of o
 ## Prerequisites
 
 * Operating Systems: macOS (Intel|Apple Silicon) or Linux (AMD64|ARM64)
-* [Erlang](https://www.erlang.org/downloads) 24 or later
+* [Erlang/OTP](https://www.erlang.org/downloads) 28 or later
 * [Rebar3](http://www.rebar3.org/) 3.17.0 or later
 * openssl
 * libssl
@@ -34,7 +34,7 @@ rebar3 as prod tar
 Untar and copy the resulting tarball to the location where you want to install Bondy e.g. ~/tmp/bondy.
 
 ```bash
-tar -zxvf _build/prod/rel/bondy-1.0.0-rc.4.tar.qz -C ~/tmp/bondy
+tar -zxvf _build/prod/rel/bondy-1.0.0.tar.gz -C ~/tmp/bondy
 ```
 
 ### 2. Running

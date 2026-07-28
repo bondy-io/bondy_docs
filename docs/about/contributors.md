@@ -18,5 +18,4 @@ Read the Coding Guidelines
 |---|---|---|
 |Bondy|Bondy source code|[https://github.com/bondy-io/bondy](https://github.com/bondy-io/bondy)|
 |Bondy Docs|The source code for this website|[https://github.com/bondy-io/bondy_docs](https://github.com/bondy-io/bondy_docs)|
-|PlumDB|The embedded DB used by Bondy|[https://github.com/Leapsight/plum_db](https://github.com/Leapsight/plum_db)|
-|Partisan|The underlying Erlang distribution library used by Bondy and PlumDB|[https://partisan.dev](https://partisan.dev)|
+|Partisan|The underlying Erlang distribution library used by Bondy for clustering and anti-entropy replication|[https://partisan.dev](https://partisan.dev)|

@@ -15,13 +15,13 @@ We recommend disabling this listener for production and using the HTTS listener 
 http.port is the TCP port that Bondy uses for exposing the Admin Rest APIs.
 
 
-@[config](admin_api.http.acceptors_pool_size,pos_integer,200,v0.8.8)
+@[config](admin_api.http.acceptors_pool_size,pos_integer,100,v0.8.8)
 
 The number of acceptors for the Admin API http listener. It determines how many HTTP sockets can be accepted concurrently by Bondy.
 
-@[config](admin_api.http.acceptors_pool_size,pos_integer,250000,v0.8.8)
+@[config](admin_api.http.max_connections,pos_integer,10000,v0.8.8)
 
-The max number of connections for the Admin API https listener.
+The max number of connections for the Admin API http listener.
 
 @[config](admin_api.http.backlog,pos_integer,1024,v0.8.8)
 
@@ -58,6 +58,49 @@ avoid performance issues because of unnecessary copying.
 If enabled, option TCP_NODELAY is turned on for the socket, which
 means that also small amounts of data are sent immediately.
 
+### HTTP/2
+
+HTTP/2 is served on this listener via the `h2c` upgrade or prior-knowledge preface (cleartext; TLS listeners negotiate it via ALPN instead — see the HTTPS listener below).
+
+@[config](admin_api.http.max_concurrent_streams,pos_integer,100,v1.0.0)
+
+Maximum number of concurrent streams (in-flight requests) a single HTTP/2 client connection may have open. Unbounded concurrency lets one connection exhaust the node. Raise it only for trusted, heavily multiplexing clients.
+
+::: warning Capacity planning
+One HTTP/2 connection can carry up to `max_concurrent_streams` in-flight requests, so `max_connections`-based alarms undercount request-level load on this listener.
+:::
+
+@[config](admin_api.http.max_authorization_header_value_length,pos_integer,N/A,v1.0.0)
+
+Maximum length of the `Authorization` header value, in bytes. Authorization headers routinely carry bearer tokens (JWTs) larger than typical header values, so this can be raised independently of the listener's general header-value limit, which applies when this option is not set.
+
+@[config](admin_api.http.max_cookie_header_value_length,pos_integer,N/A,v1.0.0)
+
+Maximum length of the `Cookie` header value, in bytes, independent of the general header-value limit.
+
+@[config](admin_api.http.max_authority_length,pos_integer,255,v1.0.0)
+
+Maximum length of the authority component of the request URI (the `host[:port]` part), in bytes. Requests exceeding it are rejected. Defaults to 255, the DNS name length limit.
+
+@[config](admin_api.http.invalid_response_headers,error_terminate|ignore,error_terminate,v1.0.0)
+
+What to do when a response contains invalid header names or values (e.g. control characters). `error_terminate` replies with a 500 and terminates the stream, preventing header injection and response splitting. `ignore` relays the response unchanged (Cowboy's behaviour before 2.16) — keep the default unless a legacy upstream behind the API gateway requires relaying such headers.
+
+### Trusted Proxies (X-Forwarded-For)
+
+@[config](admin_api.http.proxy_protocol,on|off,off,v0.8.8)
+
+Enables checking the `X-Forwarded-For`/`X-Real-IP`/`Forwarded` headers to determine a request's source IP, used for matching against RBAC Source assignments.
+
+@[config](admin_api.http.proxy_protocol.mode,strict|relaxed,relaxed,v0.8.8)
+
+When proxy protocol checking is enabled: `strict` drops a connection that doesn't send a forwarding header or sends an invalid one; `relaxed` always accepts the connection and logs when the header is missing or invalid.
+
+@[config](admin_api.http.proxy_protocol.trusted_proxies,string,N/A,v1.0.0)
+
+Comma-separated CIDR list of trusted reverse proxies, e.g. `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`. The forwarding headers are only believed when the immediate socket peer's address is within one of these ranges; otherwise the socket peer's own address is used as the source IP. The default is **empty**, meaning no proxy is trusted, so a spoofed forwarding header can never influence source-IP-based authorization — this is what closes the header-spoofing path when Bondy sits behind an untrusted or misconfigured proxy.
+
+When more than one hop is present in `X-Forwarded-For`, Bondy walks the chain from the right and takes the first address that is *not* inside a trusted range, so a client behind a trusted proxy cannot shift its apparent source IP by prepending spoofed hops of its own.
 
 ## Admin API HTTPS Listener
 
@@ -76,7 +119,7 @@ The TCP port that Bondy uses for exposing the Admin APIs.
 
 The number of acceptors for the Admin API HTTPS listener. It determines how many HTTP sockets can be accepted concurrently by Bondy.
 
-@[config](admin_api.https.acceptors_pool_size,pos_integer,250000,v0.8.8)
+@[config](admin_api.https.max_connections,pos_integer,10000,v0.8.8)
 
 The max number of connections for the Admin API https listener.
 
@@ -119,19 +162,60 @@ means that also small amounts of data are sent immediately.
 
 Default cert location.
 
-@[config](admin_api.https.certfile,path,'$(platform_etc_dir)/key.pem',v0.8.8)
+@[config](admin_api.https.keyfile,path,'$(platform_etc_dir)/key.pem',v0.8.8)
 
 Default key location.
 
-@[config](admin_api.https.certfile,cacertfile,'$(platform_etc_dir)/cacert.pem',v0.8.8)
+@[config](admin_api.https.cacertfile,path,'$(platform_etc_dir)/cacert.pem',v0.8.8)
 
 Default signing authority location.
 
-@[config](admin_api.https.versions,string,'$(platform_etc_dir)/cacert.pem',v0.8.8)
+@[config](admin_api.https.versions,string,1.3,v0.8.8)
 
 A comma separate list of TLS protocol versions that will be supported
 At the moment Bondy only supports versions `1.2` and `1.3`.
 
+### HTTP/2
+
+HTTP/2 is served on this listener, negotiated via ALPN during the TLS handshake.
+
+@[config](admin_api.https.max_concurrent_streams,pos_integer,100,v1.0.0)
+
+Maximum number of concurrent streams (in-flight requests) a single HTTP/2 client connection may have open. Unbounded concurrency lets one connection exhaust the node. Raise it only for trusted, heavily multiplexing clients.
+
+::: warning Capacity planning
+One HTTP/2 connection can carry up to `max_concurrent_streams` in-flight requests, so `max_connections`-based alarms undercount request-level load on this listener.
+:::
+
+@[config](admin_api.https.max_authorization_header_value_length,pos_integer,N/A,v1.0.0)
+
+Maximum length of the `Authorization` header value, in bytes, independently of the listener's general header-value limit — useful for large bearer tokens (JWTs).
+
+@[config](admin_api.https.max_cookie_header_value_length,pos_integer,N/A,v1.0.0)
+
+Maximum length of the `Cookie` header value, in bytes, independent of the general header-value limit.
+
+@[config](admin_api.https.max_authority_length,pos_integer,255,v1.0.0)
+
+Maximum length of the authority component of the request URI (the `host[:port]` part), in bytes. Requests exceeding it are rejected. Defaults to 255, the DNS name length limit.
+
+@[config](admin_api.https.invalid_response_headers,error_terminate|ignore,error_terminate,v1.0.0)
+
+What to do when a response contains invalid header names or values (e.g. control characters). `error_terminate` replies with a 500 and terminates the stream, preventing header injection and response splitting. `ignore` relays the response unchanged (Cowboy's behaviour before 2.16).
+
+### Trusted Proxies (X-Forwarded-For)
+
+@[config](admin_api.https.proxy_protocol,on|off,off,v0.8.8)
+
+Enables checking the `X-Forwarded-For`/`X-Real-IP`/`Forwarded` headers to determine a request's source IP, used for matching against RBAC Source assignments.
+
+@[config](admin_api.https.proxy_protocol.mode,strict|relaxed,relaxed,v0.8.8)
+
+When proxy protocol checking is enabled: `strict` drops a connection that doesn't send a forwarding header or sends an invalid one; `relaxed` always accepts the connection and logs when the header is missing or invalid.
+
+@[config](admin_api.https.proxy_protocol.trusted_proxies,string,N/A,v1.0.0)
+
+Comma-separated CIDR list of trusted reverse proxies, e.g. `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`. The forwarding headers are only believed when the immediate socket peer's address is within one of these ranges; otherwise the socket peer's own address is used as the source IP. The default is **empty**, meaning no proxy is trusted, so a spoofed forwarding header can never influence source-IP-based authorization. When more than one hop is present, Bondy walks the `X-Forwarded-For` chain from the right and takes the first address that is *not* inside a trusted range.
 
 ## API Gateway HTTP Listener
 
@@ -152,7 +236,9 @@ with a list of API Specifications.
 
 @[config](api_gateway.http.acceptors_pool_size,integer,200,v0.8.8)
 
-@[config](api_gateway.http.max_connections,integer,500000,v0.8.8)
+@[config](api_gateway.http.max_connections,integer,100000,v0.8.8)
+
+Lowered from 500000 in 1.0.0 — a per-listener cap this high invites file-descriptor and memory exhaustion. Match it to host capacity and raise deliberately rather than relying on the old default.
 
 @[config](api_gateway.http.backlog,integer,4096,v0.8.8)
 
@@ -186,7 +272,47 @@ avoid performance issues because of unnecessary copying.
 
 @[config](api_gateway.http.nodelay,on|off,off,v0.8.8)
 
+### HTTP/2
 
+HTTP/2 is served on this listener via the `h2c` upgrade or prior-knowledge preface (cleartext; TLS listeners negotiate it via ALPN instead — see the HTTPS listener below).
+
+@[config](api_gateway.http.max_concurrent_streams,pos_integer,100,v1.0.0)
+
+Maximum number of concurrent streams (in-flight requests) a single HTTP/2 client connection may have open.
+
+::: warning Capacity planning
+One HTTP/2 connection can carry up to `max_concurrent_streams` in-flight requests, so `max_connections`-based alarms undercount request-level load on this listener.
+:::
+
+@[config](api_gateway.http.max_authorization_header_value_length,pos_integer,N/A,v1.0.0)
+
+Maximum length of the `Authorization` header value, in bytes, independently of the listener's general header-value limit — useful for large bearer tokens (JWTs).
+
+@[config](api_gateway.http.max_cookie_header_value_length,pos_integer,N/A,v1.0.0)
+
+Maximum length of the `Cookie` header value, in bytes, independent of the general header-value limit.
+
+@[config](api_gateway.http.max_authority_length,pos_integer,255,v1.0.0)
+
+Maximum length of the authority component of the request URI (the `host[:port]` part), in bytes. Defaults to 255, the DNS name length limit.
+
+@[config](api_gateway.http.invalid_response_headers,error_terminate|ignore,error_terminate,v1.0.0)
+
+What to do when a response contains invalid header names or values. `error_terminate` replies with a 500 and terminates the stream, preventing header injection and response splitting; `ignore` relays the response unchanged (Cowboy's behaviour before 2.16).
+
+### Trusted Proxies (X-Forwarded-For)
+
+@[config](api_gateway.http.proxy_protocol,on|off,off,v0.8.8)
+
+Enables checking the `X-Forwarded-For`/`X-Real-IP`/`Forwarded` headers to determine a request's source IP, used for matching against RBAC Source assignments.
+
+@[config](api_gateway.http.proxy_protocol.mode,strict|relaxed,relaxed,v0.8.8)
+
+When proxy protocol checking is enabled: `strict` drops a connection that doesn't send a forwarding header or sends an invalid one; `relaxed` always accepts the connection and logs when the header is missing or invalid.
+
+@[config](api_gateway.http.proxy_protocol.trusted_proxies,string,N/A,v1.0.0)
+
+Comma-separated CIDR list of trusted reverse proxies, e.g. `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`. The default is **empty**, meaning no proxy is trusted, so a spoofed forwarding header can never influence source-IP-based authorization. When more than one hop is present, Bondy walks the `X-Forwarded-For` chain from the right and takes the first address that is *not* inside a trusted range, so a client behind a trusted proxy cannot shift its apparent source IP by prepending spoofed hops of its own.
 
 ## API Gateway HTTPS Listener
 
@@ -207,7 +333,9 @@ with a list of API Specifications.
 
 @[config](api_gateway.https.acceptors_pool_size,integer,200,v0.8.8)
 
-@[config](api_gateway.https.max_connections,integer,500000,v0.8.8)
+@[config](api_gateway.https.max_connections,integer,100000,v0.8.8)
+
+Lowered from 500000 in 1.0.0 — a per-listener cap this high invites file-descriptor and memory exhaustion. Match it to host capacity and raise deliberately rather than relying on the old default.
 
 @[config](api_gateway.https.backlog,integer,4096,v0.8.8)
 
@@ -246,18 +374,60 @@ avoid performance issues because of unnecessary copying.
 
 Default cert location.
 
-@[config](api_gateway.https.certfile,path,'$(platform_etc_dir)/key.pem',v0.8.8)
+@[config](api_gateway.https.keyfile,path,'$(platform_etc_dir)/key.pem',v0.8.8)
 
 Default key location.
 
-@[config](api_gateway.https.certfile,cacertfile,'$(platform_etc_dir)/cacert.pem',v0.8.8)
+@[config](api_gateway.https.cacertfile,path,'$(platform_etc_dir)/cacert.pem',v0.8.8)
 
 Default signing authority location.
 
-@[config](api_gateway.https.versions,string,'$(platform_etc_dir)/cacert.pem',v0.8.8)
+@[config](api_gateway.https.versions,string,1.3,v0.8.8)
 
 A comma separate list of TLS protocol versions that will be supported
 At the moment Bondy only supports versions `1.2` and `1.3`. Example: "1.2,1.3".
+
+### HTTP/2
+
+HTTP/2 is served on this listener, negotiated via ALPN during the TLS handshake.
+
+@[config](api_gateway.https.max_concurrent_streams,pos_integer,100,v1.0.0)
+
+Maximum number of concurrent streams (in-flight requests) a single HTTP/2 client connection may have open.
+
+::: warning Capacity planning
+One HTTP/2 connection can carry up to `max_concurrent_streams` in-flight requests, so `max_connections`-based alarms undercount request-level load on this listener.
+:::
+
+@[config](api_gateway.https.max_authorization_header_value_length,pos_integer,N/A,v1.0.0)
+
+Maximum length of the `Authorization` header value, in bytes, independently of the listener's general header-value limit — useful for large bearer tokens (JWTs).
+
+@[config](api_gateway.https.max_cookie_header_value_length,pos_integer,N/A,v1.0.0)
+
+Maximum length of the `Cookie` header value, in bytes, independent of the general header-value limit.
+
+@[config](api_gateway.https.max_authority_length,pos_integer,255,v1.0.0)
+
+Maximum length of the authority component of the request URI (the `host[:port]` part), in bytes. Defaults to 255, the DNS name length limit.
+
+@[config](api_gateway.https.invalid_response_headers,error_terminate|ignore,error_terminate,v1.0.0)
+
+What to do when a response contains invalid header names or values. `error_terminate` replies with a 500 and terminates the stream, preventing header injection and response splitting; `ignore` relays the response unchanged (Cowboy's behaviour before 2.16).
+
+### Trusted Proxies (X-Forwarded-For)
+
+@[config](api_gateway.https.proxy_protocol,on|off,off,v0.8.8)
+
+Enables checking the `X-Forwarded-For`/`X-Real-IP`/`Forwarded` headers to determine a request's source IP, used for matching against RBAC Source assignments.
+
+@[config](api_gateway.https.proxy_protocol.mode,strict|relaxed,relaxed,v0.8.8)
+
+When proxy protocol checking is enabled: `strict` drops a connection that doesn't send a forwarding header or sends an invalid one; `relaxed` always accepts the connection and logs when the header is missing or invalid.
+
+@[config](api_gateway.https.proxy_protocol.trusted_proxies,string,N/A,v1.0.0)
+
+Comma-separated CIDR list of trusted reverse proxies, e.g. `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`. The default is **empty**, meaning no proxy is trusted, so a spoofed forwarding header can never influence source-IP-based authorization. When more than one hop is present, Bondy walks the `X-Forwarded-For` chain from the right and takes the first address that is *not* inside a trusted range.
 
 
 

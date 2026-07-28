@@ -25,7 +25,7 @@ features:
   - title: True Peer-to-Peer Programming
     details: Any component can call any other component. Browsers can expose procedures. Backend can call frontend. IoT devices orchestrate each other. Unlock architectural patterns impossible with traditional client-server protocols.
   - title: Distributed & Always-On
-    details: Masterless clustering with automatic failover. Scales horizontally to millions of concurrent connections. Gossip-based replication and self-healing ensure availability even during network partitions and node failures.
+    details: Masterless clustering with automatic failover. Scales horizontally to millions of concurrent connections. CRDT-based replication with anti-entropy and self-healing ensure availability even during network partitions and node failures.
   - title: Zero External Dependencies
     details: No database, no ZooKeeper, no etcd, no Redis. Everything embedded. Deploy on bare metal, VMs, containers, Kubernetes, or ARM devices. Written in Erlang/OTP for proven reliability and massive concurrency.
   - title: Multi-Tenant by Design

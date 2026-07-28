@@ -723,93 +723,95 @@ wampy.call('com.myapp.process_video_frame', [rawFrameData], {
 });
 ```
 
-## Progressive Call Results<Badge text="WIP"/>
+## Progressive Call Results
 
-Stream results from procedures back to callers incrementally, enabling long-running operations to provide feedback before completion.
+Stream results from procedures back to callers incrementally, so a long-running operation can report partial output before its final result — paging a large result set, streaming file chunks, or reporting progress on a long computation.
 
-### Planned Capabilities
+The dealer feature is **off by default** and enabled per node with `wamp.dealer.progressive_call_results = on`. It also negotiates end to end: it activates only when the caller announced `progressive_call_results` in `HELLO` (paired with `call_canceling`, as the specification requires) and the callee did too. If either side didn't opt in, the option is silently removed — the callee sees a plain invocation, replies once, and the caller gets a single final result. Degradation is silent by design; the call still succeeds.
 
-Callees will be able to send partial results:
+Callees send partial results:
 
 ```javascript
 wampy.register('com.myapp.large_query', {
     rpc: async function(args, kwargs, details) {
         const results = [];
 
-        // Execute query that returns many rows
-        for await (const row of executeQuery(args[0])) {
-            results.push(row);
-
-            // Send progress update
-            details.progress({
-                rows_processed: results.length,
-                current_row: row
-            });
+        // Only present when the caller requested progressive results.
+        if (details.progress) {
+            for await (const row of executeQuery(args[0])) {
+                results.push(row);
+                details.progress({rows_processed: results.length, current_row: row});
+            }
         }
 
-        // Final result
+        // Final result either way.
         return {total_rows: results.length, results: results};
     }
 });
 ```
 
-Callers receive progress updates:
+Callers opt in with `receive_progress` and receive each progressive result before the single terminal one:
 
 ```javascript
 wampy.call('com.myapp.large_query', [query], {
+    receive_progress: true,
     onSuccess: function(finalResult) {
         console.log('Query complete:', finalResult);
     },
     onProgress: function(progressData) {
-        // Called multiple times as results stream in
+        // Called once per progressive result, in order, before onSuccess.
         console.log('Progress:', progressData.rows_processed);
         updateUI(progressData.current_row);
     }
 });
 ```
 
-### Anticipated Use Cases
+This holds across the cluster too: when caller and callee are on different nodes, progressive results are relayed between nodes and still arrive in yield order. `CALL.Options.timeout` is the inactivity window between results — each one restarts it — so a healthy, slowly-dripping stream is not cut off; the Bondy extension `CALL.Options._deadline` (milliseconds) additionally caps the whole call regardless of activity. Cancellation works mid-stream, including across nodes. See [Progressive Call Results](/reference/wamp_clients/bondy_connect) in the `bondy_connect` reference for the Erlang API.
+
+### Use Cases
 
 - **Large result sets** - Stream database query results
 - **Progress feedback** - Update UI as work progresses
 - **Real-time processing** - Display results as they're computed
 - **Incremental rendering** - Show partial data while loading
 
-## Progressive Calls<Badge text="WIP"/>
+## Progressive Calls
 
-Stream arguments to procedures incrementally, enabling callers to send large datasets without blocking.
+The mirror image of progressive results: stream a call's **arguments** from caller to callee in successive chunks under one request, so a caller can send a large payload — a file upload, a client-side stream — without buffering it whole before the call.
 
-### Planned Capabilities
+The dealer feature is **off by default**, enabled per node with `wamp.dealer.progressive_calls = on`. Unlike progressive results, this is **not** silently downgraded: because the caller has already begun streaming, if either peer didn't announce `progressive_calls` (paired with `call_canceling`) in `HELLO`, the call fails outright with `wamp.error.option_not_allowed` rather than being reinterpreted as a plain call.
 
-Callers will be able to send arguments progressively:
+Callers send arguments progressively, reusing one request across chunks:
 
 ```javascript
-const call = wampy.call('com.myapp.process_stream', [], {
+const call = wampy.call('com.myapp.process_stream', [firstChunk], {
     onSuccess: function(result) {
         console.log('Stream processing complete:', result);
     },
     progressive: true
 });
 
-// Send data in chunks
-for (const chunk of largeDataset) {
+// Send further chunks under the same call.
+for (const chunk of remainingChunks) {
     call.progress(chunk);
 }
 
-// Signal completion
-call.complete();
+// Final chunk closes the input stream.
+call.complete(lastChunk);
 ```
 
-Callees receive arguments progressively:
+Callees pull chunks as they arrive:
 
 ```javascript
 wampy.register('com.myapp.process_stream', {
-    rpc: async function(args, kwargs, details) {
-        let total = 0;
+    rpc: async function(firstChunk, kwargs, details) {
+        let total = processChunk(firstChunk);
 
-        // Receive progressive arguments
-        for await (const chunk of details.progressiveArgs()) {
-            total += processChunk(chunk);
+        // Only present when the caller opened a progressive call.
+        if (details.input) {
+            for await (const chunk of details.input()) {
+                total += processChunk(chunk);
+            }
         }
 
         return {total_processed: total};
@@ -817,7 +819,13 @@ wampy.register('com.myapp.process_stream', {
 });
 ```
 
-### Anticipated Use Cases
+Chunks reach the callee in send order, including across cluster nodes. Timeout and cancellation semantics match progressive results: `CALL.Options.timeout` is the inactivity window between chunks, `CALL.Options._deadline` caps the whole call, and cancelling mid-stream works across nodes. See [Progressive Calls](/reference/wamp_clients/bondy_connect) in the `bondy_connect` reference for the Erlang API, including the exact `call_stream/5`/`send_input/4`/`finish_input/4` client functions.
+
+::: warning Mixed-version clusters
+Enable either progressive-call dealer flag only once every node in the cluster runs a Bondy version that supports it — a node without support settles a call on its first progressive result (or cannot continue a caller's argument stream), truncating it.
+:::
+
+### Use Cases
 
 - **Large file uploads** - Stream file data without buffering
 - **Video streaming** - Send video frames continuously
@@ -923,8 +931,8 @@ Advanced RPC features provide fine-grained control over remote procedure calls:
 - **Shared registrations** - Load balancing and failover
 - **Sharded registrations** (roadmap) - Stateful routing by key
 - **Payload passthru** (WIP) - Performance optimization
-- **Progressive call results** (WIP) - Stream results to callers
-- **Progressive calls** (WIP) - Stream arguments to callees
+- **Progressive call results** - Stream results to callers (off by default)
+- **Progressive calls** - Stream arguments to callees (off by default)
 
 These capabilities make WAMP RPC suitable for production systems requiring sophisticated distributed request-response patterns.
 

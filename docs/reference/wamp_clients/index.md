@@ -20,10 +20,8 @@ The following is a pre-selection of libraries we have been using and/or we know 
 
 ### Erlang/Elixir (BEAM)
 
-* [wamp_client](https://github.com/leapsight/wamp_client)
-::: tip Bondy Connect
-We are working hard on our upcoming client for the BEAM, Bondy Connect. It will replace `wamp_client`, adding support for authentication, WebSockets and session pooling.
-:::
+* [Bondy Connect](/reference/wamp_clients/bondy_connect) — Bondy's own production client for the BEAM, supporting all transports and authentication methods, callee/caller/publisher/subscriber roles, and Progressive Calls/Call Results. See the [tutorial](/tutorials/getting_started/bondy_connect) to get started.
+* [wamp_client](https://github.com/leapsight/wamp_client) (legacy — superseded by Bondy Connect)
 
 ### Go
 * [Nexus](https://github.com/gammazero/nexus)

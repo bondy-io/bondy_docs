@@ -4,6 +4,14 @@ related:
       type: concepts
       link: /concepts/architecture
       description: Learn about Bondy's distributed architecture and design principles.
+    - text: Registry Routing (RIB)
+      type: concepts
+      link: /concepts/registry_routing
+      description: How calls and events cross nodes without replicating every registration to every node.
+    - text: Deletion and Reclamation
+      type: concepts
+      link: /concepts/deletion_and_reclamation
+      description: How Bondy safely reclaims space for deleted replicated data.
     - text: Cluster Configuration
       type: reference
       link: /reference/configuration/cluster
@@ -55,12 +63,14 @@ While Bondy supports clusters of hundreds of nodes, most production deployments 
 
 ### Control Plane State
 
-Bondy replicates control plane data across all cluster nodes using a **gossip-based convergent replication protocol**. This includes:
+Bondy replicates control plane data across cluster nodes as **per-table CRDTs** (Conflict-free Replicated Data Types), converging via a pull-based anti-entropy protocol rather than a gossip broadcast: peers compare Merkle Search Tree root hashes and exchange only the pages that actually differ. See [Architecture](/concepts/architecture) for how the storage layer (`bondy_db`/`bondy_oplog`) fits together. This covers:
 
 - **Realm definitions** - URIs, security settings, SSO configuration
 - **User accounts** - Identities, credentials, group memberships
 - **Access control rules** - Permissions, role assignments, source definitions
 - **API Gateway specifications** - HTTP routing rules and transformations
+
+Deleting a value here is itself a replicated operation, and the space it occupied is only physically reclaimed once every cluster member has provably seen the deletion — see [Deletion and Reclamation](/concepts/deletion_and_reclamation) for why that distinction is necessary and how Bondy makes it safe.
 
 ### Eventual Consistency
 
@@ -75,16 +85,16 @@ This means:
 - The system automatically reconciles conflicts when healed
 
 ::: tip Active Anti-Entropy
-Bondy uses **Active Anti-Entropy (AAE)** to proactively detect and repair state divergence. AAE periodically compares state across nodes using Merkle trees and repairs any inconsistencies, ensuring convergence even after prolonged partitions.
+Bondy uses **Active Anti-Entropy (AAE)** to proactively detect and repair state divergence. AAE periodically compares each shard's Merkle Search Tree against a peer's and pulls only the divergent pages, ensuring convergence even after prolonged partitions. See the [Active Anti-Entropy Configuration Reference](/reference/configuration/aae) for the sync protocol and its tunables, including the authentication freshness fence that refuses to authenticate against provably stale security state.
 :::
 
 ### Message Routing
 
-Unlike control plane state, **WAMP messages are routed in real-time** without replication:
+Unlike control plane state, **WAMP messages are routed in real-time** without replicating every registration or subscription cluster-wide. Instead, each node publishes a compact routing summary of what it can serve — see [Registry Routing (RIB)](/concepts/registry_routing) — and cross-node routing is decided from the merged summaries:
 
-- **RPC calls** - Routed to Callees on any node in the cluster
-- **PubSub events** - Delivered to all Subscribers across all nodes
-- **Registration/Subscription routing** - Dynamically maintained across the cluster
+- **RPC calls** - Routed to Callees on any node in the cluster, node-addressed via the RIB
+- **PubSub events** - Relayed to the nodes hosting interested Subscribers, then delivered locally on each
+- **Registration/Subscription routing** - Dynamically maintained across the cluster via the RIB's summary cells, not full-entry replication
 
 Bondy tracks which node hosts each client session and routes messages accordingly. If a node fails, clients on that node disconnect, but other clients continue operating normally.
 
@@ -112,7 +122,11 @@ When a new node starts:
 5. **Join Complete** - Node begins accepting client connections and routing messages
 
 ::: warning Version Compatibility
-All nodes in a cluster must run compatible Bondy versions. Rolling upgrades are supported within minor versions (e.g., 1.1.x → 1.2.x), but major version upgrades typically require cluster downtime.
+All nodes in a cluster must run compatible Bondy versions. Rolling upgrades are supported within minor versions (e.g., 1.1.x → 1.2.x), but major version upgrades typically require cluster downtime — see [Upgrading to 1.0.0](/guides/deployment/upgrading_to_1_0_0) for the current major upgrade.
+:::
+
+::: warning Peer plane security
+The Partisan peer plane (the connections nodes use to cluster) is plaintext and unauthenticated by default. When automatic peer discovery is configured, Bondy refuses to start unless the peer plane is secured with TLS, or the risk is explicitly acknowledged for a network-isolated cluster — an insecure peer plane would otherwise let an on-path attacker read or modify replicated credentials and realm signing keys. See [Cluster Configuration](/reference/configuration/cluster) for `cluster.tls.*`.
 :::
 
 ## Fault Tolerance
@@ -224,6 +238,8 @@ bondy1 ←→ bondy2  bondy4 ←→ bondy5
 ## See Also
 
 - [Architecture](/concepts/architecture) - Deep dive into Bondy's distributed design
+- [Registry Routing (RIB)](/concepts/registry_routing) - How calls and events cross nodes at scale
+- [Deletion and Reclamation](/concepts/deletion_and_reclamation) - How deleted replicated data is safely reclaimed
 - [Running a Cluster](/guides/deployment/running_a_cluster) - Deployment guide
 - [Cluster Configuration](/reference/configuration/cluster) - Configuration reference
 - [Active Anti-Entropy](/reference/configuration/aae) - AAE configuration and tuning

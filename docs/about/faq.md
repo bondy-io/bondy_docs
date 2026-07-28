@@ -71,7 +71,7 @@ All messages within Bondy are routed within a realm. A client with a session att
 
 ### Does Bondy depend on an external database server?
 
-No, Bondy does not depend on any external database server. Every Bondy node embeds a database which at the moment is based on Basho's fork of LevelDB but we have plans to support and/or migrate to other backends in the future.
+No, Bondy does not depend on any external database server. Every Bondy node embeds `bondy_db`, a purpose-built storage and replication stack: durable tables are backed by a `leveled` LSM-tree store, with per-table CRDT convergence replicated across the cluster via `bondy_oplog`'s anti-entropy protocol. See [Data Storage & Replication](/concepts/architecture) for details.
 
 ### Why does Bondy use its own embedded database?
 

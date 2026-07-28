@@ -196,11 +196,93 @@ Bondy Security can be completely configured dynamically via API, read more about
 This options is for those cases when you want to ensure a given configuration is applied every time Bondy restarts.
 
 :::warning
-Notice that every node will apply the security configuration on startup persisting it to the embedded replica of the database. Eventually, when joins a cluster this will trigger an actiove-anti entropy exchange, synchronising the data with peer nodes.
+Every node applies the security configuration on startup, persisting it to the embedded replica of the database. Eventually, when it joins a cluster, this will trigger an active anti-entropy exchange, synchronising the data with peer nodes.
 
-This is not a major problem when the configuration file has static data. However, the Realm object will generate signing keys if those are not provided in its definition, which means every new node will create new keys, effectively disabling the previous ones, this might trigger authentication tickets obtain in other nodes to be invalidated.
+Boot-time configuration application is declarative and idempotent: re-applying the same configuration on every boot no longer generates spurious replicated writes, and realm signing keys no longer regenerate on each boot (they live in their own union-merged structure, independent of the realm's identity hash).
+:::
 
-At the moment the way to avoid this is by either not this option and using dynamic configuration via HTTP or WAMP Admin APIs instead, or by configuring the signing keys in the Realm object, so that Bondy always applies the same keys.
+## Rate Limiting
+
+Inbound rate limiting applies token-bucket limits on connection establishment, handshakes, and authentication attempts, keyed by source IP. It is **off by default** and **fails open**: if the rate limiter process is not up, requests proceed unthrottled rather than being rejected. Each `rate` is tokens per second (steady-state); `capacity` is the burst size.
+
+@[config](security.rate_limit.enabled,on|off,off,v1.0.0)
+
+Master switch for inbound rate limiting.
+
+@[config](security.rate_limit.handshake.rate,integer,10,v1.0.0)
+
+Token-bucket refill rate, in tokens per second, for `HELLO` (pre-authentication handshake) attempts per source IP.
+
+@[config](security.rate_limit.handshake.capacity,integer,50,v1.0.0)
+
+Burst size (bucket capacity) for the same `HELLO` limit.
+
+@[config](security.rate_limit.auth.rate,integer,5,v1.0.0)
+
+Token-bucket refill rate, in tokens per second, for `AUTHENTICATE` (credential verification) attempts per source IP.
+
+@[config](security.rate_limit.auth.capacity,integer,20,v1.0.0)
+
+Burst size (bucket capacity) for the same `AUTHENTICATE` limit.
+
+@[config](security.rate_limit.connection.rate,integer,20,v1.0.0)
+
+Token-bucket refill rate, in tokens per second, for new connections per source IP, applied at the transport handler before authentication.
+
+@[config](security.rate_limit.connection.capacity,integer,100,v1.0.0)
+
+Burst size (bucket capacity) for the same connection limit.
+
+@[config](security.rate_limit.message.enabled,on|off,off,v1.0.0)
+
+Separately opt-in from the other limits above, because it sits on the message hot path: when enabled, the per-session bucket is read once at session open and consumed with a single field read plus an atomics operation per message, so there is no configuration lookup per message.
+
+@[config](security.rate_limit.message.rate,integer,1000,v1.0.0)
+
+Token-bucket refill rate, in tokens per second, for `CALL`/`PUBLISH`/`SUBSCRIBE`/`REGISTER` messages per session.
+
+@[config](security.rate_limit.message.capacity,integer,2000,v1.0.0)
+
+Burst size (bucket capacity) for the same per-session message limit.
+
+::: warning Topology-aware tuning
+A source IP behind a shared NAT or reverse proxy is throttled collectively with every other client behind it. Keep limits generous unless you can confirm clients present distinct source IPs to Bondy — see [Trusted Proxies](/reference/configuration/listeners#trusted-proxies-x-forwarded-for) for how the source IP itself is determined behind a proxy.
+:::
+
+## Realm Signing Keys
+
+Realm private keys can be encrypted at rest (AES-256-GCM) using a master key resolved at boot. The keyring **fails closed**: if the master key is unavailable at boot, encrypted keys are not served.
+
+@[config](security.master_key.provider,none&#124;env&#124;aws_sm,none,v1.0.0)
+
+Enables encryption at rest and selects where the master key material comes from. `none` disables the feature (the default, matching pre-1.0.0 behaviour). `env` reads it from an environment variable; `aws_sm` reads it from AWS Secrets Manager.
+
+@[config](security.master_key.env.var,string,BONDY_SECRET_KEY,v1.0.0)
+
+Name of the environment variable holding the master key, when `provider = env`. A base64-encoded 32-byte key can be generated with `openssl rand -base64 32`.
+
+@[config](security.master_key.aws_sm.secret_id,string,bondy/master_key,v1.0.0)
+
+Secret identifier used to fetch the master key from AWS Secrets Manager, when `provider = aws_sm`.
+
+@[config](security.master_key.aws_sm.region,string,us-east-1,v1.0.0)
+
+AWS region of that secret.
+
+@[config](security.master_key.aws_sm.field,string,master_key,v1.0.0)
+
+Field name within the secret holding the key material.
+
+@[config](security.master_key.encoding,raw&#124;base64,base64,v1.0.0)
+
+How the resolved master key material is encoded. `base64` decodes it to raw bytes (expected 32); `raw` uses the bytes verbatim.
+
+@[config](security.master_key.id,integer,1,v1.0.0)
+
+The key id baked into new encryption envelopes. Bump this on rotation.
+
+::: warning Cluster-wide requirement
+In a cluster, every node must resolve the **same** master key, or replicated realm keys will not decrypt on peers. Back the master key up out of band — losing it makes all encrypted realm keys permanently unrecoverable.
 :::
 
 

@@ -138,21 +138,65 @@ The default value is `off`.
 We recommend enabling this option for production use.
 :::
 
-@[config](cluster.tls.cacertfile,path, '$(platform_etc_dir)/cacert.pem',v0.8.8)
+@[config](cluster.tls.allow_insecure,on|off,off,v1.0.0)
 
-Default signing authority location for cluster TLS connection.
+Bondy's Partisan peer plane is plaintext and unauthenticated by default (`cluster.tls.enabled = off`, and `verify_none` even when TLS is on) — an on-path attacker could otherwise read or modify replicated credentials and realm signing keys, and a rogue peer could inject security state. When automatic peer discovery (`cluster.peer_discovery.enabled = on`) is configured but the peer plane is insecure, **Bondy refuses to start**.
 
-@[config](cluster.tls.certfile,path, '$(platform_etc_dir)/cert.pem',v0.8.8)
+Set this to `on` to acknowledge the risk and downgrade the refusal to a startup warning instead — appropriate for a properly network-isolated cluster. The secure fix is to enable TLS with peer verification and a private cluster CA, as documented below.
 
-Default cert location for cluster TLS connection.
-The default value is `$(platform_etc_dir)/cert.pem`.
+@[config](cluster.tls.server.verify,verify_peer|verify_none,verify_none,v1.0.0)
 
-@[config](cluster.tls.keyfile,path, '$(platform_etc_dir)/key.pem')
+Whether the server side of the cluster TLS connection verifies the peer's certificate against the configured CA. Set to `verify_peer` with a private cluster CA for a secure peer plane — this, together with `cluster.tls.enabled = on`, is what `cluster.tls.allow_insecure` above is guarding against skipping.
 
+@[config](cluster.tls.client.verify,verify_peer|verify_none,verify_none,v1.0.0)
 
-Default key location for cluster TLS connection.
+The same, for the client side of the cluster TLS connection.
 
+@[config](cluster.tls.server.certfile,path,'&#123;&#123;platform_etc_dir&#125;&#125;/server/keycert.pem',v1.0.0)
 
+Certificate location for the server side of the cluster TLS connection.
+
+@[config](cluster.tls.server.keyfile,path,'&#123;&#123;platform_etc_dir&#125;&#125;/server/key.pem',v1.0.0)
+
+Key location for the server side of the cluster TLS connection.
+
+@[config](cluster.tls.server.cacertfile,path,'&#123;&#123;platform_etc_dir&#125;&#125;/server/cacert.pem',v1.0.0)
+
+CA certificate location for the server side of the cluster TLS connection.
+
+@[config](cluster.tls.server.versions,string,1.3,v1.0.0)
+
+Comma-separated TLS protocol version(s) (`1.2` and/or `1.3`) supported by the server side.
+
+@[config](cluster.tls.client.certfile,path,'&#123;&#123;platform_etc_dir&#125;&#125;/client/keycert.pem',v1.0.0)
+
+Certificate location for the client side of the cluster TLS connection.
+
+@[config](cluster.tls.client.keyfile,path,'&#123;&#123;platform_etc_dir&#125;&#125;/client/key.pem',v1.0.0)
+
+Key location for the client side of the cluster TLS connection.
+
+@[config](cluster.tls.client.cacertfile,path,'&#123;&#123;platform_etc_dir&#125;&#125;/client/cacert.pem',v1.0.0)
+
+CA certificate location for the client side of the cluster TLS connection.
+
+@[config](cluster.tls.client.versions,string,1.3,v1.0.0)
+
+Comma-separated TLS protocol version(s) supported by the client side.
+
+## Registry Routing (RIB)
+
+Cross-node call and event routing is unconditional — there is nothing to enable. These two settings tune observability and flap control only; neither changes what the registry replicates. See [Registry Routing (RIB)](/concepts/registry_routing) for the concept.
+
+@[config](registry.rib.check_interval,duration_time_units,5m,v1.0.0)
+
+How often each node compares its summary cells against the registry ground truth per realm, logging a warning naming any divergence found. `0` disables the sweep.
+
+@[config](registry.rib.damping,duration_time_units,0,v1.0.0)
+
+Route-flap damping window. `0` (the default) disables it. On a node whose callee count for a procedure changes rapidly, a non-zero window coalesces updates that change only the callee count to at most one write per window. A procedure's first registration on a node, or its last one leaving, always propagates immediately regardless of this setting.
+
+The summary machinery is instrumented on the Admin API `/metrics` endpoint (`bondy_registry_rib_members`, `bondy_registry_rib_stub_cells`, `bondy_registry_rib_divergences`, `bondy_registry_rib_damping_suppressions_total`, `bondy_rpc_rib_completions_total`, `bondy_rpc_rib_retries_total`), and covered by a dedicated **Registry RIB** section in the bundled Grafana dashboard.
 
 ## Peer Discovery / Automatic Join
 

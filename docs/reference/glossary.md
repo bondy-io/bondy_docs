@@ -37,6 +37,18 @@ Bondy uses a Push-Pull Anti-entropy strategy.
 
 When performed, cluster nodes tell each other about the keys and what versions they have (using [Merkle Trees](#merkle-trees). If they notice a divergence then they start sending each other the differing keys. If a key has conflicting values Bondy will run a conflict resolution function (different entities in Bondy use different conflict resolution functions).
 
+## Anti-entropy
+
+Anti-entropy is the background process by which Bondy cluster nodes converge replicated state: peers compare what they hold and reconcile whatever differs, rather than requiring synchronous agreement on every write before it is considered durable. Bondy's storage layer, `bondy_db`, runs anti-entropy through its `bondy_oplog` component by comparing [Merkle Search Tree](#merkle-search-tree-mst) root hashes and exchanging only the divergent pages. See [Active Anti-entropy (AAE)](#active-anti-entropy-aae) for Bondy's proactively scheduled implementation of this process, and [Clustering](/concepts/clustering) for how it fits into cluster-wide replication.
+
+## Causal stability
+
+Causal stability is the property that licenses Bondy to physically reclaim deleted data: a timestamp becomes causally stable once every operation that could still be delivered is provably newer than it, so the concurrent write its tombstone exists to reject can no longer arrive. Bondy computes stability from cluster membership and confirmed anti-entropy rounds rather than from a timeout, so a single unreachable node holds reclamation back until it is retired. See [Deletion and Reclamation](/concepts/deletion_and_reclamation) for the full mechanism.
+
+## Conflict-free Replicated Data Type (CRDT)
+
+A Conflict-free Replicated Data Type (CRDT) is a data structure whose replicas converge to the same value automatically, regardless of the order in which updates are delivered and without coordination between replicas. Every table in Bondy's storage layer, `bondy_db`, is backed by a CRDT, so concurrent writes accepted on different nodes merge deterministically once anti-entropy delivers them.
+
 ## Convergence
 
 ## Distributed application
@@ -50,6 +62,14 @@ These conflicts occur when objects are either:
 
 - **missing**, as when one node holds a replica of the object and another node does not, or
 - **divergent**, as when the values of an existing object differ across nodes.
+
+## Hybrid Logical Clock (HLC)
+
+A Hybrid Logical Clock (HLC) is a timestamp that combines wall-clock time with a logical counter, ordering events consistently with causality without requiring cluster nodes' clocks to be synchronized. Bondy stamps every replicated operation with an HLC, which its CRDTs use to resolve concurrent writes deterministically and which anti-entropy uses to determine [causal stability](#causal-stability).
+
+## Merkle Search Tree (MST)
+
+A Merkle Search Tree (MST) is a search tree whose nodes are also content-hashed, so comparing two trees' root hashes reveals whether they hold the same data, and walking down from a mismatched root isolates exactly which pages differ. Bondy's storage layer, `bondy_db`, keeps one MST per table; anti-entropy compares root hashes between peers and exchanges only the divergent pages rather than comparing every key. Not to be confused with a plain [Merkle Tree](#merkle-trees): an MST is also an ordered, incrementally updatable search structure, not just a hash tree over a fixed set of leaves.
 
 ## Merkle Trees
 A Merkle Tree is a hash tree where leaves are hashes of the values of individual keys. Parent nodes are hashes of their respective children.
@@ -104,6 +124,10 @@ In WAMP's Routed RPC pattern:
 Unlike traditional RPC frameworks which are addressed directly and strictly unidirectional (client-to-server), WAMP RPCs are routed by the Router and work bidirectionally. This means any WAMP client can act as both Caller and Callee, enabling flexible architectures where browser clients can call procedures on other browser clients.
 
 This pattern is one of the two core messaging patterns provided by WAMP (the other being [Publish/Subscribe](#publish-subscribe)).
+
+## Routing Information Base (RIB)
+
+The Routing Information Base (RIB) is Bondy's mechanism for routing WAMP calls and events across cluster nodes without replicating every registration and subscription to every node. Each node publishes only a compact summary cell per `(realm, match policy, URI, node)` it serves; other nodes merge these summaries into a stub view used to pick the right node for a remote call or event, then resolve the actual callee or subscribers locally. See [Registry Routing (RIB)](/concepts/registry_routing) for the full mechanism.
 
 ## Service Mesh
 A service mesh is a dedicated network layer that sits above the service layer and enables service-to-service communication. Its communication channels rely on distributed APIs instead of centralized and discrete appliances.

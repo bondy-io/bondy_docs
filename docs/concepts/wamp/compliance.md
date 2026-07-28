@@ -15,7 +15,7 @@ The following two sections go into a detail compliance analysis listing what WAM
 |Web Socket transport|:heavy_check_mark:|||
 |Batched Web Socket transport|:x:||Yes|
 |Raw Socket transport|:heavy_check_mark:|||
-|Longpoll transport|:x:|||
+|Longpoll transport|:heavy_check_mark:|||
 |Transport and Session Lifetime|:heavy_check_mark:<br>Each session establishes a new transport connection|||
 |Close session and connection on protocol errors|:heavy_check_mark:|||
 |Serializations: Support JSON and Msgpack|:heavy_check_mark:| BERT, Erlang (subset)|CBOR, Flatbuffers|
@@ -45,7 +45,7 @@ The following two sections go into a detail compliance analysis listing what WAM
 |---|---|---|---|
 |Challenge-response authentication|:heavy_check_mark:||
 |Ticket authentication|:heavy_check_mark:|Allows [Single Sign-on](/concepts/single_sign_on) to multiple realms|
-|Cookie authentication|:x:||No|
+|Cookie authentication|:heavy_check_mark:||No|
 
 ### Pub/Sub Features
 
@@ -75,8 +75,8 @@ The following two sections go into a detail compliance analysis listing what WAM
 |Sharded Registration|:x:||Yes|
 |Registration Revocation|:x:||Yes|
 |Procedure Reflection|:x:||Yes|
-|Progressive Call Results|:x:||Yes|
-|Progressive Calls|:x:||Yes|
+|Progressive Call Results|:heavy_check_mark:|Off by default (`wamp.dealer.progressive_call_results`)||
+|Progressive Calls|:heavy_check_mark:|Off by default (`wamp.dealer.progressive_calls`)||
 
 
 
