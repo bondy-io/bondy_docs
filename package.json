@@ -28,17 +28,12 @@
     "check": "yarn format:check && yarn lint:md && yarn spellcheck"
   },
   "dependencies": {
+    "@leapsight/vitepress-theme": "git+https://github.com/Leapsight/vitepress-template.git#path:/theme",
     "@sindresorhus/slugify": "^2.1.1",
     "@types/markdown-it": "^14.1.2",
     "markdown-it": "^14.1.0",
     "markdown-it-container": "^4.0.0",
     "markdown-it-custom-block": "^1.0.0",
-    "markdown-it-deflist": "^3.0.0",
-    "markdown-it-footnote": "^4.0.0",
-    "markdown-it-katex": "^2.0.3",
-    "markdown-it-task-lists": "^2.1.1",
-    "medium-zoom": "^1.1.0",
-    "sitemap": "^8.0.0",
-    "switch-ts": "^1.0.9"
+    "sitemap": "^8.0.0"
   }
 }

@@ -1,0 +1,78 @@
+name: Deploy
+
+# Builds the current version fresh, downloads every archived version's
+# already-built package from GitHub Releases (see release-docs.yml —
+# archived versions are never rebuilt here), combines them, and pushes
+# the result to Netlify as a production deploy.
+
+on:
+  push:
+    branches: [master]
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed for lastUpdated
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+
+      # @leapsight/vitepress-theme lives in a private repo. This token
+      # (a PAT with read access to Leapsight/vitepress-template) must
+      # be added as a repository secret before this job can install
+      # dependencies.
+      - name: Configure access to the private theme repo
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.TEMPLATE_REPO_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build documentation (current version)
+        run: yarn docs:build
+
+      - name: Assemble combined site
+        run: |
+          mkdir -p combined
+          cp -R docs/.vitepress/dist/. combined/
+
+      # Reads docs/versions.json and, for each archived entry, downloads
+      # that tag's release asset (built once by release-docs.yml) and
+      # unpacks it at /v<version>/. Nothing here is rebuilt.
+      - name: Fetch archived versions from GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          jq -c '.archived[]' docs/versions.json | while read -r entry; do
+            version=$(echo "$entry" | jq -r '.version')
+            tag=$(echo "$entry" | jq -r '.tag')
+            echo "Fetching release '$tag' for /v$version/ ..."
+            mkdir -p "combined/v$version"
+            gh release download "$tag" --repo "${{ github.repository }}" --pattern '*.tar.gz' --output "$tag.tar.gz" --clobber
+            tar -xzf "$tag.tar.gz" -C "combined/v$version"
+          done
+
+      # Requires the Netlify site's own git-triggered auto-publish to be
+      # switched off (Site settings -> Build & deploy -> Stop auto
+      # publishing), so this push is the only thing that produces a
+      # production deploy. NETLIFY_AUTH_TOKEN is a personal/team Netlify
+      # auth token; NETLIFY_SITE_ID is this site's API ID (Site settings
+      # -> General -> Site details). Both must be added as repository
+      # secrets.
+      - name: Deploy combined site to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: npx --yes netlify-cli deploy --prod --dir=combined --message "Deploy ${{ github.sha }}"

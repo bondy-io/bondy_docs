@@ -1,0 +1,70 @@
+name: Release Docs Version
+
+# Builds a tagged docs snapshot exactly once and stores it as a GitHub
+# Release asset. This build is never repeated — deploy.yml downloads
+# the resulting package on every future deploy instead of rebuilding
+# it. To add a new archived version: tag it (docs-<version>), let this
+# workflow publish the release, then add an entry to docs/versions.json
+# so deploy.yml knows to fetch it.
+
+on:
+  push:
+    tags:
+      - 'docs-*'
+
+permissions:
+  contents: write # needed to create the GitHub Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed for lastUpdated
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+
+      # @leapsight/vitepress-theme lives in a private repo; see deploy.yml.
+      - name: Configure access to the private theme repo
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.TEMPLATE_REPO_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Derive version from tag
+        id: version
+        run: |
+          echo "version=${GITHUB_REF_NAME#docs-}" >> "$GITHUB_OUTPUT"
+
+      # docs-1.0.0-rc was tagged before the vitepress-template rebase
+      # introduced the DOCS_BASE build-time convention, so its config.mjs
+      # doesn't read that env var. This patches the base in directly for
+      # that one legacy tag only; every tag cut after the rebase reads
+      # DOCS_BASE natively and skips this step.
+      - name: Patch base path (pre-DOCS_BASE tags only)
+        if: github.ref_name == 'docs-1.0.0-rc'
+        run: |
+          sed -i "0,/^export default {/s//export default {\n    base: '\/v${{ steps.version.outputs.version }}\/',/" docs/.vitepress/config.mjs
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build documentation
+        env:
+          DOCS_BASE: /v${{ steps.version.outputs.version }}/
+        run: yarn docs:build
+
+      - name: Package build output
+        run: tar -czf "docs-${{ steps.version.outputs.version }}.tar.gz" -C docs/.vitepress/dist .
+
+      - name: Create GitHub Release with the built package
+        uses: softprops/action-gh-release@v2
+        with:
+          name: 'Docs ${{ steps.version.outputs.version }}'
+          files: 'docs-${{ steps.version.outputs.version }}.tar.gz'
+          generate_release_notes: true

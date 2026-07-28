@@ -6,7 +6,7 @@ If you don't know Erlang you can still contribute to the project, specially if y
 
 ## Coding guidelines
 :::: column 1
-::: big-button https://github.com/bondy-io/bondy/blob/develop/CODING_GUIDELINES.md
+::: button https://github.com/bondy-io/bondy/blob/develop/CODING_GUIDELINES.md
 Read the Coding Guidelines
 :::
 ::::

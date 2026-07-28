@@ -1,21 +1,33 @@
 // Sitemap
-import { createWriteStream, cpSync } from 'node:fs'
+import { createWriteStream, cpSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { SitemapStream } from 'sitemap'
-import mdDeflist from 'markdown-it-deflist'
-import mdFootnote from 'markdown-it-footnote'
-import mdTaskLists from 'markdown-it-task-lists'
-import mdKatex from 'markdown-it-katex'
-import mdContainer from 'markdown-it-container'
 import mdCustomBlock from 'markdown-it-custom-block'
+import { withThemeDefaults } from '@leapsight/vitepress-theme/config'
 
 const links = []
 
-export default {
+// Single source of truth for the version picker and the release/deploy
+// workflows (.github/workflows/release-docs.yml, deploy.yml). Each
+// archived entry's `tag` names the git tag whose one-off release build
+// gets downloaded and placed at /v<version>/ at deploy time; `tag` is
+// dropped below since the widget only needs {version, label}.
+const versionsManifest = JSON.parse(
+  readFileSync(resolve(__dirname, '../versions.json'), 'utf-8')
+)
+
+// Serve under a sub-path by setting DOCS_BASE (used to build the
+// archived version snapshots under /v<version>/, see the deploy
+// workflow).
+const base = process.env.DOCS_BASE ?? '/'
+
+export default withThemeDefaults(
+  {
     // These are app level configs.
     lang: 'en-GB',
     titleTemplate: false,
     title: 'Bondy Developer',
+    base,
     // This will render as a <meta> tag in the page HTML.
     description: 'Learn how to develop, deploy and manage distributed applications using Bondy. Bondy is an open-source, always-on and scalable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple communication protocol.',
     head: [
@@ -28,11 +40,12 @@ export default {
       ['meta', {name: "msapplication-TileColor", content: "#171916"}],
       ['meta', { name: "msapplication-config", content: "/assets/favicons/browserconfig.xml"}],
       ['link', { rel: "apple-touch-icon", sizes: "180x180", href: "/assets/favicons/apple-touch-icon.png"}],
-    ['link', { rel: "icon", type: "image/png", sizes: "32x32", href: "/assets/favicons/favicon-32x32.png"}],
-    ['link', { rel: "icon", type: "image/png", sizes: "16x16", href: "/assets/favicons/favicon-16x16.png"}],
+      ['link', { rel: "icon", type: "image/png", sizes: "32x32", href: "/assets/favicons/favicon-32x32.png"}],
+      ['link', { rel: "icon", type: "image/png", sizes: "16x16", href: "/assets/favicons/favicon-16x16.png"}],
       ['link', { rel: "manifest", href: "/assets/favicons/site.webmanifest"}],
       ['link', { rel: "mask-icon", href: "/assets/favicons/safari-pinned-tab.svg", color: "#171916"}],
       ['link', { rel: "shortcut icon", href: "/assets/favicons/favicon.ico"}],
+      ['link', { rel: "stylesheet", href: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" }],
       ['script',{
         defer: true,
         'data-domain':"bondy.dev",
@@ -48,7 +61,6 @@ export default {
       hostname: 'https://developer.bondy.io/'
     },
     appearance: true,
-    lastUpdated: true,
 
     markdown: {
         toc: { level: [3] },
@@ -61,113 +73,9 @@ export default {
           disable: false
         },
         config: (md) => {
-          md.use(mdDeflist)
-          md.use(mdFootnote)
-          md.use(mdTaskLists)
-          md.use(mdKatex)
-          md.use(mdContainer, 'big-button', {
-            validate: function(params) {
-              return params.trim().match(/^big-button\s+(.*)$/);
-            },
-
-            render: function (tokens, idx) {
-              var m = tokens[idx].info.trim().match(/^big-button\s+(.*)$/);
-
-              if (tokens[idx].nesting === 1) {
-                var href = m[1];
-                var target = href.startsWith('http') ? '__blank' : '';
-                // opening tag
-                return '<div class="action"><a class="BondyButton big alt" href="' + href + '" target="' + target + '">';
-
-              } else {
-                // closing tag
-                return '</a></div>\n';
-              }
-            }
-          })
-          md.use(mdContainer, 'definition', {
-            validate: function(params) {
-              return params.trim().match(/^definition\s+(.*)$/);
-            },
-            render: function(tokens, idx) {
-              var m = tokens[idx].info.trim().match(/^definition\s+(.*)$/);
-              if (tokens[idx].nesting === 1) {
-                const title = md.renderInline(m[1] || 'Definition')
-                return `<div class="definition custom-block"><p class="custom-block-title">${title}</p>\n`;
-              } else {
-                return `</div>\n`;
-              }
-            }
-          })
-          md.use(mdContainer, 'column', {
-            validate: function(params) {
-              return params.trim().match(/^column\s+(.*)$/);
-            },
-            render: function (tokens, idx) {
-              var m = tokens[idx].info.trim().match(/^column\s+(.*)$/);
-
-              if (tokens[idx].nesting === 1) {
-                // opening tag
-                return '<div class="column">'
-
-              } else {
-                // closing tag
-                return '</div>\n';
-              }
-            }
-          })
-          md.use(mdContainer, 'columns', {
-            validate: function(params) {
-              return params.trim().match(/^columns\s+(.*)$/);
-            },
-
-            render: function (tokens, idx) {
-              var m = tokens[idx].info.trim().match(/^columns\s+(.*)$/);
-
-              if (tokens[idx].nesting === 1) {
-                // opening tag
-                return '<div class="column-wrapper">'
-
-              } else {
-                // closing tag
-                return '</div>\n';
-              }
-            }
-          })
-          md.use(mdContainer, 'tab', {
-            validate: function(params) {
-              return params.trim().match(/^tab\s+(.*)$/);
-            },
-            render: function(tokens, idx) {
-              var m = tokens[idx].info.trim().match(/^tab\s+(.*)$/);
-
-              if (tokens[idx].nesting === 1) {
-                // opening tag
-                var name = m[1];
-                return '<tab name="' + name + '">';
-
-              } else {
-                // closing tag
-                return '</tab>\n';
-              }
-            }
-          })
-          md.use(mdContainer, 'tabs', {
-            validate: function(params) {
-              return params.trim().match(/^tabs\s+(.*)$/);
-            },
-            render: function(tokens, idx) {
-              var m = tokens[idx].info.trim().match(/^tabs\s+(.*)$/);
-              if (tokens[idx].nesting === 1) {
-                // opening tag
-                return '<tabs cache-lifetime="1000">';
-
-              } else {
-                // closing tag
-                return '</tabs>\n';
-              }
-            }
-          })
+          // Bondy-specific `@[name](args)` reference macros. Tabs,
+          // buttons, columns and definitions come from the shared
+          // theme's markdown kit (see @leapsight/vitepress-theme/config).
           md.use(mdCustomBlock, {
             // URI
             uri (str) {
@@ -244,18 +152,15 @@ export default {
     themeConfig: {
         siteTitle: false,
         logo: '/assets/logo.png',
-        // logo: {
-        //   light: '/assets/logo.png',
-        //   dark: '/assets/logo.png',
-        //   // light: {src:'/assets/logo.png', alt:"Bondy"},
-        //   // dark: {src:'/assets/logo.png', alt:"Bondy"}
-        // },
 
         // Search
-        algolia: {
+        search: {
+          provider: 'algolia',
+          options: {
             appId: '1GA3LX5N2C',
             apiKey: '17d9078a92df8769b75e5a64a3d8f869',
             indexName: 'bondy'
+          }
         },
 
         socialLinks: [
@@ -280,6 +185,21 @@ export default {
         editLink: {
             pattern: 'https://github.com/bondy-io/bondy_docs/edit/main/docs/:path',
             text: 'Edit this page on GitHub'
+        },
+
+        // Shown by the navbar <NavbarVersion> widget as a dropdown.
+        // Sourced from versions.json; each non-current entry defaults to
+        // linking at /v<version>/, which is where the deploy workflow
+        // unpacks that version's released package (see
+        // .github/workflows/deploy.yml and release-docs.yml).
+        versions: [
+          { ...versionsManifest.current, current: true },
+          ...versionsManifest.archived.map(({ tag, ...v }) => v)
+        ],
+
+        // Arbitrary site metadata, readable in markdown via <SiteMeta k="..."/>.
+        metadata: {
+          bondyVersion: versionsManifest.current.version
         },
 
         nav: nav(),
@@ -321,732 +241,719 @@ export default {
     cleanUrls: 'with-subfolders',
     // Set to false for publishing
     ignoreDeadLinks: false,
+  },
+  {
+    // KaTeX CSS is linked in `head` above.
+    markdown: { math: true }
   }
+)
 
-  // Top navigation
+// Top navigation
 
-  function nav() {
-      return [
-        // {
-        //   text: 'Alt Home',
-        //   link: 'alt_index',
-        //   activeMatch: '/'
-        // },
-
-        {
-          text: 'Concepts',
-          link: '/concepts/index',
-          activeMatch: '/concepts/'
-        },
-        {
-          text: 'Tutorials',
-          link: '/tutorials/index',
-          activeMatch: '/tutorials/'
-        },
-        {
-          text: 'How-to Guides',
-          link: '/guides/index',
-          activeMatch: '/guides/'
-        },
-        {
-          text: 'Reference',
-          items: [
-            {
-              text: 'Configuration Reference',
-              link: '/reference/configuration/index',
-              activeMatch: '/reference/configuration'
-            },
-            {
-              text: 'WAMP API Reference',
-              link: '/reference/wamp_api/index',
-              activeMatch: '/reference/wamp_api'
-            },
-            {
-              text: 'HTTP API Reference',
-              link: '/reference/http_api/index',
-              activeMatch: '/reference/http_api'
-            },
-            {
-              text: 'HTTP API Gateway Specification',
-              link: '/reference/api_gateway/index',
-              activeMatch: '/reference/api_gateway'
-            },
-            {
-              text: 'WAMP Client Libraries',
-              link: '/reference/wamp_clients/index',
-              activeMatch: '/reference/wamp_clients'
-            },
-            {
-              text: 'Glossary',
-              link: '/reference/glossary',
-              activeMatch: '/reference/glossary'
-            },
-          ]
-        },
-        {
-          text: 'About',
-          items: [
-            {
-              text: 'Bondy.io',
-              link: 'https://www.bondy.io',
-            },
-            {
-              text: 'FAQ',
-              link: '/about/faq',
-            },
-            {
-              text: 'Community',
-              link: '/about/community',
-            },
-            {
-              text: 'Contributors',
-              link: '/about/contributors',
-            },
-            {
-              text: 'Terms and Policies',
-              link: '/about/terms_and_policies',
-            }
-          ]
-        }
-    ]
-  }
-
-  function sidebars() {
-    return {
-      '/tutorials/': tutorialsSidebar(),
-      '/guides/': guidesSidebar(),
-      '/reference/configuration': configurationSidebar(),
-      '/reference/wamp_api': wampAPISidebar(),
-      '/reference/http_api': httpAPISidebar(),
-      '/reference/api_gateway': httpAPIGatewaySidebar(),
-      '/concepts/': conceptsSidebar()
-    }
-  }
-
-
-  function externalResources() {
+function nav() {
     return [
+      {
+        text: 'Concepts',
+        link: '/concepts/index',
+        activeMatch: '/concepts/'
+      },
+      {
+        text: 'Tutorials',
+        link: '/tutorials/index',
+        activeMatch: '/tutorials/'
+      },
+      {
+        text: 'How-to Guides',
+        link: '/guides/index',
+        activeMatch: '/guides/'
+      },
+      {
+        text: 'Reference',
+        items: [
           {
-            text: 'Community Forum',
-            link: 'https://discuss.bondy.io',
-            isFeature: false
+            text: 'Configuration Reference',
+            link: '/reference/configuration/index',
+            activeMatch: '/reference/configuration'
           },
           {
-            text: 'Community Chat',
-            link: 'https://bondy.zulipchat.com',
-            isFeature: false
+            text: 'WAMP API Reference',
+            link: '/reference/wamp_api/index',
+            activeMatch: '/reference/wamp_api'
           },
           {
-            text: 'Commercial Support',
-            link: 'https://bondy.io/',
-            isFeature: false
+            text: 'HTTP API Reference',
+            link: '/reference/http_api/index',
+            activeMatch: '/reference/http_api'
           },
           {
-            text: 'Github',
-            link: 'https://github.com/bondy-io/bondy',
-            isFeature: false
+            text: 'HTTP API Gateway Specification',
+            link: '/reference/api_gateway/index',
+            activeMatch: '/reference/api_gateway'
+          },
+          {
+            text: 'WAMP Client Libraries',
+            link: '/reference/wamp_clients/index',
+            activeMatch: '/reference/wamp_clients'
+          },
+          {
+            text: 'Glossary',
+            link: '/reference/glossary',
+            activeMatch: '/reference/glossary'
+          },
+        ]
+      },
+      {
+        text: 'About',
+        items: [
+          {
+            text: 'Bondy.io',
+            link: 'https://www.bondy.io',
+          },
+          {
+            text: 'FAQ',
+            link: '/about/faq',
+          },
+          {
+            text: 'Community',
+            link: '/about/community',
+          },
+          {
+            text: 'Contributors',
+            link: '/about/contributors',
+          },
+          {
+            text: 'Terms and Policies',
+            link: '/about/terms_and_policies',
           }
         ]
+      }
+  ]
+}
+
+function sidebars() {
+  return {
+    '/tutorials/': tutorialsSidebar(),
+    '/guides/': guidesSidebar(),
+    '/reference/configuration': configurationSidebar(),
+    '/reference/wamp_api': wampAPISidebar(),
+    '/reference/http_api': httpAPISidebar(),
+    '/reference/api_gateway': httpAPIGatewaySidebar(),
+    '/concepts/': conceptsSidebar()
   }
+}
 
-  // Tutorials Section
 
-  function tutorialsSidebar() {
-    return [
+function externalResources() {
+  return [
         {
-          text: 'Getting Started with WAMP',
-          collapsible: true,
-          items: [
-            {
-              text: 'Marketplace',
-              link: '/tutorials/getting_started/marketplace',
-              isFeature:true,
-              description: 'A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS web application.'
-            }
-          ]
+          text: 'Community Forum',
+          link: 'https://discuss.bondy.io',
+          isFeature: false
         },
         {
-          text: 'Getting Started with HTTP',
-          description: 'Tutorials demonstrating the use of the embedded HTTP API Gateway.',
-          items: [
-            {
-              text: 'Marketplace HTTP API Gateway',
-              link: '/tutorials/getting_started/marketplace_api_gateway',
-              isFeature:true,
-              description: 'A tutorial that demonstrates how to add an HTTP API to an existing project using the HTTP API Gateway.'
-            }
-          ]
+          text: 'Community Chat',
+          link: 'https://bondy.zulipchat.com',
+          isFeature: false
         },
         {
-          text: 'Advanced Security Topics',
-          items: [
-            {
-              text: 'Using Same Sign-on',
-              link: '/tutorials/security/same_sign_on' ,
-              description: 'Learn how to use create and use a Same Sign-on Realm.',
-              isFeature: true
-            },
-            { text: 'More tutorials coming soon...',}
-          ]
+          text: 'Commercial Support',
+          link: 'https://bondy.io/',
+          isFeature: false
+        },
+        {
+          text: 'Github',
+          link: 'https://github.com/bondy-io/bondy',
+          isFeature: false
         }
-    ]
-  }
+      ]
+}
+
+// Tutorials Section
+
+function tutorialsSidebar() {
+  return [
+      {
+        text: 'Getting Started with WAMP',
+        collapsible: true,
+        items: [
+          {
+            text: 'Marketplace',
+            link: '/tutorials/getting_started/marketplace',
+            isFeature:true,
+            description: 'A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS web application.'
+          }
+        ]
+      },
+      {
+        text: 'Getting Started with HTTP',
+        description: 'Tutorials demonstrating the use of the embedded HTTP API Gateway.',
+        items: [
+          {
+            text: 'Marketplace HTTP API Gateway',
+            link: '/tutorials/getting_started/marketplace_api_gateway',
+            isFeature:true,
+            description: 'A tutorial that demonstrates how to add an HTTP API to an existing project using the HTTP API Gateway.'
+          }
+        ]
+      },
+      {
+        text: 'Advanced Security Topics',
+        items: [
+          {
+            text: 'Using Same Sign-on',
+            link: '/tutorials/security/same_sign_on' ,
+            description: 'Learn how to use create and use a Same Sign-on Realm.',
+            isFeature: true
+          },
+          { text: 'More tutorials coming soon...',}
+        ]
+      }
+  ]
+}
 
 
-  // Guides Section
+// Guides Section
 
-  function guidesSidebar() {
-    return [
-        {
-          text: 'Get Bondy',
-          description: 'Bondy can be deployed anywhere from resource-constrained AMD64/ARM64 edge devices to private, hybrid and public clouds running bare metal, virtual machines and containers. Choose the option best suited to your needs.',
-          collapsible: true,
-          items: [
-            {
-              text: 'Install from Source',
-              link: '/guides/install/source',
-              description: 'Build and install Bondy from source.',
-              isFeature: true
-            },
-            // {
-            //   text: 'Install using prebuild Packages',
-            //   link: '/guides/install/packages',
-            //   description: 'Install Bondy as a prebuilt package.',
-            //   isFeature: true
-            // },
-            {
-              text: 'Install using Docker',
-              link: '/guides/install/docker' ,
-              description: 'Use the official Docker images for AMD64 and ARM64 architectures.',
-              isFeature: true
-            },
-            {
-              text: 'Install using Kubernetes',
-              link: '/guides/install/kubernetes' ,
-              description: 'See a starter manifest recipe and taylor it based on your needs.',
-              isFeature: true
-            },
-            // {
-            //   text: 'Install using Homebrew (macOS)',
-            //   link: '/guides/install/packages',
-            //   description: 'Install Bondy using the Homebrew package manager.',
-            //   isFeature: true
-            // },
-          ]
-        },
-        {
-          text: 'Programming with WAMP',
-          collapsible: true,
-          items: [
-            {
-              text: 'General',
-              link: '/guides/programming/general',
-              isFeature: true
-            },
-            {
-              text: 'Remote Procedure Calls',
-              link: '/guides/programming/rpc',
-              isFeature: true
-            },
-            {
-              text: 'Publish and Subscribe',
-              link: '/guides/programming/pub_sub',
-              isFeature: true
-            }
-          ]
-        },
-        {
-          text: 'Programming with HTTP',
-          collapsible: true,
-          items: [
-            {
-              text: 'Loading an API Gateway Specification',
-              link: '/guides/programming/loading_api_spec',
-              isFeature: true,
-              description: "Learn how to load an API Gateway Specification using the HTTP Admin API."
-            },
-            {
-              text: 'Using the RPC Gateway',
-              link: '/guides/programming/rpc_gateway',
-              isFeature: true,
-              description: "Bridge WAMP RPC calls to upstream HTTP/REST services with step-by-step examples."
-            }
-          ]
-        },
-        {
-          text: 'Configuration',
-          collapsible: true,
-          items: [
-            { text: 'Configuration Basics', link: '/guides/configuration/configuration_basics.md'}
-          ]
-        },
-        {
-          text: 'Administration',
-          collapsible: true,
-          items: [
-            // { text: 'Simplifying realm management using prototypes', link: '/guides/administration/simplifying_realm_management_using_prototypes'}
-          ]
-        },
-        {
-          text: 'Security',
-          collapsible:true,
-          items: [
-            // { text: 'TLS configuration', link: '/guides/security/tls_configuration'},
-            { text: 'Configuring CORS & HTTP Security Headers', link: '/guides/security/configuring_cors'}
-          ]
-        },
-        {
-          text: 'Deployment',
-          collapsible: true,
-          items: [
-            { text: 'Running a cluster', link: '/guides/deployment/running_a_cluster'}
-          ]
-        }
-    ]
-  }
+function guidesSidebar() {
+  return [
+      {
+        text: 'Get Bondy',
+        description: 'Bondy can be deployed anywhere from resource-constrained AMD64/ARM64 edge devices to private, hybrid and public clouds running bare metal, virtual machines and containers. Choose the option best suited to your needs.',
+        collapsible: true,
+        items: [
+          {
+            text: 'Install from Source',
+            link: '/guides/install/source',
+            description: 'Build and install Bondy from source.',
+            isFeature: true
+          },
+          {
+            text: 'Install using Docker',
+            link: '/guides/install/docker' ,
+            description: 'Use the official Docker images for AMD64 and ARM64 architectures.',
+            isFeature: true
+          },
+          {
+            text: 'Install using Kubernetes',
+            link: '/guides/install/kubernetes' ,
+            description: 'See a starter manifest recipe and taylor it based on your needs.',
+            isFeature: true
+          },
+        ]
+      },
+      {
+        text: 'Programming with WAMP',
+        collapsible: true,
+        items: [
+          {
+            text: 'General',
+            link: '/guides/programming/general',
+            isFeature: true
+          },
+          {
+            text: 'Remote Procedure Calls',
+            link: '/guides/programming/rpc',
+            isFeature: true
+          },
+          {
+            text: 'Publish and Subscribe',
+            link: '/guides/programming/pub_sub',
+            isFeature: true
+          }
+        ]
+      },
+      {
+        text: 'Programming with HTTP',
+        collapsible: true,
+        items: [
+          {
+            text: 'Loading an API Gateway Specification',
+            link: '/guides/programming/loading_api_spec',
+            isFeature: true,
+            description: "Learn how to load an API Gateway Specification using the HTTP Admin API."
+          },
+          {
+            text: 'Using the RPC Gateway',
+            link: '/guides/programming/rpc_gateway',
+            isFeature: true,
+            description: "Bridge WAMP RPC calls to upstream HTTP/REST services with step-by-step examples."
+          }
+        ]
+      },
+      {
+        text: 'Configuration',
+        collapsible: true,
+        items: [
+          { text: 'Configuration Basics', link: '/guides/configuration/configuration_basics.md'}
+        ]
+      },
+      {
+        text: 'Administration',
+        collapsible: true,
+        items: [
+          // { text: 'Simplifying realm management using prototypes', link: '/guides/administration/simplifying_realm_management_using_prototypes'}
+        ]
+      },
+      {
+        text: 'Security',
+        collapsible:true,
+        items: [
+          // { text: 'TLS configuration', link: '/guides/security/tls_configuration'},
+          { text: 'Configuring CORS & HTTP Security Headers', link: '/guides/security/configuring_cors'}
+        ]
+      },
+      {
+        text: 'Deployment',
+        collapsible: true,
+        items: [
+          { text: 'Running a cluster', link: '/guides/deployment/running_a_cluster'}
+        ]
+      }
+  ]
+}
 
-  // Concepts Section
-  function conceptsSidebar() {
-    return [
+// Concepts Section
+function conceptsSidebar() {
+  return [
 
-        {
-          text: 'Introduction',
-          items: [
-            {
-              text: 'Why Bondy',
-              link: '/concepts/why_bondy' ,
-              isFeature: true,
-              description: "Learn about the need for a unified application networking platform for distributed application development."
-            },
-            {
-              text: 'What is Bondy',
-              link: '/concepts/what_is_bondy',
-              isFeature: true,
-              description: "A high-level description of Bondy, its key features and the key benefits it delivers."
-            },
-            {
-              text: 'What is an Application Network',
-              link: '/concepts/application_networks',
-              isFeature: true,
-              description: "Learn about application networks, their characteristics and benefits, and how Bondy is implementing them. "
-            },
-            {
-              text: 'What is WAMP',
-              link: '/concepts/what_is_wamp' ,
-              isFeature: true,
-              description: "Find out more about the Web Application Messaging Protocol. "
-            },
-            {
-              text: 'How does Bondy work',
-              link: '/concepts/how_does_bondy_work' ,
-              isFeature: true,
-              description: "A high-level description that explains how Bondy works."
-            },
-            {
-              text: 'How is Bondy different',
-              link: '/concepts/how_is_bondy_different',
-              isFeature: true,
-              description: "Learn about Bondy's unique set of features and how it compares to alternative solutions."
-            },
-            {
-              text: 'Features',
-              link: '/concepts/features',
-              isFeature: true,
-              description: "Dive into a more detail description of Bondy's features."
-            },
-            {
-              text: 'Architecture',
-              link: '/concepts/architecture',
-              isFeature: true,
-              description: "Dive into a description of Bondy's architecture and its rationale behind its characteristics."
-            }
-          ]
-        },
-        {
-          text: 'Key Concepts',
-          description: "Learn about the fundamental concepts used by Bondy.",
-          items: [
-            {
-              text: 'Realms',
-              link: '/concepts/realms',
-              isFeature: true,
-              description: "Realms are authentication, authorization, routing and administrative domains that act as namespaces."
-            },
-            {
-              text: 'Same Sign-on',
-              link: '/concepts/same_sign_on',
-              isFeature: true,
-              description: "Do you need to provide users access to multiple realms? Learn about same sign-on realms."
-            },
-            {
-              text: 'Single Sign-on',
-              link: '/concepts/single_sign_on',
-              isFeature: true,
-              description: "Learn how to enable Single Sign-on on multiple realms."
-            },
-            {
-              text: 'OIDC Authentication',
-              link: '/concepts/oidc_authentication',
-              isFeature: true,
-              description: "Learn how to authenticate users via external Identity Providers using OpenID Connect."
-            },
-            {
-              text: 'HTTP Transports (Longpoll & SSE)',
-              link: '/concepts/http_transports',
-              isFeature: true,
-              description: "Learn how to use HTTP long-polling and Server-Sent Events transports for WAMP sessions."
-            },
-            {
-              text: 'HTTP API Gateway',
-              link: '/concepts/api_gateway',
-              isFeature: true,
-              description: "Route incoming HTTP/REST requests to WAMP procedures or external APIs using declarative JSON specifications."
-            },
-            {
-              text: 'RPC Gateway',
-              link: '/concepts/rpc_gateway',
-              isFeature: true,
-              description: "Bridge WAMP RPC calls to upstream HTTP/REST services with automatic auth, retries, and error mapping."
-            },
-            {
-              text: 'Clustering',
-              link: '/concepts/clustering',
-              isFeature: true
-            },
-          ]
-        },
-        {
-          text: 'WAMP Essentials',
-          items: [
-            {
-              text: 'Introduction to WAMP',
-              link: '/concepts/wamp/introduction',
-              isFeature: true,
-              description:'Learn the WAMP basics including how to establish a session and use RPC and Publish/Subscribe.'
-            },
-            {
-              text: 'Communication Patterns',
-              link: '/concepts/wamp/communication_patterns',
-              isFeature: true
-            },
-            {
-              text: 'Routed RPC',
-              link: '/concepts/wamp/rpc',
-              isFeature: true
-            },
-            {
-              text: 'Publish/Subscribe',
-              link: '/concepts/wamp/pubsub',
-              isFeature: true
-            },
-            {
-              text: 'Connections and Sessions',
-              link: '/concepts/wamp/sessions',
-              isFeature: true
-            },
-            {
-              text: 'Naming Best Practices',
-              link: '/concepts/wamp/naming',
-              isFeature: true
-            },
-            {
-              text: 'Security',
-              link: '/concepts/wamp/security',
-              isFeature: true
-            },
-            {
-              text: 'Getting started with WAMP',
-              link: '/concepts/wamp/getting_started',
-              isFeature: true
-            }
-          ]
-        },
-        {
-          text: 'WAMP Features',
-          items: [
-            {
-              text: 'Advanced RPC',
-              link: '/concepts/wamp/advanced/rpc',
-              isFeature: true
-            },
-            {
-              text: 'Advanced Publish/Subscribe',
-              link: '/concepts/wamp/advanced/pubsub',
-              isFeature: true
-            },
-            {
-              text: 'WAMP Compliance',
-              link: '/concepts/wamp/compliance',
-              isFeature: true
-            }
-          ]
-        }
-    ]
-  }
+      {
+        text: 'Introduction',
+        items: [
+          {
+            text: 'Why Bondy',
+            link: '/concepts/why_bondy' ,
+            isFeature: true,
+            description: "Learn about the need for a unified application networking platform for distributed application development."
+          },
+          {
+            text: 'What is Bondy',
+            link: '/concepts/what_is_bondy',
+            isFeature: true,
+            description: "A high-level description of Bondy, its key features and the key benefits it delivers."
+          },
+          {
+            text: 'What is an Application Network',
+            link: '/concepts/application_networks',
+            isFeature: true,
+            description: "Learn about application networks, their characteristics and benefits, and how Bondy is implementing them. "
+          },
+          {
+            text: 'What is WAMP',
+            link: '/concepts/what_is_wamp' ,
+            isFeature: true,
+            description: "Find out more about the Web Application Messaging Protocol. "
+          },
+          {
+            text: 'How does Bondy work',
+            link: '/concepts/how_does_bondy_work' ,
+            isFeature: true,
+            description: "A high-level description that explains how Bondy works."
+          },
+          {
+            text: 'How is Bondy different',
+            link: '/concepts/how_is_bondy_different',
+            isFeature: true,
+            description: "Learn about Bondy's unique set of features and how it compares to alternative solutions."
+          },
+          {
+            text: 'Features',
+            link: '/concepts/features',
+            isFeature: true,
+            description: "Dive into a more detail description of Bondy's features."
+          },
+          {
+            text: 'Architecture',
+            link: '/concepts/architecture',
+            isFeature: true,
+            description: "Dive into a description of Bondy's architecture and its rationale behind its characteristics."
+          }
+        ]
+      },
+      {
+        text: 'Key Concepts',
+        description: "Learn about the fundamental concepts used by Bondy.",
+        items: [
+          {
+            text: 'Realms',
+            link: '/concepts/realms',
+            isFeature: true,
+            description: "Realms are authentication, authorization, routing and administrative domains that act as namespaces."
+          },
+          {
+            text: 'Same Sign-on',
+            link: '/concepts/same_sign_on',
+            isFeature: true,
+            description: "Do you need to provide users access to multiple realms? Learn about same sign-on realms."
+          },
+          {
+            text: 'Single Sign-on',
+            link: '/concepts/single_sign_on',
+            isFeature: true,
+            description: "Learn how to enable Single Sign-on on multiple realms."
+          },
+          {
+            text: 'OIDC Authentication',
+            link: '/concepts/oidc_authentication',
+            isFeature: true,
+            description: "Learn how to authenticate users via external Identity Providers using OpenID Connect."
+          },
+          {
+            text: 'HTTP Transports (Longpoll & SSE)',
+            link: '/concepts/http_transports',
+            isFeature: true,
+            description: "Learn how to use HTTP long-polling and Server-Sent Events transports for WAMP sessions."
+          },
+          {
+            text: 'HTTP API Gateway',
+            link: '/concepts/api_gateway',
+            isFeature: true,
+            description: "Route incoming HTTP/REST requests to WAMP procedures or external APIs using declarative JSON specifications."
+          },
+          {
+            text: 'RPC Gateway',
+            link: '/concepts/rpc_gateway',
+            isFeature: true,
+            description: "Bridge WAMP RPC calls to upstream HTTP/REST services with automatic auth, retries, and error mapping."
+          },
+          {
+            text: 'Clustering',
+            link: '/concepts/clustering',
+            isFeature: true
+          },
+        ]
+      },
+      {
+        text: 'WAMP Essentials',
+        items: [
+          {
+            text: 'Introduction to WAMP',
+            link: '/concepts/wamp/introduction',
+            isFeature: true,
+            description:'Learn the WAMP basics including how to establish a session and use RPC and Publish/Subscribe.'
+          },
+          {
+            text: 'Communication Patterns',
+            link: '/concepts/wamp/communication_patterns',
+            isFeature: true
+          },
+          {
+            text: 'Routed RPC',
+            link: '/concepts/wamp/rpc',
+            isFeature: true
+          },
+          {
+            text: 'Publish/Subscribe',
+            link: '/concepts/wamp/pubsub',
+            isFeature: true
+          },
+          {
+            text: 'Connections and Sessions',
+            link: '/concepts/wamp/sessions',
+            isFeature: true
+          },
+          {
+            text: 'Naming Best Practices',
+            link: '/concepts/wamp/naming',
+            isFeature: true
+          },
+          {
+            text: 'Security',
+            link: '/concepts/wamp/security',
+            isFeature: true
+          },
+          {
+            text: 'Getting started with WAMP',
+            link: '/concepts/wamp/getting_started',
+            isFeature: true
+          }
+        ]
+      },
+      {
+        text: 'WAMP Features',
+        items: [
+          {
+            text: 'Advanced RPC',
+            link: '/concepts/wamp/advanced/rpc',
+            isFeature: true
+          },
+          {
+            text: 'Advanced Publish/Subscribe',
+            link: '/concepts/wamp/advanced/pubsub',
+            isFeature: true
+          },
+          {
+            text: 'WAMP Compliance',
+            link: '/concepts/wamp/compliance',
+            isFeature: true
+          }
+        ]
+      }
+  ]
+}
 
-  // Reference Section
+// Reference Section
 
 
-  function configurationSidebar() {
-    return [
-        {
-          text: 'Configuration Reference',
-          items: [
-            {
-              text: 'Overview',
-              link: '/reference/configuration/index',
-              isFeature: false
-            },
-            {
-              text: 'Configuration basics',
-              description: 'Learn about the Bondy runtime configuration, the Bondy configuration file, its syntax, variable replacement and the required OS-specific configuration.',
-              link: '/reference/configuration/basics',
-              isFeature: true
-            },
-            {
-              text: 'Quickstart Configuration',
-              description: 'The minimal configuration you must do for a quick start.',
-              link: '/reference/configuration/quickstart',
-              isFeature: true
-            }
-          ]
-        },
-        {
-          text: 'Router Configuration',
-          items: [
-            {
-              text: 'Node',
-              description: 'Configure the nodename, platform paths and Erlang VM parameters',
-              link: '/reference/configuration/node',
-              isFeature: true
-            },
-            {
-              text: 'Startup/Shutdown',
-              description: 'Configure options controlling serveral aspects of what happens during startup and shutdown',
-              link: '/reference/configuration/startup_shutdown',
-              isFeature: true
-            },
-            {
-              text: 'Network Listeners',
-              description: 'Configure the network listeners for the different protocols and gateways',
-              link: '/reference/configuration/listeners',
-              isFeature: true
-            },
-            {
-              text: 'HTTP Security Headers',
-              description: 'Configure CORS, HSTS, X-Frame-Options, CSP, and other HTTP security response headers per listener',
-              link: '/reference/configuration/http_security_headers',
-              isFeature: true
-            },
-            {
-              text: 'Security',
-              link: '/reference/configuration/security',
-              isFeature: true
-            },
-            {
-              text: 'Overload Protection',
-              link: '/reference/configuration/overload_protection',
-              isFeature: true
-            },
-            {
-              text: 'Cluster',
-              link: '/reference/configuration/cluster',
-              isFeature: true
-            },
-            {
-              text: 'Active Anti-entropy',
-              link: '/reference/configuration/aae',
-              isFeature: true
-            },
-            {
-              text: 'Data Storage',
-              link: '/reference/configuration/data_storage',
-              isFeature: true
-            },
-            {
-              text: 'Bridge Relay (Edge)',
-              link: '/reference/configuration/bridge_relay',
-              isFeature: true
-            },
-            {
-              text: 'RPC Gateway',
-              description: 'Configure WAMP-to-HTTP service bridges with authentication, connection pools, and secret management.',
-              link: '/reference/configuration/rpc_gateway',
-              isFeature: true
-            },
-            {
-              text: 'Certificate Manager',
-              description: 'Configure the CA trust store, server certificate rotation, and mTLS settings.',
-              link: '/reference/configuration/cert_manager',
-              isFeature: true
-            }
-          ]
-        },
+function configurationSidebar() {
+  return [
+      {
+        text: 'Configuration Reference',
+        items: [
+          {
+            text: 'Overview',
+            link: '/reference/configuration/index',
+            isFeature: false
+          },
+          {
+            text: 'Configuration basics',
+            description: 'Learn about the Bondy runtime configuration, the Bondy configuration file, its syntax, variable replacement and the required OS-specific configuration.',
+            link: '/reference/configuration/basics',
+            isFeature: true
+          },
+          {
+            text: 'Quickstart Configuration',
+            description: 'The minimal configuration you must do for a quick start.',
+            link: '/reference/configuration/quickstart',
+            isFeature: true
+          }
+        ]
+      },
+      {
+        text: 'Router Configuration',
+        items: [
+          {
+            text: 'Node',
+            description: 'Configure the nodename, platform paths and Erlang VM parameters',
+            link: '/reference/configuration/node',
+            isFeature: true
+          },
+          {
+            text: 'Startup/Shutdown',
+            description: 'Configure options controlling serveral aspects of what happens during startup and shutdown',
+            link: '/reference/configuration/startup_shutdown',
+            isFeature: true
+          },
+          {
+            text: 'Network Listeners',
+            description: 'Configure the network listeners for the different protocols and gateways',
+            link: '/reference/configuration/listeners',
+            isFeature: true
+          },
+          {
+            text: 'HTTP Security Headers',
+            description: 'Configure CORS, HSTS, X-Frame-Options, CSP, and other HTTP security response headers per listener',
+            link: '/reference/configuration/http_security_headers',
+            isFeature: true
+          },
+          {
+            text: 'Security',
+            link: '/reference/configuration/security',
+            isFeature: true
+          },
+          {
+            text: 'Overload Protection',
+            link: '/reference/configuration/overload_protection',
+            isFeature: true
+          },
+          {
+            text: 'Cluster',
+            link: '/reference/configuration/cluster',
+            isFeature: true
+          },
+          {
+            text: 'Active Anti-entropy',
+            link: '/reference/configuration/aae',
+            isFeature: true
+          },
+          {
+            text: 'Data Storage',
+            link: '/reference/configuration/data_storage',
+            isFeature: true
+          },
+          {
+            text: 'Bridge Relay (Edge)',
+            link: '/reference/configuration/bridge_relay',
+            isFeature: true
+          },
+          {
+            text: 'RPC Gateway',
+            description: 'Configure WAMP-to-HTTP service bridges with authentication, connection pools, and secret management.',
+            link: '/reference/configuration/rpc_gateway',
+            isFeature: true
+          },
+          {
+            text: 'Certificate Manager',
+            description: 'Configure the CA trust store, server certificate rotation, and mTLS settings.',
+            link: '/reference/configuration/cert_manager',
+            isFeature: true
+          }
+        ]
+      },
 
-        {
-          text: 'Protocols',
-          items: [
-            {
-              text: 'WAMP Features',
-              description: 'Configure several WAMP features like URI strictness, RPC timeouts and message retention',
-              link: '/reference/configuration/wamp',
-              isFeature: true
-            }
-          ]
-        },
-        {
-          text: 'Broker Bridge',
-          items: [
-            {
-              text: 'General',
-              link: '/reference/configuration/broker_bridge',
-              isFeature: true
-            },
-            {
-              text: 'Kafka Bridge',
-              link: '/reference/configuration/kafka_bridge',
-              isFeature: true
-            }
-          ]
-        },
-    ]
-  }
+      {
+        text: 'Protocols',
+        items: [
+          {
+            text: 'WAMP Features',
+            description: 'Configure several WAMP features like URI strictness, RPC timeouts and message retention',
+            link: '/reference/configuration/wamp',
+            isFeature: true
+          }
+        ]
+      },
+      {
+        text: 'Broker Bridge',
+        items: [
+          {
+            text: 'General',
+            link: '/reference/configuration/broker_bridge',
+            isFeature: true
+          },
+          {
+            text: 'Kafka Bridge',
+            link: '/reference/configuration/kafka_bridge',
+            isFeature: true
+          }
+        ]
+      },
+  ]
+}
 
 
-  function wampAPISidebar() {
-    return [
-        {
-          text: 'WAMP API Reference',
-          items: [
-            { text: 'Introduction',
-              link: '/reference/wamp_api/index',
-              isFeature: false
-            },
-            { text: 'Realm',
-              link: '/reference/wamp_api/realm',
-              isFeature: true,
-              description:"Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status."
-            },
-            { text: 'User',
-              link: '/reference/wamp_api/user',
-              isFeature: true,
-              description:"Creating, retrieving and managing users within a realm."
-            },
-            { text: 'Group',
-              link: '/reference/wamp_api/group',
-              isFeature: true,
-              description:"Creating, retrieving and managing groups within a realm."
-            },
-            { text: 'Source',
-              link: '/reference/wamp_api/source',
-              isFeature: true,
-              description:"Creating, retrieving and managing authentication methods and available sources within a realm."
-            },
-            { text: 'Grant',
-              link: '/reference/wamp_api/grant',
-              isFeature: true
-            },
-            { text: 'Session',
-              link: '/reference/wamp_api/session',
-              isFeature: true
-            },
-            { text: 'Ticket',
-              link: '/reference/wamp_api/ticket',
-              isFeature: true,
-              description: "Issuing and revoking tickets."
-            },
-            { text: 'OAuth2 Token',
-              link: '/reference/wamp_api/oauth2_token',
-              isFeature: true
-            },
-            { text: 'Cluster',
-              link: '/reference/wamp_api/cluster',
-              isFeature: true
-            },
-            { text: 'Bridge Relay (Edge)',
-              link: '/reference/wamp_api/bridge_relay',
-              isFeature: true,
-              description: "Creating, retrieving and managing Bridge Relay (Edge) connections."
-            },
-            { text: 'HTTP API Gateway',
-              link: '/reference/wamp_api/api_gateway',
-              isFeature: true,
-              description: "Load and manage API Gateway specifications."
-            },
-            { text: 'Certificate Manager',
-              link: '/reference/wamp_api/cert_manager',
-              isFeature: true,
-              description: "Live TLS certificate rotation, CA trust store management, and mTLS configuration."
-            },
-            { text: 'Error URIs',
-              link: '/reference/wamp_api/errors/index',
-              isFeature: true,
-              description: "The catalogue of all error URIs used by Bondy and WAMP."
-            }
-          ]
-        }
-    ]
-  }
+function wampAPISidebar() {
+  return [
+      {
+        text: 'WAMP API Reference',
+        items: [
+          { text: 'Introduction',
+            link: '/reference/wamp_api/index',
+            isFeature: false
+          },
+          { text: 'Realm',
+            link: '/reference/wamp_api/realm',
+            isFeature: true,
+            description:"Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status."
+          },
+          { text: 'User',
+            link: '/reference/wamp_api/user',
+            isFeature: true,
+            description:"Creating, retrieving and managing users within a realm."
+          },
+          { text: 'Group',
+            link: '/reference/wamp_api/group',
+            isFeature: true,
+            description:"Creating, retrieving and managing groups within a realm."
+          },
+          { text: 'Source',
+            link: '/reference/wamp_api/source',
+            isFeature: true,
+            description:"Creating, retrieving and managing authentication methods and available sources within a realm."
+          },
+          { text: 'Grant',
+            link: '/reference/wamp_api/grant',
+            isFeature: true
+          },
+          { text: 'Session',
+            link: '/reference/wamp_api/session',
+            isFeature: true
+          },
+          { text: 'Ticket',
+            link: '/reference/wamp_api/ticket',
+            isFeature: true,
+            description: "Issuing and revoking tickets."
+          },
+          { text: 'OAuth2 Token',
+            link: '/reference/wamp_api/oauth2_token',
+            isFeature: true
+          },
+          { text: 'Cluster',
+            link: '/reference/wamp_api/cluster',
+            isFeature: true
+          },
+          { text: 'Bridge Relay (Edge)',
+            link: '/reference/wamp_api/bridge_relay',
+            isFeature: true,
+            description: "Creating, retrieving and managing Bridge Relay (Edge) connections."
+          },
+          { text: 'HTTP API Gateway',
+            link: '/reference/wamp_api/api_gateway',
+            isFeature: true,
+            description: "Load and manage API Gateway specifications."
+          },
+          { text: 'Certificate Manager',
+            link: '/reference/wamp_api/cert_manager',
+            isFeature: true,
+            description: "Live TLS certificate rotation, CA trust store management, and mTLS configuration."
+          },
+          { text: 'Error URIs',
+            link: '/reference/wamp_api/errors/index',
+            isFeature: true,
+            description: "The catalogue of all error URIs used by Bondy and WAMP."
+          }
+        ]
+      }
+  ]
+}
 
-  function httpAPISidebar() {
-    return [
-        {
-          text: 'HTTP API Reference',
-          items: [
-            {
-              text: 'Introduction',
-              link: '/reference/index',
-              isFeature: false
-            },
+function httpAPISidebar() {
+  return [
+      {
+        text: 'HTTP API Reference',
+        items: [
+          {
+            text: 'Introduction',
+            link: '/reference/index',
+            isFeature: false
+          },
 
-            {
-              text: 'Realm',
-              link: '/reference/http_api/realm',
-              isFeature: true,
-              description:"Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status."
-            },
-            {
-              text: 'HTTP API Gateway',
-              link: '/reference/http_api/api_gateway',
-              isFeature: true,
-              description: "Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP/REST APIs."
-            },
-            {
-              text: 'OIDC',
-              link: '/reference/http_api/oidc',
-              isFeature: true,
-              description: "OIDC login, callback and logout endpoints for OpenID Connect authentication."
-            }
+          {
+            text: 'Realm',
+            link: '/reference/http_api/realm',
+            isFeature: true,
+            description:"Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status."
+          },
+          {
+            text: 'HTTP API Gateway',
+            link: '/reference/http_api/api_gateway',
+            isFeature: true,
+            description: "Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP/REST APIs."
+          },
+          {
+            text: 'OIDC',
+            link: '/reference/http_api/oidc',
+            isFeature: true,
+            description: "OIDC login, callback and logout endpoints for OpenID Connect authentication."
+          }
 
-          ]
-        }
-    ]
-  }
+        ]
+      }
+  ]
+}
 
-    function httpAPIGatewaySidebar() {
-    return [
-        {
-          text: 'HTTP API Gateway Reference',
-          items: [
-            {
-              text: 'Introduction',
-              link: '/reference/api_gateway/index',
-              isFeature: false
-            },
-            {
-              text: 'API Gateway Specification',
-              link: '/reference/api_gateway/specification',
-              isFeature: true,
-              description: "An API Gateway specification is a document that tells Bondy how to route incoming HTTP requests to your WAMP APIs or to external HTTP/REST APIs."
-            },
-            {
-              text: 'API Gateway Expressions',
-              link: '/reference/api_gateway/expressions',
-              isFeature: true,
-              description: "Bondy API Specification use a logic-less domain-specific language for data transformation and dynamic configuration."
-            }
+  function httpAPIGatewaySidebar() {
+  return [
+      {
+        text: 'HTTP API Gateway Reference',
+        items: [
+          {
+            text: 'Introduction',
+            link: '/reference/api_gateway/index',
+            isFeature: false
+          },
+          {
+            text: 'API Gateway Specification',
+            link: '/reference/api_gateway/specification',
+            isFeature: true,
+            description: "An API Gateway specification is a document that tells Bondy how to route incoming HTTP requests to your WAMP APIs or to external HTTP/REST APIs."
+          },
+          {
+            text: 'API Gateway Expressions',
+            link: '/reference/api_gateway/expressions',
+            isFeature: true,
+            description: "Bondy API Specification use a logic-less domain-specific language for data transformation and dynamic configuration."
+          }
 
-          ]
-        }
-    ]
-  }
+        ]
+      }
+  ]
+}

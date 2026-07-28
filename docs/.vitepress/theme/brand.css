@@ -1,0 +1,261 @@
+/* ===============================================================
+ * Bondy brand tokens and site-specific styling, loaded after the
+ * shared theme's neutral defaults (see THEMING.md in the template
+ * repo). Only genuinely bondy-specific rules live here: brand
+ * colors/type, the WAMP URI/procedure/topic blocks, the
+ * `@[config]`/`@[uri]` custom-block macro styling, and home-page
+ * hero overrides. Tabs, buttons, columns, the DRAFT watermark and
+ * definition blocks are already styled by the shared theme.
+ * =============================================================== */
+
+:root {
+  --vp-c-brand-1: #779e1b;
+  --vp-c-brand-2: #96c623;
+  --vp-c-brand-3: #597614;
+  --vp-c-brand-soft: rgba(150, 198, 35, 0.14);
+
+  --vp-font-family-base:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Noto Sans', Helvetica, Arial,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --vp-font-family-mono:
+    ui-monospace, system-ui, -apple-system, BlinkMacSystemFont, 'SF Mono', 'Inconsolata', 'Menlo',
+    'Courier', monospace;
+  --vp-code-font-size: 15px;
+
+  --vp-nav-logo-height: 55px;
+}
+
+html.dark {
+  --vp-c-brand-1: #b0d45a;
+  --vp-c-brand-2: #cae291;
+  --vp-c-brand-3: #96c623;
+  --vp-c-brand-soft: rgba(150, 198, 35, 0.2);
+}
+
+body {
+  font-size: 17px;
+  letter-spacing: -0.374px;
+  line-height: 25px;
+}
+
+blockquote > p {
+  line-height: 1.651rem !important;
+  font-size: 1.15rem !important;
+}
+
+/* Prevent sub/sup from affecting line height. */
+sup,
+sub {
+  vertical-align: baseline;
+  position: relative;
+  top: -0.4em;
+}
+sub {
+  top: 0.4em;
+}
+
+h4 {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+  text-transform: uppercase;
+  font-family: var(--vp-font-family-mono);
+}
+
+h5 {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding-top: 24px;
+  font-size: 13px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+/* Lead paragraph after the H1 is handled by the shared theme's Layout. */
+
+dt {
+  font-weight: bold;
+  font-style: italic;
+}
+
+.footnotes {
+  font-size: 14px;
+}
+
+/* -------------------------------------------------------------- */
+/* HOME HERO                                                       */
+/* -------------------------------------------------------------- */
+
+.VPHomeHero > div > div.main > h1 > span {
+  background: linear-gradient(to right, #ff6442 0%, #6667ab 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.VPImage {
+  max-width: 400px !important;
+}
+
+.logo {
+  margin-right: 20px;
+  margin-left: -15px;
+}
+
+.text-gradient {
+  background: linear-gradient(to right, #ff6442 0%, #6667ab 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* -------------------------------------------------------------- */
+/* WAMP / CONFIG REFERENCE BLOCKS (used across reference/*.md)     */
+/* -------------------------------------------------------------- */
+
+.uri,
+.table-of-contents {
+  font-family: var(--vp-font-family-mono);
+}
+.uri {
+  font-size: 0.95rem;
+}
+.table-of-contents {
+  font-size: 0.9rem !important;
+}
+
+table.property-table > thead > tr > th {
+  font-size: 14px;
+  background-color: var(--vp-c-bg-mute);
+  color: var(--vp-c-text-1);
+  line-height: 10px;
+}
+table.property-table > tbody > tr > td {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.datatype {
+  background-color: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-left: 3px solid var(--vp-c-text-3);
+  display: inline-block;
+  font-family: var(--vp-font-family-mono);
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  margin-top: 10px;
+  margin-bottom: 20px !important;
+  min-width: 320px;
+  width: 100%;
+  padding: 0.5em;
+  color: var(--vp-c-text-1);
+}
+
+.wamp-procedure,
+.wamp-topic,
+.custom-block.uri {
+  border: 1px solid var(--vp-c-divider);
+  border-left-style: solid;
+  border-left-width: 3px !important;
+  display: inline-block;
+  font-family: var(--vp-font-family-mono);
+  text-transform: lowercase;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  min-width: 320px;
+  width: 100%;
+  padding: 0.5em;
+  color: var(--vp-c-text-1);
+}
+
+.wamp-procedure {
+  background-color: rgba(102, 103, 171, 0.1) !important;
+  border-color: rgba(102, 103, 171, 0.3) !important;
+  border-left-color: rgba(102, 103, 171, 1) !important;
+  margin-top: 10px !important;
+  margin-bottom: 5px !important;
+}
+
+.wamp-topic {
+  background-color: var(--vp-c-brand-soft) !important;
+  border-color: rgba(150, 198, 35, 0.3) !important;
+  border-left-color: var(--vp-c-brand-2) !important;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.custom-block.uri {
+  background-color: rgba(102, 103, 171, 0.1) !important;
+  border-color: rgba(102, 103, 171, 0.3) !important;
+  border-left-color: rgba(102, 103, 171, 1) !important;
+  border-radius: 0;
+  display: inline-flex;
+  justify-content: space-between;
+  margin-top: 30px !important;
+  margin-bottom: 0 !important;
+}
+.custom-block.uri.public,
+.custom-block.private {
+  background-color: transparent;
+  border-left-color: rgba(102, 103, 171, 0.8);
+}
+.custom-block.uri > p {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 0;
+  padding: 8px;
+}
+.custom-block.uri > span {
+  display: inline-block;
+  font-size: 14px;
+  padding: 8px 10px;
+}
+.custom-block.public > span {
+  border-color: rgba(61, 175, 123, 0.4);
+}
+.custom-block.private > span {
+  border-color: rgba(218, 89, 96, 0.4);
+}
+
+/* `@[config](key,type,default,since)` custom-block macro. */
+.custom-block.config-param {
+  background-color: var(--vp-c-brand-soft) !important;
+  border: 1px solid var(--vp-c-divider);
+  border-left: 3px solid var(--vp-c-brand-2) !important;
+  border-radius: 0;
+  display: inline-flex;
+  justify-content: space-between;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  width: 100%;
+  margin-top: 30px !important;
+  margin-bottom: 0 !important;
+  min-width: 320px;
+  padding: 0.5em;
+  color: var(--vp-c-text-1);
+}
+
+.config-param-badge {
+  display: inline-block;
+  font-family: var(--vp-font-family-mono) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background-color: var(--vp-c-brand-soft) !important;
+}
+
+.config-param-meta {
+  font-family: var(--vp-font-family-mono) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.since-version {
+  margin-top: 5px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--vp-font-family-mono) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}

@@ -1,0 +1,6 @@
+{
+  "current": { "version": "1.0.0", "label": "1.0.0" },
+  "archived": [
+    { "version": "1.0.0-rc", "label": "1.0.0-rc", "tag": "docs-1.0.0-rc" }
+  ]
+}

@@ -8,7 +8,7 @@ Development of Bondy, and general chatter happens on Slack.
 
 :::::: columns buttons
 :::: column 1
-::: big-button https://join.slack.com/t/bondy-group/shared_invite/zt-1j1fbpr04-BUesuqeWBbblbqUPsXrP1A
+::: button https://join.slack.com/t/bondy-group/shared_invite/zt-1j1fbpr04-BUesuqeWBbblbqUPsXrP1A
 Slack
 :::
 ::::
@@ -21,7 +21,7 @@ Please report any new issues using Bondy's Github Issues page. Start by searchin
 
 :::::: columns buttons
 :::: column 1
-::: big-button https://github.com/bondy-io/bondy/issues
+::: button https://github.com/bondy-io/bondy/issues
 Github Issues
 :::
 ::::
@@ -32,7 +32,7 @@ We are always very happy to have contributions from the community. If you are pl
 
 :::::: columns buttons
 :::: column 2
-::: big-button /about/contributors
+::: button /about/contributors
 Contributors
 :::
 ::::
@@ -46,7 +46,7 @@ We are committed to providing a friendly, safe and welcoming environment for all
 
 <!-- If you feel you have been or are being harassed or made uncomfortable by a community member, please contact any of the Bondy Moderation Team immediately. Whether you are a regular contributor or a newcomer, we care about making the community a safe space for you. -->
 
-::: big-button https://github.com/bondy-io/bondy/blob/develop/CODE_OF_CONDUCT.md
+::: button https://github.com/bondy-io/bondy/blob/develop/CODE_OF_CONDUCT.md
 Read the Code of Conduct
 :::
 

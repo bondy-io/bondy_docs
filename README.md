@@ -15,6 +15,7 @@ Visit [developer.bondy.io](https://developer.bondy.io) to view the live document
 
 - Node.js 20 or higher (use `.nvmrc` with `nvm use`)
 - Yarn package manager
+- GitHub access to the private [`Leapsight/vitepress-template`](https://github.com/Leapsight/vitepress-template) repo — the site depends on `@leapsight/vitepress-theme`, which lives there (see [Technology Stack](#technology-stack))
 
 ### Setup
 
@@ -28,6 +29,7 @@ cd bondy_docs
 ```bash
 yarn install
 ```
+`yarn install` fetches `@leapsight/vitepress-theme` directly from its private git repo, so this step will fail without GitHub access to it (see Prerequisites above).
 
 3. Start development server
 ```bash
@@ -62,16 +64,65 @@ The site will be available at `http://localhost:5173`
 ```
 bondy_docs/
 ├── docs/                      # Documentation content
-│   ├── .vitepress/           # VitePress configuration & theme
+│   ├── .vitepress/           # VitePress configuration & site-specific theme extras
 │   ├── about/                # About pages
 │   ├── concepts/             # Conceptual documentation
 │   ├── guides/               # How-to guides
 │   ├── reference/            # API reference
 │   ├── tutorials/            # Tutorials
-│   └── assets/               # Images and assets
-├── .github/workflows/        # CI/CD pipelines
+│   ├── assets/               # Images and assets
+│   └── versions.json         # Version picker source of truth (see Versioning & Deployment)
+├── .github/workflows/        # CI/CD pipelines (ci.yml, release-docs.yml, deploy.yml)
 └── CONTRIBUTING.md           # Contribution guidelines
 ```
+
+## Versioning & Deployment
+
+The site is versioned: a small dropdown in the navbar lets readers switch between the current docs and older, archived snapshots, so a major content rewrite (like the storage/replication overhaul for Bondy 1.0.0) doesn't strand anyone still reading the previous version.
+
+### How it works
+
+- **`docs/versions.json`** is the single source of truth. It lists the `current` version and every `archived` version (each with the git tag that produced it). `docs/.vitepress/config.mjs` reads this file at build time to populate the navbar version picker and the `bondyVersion` site metadata — nothing about the version list is hardcoded in `config.mjs` itself.
+- **Archived versions are built exactly once, ever.** Tagging a commit `docs-<version>` (e.g. `docs-1.0.0-rc`) triggers `.github/workflows/release-docs.yml`, which builds that snapshot with its base path set to `/v<version>/` and publishes the output as a GitHub Release asset. That build is never repeated.
+- **Every push to `master`** triggers `.github/workflows/deploy.yml`, which builds only the *current* version fresh, downloads each archived version's already-built package from GitHub Releases (per `docs/versions.json`, no rebuild), combines them into one directory (current at `/`, each archive at `/v<version>/`), and pushes the result to Netlify as a production deploy via the Netlify CLI.
+- **`.github/workflows/ci.yml`** runs on every push/PR: build check, broken-link check, spellcheck. It doesn't deploy anything.
+
+### Cutting a new archived version
+
+When a future rewrite needs the same treatment:
+
+1. Update `docs/versions.json`: move the current entry into `archived` (giving it a `tag`), and set a new `current`.
+2. Tag the commit you want frozen: `git tag -a docs-<version> -m "..."` and `git push origin docs-<version>`. This triggers `release-docs.yml`, which builds and publishes it once.
+3. Push the `versions.json` update to `master`. The next `deploy.yml` run picks up the new archived entry automatically — no further workflow changes needed.
+
+### One-time setup
+
+**GitHub repository secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Value | Used by |
+|---|---|---|
+| `TEMPLATE_REPO_TOKEN` | A PAT (classic `repo` scope, or fine-grained with Contents: Read) with access to the private `Leapsight/vitepress-template` repo | `deploy.yml`, `release-docs.yml` — installing `@leapsight/vitepress-theme` |
+| `NETLIFY_AUTH_TOKEN` | Netlify personal/team access token | `deploy.yml`'s deploy step |
+| `NETLIFY_SITE_ID` | This site's Netlify Site ID | `deploy.yml`'s deploy step |
+
+No secret is needed for downloading or publishing GitHub Releases — those steps use the automatically-provided `GITHUB_TOKEN`.
+
+**Netlify:**
+
+1. Get an **Auth Token**: User settings → Applications → Personal access tokens.
+2. Get the **Site ID**: this site → Site settings → General → Site details.
+3. **Stop auto-publishing**: Site settings → Build & deploy → Continuous deployment → "Stop auto publishing". This is required — otherwise Netlify's own git-triggered build races with (and can overwrite) the versioned deploy pushed by `deploy.yml`. Once stopped, the CLI's `--dir` flag is what controls what gets published; any build command/publish directory still configured in the dashboard is unused.
+
+**Algolia:** search is a single hosted DocSearch crawler/index shared across all versions. Its crawl config lives in Algolia's dashboard, not this repo. Versioned paths must be excluded from the crawl (otherwise archived-version pages pollute current-version search results with no way to tell them apart):
+
+```json
+"exclusionPatterns": [
+  "https://developer.bondy.io/v*/",
+  "https://developer.bondy.io/v*/**"
+]
+```
+
+This is future-proof — any later `/v<version>/` is excluded automatically. Archived versions remain fully browsable via their own sidebar nav; they're just not searchable through the widget.
 
 ## Contributing
 
@@ -90,7 +141,8 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 - [VitePress](https://vitepress.dev/) - Static site generator
 - [Vue 3](https://vuejs.org/) - UI framework
 - [Markdown](https://www.markdownguide.org/) - Content format
-- Custom components and plugins
+- [`@leapsight/vitepress-theme`](https://github.com/Leapsight/vitepress-template) - Shared layout, components (Tabs, DataTreeView, ZoomImg, the version picker) and markdown kit reused across Leapsight documentation sites
+- Site-specific components and plugins (`docs/.vitepress/theme/`) for the WAMP/config reference macros and other Bondy-specific markup
 
 ## License
 

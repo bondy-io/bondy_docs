@@ -1,8 +1,8 @@
 <script setup>
-import { inject } from 'vue';
+import { useData } from 'vitepress';
 
-const globalMetadata = inject('globalMetadata');
-const bondyVersion = globalMetadata.bondyVersion;
+const { theme } = useData();
+const bondyVersion = theme.value.metadata.bondyVersion;
 </script>
 
 # Install using Docker
@@ -151,10 +151,10 @@ You should get the following output:
 
 We will run an official Bondy Docker image using the `docker run` command with an image name using the following syntax: `leapsight/bondy:{VERSION}[-{VARIANT}]` where:
 
-- `{VERSION}` can be `master`, `develop` or a tag like <BondyVersion/>
+- `{VERSION}` can be `master`, `develop` or a tag like <SiteMeta k="bondyVersion"/>
 - `{VARIANT}` can be null or `slim` (we will provide the `alpine` variant in the future).
 
-For example to run the <BondyVersion/> release you would use:
+For example to run the <SiteMeta k="bondyVersion"/> release you would use:
 
 ::: code-group
 ```bash-vue [Debian]
