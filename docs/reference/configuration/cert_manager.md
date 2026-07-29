@@ -6,7 +6,7 @@ Configure the central TLS certificate manager that handles CA trust, server cert
 
 @[config](cert_manager.cacertfile,path,N/A,v1.0.0-rc.54)
 
-Path to a PEM file containing additional trusted CA certificates for outbound TLS connections (OIDC providers, RPC Gateway HTTP backends, etc.).
+Path to a PEM file containing additional trusted CA certificates for outbound TLS connections (OIDC providers, HTTP Connector backends, etc.).
 
 These certificates are merged with the [certifi](https://hex.pm/packages/certifi) Mozilla CA bundle and (when available) the OS trust store. The merged, deduplicated set is used by all outbound HTTPS connections that Bondy initiates.
 

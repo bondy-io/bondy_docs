@@ -1,32 +1,32 @@
 ---
 outline: [2,3]
 related:
-    - text: RPC Gateway Configuration Reference
+    - text: HTTP Connector Configuration Reference
       type: Configuration Reference
-      link: /reference/configuration/rpc_gateway
-      description: Complete bondy.conf reference for all RPC Gateway service configuration keys.
-    - text: RPC Gateway Guide
+      link: /reference/configuration/http_connector
+      description: Complete bondy.conf reference for all HTTP Connector service configuration keys.
+    - text: HTTP Connector Guide
       type: How-to Guide
-      link: /guides/programming/rpc_gateway
-      description: Step-by-step guide to setting up the RPC Gateway with practical examples.
+      link: /guides/programming/http_connector
+      description: Step-by-step guide to setting up the HTTP Connector with practical examples.
     - text: HTTP API Gateway Specification
       type: Reference
       link: /reference/api_gateway/specification
       description: The HTTP API Gateway translates incoming HTTP requests into WAMP calls — the inverse direction.
 ---
-# RPC Gateway
+# HTTP Connector
 
-The RPC Gateway bridges WAMP RPC procedures to upstream HTTP/REST services, allowing WAMP clients to call registered procedures that are transparently translated into HTTP requests.
+The HTTP Connector bridges WAMP RPC procedures to upstream HTTP/REST services, allowing WAMP clients to call registered procedures that are transparently translated into HTTP requests.
 
 ## Overview
 
-::: definition RPC Gateway
-The RPC Gateway is a Bondy subsystem that registers WAMP procedures and, when called, translates the call arguments into an outgoing HTTP request to an upstream service. The HTTP response is then mapped back to a WAMP result or error. It enables WAMP clients to interact with external REST APIs without any HTTP-specific code.
+::: definition HTTP Connector
+The HTTP Connector is a Bondy subsystem that registers WAMP procedures and, when called, translates the call arguments into an outgoing HTTP request to an upstream service. The HTTP response is then mapped back to a WAMP result or error. It enables WAMP clients to interact with external REST APIs without any HTTP-specific code.
 :::
 
-The RPC Gateway is the **inverse** of the [HTTP API Gateway](/reference/api_gateway/specification):
+The HTTP Connector is the **inverse** of the [HTTP API Gateway](/reference/api_gateway/specification):
 
-| | HTTP API Gateway | RPC Gateway |
+| | HTTP API Gateway | HTTP Connector |
 |:---|:---|:---|
 | **Direction** | HTTP → WAMP | WAMP → HTTP |
 | **Input** | Incoming HTTP request | Incoming WAMP Call |
@@ -61,7 +61,7 @@ WAMP Call(KWArgs)
    - **GET, DELETE, HEAD** → URL query parameters (body is empty)
    - **POST, PUT, PATCH** → JSON request body (no query parameters)
 
-4. **Authentication** — A token is acquired from the per-service token cache. If the cache is empty, the gateway fetches a token from the configured auth endpoint. Tokens are cached with preemptive refresh.
+4. **Authentication** — A token is acquired from the per-service token cache. If the cache is empty, the connector fetches a token from the configured auth endpoint. Tokens are cached with preemptive refresh.
 
 5. **HTTP request** — The request is sent to the upstream service with configurable retries and exponential backoff on connection failures.
 
@@ -70,7 +70,7 @@ WAMP Call(KWArgs)
 
 ## Architecture
 
-The RPC Gateway runs as a separate OTP application (`bondy_rpc_gateway`) started automatically by Bondy after the public listeners are ready. If no services are configured, the subsystem remains idle with no resource overhead.
+The HTTP Connector runs as a separate OTP application (`bondy_http_connector`) started automatically by Bondy after the public listeners are ready. If no services are configured, the subsystem remains idle with no resource overhead.
 
 Each configured service gets:
 
@@ -79,7 +79,7 @@ Each configured service gets:
 - **One or more WAMP callees** — Each service/realm pair spawns a process that registers the configured procedures with the Bondy Dealer.
 
 ::: info Lazy Startup
-The RPC Gateway only starts supervision tree children when services are configured. An empty configuration results in zero overhead.
+The HTTP Connector only starts supervision tree children when services are configured. An empty configuration results in zero overhead.
 :::
 
 
@@ -137,11 +137,11 @@ The `_headers` map is extracted first and merged with the default headers. It do
 
 ## Authentication
 
-The RPC Gateway supports pluggable authentication for upstream services. The built-in `generic` module provides a declarative configuration for common patterns.
+The HTTP Connector supports pluggable authentication for upstream services. The built-in `generic` module provides a declarative configuration for common patterns.
 
 ### Token Acquisition
 
-The gateway can acquire tokens from an OAuth2 token endpoint (or any HTTP endpoint that returns a token). You configure:
+The connector can acquire tokens from an OAuth2 token endpoint (or any HTTP endpoint that returns a token). You configure:
 
 - The HTTP method and URL for the token request
 - Request body key-value pairs (supports `form`, `json`, or `none` encoding)
@@ -174,7 +174,7 @@ Tokens are cached per-service with:
 
 ## Secret Management
 
-For production deployments, you can store credentials in an external secrets provider instead of the `bondy.conf` file. The RPC Gateway currently supports **AWS Secrets Manager**.
+For production deployments, you can store credentials in an external secrets provider instead of the `bondy.conf` file. The HTTP Connector currently supports **AWS Secrets Manager**.
 
 Secrets are resolved at startup and mapped into the auth variable bindings (`auth.vars`), overriding any static values. Each secret variable specifies:
 
@@ -240,7 +240,7 @@ Default: 3 retries, 30 second timeout. Both are configurable per service.
 
 ### Auth Rejection Auto-Retry
 
-When the upstream returns 401 or 403, the gateway automatically:
+When the upstream returns 401 or 403, the connector automatically:
 
 1. Invalidates the cached auth token
 2. Fetches a fresh token from the auth provider

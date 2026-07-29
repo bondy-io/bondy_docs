@@ -9,7 +9,7 @@ The Certificate Manager provides WAMP procedures for managing TLS certificates a
 
 Bondy's certificate manager (`bondy_cert_manager`) centralises all TLS certificate operations:
 
-- **CA trust store** -- merges CA certificates from the `certifi` Mozilla bundle, a user-configured PEM file (`cert_manager.cacertfile`), and the OS trust store. Used for all outbound TLS connections (OIDC providers, RPC Gateway HTTP backends, etc.).
+- **CA trust store** -- merges CA certificates from the `certifi` Mozilla bundle, a user-configured PEM file (`cert_manager.cacertfile`), and the OS trust store. Used for all outbound TLS connections (OIDC providers, HTTP Connector backends, etc.).
 - **Server certificates** -- manages per-listener TLS certificates (cert + key). Enables live certificate rotation via an `sni_fun` callback so new connections use updated certificates without listener restarts.
 - **mTLS** -- per-listener client CA pools, `verify` mode, and `fail_if_no_peer_cert` settings for mutual TLS authentication.
 

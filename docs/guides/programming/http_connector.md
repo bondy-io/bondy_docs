@@ -1,18 +1,18 @@
 ---
 outline: [2,3]
 related:
-    - text: RPC Gateway
+    - text: HTTP Connector
       type: Concepts
-      link: /concepts/rpc_gateway
-      description: Understand the architecture, request routing, and authentication model of the RPC Gateway.
-    - text: RPC Gateway Configuration Reference
+      link: /concepts/http_connector
+      description: Understand the architecture, request routing, and authentication model of the HTTP Connector.
+    - text: HTTP Connector Configuration Reference
       type: Configuration Reference
-      link: /reference/configuration/rpc_gateway
-      description: Complete bondy.conf reference for all RPC Gateway service configuration keys.
+      link: /reference/configuration/http_connector
+      description: Complete bondy.conf reference for all HTTP Connector service configuration keys.
 ---
-# Using the RPC Gateway
+# Using the HTTP Connector
 
-This guide walks through setting up the RPC Gateway to expose an upstream HTTP/REST API as WAMP procedures.
+This guide walks through setting up the HTTP Connector to expose an upstream HTTP/REST API as WAMP procedures.
 
 ## Defining a Service
 
@@ -20,20 +20,20 @@ Add the following to your `bondy.conf` to define a service that proxies to a bil
 
 ```ini
 ## Upstream base URL
-rpc_gateway.services.billing.base_url = https://billing.example.com/api
-rpc_gateway.services.billing.timeout = 15s
-rpc_gateway.services.billing.retries = 2
+http_connector.services.billing.base_url = https://billing.example.com/api
+http_connector.services.billing.timeout = 15s
+http_connector.services.billing.retries = 2
 
 ## Map WAMP procedures to HTTP endpoints
-rpc_gateway.services.billing.procedures.get_invoice.uri = com.billing.get_invoice
-rpc_gateway.services.billing.procedures.get_invoice.realm = com.example.myrealm
-rpc_gateway.services.billing.procedures.get_invoice.method = get
-rpc_gateway.services.billing.procedures.get_invoice.path = /invoices/{{id}}
+http_connector.services.billing.procedures.get_invoice.uri = com.billing.get_invoice
+http_connector.services.billing.procedures.get_invoice.realm = com.example.myrealm
+http_connector.services.billing.procedures.get_invoice.method = get
+http_connector.services.billing.procedures.get_invoice.path = /invoices/{{id}}
 
-rpc_gateway.services.billing.procedures.create_invoice.uri = com.billing.create_invoice
-rpc_gateway.services.billing.procedures.create_invoice.realm = com.example.myrealm
-rpc_gateway.services.billing.procedures.create_invoice.method = post
-rpc_gateway.services.billing.procedures.create_invoice.path = /invoices
+http_connector.services.billing.procedures.create_invoice.uri = com.billing.create_invoice
+http_connector.services.billing.procedures.create_invoice.realm = com.example.myrealm
+http_connector.services.billing.procedures.create_invoice.method = post
+http_connector.services.billing.procedures.create_invoice.path = /invoices
 ```
 
 After restarting Bondy, any WAMP client connected to `com.example.myrealm` can call `com.billing.get_invoice` and `com.billing.create_invoice`.
@@ -199,27 +199,27 @@ The most common pattern — acquire a bearer token from an OAuth2 token endpoint
 
 ```ini
 ## Token acquisition
-rpc_gateway.services.billing.auth.fetch.method = post
-rpc_gateway.services.billing.auth.fetch.url = https://idp.example.com/oauth/token
-rpc_gateway.services.billing.auth.fetch.body_encoding = form
-rpc_gateway.services.billing.auth.fetch.body.grant_type = client_credentials
-rpc_gateway.services.billing.auth.fetch.body.client_id = {{client_id}}
-rpc_gateway.services.billing.auth.fetch.body.client_secret = {{client_secret}}
-rpc_gateway.services.billing.auth.fetch.token_path = access_token
-rpc_gateway.services.billing.auth.fetch.expires_in_path = expires_in
+http_connector.services.billing.auth.fetch.method = post
+http_connector.services.billing.auth.fetch.url = https://idp.example.com/oauth/token
+http_connector.services.billing.auth.fetch.body_encoding = form
+http_connector.services.billing.auth.fetch.body.grant_type = client_credentials
+http_connector.services.billing.auth.fetch.body.client_id = {{client_id}}
+http_connector.services.billing.auth.fetch.body.client_secret = {{client_secret}}
+http_connector.services.billing.auth.fetch.token_path = access_token
+http_connector.services.billing.auth.fetch.expires_in_path = expires_in
 
 ## Token placement
-rpc_gateway.services.billing.auth.apply.placement = header
-rpc_gateway.services.billing.auth.apply.name = Authorization
-rpc_gateway.services.billing.auth.apply.format = Bearer {{token}}
+http_connector.services.billing.auth.apply.placement = header
+http_connector.services.billing.auth.apply.name = Authorization
+http_connector.services.billing.auth.apply.format = Bearer {{token}}
 
 ## Credentials
-rpc_gateway.services.billing.auth.vars.client_id = my-client-id
-rpc_gateway.services.billing.auth.vars.client_secret = my-client-secret
+http_connector.services.billing.auth.vars.client_id = my-client-id
+http_connector.services.billing.auth.vars.client_secret = my-client-secret
 
 ## Cache
-rpc_gateway.services.billing.auth.cache.default_ttl = 1h
-rpc_gateway.services.billing.auth.cache.refresh_margin = 2m
+http_connector.services.billing.auth.cache.default_ttl = 1h
+http_connector.services.billing.auth.cache.refresh_margin = 2m
 ```
 
 ### API Key
@@ -228,12 +228,12 @@ For services that use a static API key:
 
 ```ini
 ## No token fetch needed — use the key directly
-rpc_gateway.services.maps.auth.apply.placement = query_param
-rpc_gateway.services.maps.auth.apply.name = api_key
+http_connector.services.maps.auth.apply.placement = query_param
+http_connector.services.maps.auth.apply.name = api_key
 
 ## The "token" is the static key value
-rpc_gateway.services.maps.auth.vars.token = my-api-key-123
-rpc_gateway.services.maps.auth.apply.format = {{token}}
+http_connector.services.maps.auth.vars.token = my-api-key-123
+http_connector.services.maps.auth.apply.format = {{token}}
 ```
 
 ### Basic Auth on Token Request
@@ -241,8 +241,8 @@ rpc_gateway.services.maps.auth.apply.format = {{token}}
 Some IdPs require HTTP Basic authentication on the token endpoint itself:
 
 ```ini
-rpc_gateway.services.billing.auth.fetch.basic_auth.username = {{client_id}}
-rpc_gateway.services.billing.auth.fetch.basic_auth.password = {{client_secret}}
+http_connector.services.billing.auth.fetch.basic_auth.username = {{client_id}}
+http_connector.services.billing.auth.fetch.basic_auth.password = {{client_secret}}
 ```
 
 
@@ -252,16 +252,16 @@ Instead of putting credentials in `bondy.conf`, resolve them from AWS Secrets Ma
 
 ```ini
 ## External secrets
-rpc_gateway.services.billing.auth.secrets.provider = aws_sm
-rpc_gateway.services.billing.auth.secrets.secret_id = arn:aws:secretsmanager:us-east-1:123456789:secret:billing-creds
-rpc_gateway.services.billing.auth.secrets.region = us-east-1
+http_connector.services.billing.auth.secrets.provider = aws_sm
+http_connector.services.billing.auth.secrets.secret_id = arn:aws:secretsmanager:us-east-1:123456789:secret:billing-creds
+http_connector.services.billing.auth.secrets.region = us-east-1
 
 ## Map secret fields to auth variables
-rpc_gateway.services.billing.auth.secrets.vars.client_id.field = CLIENT_ID
-rpc_gateway.services.billing.auth.secrets.vars.client_id.transform = none
+http_connector.services.billing.auth.secrets.vars.client_id.field = CLIENT_ID
+http_connector.services.billing.auth.secrets.vars.client_id.transform = none
 
-rpc_gateway.services.billing.auth.secrets.vars.client_secret.field = CLIENT_SECRET
-rpc_gateway.services.billing.auth.secrets.vars.client_secret.transform = none
+http_connector.services.billing.auth.secrets.vars.client_secret.field = CLIENT_SECRET
+http_connector.services.billing.auth.secrets.vars.client_secret.transform = none
 ```
 
 The secret JSON is expected to contain the referenced fields:
@@ -278,11 +278,11 @@ Resolved values override static `auth.vars` values with the same name.
 If the secret contains a `Basic base64(user:pass)` encoded value, use the `basic_username` and `basic_password` transforms to extract the components:
 
 ```ini
-rpc_gateway.services.billing.auth.secrets.vars.client_id.field = AUTHORIZATION_HEADER
-rpc_gateway.services.billing.auth.secrets.vars.client_id.transform = basic_username
+http_connector.services.billing.auth.secrets.vars.client_id.field = AUTHORIZATION_HEADER
+http_connector.services.billing.auth.secrets.vars.client_id.transform = basic_username
 
-rpc_gateway.services.billing.auth.secrets.vars.client_secret.field = AUTHORIZATION_HEADER
-rpc_gateway.services.billing.auth.secrets.vars.client_secret.transform = basic_password
+http_connector.services.billing.auth.secrets.vars.client_secret.field = AUTHORIZATION_HEADER
+http_connector.services.billing.auth.secrets.vars.client_secret.transform = basic_password
 ```
 :::
 
@@ -293,7 +293,7 @@ If secret resolution fails at startup, the service starts but returns `bondy.err
 
 ## Error Handling in Client Code
 
-The RPC Gateway maps HTTP errors to standard WAMP error URIs. Your client code should handle these errors based on the URI and the kwargs payload:
+The HTTP Connector maps HTTP errors to standard WAMP error URIs. Your client code should handle these errors based on the URI and the kwargs payload:
 
 ::: code-group
 ```python [Python (autobahn)]

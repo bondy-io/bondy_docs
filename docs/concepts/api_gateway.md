@@ -13,10 +13,10 @@ related:
       type: How-to Guide
       link: /guides/programming/loading_api_spec
       description: Learn how to load an API Gateway Specification using the HTTP Admin API.
-    - text: RPC Gateway
+    - text: HTTP Connector
       type: Concepts
-      link: /concepts/rpc_gateway
-      description: The RPC Gateway works in the opposite direction — bridging WAMP calls to upstream HTTP services.
+      link: /concepts/http_connector
+      description: The HTTP Connector works in the opposite direction — bridging WAMP calls to upstream HTTP services.
     - text: Network Listeners
       type: Configuration Reference
       link: /reference/configuration/listeners#api-gateway-http-listener
@@ -38,21 +38,21 @@ The HTTP API Gateway is a Bondy subsystem that accepts incoming HTTP requests an
 
 The API Gateway allows you to define a complete HTTP/REST API declaratively using a JSON specification document — no coding required. The specification describes how each HTTP endpoint maps to a WAMP procedure call or an external HTTP request, including data transformation using an embedded expression language.
 
-### Two Gateways, Opposite Directions
+### Gateway and Connector, Opposite Directions
 
-Bondy provides two gateway subsystems that work in opposite directions:
+Bondy provides two subsystems that work in opposite directions — an ingress **gateway** and an egress **connector**:
 
 ```
                    HTTP API Gateway
 External  ───HTTP Request──>  Bondy  ───WAMP Call──>  WAMP Service
 Client    <──HTTP Response──         <──WAMP Result──
 
-                    RPC Gateway
+                    HTTP Connector
 WAMP      ───WAMP Call──>     Bondy  ───HTTP Request──>  External
 Client    <──WAMP Result──           <──HTTP Response──   REST API
 ```
 
-| | HTTP API Gateway | [RPC Gateway](/concepts/rpc_gateway) |
+| | HTTP API Gateway | [HTTP Connector](/concepts/http_connector) |
 |:---|:---|:---|
 | **Direction** | HTTP → WAMP (or HTTP → HTTP) | WAMP → HTTP |
 | **Use case** | Expose WAMP services as REST APIs | Consume REST APIs from WAMP clients |
