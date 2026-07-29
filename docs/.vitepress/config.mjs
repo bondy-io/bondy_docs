@@ -127,6 +127,41 @@ export default withThemeDefaults(
         </div>
     </div>`;
             },
+            // DEPRECATED CONFIG (renamed to a current key)
+            configDeprecated (str) {
+              let args = str.split(",").map((s) => s.trim());
+              let oldKey = args.shift();
+              let newKey = args.shift();
+              let since = args.shift();
+              return `
+    <div id="${oldKey}" tabindex="-1" class="config-param-deprecated">
+        <span class="config-param-badge-deprecated">Deprecated</span>
+        <span class="config-param-old">
+            <a href="#${oldKey}" aria-hidden="true"></a>
+            ${oldKey}
+        </span>
+        <span class="config-param-arrow">renamed to</span>
+        <a class="config-param-new" href="#${newKey}"><code>${newKey}</code></a>
+        ${since ? `<span class="config-param-meta">since&nbsp;${since}</span>` : ''}
+    </div>`;
+            },
+            // REMOVED CONFIG (no replacement)
+            configRemoved (str) {
+              let args = str.split(",").map((s) => s.trim());
+              let oldKey = args.shift();
+              let reason = args.shift();
+              let since = args.shift();
+              return `
+    <div id="${oldKey}" tabindex="-1" class="config-param-deprecated">
+        <span class="config-param-badge-deprecated">Removed</span>
+        <span class="config-param-old">
+            <a href="#${oldKey}" aria-hidden="true"></a>
+            ${oldKey}
+        </span>
+        ${reason ? `<span class="config-param-meta">${reason}</span>` : ''}
+        ${since ? `<span class="config-param-meta">since&nbsp;${since}</span>` : ''}
+    </div>`;
+            },
             // FOO
             configRef (str) {
               let obj = str.replace(/\s+/g, '');
@@ -806,20 +841,16 @@ function configurationSidebar() {
             isFeature: true
           },
           {
-            text: 'Active Anti-entropy',
-            link: '/reference/configuration/aae',
-            isFeature: true
+            text: 'Data Storage & Active Anti-entropy',
+            link: '/reference/configuration/data_storage',
+            isFeature: true,
+            description: 'Sharding, placement, pack-store durability, and anti-entropy sync for the db.* configuration surface.'
           },
           {
             text: 'Reclamation',
             link: '/reference/configuration/reclamation',
             isFeature: true,
             description: 'Configure deletion reclamation and origin retirement for the storage layer.'
-          },
-          {
-            text: 'Data Storage',
-            link: '/reference/configuration/data_storage',
-            isFeature: true
           },
           {
             text: 'Bridge Relay (Edge)',

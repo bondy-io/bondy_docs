@@ -184,6 +184,18 @@ CA certificate location for the client side of the cluster TLS connection.
 
 Comma-separated TLS protocol version(s) supported by the client side.
 
+## Message Framing
+
+@[config](cluster.max_message_size,bytesize,64MB,v1.0.0)
+
+Upper bound on a single length-prefixed frame accepted on the peer
+connection, enforced identically on both the connect and accept paths —
+before a peer's identity has been verified. This bounds a
+pre-authentication memory-exhaustion / decompression-bomb vector: without a
+cap, a frame's declared length could force the receiver to allocate
+unbounded memory before the connection is ever rejected. Raise it only if
+you have legitimately large control-plane payloads that exceed the default.
+
 ## Registry Routing (RIB)
 
 Cross-node call and event routing is unconditional — there is nothing to enable. These two settings tune observability and flap control only; neither changes what the registry replicates. See [Registry Routing (RIB)](/concepts/registry_routing) for the concept.

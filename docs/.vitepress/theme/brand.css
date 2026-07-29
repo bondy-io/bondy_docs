@@ -259,3 +259,65 @@ table.property-table > tbody > tr > td {
   font-size: 14px !important;
   font-weight: 500 !important;
 }
+
+/* `@[configDeprecated](oldKey,newKey,since)` / `@[configRemoved](oldKey,reason,since)`
+   custom-block macros -- superseded or removed bondy.conf keys, kept on the
+   page (rather than silently dropped) so a reader upgrading from an older
+   release can still find their old key and see where it went. */
+.config-param-deprecated {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.6em;
+  row-gap: 2px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.85rem;
+  border: 1px dashed var(--vp-c-divider);
+  border-left: 3px solid var(--vp-c-text-3);
+  border-radius: 0;
+  background-color: var(--vp-c-default-soft);
+  color: var(--vp-c-text-3);
+  padding: 0.45em 0.7em;
+  margin-top: 8px;
+  margin-bottom: 0;
+  opacity: 0.8;
+}
+
+.config-param-badge-deprecated {
+  display: inline-block;
+  font-family: var(--vp-font-family-mono) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--vp-c-text-2);
+  background-color: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 3px;
+  padding: 1px 6px;
+}
+
+.config-param-old {
+  text-decoration: line-through;
+  color: var(--vp-c-text-3);
+}
+
+.config-param-arrow {
+  color: var(--vp-c-text-3);
+  font-style: italic;
+}
+
+.config-param-new {
+  color: var(--vp-c-text-2) !important;
+  text-decoration: none !important;
+}
+
+.config-param-new:hover {
+  color: var(--vp-c-brand-1) !important;
+}
+
+.config-param-deprecated .config-param-meta {
+  font-family: var(--vp-font-family-mono) !important;
+  font-size: 12px !important;
+  color: var(--vp-c-text-3);
+}

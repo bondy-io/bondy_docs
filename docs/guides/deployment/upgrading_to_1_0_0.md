@@ -6,10 +6,10 @@ related:
       type: "Concept"
       link: "/concepts/architecture"
       description: "Bondy's storage and replication design: bondy_db, bondy_oplog, and bondy_mst."
-    - text: "Data Storage Configuration Reference"
+    - text: "Data Storage & Active Anti-entropy Configuration Reference"
       type: "Reference"
       link: "/reference/configuration/data_storage"
-      description: "The oplog.* configuration surface that replaces store.*."
+      description: "The db.* configuration surface that replaces store.*."
     - text: "Cluster Configuration Reference"
       type: "Reference"
       link: "/reference/configuration/cluster"
@@ -142,14 +142,75 @@ Spot-check that realms, users, and API gateway specs are present on the new depl
 
 Review these before you finalise your `bondy.conf` and cutover plan — none of them are part of the export/import procedure above, but each can stop the new release from starting or behaving as your existing configuration or clients expect.
 
-- **App rename: `bondy` → `bondy_router`.** The router's OTP application changed name (source now lives under `apps/bondy_router`). This is transparent to normal operation — the release name, node name, `bondy.conf` file, and every WAMP URI are unchanged. It only matters if you reach into the application name directly: a custom `sys.config`/`advanced.config` stanza keyed on `{bondy, [...]}`, or a release hook or health check that calls `application:get_env(bondy, ...)`. Update those to `bondy_router`.
-- **`store.*` configuration removed.** The entire PlumDB `store.*` namespace (and the `plum_db` broadcast wiring behind it) is gone. Remove any `store.*` keys from your `bondy.conf` — 1.0.0 doesn't recognise them and they have no effect. The equivalent surface for the new storage engine lives under `oplog.*`; see the [Data Storage](/reference/configuration/data_storage) and [Active Anti-entropy](/reference/configuration/aae) configuration references.
+### Storage and AAE key renames
+
+Every storage-related `bondy.conf` key changed name as part of the storage-engine replacement. Bondy refuses to boot if it finds a key it doesn't recognise, so carrying an old key over unchanged is not a silent no-op — it's a startup failure, naming the offending key and suggesting the closest current key by edit distance.
+
+The `oplog.` prefix is now `db.`, unconditionally. If you didn't customise any of these, there's nothing to do — the defaults are unchanged:
+
+| Old key (≤ 1.0.0-rc.65) | New key |
+|---|---|
+| `oplog.aae` | `db.aae` |
+| `oplog.aae.interval` | `db.aae.interval` |
+| `oplog.aae.live_sync` | `db.aae.live_sync` |
+| `oplog.aae.live_sync.max` | `db.aae.live_sync.max` |
+| `oplog.aae.max_concurrency` | `db.aae.max_concurrency` |
+| `oplog.aae.max_pages_in_flight` | `db.aae.max_pages_in_flight` |
+| `oplog.aae.load_adaptive` | `db.aae.load_adaptive` |
+| `oplog.aae.load_run_queue_threshold` | `db.aae.load_run_queue_threshold` |
+| `oplog.aae.fanout` | `db.aae.fanout` |
+| `oplog.aae.fence.max_lag` | `db.aae.fence.max_lag` |
+| `oplog.aae.fence.on_isolation` | `db.aae.fence.on_isolation` |
+
+Four more keys move from `oplog.core.*` to a bare `db.*` — the `core.` segment drops because these settings were never specific to one database; they govern every replicated table node-wide:
+
+| Old key | New key |
+|---|---|
+| `oplog.core.gc_interval` | `db.gc_interval` |
+| `oplog.core.gc_heap_delta` | `db.gc_heap_delta` |
+| `oplog.core.pack_auto_seal_bytes` | `db.pack_auto_seal_bytes` |
+| `oplog.core.pack_seal_mode` | `db.pack_seal_mode` |
+
+Bondy's durable database itself is renamed: `core` is now `main`, to stop it being confused with the unrelated `bondy_oplog_core` substrate module. If your `bondy.conf` sets any of the durable database's topology, rename these too:
+
+| Old key | New key |
+|---|---|
+| `oplog.core.shard_count` | `db.main.shard_count` |
+| `oplog.core.partition_strategy` | `db.main.partition_strategy` |
+| `oplog.core.realm_prefix_depth` | `db.main.realm_prefix_depth` |
+| `oplog.core.on_topology_mismatch` | `db.main.on_topology_mismatch` |
+
+The value and its meaning are identical for every rename above — only the key name moved. The on-disk directory for the durable database is also renamed, from `<platform_data_dir>/bondy_db/core` to `<platform_data_dir>/bondy_db/main` — irrelevant if you wiped the data directory per step 4 above, but worth knowing if you scripted anything against the old path. The [Data Storage & Active Anti-entropy Configuration Reference](/reference/configuration/data_storage#deprecated-and-removed-keys) also lists every old key inline, greyed out, linking to its replacement.
+
+### Removed keys
+
+These keys have no replacement — remove them from your `bondy.conf` rather than renaming them:
+
+- `oplog.catalog` — never had a consumer; setting it did nothing in any released version.
+- `oplog.core.scan_max_concurrency` — same; never wired to any code path.
+- Any `store.*` key (RocksDB tuning) — RocksDB is gone. The `leveled` backend that replaced it has no equivalent `bondy.conf` tuning surface yet; if you relied on `store.*` for capacity planning, there is currently nothing to replace it with.
+
+### advanced.config application names
+
+Two application identifiers changed. Both are silently inert under the old name rather than a boot error, which makes them easy to miss — Erlang doesn't fail when configuring an application that isn't loaded, it just stops taking effect:
+
+- **`bondy` → `bondy_router`.** The router's OTP application changed name (source now lives under `apps/bondy_router`). This is transparent to normal operation — the release name, node name, `bondy.conf` file, and every WAMP URI are unchanged. It only matters if you reach into the application name directly: a custom `sys.config`/`advanced.config` stanza keyed on `{bondy, [...]}`, or a release hook or health check that calls `application:get_env(bondy, ...)`. Rename those stanzas to `{bondy_router, [...]}`.
+- **`plum_db` removed.** If you have an `advanced.config` with a `{plum_db, [...]}` stanza (for `store.*` settings that had no `bondy.conf` mapping, or anything else), delete it. The `plum_db` application no longer exists in 1.0.0, so the stanza does nothing — but it's dead weight and worth removing so it doesn't look like it's still taking effect.
+
+### New optional keys
+
+None of these existed at 1.0.0-rc.65 in any form — there's nothing to migrate, and the defaults are safe to run with unchanged, but they're worth knowing about: `db.registry.shard_count` (the ephemeral registry's shard count); `db.wal.fsync_mode`, `db.wal.max_segment_bytes`, `db.wal.batched_fsync_interval`, `db.wal.batched_fsync_bytes` (write-ahead log durability and batching); `db.reclaim`, `db.reclaim.interval`, `db.reclaim.batch_cells`, `db.origin_retirement`, `db.origin_retirement.interval`, `db.gc_max_concurrency`, `db.compaction.peer_timeout` (previously internal-only reclamation/retirement tuning, now real `bondy.conf` keys — see the [Reclamation Configuration Reference](/reference/configuration/reclamation)); `cluster.max_message_size` (Partisan inter-node frame size cap); and `load_regulation.aae_reactor.pool.size`, `load_regulation.router.flow_pool.capacity` (see the [Overload Protection](/reference/configuration/overload_protection) reference).
+
+### Other changes
+
 - **Erlang/OTP 28 minimum.** Up from OTP 24. Upgrade the Erlang runtime on every host before installing 1.0.0.
 - **Cowboy 2.17's query-string/form-field cap.** Cowboy was upgraded from 2.13.0 to 2.17.0, which rejects any request carrying more than 100 query-string parameters or `application/x-www-form-urlencoded` form fields — a Cowboy 2.17 default that Bondy does not override. This affects API Gateway routes that read query parameters, the OAuth2 token endpoint, and the OIDC login/callback endpoints. Audit any client that sends unusually wide query strings or large forms before cutting over.
 - **Partisan peer-plane TLS gate.** Covered in step 5 above — an auto-clustering node with an insecure peer plane now refuses to start instead of clustering insecurely. Only relevant if `cluster.peer_discovery.enabled = on`.
 - **HTTP/2 on every listener.** All four HTTP listeners now negotiate HTTP/2 automatically (ALPN on the HTTPS listeners, `h2c`/prior-knowledge on the HTTP listeners) — there's no setting to opt out. Nothing to configure, but revisit capacity planning: one HTTP/2 connection can carry up to `max_concurrent_streams` (default 100) requests concurrently, so connection-count-based alarms will now undercount request-level load.
 
 Not a breaking change, but worth considering while you're already re-provisioning nodes: realm private keys can now be encrypted at rest via `security.master_key.*`. See [Security Configuration Reference → Realm Signing Keys](/reference/configuration/security#realm-signing-keys).
+
+If you're building from source rather than installing a packaged release, `config/bondy.conf.defaults` (regenerate it with `make conf`) lists every current key and its default, and is a useful diff target against your existing `bondy.conf`.
 
 ## Result
 
@@ -158,6 +219,6 @@ You now have a 1.0.0 deployment running on the new storage engine: your realms r
 ## See also
 
 - [Architecture](/concepts/architecture) — the storage and replication model behind `bondy_db`, `bondy_oplog`, and `bondy_mst`.
-- [Data Storage Configuration Reference](/reference/configuration/data_storage) — the `oplog.core.*` options that replace `store.*`.
+- [Data Storage & Active Anti-entropy Configuration Reference](/reference/configuration/data_storage) — the `db.*` configuration surface that replaces `store.*` and `oplog.*`.
 - [Running a Cluster](/guides/deployment/running_a_cluster) — forming the new cluster before you import.
 - [Cluster Configuration Reference](/reference/configuration/cluster) — the Partisan peer-plane TLS options and the `cluster.tls.allow_insecure` gate.

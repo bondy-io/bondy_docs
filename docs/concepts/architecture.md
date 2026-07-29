@@ -13,14 +13,10 @@ related:
       type: Concept
       link: /concepts/deletion_and_reclamation
       description: How Bondy safely reclaims space for deleted replicated data.
-    - text: Data Storage Configuration Reference
+    - text: Data Storage & Active Anti-entropy Configuration Reference
       type: Configuration Reference
       link: /reference/configuration/data_storage
-      description: Sharding, placement, and durability tuning for the core database.
-    - text: Active Anti-entropy Configuration Reference
-      type: Configuration Reference
-      link: /reference/configuration/aae
-      description: How replicas converge, and the authentication freshness fence.
+      description: Sharding, placement, durability tuning, anti-entropy sync, and the authentication freshness fence.
 ---
 
 # Architecture
@@ -62,7 +58,7 @@ Every stateful subsystem — security (users, groups, sources, grants), realms, 
 
 Every replicated write carries a Hybrid Logical Clock (HLC) timestamp, giving a leaderless, causally-meaningful ordering without relying on synchronized wall clocks. Deleting a value is itself a replicated operation — it must leave a tombstone, since the tombstone is what rejects a late-arriving concurrent write — and physically reclaiming that tombstone's space is licensed only once every cluster member has provably seen it. See [Deletion and Reclamation](/concepts/deletion_and_reclamation) for why that distinction matters and how it's made safe.
 
-Because convergence never blocks on a majority round-trip, an isolated node can still serve reads and writes from what it has. The one place this needs a safeguard is authentication: a node whose view of security state is provably stale beyond a configurable bound refuses to authenticate against it rather than risk deciding on out-of-date grants. See the [Active Anti-entropy Configuration Reference](/reference/configuration/aae) for that fence and the sync protocol generally, and the [Data Storage Configuration Reference](/reference/configuration/data_storage) for sharding and placement.
+Because convergence never blocks on a majority round-trip, an isolated node can still serve reads and writes from what it has. The one place this needs a safeguard is authentication: a node whose view of security state is provably stale beyond a configurable bound refuses to authenticate against it rather than risk deciding on out-of-date grants. See the [Data Storage & Active Anti-entropy Configuration Reference](/reference/configuration/data_storage) for that fence, the sync protocol, and sharding and placement.
 
 ### Clustering
 
@@ -83,4 +79,4 @@ Within that design, Bondy offers a few distinct consistency guarantees depending
 - [Clustering](/concepts/clustering) — cluster formation, peer discovery, and replication in depth.
 - [Registry Routing (RIB)](/concepts/registry_routing) — how calls and events cross nodes without full-mesh replication.
 - [Deletion and Reclamation](/concepts/deletion_and_reclamation) — the model behind safely reclaiming deleted data.
-- [Data Storage](/reference/configuration/data_storage) and [Active Anti-entropy](/reference/configuration/aae) configuration references.
+- [Data Storage & Active Anti-entropy](/reference/configuration/data_storage) configuration reference.

@@ -1,65 +1,42 @@
 # Reclamation Configuration Reference
 
 The configuration surface for projection-cell reclamation and origin
-retirement. Reclamation and retirement are **on by default**; deletion
-itself is always available and needs no configuration.
+retirement. Reclamation and retirement are **on by default**. Deletion
+itself is always available and always converges regardless of these
+settings — they only tune *when* the space a deleted or superseded value
+occupied is physically reclaimed.
 
 > **Concept:** [Deletion and Reclamation →](/concepts/deletion_and_reclamation)
 
-::: warning Not bondy.conf keys
-Unlike most of this reference, the options below are **Erlang application
-environment** keys under the `bondy_oplog` application, not `bondy.conf`
-settings — there is no cuttlefish mapping for them. Set them via an
-`advanced.config` file alongside `bondy.conf` in the release's `etc/`
-directory (the standard mechanism for options a cuttlefish schema doesn't
-cover), e.g.:
+## Enabling Reclamation
 
-```erlang
-%% etc/advanced.config
-[
-  {bondy_oplog, [
-    {reclaim_interval_ms, 120000},
-    {origin_retirement, true}
-  ]}
-].
-```
+@[config](db.reclaim,on|off,on,v1.0.0)
 
-Read once at node start; changing a value requires a restart.
-:::
+Whether the reclamation scheduler ticks. Deletion (`bondy_db:delete/3`)
+always converges and is unaffected by this setting: turning reclamation off
+only stops the underlying tombstone from being *physically* reclaimed once
+every cluster member has certified it causally stable. With it off,
+tombstones are retained indefinitely, exactly as if reclamation did not
+exist.
 
-## Enabling reclamation
+@[config](db.reclaim.interval,duration_time_units,1m,v1.0.0)
 
-### `reclaim_enabled`
-
-`boolean()`, default `true`.
-
-Whether the reclamation scheduler ticks. When `false` the scheduler process
-runs idle: deletes still converge and tombstones are retained indefinitely,
-exactly as before the feature existed.
-
-### `reclaim_interval_ms`
-
-`non_neg_integer()`, default `60000`.
-
-Milliseconds between reclamation passes. Deliberately much larger than the
+Interval between reclamation passes. Deliberately much larger than the
 compaction cadence: reclamation is a space concern, not a liveness one, and
 each pass re-derives stability from peer state that only changes as
-anti-entropy rounds complete. `0` disables periodic passes.
+anti-entropy rounds complete. `0` disables periodic passes — an operator can
+still trigger one explicitly.
 
-### `reclaim_batch_cells`
-
-`pos_integer()`, default `500`.
+@[config](db.reclaim.batch_cells,integer,500,v1.0.0)
 
 Cells scanned per pass batch. The sweep runs inside the applier — the one
 process on each node that writes to that node's local projection for a
 shard — so this bound caps how long one batch can stall a concurrent apply.
 A pass loops batches to completion; writes interleave between batches.
 
-## Origin retirement
+## Origin Retirement
 
-### `origin_retirement`
-
-`boolean()`, default `true`.
+@[config](db.origin_retirement,on|off,on,v1.0.0)
 
 Whether the origin-retirement pass auto-reacts to cluster membership
 changes. When enabled, each node reacts to an observed membership removal —
@@ -69,37 +46,35 @@ origins from cell states by complement. The pass is fail-closed: if any
 current member cannot be queried for the origins it claims, nothing is
 reaped and the pass retries on the next trigger. It never bans an origin.
 
-### `origin_retirement_interval_ms`
+@[config](db.origin_retirement.interval,duration_time_units,10m,v1.0.0)
 
-`non_neg_integer()`, default `600000`.
-
-Milliseconds between periodic retirement passes, in addition to the
+Interval between periodic retirement passes, in addition to the
 membership-event trigger. The periodic pass covers origin-epoch turnover
 that produces no membership event — a node that loses its storage and
 rejoins under the same name mints fresh origins without any member joining
 or leaving, and only a periodic pass on the surviving nodes reaps the dead
 epoch.
 
-## Shared scheduler machinery
+## Shared Scheduler Machinery
 
 The reclamation scheduler is an instance of the same scheduler that drives
-compaction. One option is shared between them; the compaction-only options
-are listed here only to state that they do **not** govern reclamation.
+compaction. One option is shared between them; the other governs compaction
+only and is listed here just to state that it does **not** affect
+reclamation.
 
-### `gc_max_concurrency`
+@[config](db.gc_max_concurrency,integer,4,v1.0.0)
 
-`pos_integer()`, default `4`.
+Cap on concurrently running trigger workers, per scheduler instance —
+shared between the compaction scheduler and the reclamation scheduler. This
+is a distinct subsystem from `db.gc_interval`/`db.gc_heap_delta`, the
+per-instance BEAM heap monitor that happens to share the "gc" name; see
+[Instance Memory Management](/reference/configuration/data_storage#instance-memory-management).
 
-Cap on concurrently running trigger workers, per scheduler instance. Applies
-to both the compaction scheduler and the reclamation scheduler.
-
-### `peer_timeout_ms`
-
-`non_neg_integer()`, default `30000`.
+@[config](db.compaction.peer_timeout,duration_time_units,30s,v1.0.0)
 
 This recency filter applies to **compaction**'s reading of peer state only.
-Reclamation uses a strict, membership-based reading with no recency
-filter — a silent member holds reclamation down until retired by a
+Reclamation (`db.reclaim`) uses a strict, membership-based reading with no
+recency filter — a silent member holds reclamation down until retired by a
 membership act, and no timeout changes that.
 
 ## Telemetry
@@ -130,3 +105,4 @@ one line per instance per 60 seconds.
 
 - [Deletion and Reclamation](/concepts/deletion_and_reclamation) — the model
   these options control.
+- [Data Storage & Active Anti-entropy Configuration Reference](/reference/configuration/data_storage) — sharding, pack-store durability, the write-ahead log, and anti-entropy sync.

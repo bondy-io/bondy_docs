@@ -20,6 +20,25 @@ The capacity of the router process pool, i.e. the maximum number of
 active erlang processes handling router events (default = 100000).
 Once the maximum has been reached, Bondy will respond with an overload error.
 
+@[config](load_regulation.router.flow_pool.capacity,integer,100000,v1.0.0)
+
+Total number of messages that can be queued across the router flow pool
+workers — the pool that preserves WAMP per-flow ordering (calls and their
+results, and events for a given subscription, delivered in strict order).
+Each worker's share of this capacity is this value divided by
+[load_regulation.router.pool.size](#load_regulationrouterpoolsize); once a
+worker's share is exhausted, Bondy responds with an overload error for
+messages on that flow.
+
+@[config](load_regulation.aae_reactor.pool.size,integer,16,v1.0.0)
+
+The size of the anti-entropy merge-reaction worker pool: the pool that
+applies remote-merge reactions — session close, RBAC cache invalidation, and
+[Registry Routing (RIB)](/concepts/registry_routing) stub updates —
+triggered as anti-entropy syncs land. Events are sharded by cell key, so
+increasing this only helps when reactions for many distinct cells are in
+flight concurrently.
+
 @[config](load_regulation.session_manager.pool.size,pos_integer,32,v1.0.0)
 
 The capacity of the session manager process pool, i.e. the maximum

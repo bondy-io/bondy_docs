@@ -100,7 +100,7 @@ These families instrument the replicated storage layer described in [Architectur
 |---|---|---|
 | `bondy_oplog_core_reads_total`, `_read_rps`, `_range_rps` | Counter / Gauge | Point-read totals (wait-free) and point/range read rates over the last refresh interval, by `namespace`. |
 | `bondy_oplog_core_cache_hit_ratio` | Gauge | Per-namespace ETS point-read cache hit ratio. |
-| `bondy_oplog_core_ae_lag_milliseconds`, `_freshness_lag_max_milliseconds` | Gauge | Per-shard and per-namespace anti-entropy freshness lag &mdash; the signal behind the authentication freshness fence (see the [AAE Configuration Reference](/reference/configuration/aae)). |
+| `bondy_oplog_core_ae_lag_milliseconds`, `_freshness_lag_max_milliseconds` | Gauge | Per-shard and per-namespace anti-entropy freshness lag &mdash; the signal behind the authentication freshness fence (see the [Data Storage & Active Anti-entropy Configuration Reference](/reference/configuration/data_storage#active-anti-entropy)). |
 | `bondy_oplog_core_subscribers` | Gauge | Pub/sub subscriber count per namespace. |
 | `bondy_oplog_write_readable_latency_microseconds` | Gauge | Write-to-readable latency quantiles over a rolling window, by `instance_id` and `quantile`. |
 | `bondy_oplog_instances`, `_instance_lifecycle_code`, `_instance_live_size` | Gauge | Instance counts by bootstrap lifecycle state; per-instance lifecycle code (`0` starting, `1` pre_bootstrap, `2` live); live (unapplied overlay) size. |

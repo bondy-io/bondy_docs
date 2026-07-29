@@ -128,4 +128,4 @@ docker compose down          # add -v to also drop the Prometheus/Grafana data v
 
 - [Prometheus Metrics Reference](/reference/metrics) &mdash; every metric family behind these dashboards, with a pointer to the self-documenting `/metrics` endpoint for full detail.
 - [Clustering](/concepts/clustering) &mdash; the concepts behind the Cluster Overview and Cluster Graph dashboards.
-- [Active Anti-entropy Configuration Reference](/reference/configuration/aae) &mdash; tune the sync scheduler whose state the Sync/AAE row visualises.
+- [Data Storage & Active Anti-entropy Configuration Reference](/reference/configuration/data_storage#active-anti-entropy) &mdash; tune the sync scheduler whose state the Sync/AAE row visualises.

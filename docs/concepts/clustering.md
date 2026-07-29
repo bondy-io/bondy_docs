@@ -85,7 +85,7 @@ This means:
 - The system automatically reconciles conflicts when healed
 
 ::: tip Active Anti-Entropy
-Bondy uses **Active Anti-Entropy (AAE)** to proactively detect and repair state divergence. AAE periodically compares each shard's Merkle Search Tree against a peer's and pulls only the divergent pages, ensuring convergence even after prolonged partitions. See the [Active Anti-Entropy Configuration Reference](/reference/configuration/aae) for the sync protocol and its tunables, including the authentication freshness fence that refuses to authenticate against provably stale security state.
+Bondy uses **Active Anti-Entropy (AAE)** to proactively detect and repair state divergence. AAE periodically compares each shard's Merkle Search Tree against a peer's and pulls only the divergent pages, ensuring convergence even after prolonged partitions. See the [Data Storage & Active Anti-entropy Configuration Reference](/reference/configuration/data_storage#active-anti-entropy) for the sync protocol and its tunables, including the authentication freshness fence that refuses to authenticate against provably stale security state.
 :::
 
 ### Message Routing
@@ -242,4 +242,4 @@ bondy1 ←→ bondy2  bondy4 ←→ bondy5
 - [Deletion and Reclamation](/concepts/deletion_and_reclamation) - How deleted replicated data is safely reclaimed
 - [Running a Cluster](/guides/deployment/running_a_cluster) - Deployment guide
 - [Cluster Configuration](/reference/configuration/cluster) - Configuration reference
-- [Active Anti-Entropy](/reference/configuration/aae) - AAE configuration and tuning
+- [Data Storage & Active Anti-entropy](/reference/configuration/data_storage) - AAE configuration and tuning
