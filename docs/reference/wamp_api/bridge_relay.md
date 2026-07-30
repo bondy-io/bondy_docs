@@ -1,34 +1,13 @@
 ---
 outline: [2,3]
+related:
+    - text: Bondy Edge (Bridge Relay)
+      type: Concept
+      link: /concepts/bridge_relay
+      description: What a bridge relay is, why it exists, and what actually happens when one connects.
 ---
 # Bridge Relay (Edge)
-A Bridge Relay are connections between one or more realms across two Bondy clusters.
-
-Generally speaking an edge router is a router located at a network boundary or on-premises (office, home) that enables an internal network to connect to external networks.
-
-
-## Description
-A **Bondy Edge router (edge or edge node)** is an operational mode that enables Bondy to act as an edge router i.e. it connects to a Bondy remote cluster not as another cluster node but as an edge node, a special mode which allows it to extend the capabilities of Bondy routing to a subset of realms.
-
-### Synchronization
-Edge connection establishing requires the synchronization of realm state between edge and remote.
-
-Edge will synchronize:
-- **Realm configuration state**
-    - Realm private keys should not be replicated.
-        - So we would replicate only the realm's public signing (EC) and encryption (RSA) public keys.
-    - The realm's prototype (if it is used by the edge's realm)
-        - We need to copy the realm and its prototype which will have most of the group, source and grant definitions.
-    - User data
-        - User passwords should NOT be replicated (only authorized_keys i.e. cryptosign public keys)
-    - Group data
-    - Source data
-    - Grant data
-- **Realm registry state**
-    - Registrations
-    - Subscriptions
-
-The api described below is to be able to configure the proper Bondy Edge router.
+The WAMP procedures for managing bridge relays (Bondy Edge connections) at runtime — adding, removing, starting, stopping, and checking the status of a bridge. For what a bridge relay is, why it's distinct from clustering, and what syncs (and doesn't yet sync) when one connects, see [Bondy Edge (Bridge Relay)](/concepts/bridge_relay).
 
 ## Types
 ### input_data(){.datatype}
@@ -193,7 +172,7 @@ None.
 
 #### Errors
 
-* [bondy.error.running](): when the bridge is running.
+* [bondy.error.running](/reference/wamp_api/errors/running): when the bridge is running or restarting — stop it first.
 
 #### Example
 
@@ -242,7 +221,7 @@ None.
 
 * [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided bridge name is not found.
 * [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there are an invalid number of positional arguments.
-* [bondy.error.unknown_error]():
+* [bondy.error.unknown_error](/reference/wamp_api/errors/unknown_error): when the bridge fails to start for a reason that doesn't map to a more specific error.
 
 #### Examples
 
@@ -553,7 +532,10 @@ None.
 
 #### Errors
 
-* [bondy.error.badmap](): when the provided data is invalid according to the spec.
+* [bondy.error.missing_required_value](/reference/wamp_api/errors/missing_required_value): when a required value is not provided.
+* [bondy.error.invalid_datatype](/reference/wamp_api/errors/invalid_datatype): when the data type is invalid.
+* [bondy.error.invalid_value](/reference/wamp_api/errors/invalid_value): when the data value is invalid.
+* [bondy.error.invalid_data](/reference/wamp_api/errors/invalid_data): when the data values are invalid.
 
 #### Examples
 
@@ -956,7 +938,7 @@ const bridgeData = {
                         "type": "object",
                         "properties": procedureActionSpec
                     },
-                    "description": "",
+                    "description": "Accepted and validated, but not yet enforced by the running bridge — see Bondy Edge.",
                     "default": "[]"
                 },
                 "topics": {
@@ -966,7 +948,7 @@ const bridgeData = {
                         "type": "object",
                         "properties": topicActionSpec
                     },
-                    "description": "",
+                    "description": "Only direction \"out\" currently has an effect — see Bondy Edge.",
                     "default": "[]"
                 }
             }

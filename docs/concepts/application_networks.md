@@ -41,9 +41,9 @@ WAMP an open protocol that unifies the *core services required by every distribu
     - **Publish/Subscribe** routing
 - **Message routing**, where Bondy nodes relay messages from a source to a destination within a network, as well as bridging messages between components connected to different networks, such as cloud-to-cloud or edge-to-cloud cases.
 
-By supporting multiple transports and combining the two main application communication patterns (Remote Procedure Calls and Publish/Subscribe) into a single protocol, WAMP can be used for all messaging requirements of a distributed application, including North-South and East-West traffic, replacing protocols like HTTP, GraphQL and gRPC.
+By supporting multiple transports and combining the two main application communication patterns (Remote Procedure Calls and Publish/Subscribe) into a single protocol, WAMP can be used for all messaging requirements of a distributed application, including North-South and East-West traffic, in place of separate protocols such as HTTP, GraphQL, and gRPC for each.
 
-This reduces technology stack complexity and networking overheads but also provides a better deverloper and user experience.
+This reduces the number of protocols, client libraries, and infrastructure components a distributed application needs to integrate.
 
 ### Key Characteristics
 
@@ -65,26 +65,15 @@ A reverse VPN is used to expose devices and software from your edge network to t
 However, this is a complicated setup that is prone to errors and misconfiguration. It also requires your device to run a VPN client, which is sometimes not possible.
 :::
 
-## Key Benefits
+## Consequences of a single protocol
 
-### Simplified Connectivity
-An application network simplifies the integration of applications and systems by providing a standardized protocol that supports multiple transports and encodings. It caters to the needs of a wide spectrum of platforms, from web apps to backend services and tools.
-### Improved Agility and Time-to-Market
-By leveraging an application network, you can accelerate application development and deployment processes. It enables agility by promoting modular and decoupled architectures, allowing independent updates and releases of individual components. This results in faster time-to-market.
-### Scalability and Flexibility
-An application network architecture supports scalability and flexibility to accommodate changing business needs. It enables organizations to handle increasing data volumes, user traffic, and application workloads by leveraging technologies such as microservices, containerization, and auto-scaling.
-### Security and Governance
-An application network allows for centralized security controls, authentication, authorization, and encryption. It can also facilitate adherence to regulatory compliance requirements and data privacy regulations.
-### Improved User Experience
-An application network helps deliver a seamless and consistent user experience by enabling smooth interactions between different applications and services through the use of different communication patterns.
-### Observability
-An application network can provide monitoring, analytics, and reporting capabilities to gain insights into application performance, usage patterns, and system behavior. This data helps identify bottlenecks, optimize resources, detect anomalies, and make data-driven decisions to improve application performance and user satisfaction.
-### Collaboration and Innovation
-An application network fosters collaboration between development teams, allowing them to build upon existing services and leverage shared functionalities through the use of a common protocol. It encourages innovation by promoting the creation of new applications by combining existing services.
-### Reduce accidental complexity
-An application network eliminates the need for the integration of single-purpose dedicated infrastructure components such as service mesh, event mesh, authentication and authorization services, API gateways, and real-time notification services.
-### Cost Optimization
-An application network can help optimize costs by reducing duplication of effort and resources. The improved time-to-market and reduced accidental complexity means you can do more with less.
-
+- **Fewer components to integrate.** One protocol, over multiple transports and encodings, connects web apps, backend services, and tools, rather than a different protocol per platform.
+- **Independent deployability.** Because participants are decoupled and addressed by named resource (a procedure or topic URI) rather than by network location, one component can be updated or redeployed without the others needing to know.
+- **Scaling per component.** Adding capacity for one service (more instances registering the same procedure, or subscribing to the same topic) doesn't require re-architecting how other services reach it.
+- **Centralized security.** Authentication, authorization, and encryption are enforced at the router rather than reimplemented per component.
+- **One place to observe.** Because every call and event passes through the router, it is also the one place to monitor traffic, latency, and error rates across the whole network — see [Prometheus Metrics Reference](/reference/metrics).
+- **Less accidental complexity.** An application network replaces the combination of a service mesh, event mesh, authentication/authorization service, and API gateway with the single router, rather than integrating each separately.
 
 ## How is an application network different
+
+A traditional network routes traffic by IP address and port: two components communicate once one knows the other's network location. An application network routes by named resource instead — a procedure URI or a topic URI — so a component reaches another by what it does, not where it runs. This is what lets Bondy relocate, scale, or replace a component behind a stable name, and what lets the same overlay carry both North-South and East-West traffic through one addressing scheme instead of two.

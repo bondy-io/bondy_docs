@@ -20,7 +20,7 @@ Bondy creates a distributed application network that connects all your component
 
 ## The Foundation: WAMP Router
 
-At its core, Bondy is a sophisticated implementation of the [Web Application Messaging Protocol (WAMP)](/concepts/what_is_wamp). Think of Bondy as the intelligent middleware that sits between all your application components, routing messages and managing connections.
+At its core, Bondy is an implementation of the [Web Application Messaging Protocol (WAMP)](/concepts/what_is_wamp): middleware that sits between application components, routing messages and managing connections between them.
 
 When a client connects to Bondy:
 
@@ -96,7 +96,7 @@ Pub/Sub benefits:
 
 ## Distributed Architecture
 
-A single Bondy node provides all basic functionality. But Bondy's real power emerges when you deploy multiple nodes in a cluster.
+A single Bondy node provides all basic functionality. Deploying multiple nodes in a cluster adds capacity and availability on top of it.
 
 ### Masterless Clustering
 
@@ -111,54 +111,41 @@ Nodes automatically discover each other through DNS and form a mesh network. Whe
 
 ### State Replication
 
-Critical state must be consistent across all nodes for routing to work correctly. Bondy replicates:
+Realm configurations, security settings, and RBAC rules (users, groups, grants, sources) must be consistent across nodes for routing decisions to be correct. Bondy replicates these as per-table CRDTs, backed by its storage layer, `bondy_db`.
 
-- **Realm configurations** - Security settings, RBAC rules
-- **User credentials** - For authentication
-- **Registration data** - Which procedures are available where
-- **Subscription data** - Which topics have subscribers where
+Rather than a synchronous write to every node, or a gossip broadcast, replication converges through **active anti-entropy**: nodes compare a Merkle Search Tree (MST) of each table's contents against a peer's and pull only the pages that differ. A write only needs to land durably on the node that accepted it; anti-entropy then carries it to the rest of the cluster.
 
-Bondy uses a gossip-based protocol for state dissemination:
-
-1. When state changes on one node, it's immediately shared with a few peers
-2. Those peers share with their peers
-3. Eventually all nodes receive the update
-4. Updates are idempotent and commutative (CRDTs)
-
-This approach ensures **eventual consistency** while maintaining **high availability**. Nodes continue operating during network partitions, with reconciliation happening automatically when connectivity restores.
+This gives **eventual consistency** with **high availability**: nodes keep accepting writes during a network partition, and reconcile automatically — with no lost updates, since the underlying CRDTs merge deterministically regardless of delivery order — once connectivity is restored.
 
 ### Active Anti-Entropy
 
-Gossip is efficient but can miss updates. Bondy includes Active Anti-Entropy (AAE) for repair:
+Active Anti-Entropy (AAE) is that same convergence mechanism, running on a schedule rather than only in reaction to a write:
 
-- Each node maintains Merkle trees of its state
-- Nodes periodically compare trees with peers
-- Differences are identified and reconciled
-- Missing or divergent data is synchronized
+- Each node keeps a Merkle Search Tree per table.
+- A scheduler periodically compares a sample of peers' tree roots against the local one.
+- A root mismatch is walked down to the specific divergent pages, and only those pages are exchanged.
 
-AAE runs in the background, continuously healing the cluster from:
-- Network partitions that prevented gossip delivery
-- Node crashes before gossip completed
-- Disk corruption or data loss
+Because AAE re-derives divergence directly from tree state rather than waiting for a triggering event, it also repairs a node that missed updates outright — after a network partition, a crash mid-write, or local disk corruption — once it reconnects.
 
 ### Cross-Cluster Routing
 
-When a client connected to Node A calls a procedure registered on Node B:
+Registrations and subscriptions themselves are **not** replicated — only a compact summary of what each node can serve is (its Routing Information Base, or RIB — see [Registry Routing (RIB)](/concepts/registry_routing)). When a client connected to Node A calls a procedure whose only callee is registered on Node B:
 
 ```
 1. Client → Node A: CALL message
-2. Node A checks local routing table
-3. Finds procedure registered on Node B
-4. Node A → Node B: Forward INVOCATION
-5. Node B → Callee: Deliver INVOCATION
-6. Callee → Node B: Return YIELD
-7. Node B → Node A: Forward RESULT
-8. Node A → Client: Deliver RESULT
+2. Node A consults its merged RIB summary
+3. Summary indicates Node B serves this procedure
+4. Node A → Node B: Forward INVOCATION, node-addressed
+5. Node B re-selects the callee among its own live local registrations
+6. Node B → Callee: Deliver INVOCATION
+7. Callee → Node B: Return YIELD
+8. Node B → Node A: Forward RESULT
+9. Node A → Client: Deliver RESULT
 ```
 
-This happens automatically and transparently. From the client's perspective, it's just calling a procedure. Bondy handles all cross-node routing internally.
+Step 5 matters: Node B decides the final callee from its own current, authoritative local state rather than acting on Node A's possibly momentarily-stale summary. If Node A's summary turns out to be stale (the procedure was just unregistered on Node B), a bounded retry reroutes to another candidate before the call fails.
 
-The same applies to Pub/Sub—events published on one node are automatically delivered to subscribers on other nodes.
+This happens automatically and transparently — from the client's perspective, it's just calling a procedure. The same node-addressed forwarding applies to Pub/Sub: a publish reaches every node with an interested subscriber, and each node delivers to its own local subscribers.
 
 ## Security Model
 
@@ -310,22 +297,21 @@ Expose WAMP procedures as REST APIs:
 
 This allows legacy HTTP clients to access WAMP services without modification.
 
-### Message Broker Bridges
+### Broker Bridge
 
-Connect to external message systems:
-- **Kafka** - Forward WAMP events to Kafka topics or consume from Kafka
-- **MQTT** - Bridge to IoT networks (future)
-- **RabbitMQ** - Integration with existing message infrastructure (future)
+Re-publish WAMP events to a system that doesn't speak WAMP, via a JSON subscription spec — see [Broker Bridge](/concepts/broker_bridge):
+- **Kafka** - forward WAMP events to Kafka topics (produce only; there is no consumer side back into WAMP)
+- **AWS SNS** - send SMS messages
+- **Mailgun** / **SendGrid** - send email, the latter with template support
 
 Bridges enable gradual migration and hybrid architectures.
 
-### Bondy Edge (Router Bridging)
+### Bondy Edge (Bridge Relay)
 
-Connect Bondy clusters across WAN:
-- Bridge geographically distributed clusters
-- Selective topic/procedure replication
-- Compress and secure inter-cluster traffic
-- Maintain local autonomy during network issues
+Connect one Bondy node, as a client, to a remote Bondy router — see [Bondy Edge (Bridge Relay)](/concepts/bridge_relay):
+- Share a subset of a realm's procedures and topics, without joining the remote's cluster
+- The edge always dials out, so it needs no inbound port open
+- Reconnects automatically on a network drop, with configurable backoff
 
 ## Putting It All Together
 
@@ -342,7 +328,7 @@ Here's how all these pieces work in a real deployment:
 9. **Monitor** - Track metrics and health via APIs
 10. **Integrate** - Bridge to HTTP clients or message brokers as needed
 
-The result is a robust, scalable, secure application network that simplifies distributed system development.
+The result is a single application network handling routing, security, clustering, and failure recovery, in place of a separate stack of components for each.
 
 ## Next Steps
 
@@ -350,5 +336,3 @@ The result is a robust, scalable, secure application network that simplifies dis
 - **Learn about clustering** - See [Clustering](/concepts/clustering) for deployment patterns
 - **Explore security** - Review [Security](/concepts/wamp/security) for authentication and authorization
 - **Try it yourself** - Follow the [Getting Started tutorial](/tutorials/getting_started/marketplace)
-
-Bondy works by making the complex simple. It handles the hard parts of distributed systems—routing, security, clustering, failure recovery—so you can focus on building features.

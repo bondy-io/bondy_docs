@@ -95,27 +95,43 @@ or a named alias configuration:
 - `sensitive` (1GB)
 
 ::: info Notice
-The underlying library allows up to 4398046510080 (3.9 TB)
-but we have restricted this value to avoid a configuration error to enable a
-DoS attack.
+The underlying library allows up to 4398046510080 (3.9 TB), but Bondy
+restricts this value so that a configuration error cannot itself become a
+DoS vector.
 :::
 
 
 ## Authentication: OAuth2
 
-@[config](oauth2.client_credentials_grant.duration)
+@[config](oauth2.config_file,path,'{{platform_etc_dir}}/oauth2_config.json',v0.9.0)
 
-@[config](oauth2.code_grant.duration)
+Path to the OAuth2 client configuration file (registered clients, scopes, and related settings).
 
-@[config](oauth2.config_file)
+@[config](oauth2.password_grant.duration,duration_time_units,15m,v0.9.0)
 
-@[config](oauth2.password_grant.duration)
+Lifetime of an access token issued via the Resource Owner Password Credentials grant.
 
-@[config](oauth2.refresh_token.duration)
+@[config](oauth2.client_credentials_grant.duration,duration_time_units,15m,v0.9.0)
 
-@[config](oauth2.refresh_token.length)
+Lifetime of an access token issued via the Client Credentials grant.
 
+@[config](oauth2.code_grant.duration,duration_time_units,10m,v0.9.0)
 
+Lifetime of an access token issued via the Authorization Code grant.
+
+@[config](oauth2.refresh_token.duration,duration_time_units,30d,v0.9.0)
+
+Lifetime of a refresh token. A client uses a still-valid refresh token to obtain a new access token without the resource owner re-authenticating.
+
+@[config](oauth2.refresh_token.limit,integer,25,v0.9.0)
+
+Maximum number of refresh tokens held concurrently per user. Issuing beyond this limit retires the oldest outstanding token for that user.
+
+@[config](oauth2.refresh_token.length,bytesize,40,v0.9.0)
+
+::: warning Deprecated
+This key has no effect in current releases and is kept only for backward compatibility with existing `bondy.conf` files — setting it neither errors nor changes refresh token behaviour.
+:::
 
 ## Authentication: Ticket
 

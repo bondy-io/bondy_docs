@@ -181,7 +181,7 @@ const realmPublic = {
                     "type": "string",
                     "required": true,
                     "mutable": true,
-                    "description": ""
+                    "description": "The URI or URI pattern the permissions apply to, matched according to `match`."
                 },
                 "match": {
                     "type": "string",
@@ -198,7 +198,7 @@ const realmPublic = {
                                 "type": "string",
                                 "required": true,
                                 "mutable": true,
-                                "description": ""
+                                "description": "The URI or URI pattern this resource entry covers, matched according to its own `match`."
                             },
                             "match": {
                                 "type": "string",

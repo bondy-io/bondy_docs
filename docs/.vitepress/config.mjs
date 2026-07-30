@@ -288,14 +288,14 @@ export default withThemeDefaults(
 function nav() {
     return [
       {
-        text: 'Concepts',
-        link: '/concepts/index',
-        activeMatch: '/concepts/'
-      },
-      {
         text: 'Tutorials',
         link: '/tutorials/index',
         activeMatch: '/tutorials/'
+      },
+      {
+        text: 'Concepts',
+        link: '/concepts/index',
+        activeMatch: '/concepts/'
       },
       {
         text: 'How-to Guides',
@@ -413,17 +413,18 @@ function externalResources() {
 function tutorialsSidebar() {
   return [
       {
-        text: 'Getting Started with WAMP',
+        text: 'Get Started',
+        description: 'The fastest path from a running Bondy node to your first RPC call and Pub/Sub event.',
         collapsible: true,
         items: [
           {
-            text: 'Marketplace',
-            link: '/tutorials/getting_started/marketplace',
-            isFeature:true,
-            description: 'A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS web application.'
+            text: 'Getting Started with Wampy (JavaScript)',
+            link: '/tutorials/getting_started/wampy',
+            isFeature: true,
+            description: 'Connect to Bondy from Node.js using Wampy: register and call a procedure, then publish and subscribe.'
           },
           {
-            text: 'Getting Started with Bondy Connect',
+            text: 'Getting Started with Bondy Connect (Erlang/Elixir)',
             link: '/tutorials/getting_started/bondy_connect',
             isFeature: true,
             description: 'Connect to Bondy from Erlang or Elixir using bondy_connect: register and call a procedure, then publish and subscribe.'
@@ -431,9 +432,15 @@ function tutorialsSidebar() {
         ]
       },
       {
-        text: 'Getting Started with HTTP',
-        description: 'Tutorials demonstrating the use of the embedded HTTP API Gateway.',
+        text: 'Example Applications',
+        description: 'Complete, worked applications to follow once you know the fundamentals.',
         items: [
+          {
+            text: 'Marketplace',
+            link: '/tutorials/getting_started/marketplace',
+            isFeature:true,
+            description: 'A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS web application.'
+          },
           {
             text: 'Marketplace HTTP API Gateway',
             link: '/tutorials/getting_started/marketplace_api_gateway',
@@ -553,6 +560,12 @@ function guidesSidebar() {
             text: 'Simplifying realm management using prototypes',
             link: '/guides/administration/simplifying_realm_management_using_prototypes',
             isFeature: true
+          },
+          {
+            text: 'Raising Open File Limits',
+            link: '/guides/administration/raising_open_file_limits',
+            isFeature: true,
+            description: 'Raise the OS and Docker open-file limit so Bondy never runs out of file handles.'
           }
         ]
       },
@@ -585,7 +598,153 @@ function conceptsSidebar() {
   return [
 
       {
-        text: 'Introduction',
+        text: 'Core Concepts',
+        description: "What every Bondy developer needs to build their first client: the two communication patterns WAMP provides.",
+        items: [
+          {
+            text: 'Communication Patterns',
+            link: '/concepts/wamp/communication_patterns',
+            isFeature: true,
+            description: "The two patterns — RPC and Pub/Sub — that together cover request-response and event distribution."
+          },
+          {
+            text: 'Routed RPC',
+            link: '/concepts/wamp/rpc',
+            isFeature: true,
+            description: "The Caller/Callee request-response pattern: how a procedure is registered, called, and routed."
+          },
+          {
+            text: 'Publish/Subscribe',
+            link: '/concepts/wamp/pubsub',
+            isFeature: true,
+            description: "The Publisher/Subscriber event pattern: how topics, subscriptions, and publications work."
+          }
+        ]
+      },
+      {
+        text: 'Realms & Security',
+        description: "Once RPC and Pub/Sub are working, the next thing to understand: the domain your sessions attach to, and how they authenticate.",
+        items: [
+          {
+            text: 'Realms',
+            link: '/concepts/realms',
+            isFeature: true,
+            description: "Realms are authentication, authorization, routing and administrative domains that act as namespaces."
+          },
+          {
+            text: 'Connections and Sessions',
+            link: '/concepts/wamp/sessions',
+            isFeature: true,
+            description: "What a WAMP session is and how it relates to transports, realms, and authentication."
+          },
+          {
+            text: 'Security',
+            link: '/concepts/wamp/security',
+            isFeature: true,
+            description: "How Bondy authenticates and authorizes sessions within a realm."
+          },
+          {
+            text: 'Same Sign-on',
+            link: '/concepts/same_sign_on',
+            isFeature: true,
+            description: "Do you need to provide users access to multiple realms? Learn about same sign-on realms."
+          },
+          {
+            text: 'Single Sign-on',
+            link: '/concepts/single_sign_on',
+            isFeature: true,
+            description: "Learn how to enable Single Sign-on on multiple realms."
+          },
+          {
+            text: 'OIDC Authentication',
+            link: '/concepts/oidc_authentication',
+            isFeature: true,
+            description: "Learn how to authenticate users via external Identity Providers using OpenID Connect."
+          }
+        ]
+      },
+      {
+        text: 'Platform & Scaling',
+        description: "Concepts for once you're running Bondy for real: clustering, edge deployments, and cross-node routing.",
+        items: [
+          {
+            text: 'Clustering',
+            link: '/concepts/clustering',
+            isFeature: true
+          },
+          {
+            text: 'Registry Routing (RIB)',
+            link: '/concepts/registry_routing',
+            isFeature: true,
+            description: "How Bondy scales cross-node call and event routing without replicating every registration to every node."
+          },
+          {
+            text: 'Bondy Edge (Bridge Relay)',
+            link: '/concepts/bridge_relay',
+            isFeature: true,
+            description: "Connect one Bondy node, as a client, to a remote router — sharing a subset of a realm without joining its cluster."
+          },
+          {
+            text: 'Broker Bridge',
+            link: '/concepts/broker_bridge',
+            isFeature: true,
+            description: "Re-publish WAMP events to Kafka, AWS SNS, Mailgun, or SendGrid."
+          },
+          {
+            text: 'HTTP Transports (Longpoll & SSE)',
+            link: '/concepts/http_transports',
+            isFeature: true,
+            description: "Learn how to use HTTP long-polling and Server-Sent Events transports for WAMP sessions."
+          },
+          {
+            text: 'HTTP API Gateway',
+            link: '/concepts/api_gateway',
+            isFeature: true,
+            description: "Route incoming HTTP/REST requests to WAMP procedures or external APIs using declarative JSON specifications."
+          },
+          {
+            text: 'HTTP Connector',
+            link: '/concepts/http_connector',
+            isFeature: true,
+            description: "Bridge WAMP RPC calls to upstream HTTP/REST services with automatic auth, retries, and error mapping."
+          },
+          {
+            text: 'Deletion and Reclamation',
+            link: '/concepts/deletion_and_reclamation',
+            isFeature: true,
+            description: "How Bondy safely reclaims space for deleted replicated data."
+          },
+        ]
+      },
+      {
+        text: 'Advanced WAMP Protocol',
+        description: "Protocol-level mechanics for once the basics are second nature.",
+        items: [
+          {
+            text: 'Naming Best Practices',
+            link: '/concepts/wamp/naming',
+            isFeature: true
+          },
+          {
+            text: 'Advanced RPC',
+            link: '/concepts/wamp/advanced/rpc',
+            isFeature: true
+          },
+          {
+            text: 'Advanced Publish/Subscribe',
+            link: '/concepts/wamp/advanced/pubsub',
+            isFeature: true
+          },
+          {
+            text: 'WAMP Compliance',
+            link: '/concepts/wamp/compliance',
+            isFeature: true
+          }
+        ]
+      },
+      {
+        text: 'Background',
+        description: "Optional reading: the reasoning and terminology behind Bondy and WAMP. Not required to build your first client.",
         items: [
           {
             text: 'Why Bondy',
@@ -612,6 +771,12 @@ function conceptsSidebar() {
             description: "Find out more about the Web Application Messaging Protocol. "
           },
           {
+            text: 'Introduction to WAMP',
+            link: '/concepts/wamp/introduction',
+            isFeature: true,
+            description:'Learn the WAMP basics including how to establish a session and use RPC and Publish/Subscribe.'
+          },
+          {
             text: 'How does Bondy work',
             link: '/concepts/how_does_bondy_work' ,
             isFeature: true,
@@ -634,137 +799,6 @@ function conceptsSidebar() {
             link: '/concepts/architecture',
             isFeature: true,
             description: "Dive into a description of Bondy's architecture and its rationale behind its characteristics."
-          }
-        ]
-      },
-      {
-        text: 'Key Concepts',
-        description: "Learn about the fundamental concepts used by Bondy.",
-        items: [
-          {
-            text: 'Realms',
-            link: '/concepts/realms',
-            isFeature: true,
-            description: "Realms are authentication, authorization, routing and administrative domains that act as namespaces."
-          },
-          {
-            text: 'Same Sign-on',
-            link: '/concepts/same_sign_on',
-            isFeature: true,
-            description: "Do you need to provide users access to multiple realms? Learn about same sign-on realms."
-          },
-          {
-            text: 'Single Sign-on',
-            link: '/concepts/single_sign_on',
-            isFeature: true,
-            description: "Learn how to enable Single Sign-on on multiple realms."
-          },
-          {
-            text: 'OIDC Authentication',
-            link: '/concepts/oidc_authentication',
-            isFeature: true,
-            description: "Learn how to authenticate users via external Identity Providers using OpenID Connect."
-          },
-          {
-            text: 'HTTP Transports (Longpoll & SSE)',
-            link: '/concepts/http_transports',
-            isFeature: true,
-            description: "Learn how to use HTTP long-polling and Server-Sent Events transports for WAMP sessions."
-          },
-          {
-            text: 'HTTP API Gateway',
-            link: '/concepts/api_gateway',
-            isFeature: true,
-            description: "Route incoming HTTP/REST requests to WAMP procedures or external APIs using declarative JSON specifications."
-          },
-          {
-            text: 'HTTP Connector',
-            link: '/concepts/http_connector',
-            isFeature: true,
-            description: "Bridge WAMP RPC calls to upstream HTTP/REST services with automatic auth, retries, and error mapping."
-          },
-          {
-            text: 'Clustering',
-            link: '/concepts/clustering',
-            isFeature: true
-          },
-          {
-            text: 'Registry Routing (RIB)',
-            link: '/concepts/registry_routing',
-            isFeature: true,
-            description: "How Bondy scales cross-node call and event routing without replicating every registration to every node."
-          },
-          {
-            text: 'Deletion and Reclamation',
-            link: '/concepts/deletion_and_reclamation',
-            isFeature: true,
-            description: "How Bondy safely reclaims space for deleted replicated data."
-          },
-        ]
-      },
-      {
-        text: 'WAMP Essentials',
-        items: [
-          {
-            text: 'Introduction to WAMP',
-            link: '/concepts/wamp/introduction',
-            isFeature: true,
-            description:'Learn the WAMP basics including how to establish a session and use RPC and Publish/Subscribe.'
-          },
-          {
-            text: 'Communication Patterns',
-            link: '/concepts/wamp/communication_patterns',
-            isFeature: true
-          },
-          {
-            text: 'Routed RPC',
-            link: '/concepts/wamp/rpc',
-            isFeature: true
-          },
-          {
-            text: 'Publish/Subscribe',
-            link: '/concepts/wamp/pubsub',
-            isFeature: true
-          },
-          {
-            text: 'Connections and Sessions',
-            link: '/concepts/wamp/sessions',
-            isFeature: true
-          },
-          {
-            text: 'Naming Best Practices',
-            link: '/concepts/wamp/naming',
-            isFeature: true
-          },
-          {
-            text: 'Security',
-            link: '/concepts/wamp/security',
-            isFeature: true
-          },
-          {
-            text: 'Getting started with WAMP',
-            link: '/concepts/wamp/getting_started',
-            isFeature: true
-          }
-        ]
-      },
-      {
-        text: 'WAMP Features',
-        items: [
-          {
-            text: 'Advanced RPC',
-            link: '/concepts/wamp/advanced/rpc',
-            isFeature: true
-          },
-          {
-            text: 'Advanced Publish/Subscribe',
-            link: '/concepts/wamp/advanced/pubsub',
-            isFeature: true
-          },
-          {
-            text: 'WAMP Compliance',
-            link: '/concepts/wamp/compliance',
-            isFeature: true
           }
         ]
       }
@@ -935,14 +969,34 @@ function wampAPISidebar() {
             link: '/reference/wamp_api/grant',
             isFeature: true
           },
+          { text: 'RBAC',
+            link: '/reference/wamp_api/rbac',
+            isFeature: true,
+            description: "Check whether an identity holds a given permission on a resource."
+          },
           { text: 'Session',
             link: '/reference/wamp_api/session',
             isFeature: true
+          },
+          { text: 'Registration',
+            link: '/reference/wamp_api/registration',
+            isFeature: true,
+            description: "Introspecting RPC registrations: paginated and WAMP Meta API listing, matching, and callee lookup."
+          },
+          { text: 'Subscription',
+            link: '/reference/wamp_api/subscription',
+            isFeature: true,
+            description: "Introspecting Pub/Sub subscriptions: paginated and WAMP Meta API listing, matching, and subscriber lookup."
           },
           { text: 'Ticket',
             link: '/reference/wamp_api/ticket',
             isFeature: true,
             description: "Issuing and revoking tickets."
+          },
+          { text: 'OAuth2 Administration',
+            link: '/reference/wamp_api/oauth2',
+            isFeature: true,
+            description: "Manage API client and resource owner identities, and revoke refresh tokens administratively."
           },
           { text: 'OAuth2 Token',
             link: '/reference/wamp_api/oauth2_token',
@@ -966,6 +1020,11 @@ function wampAPISidebar() {
             link: '/reference/wamp_api/cert_manager',
             isFeature: true,
             description: "Live TLS certificate rotation, CA trust store management, and mTLS configuration."
+          },
+          { text: 'Export & Backup',
+            link: '/reference/wamp_api/export',
+            isFeature: true,
+            description: "Exporting and importing Bondy's durable data (security, tokens, tickets, bridges, retained messages)."
           },
           { text: 'Error URIs',
             link: '/reference/wamp_api/errors/index',

@@ -7,7 +7,7 @@ related:
     - type: tutorial
       text: How to use Same-sign on
       link: /tutorials/security/same_sign_on
-      description: Learn how to use create and use a Same Sign-on Realm.
+      description: Learn how to create and use a Same Sign-on Realm.
     - type: Reference
       text: Realm WAMP API
       link: /reference/wamp_api/realm

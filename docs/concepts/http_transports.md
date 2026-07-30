@@ -24,7 +24,7 @@ Bondy provides two HTTP-based transports for WAMP sessions, enabling WAMP commun
 HTTP transports allow clients to establish WAMP sessions using standard HTTP requests instead of WebSocket connections. They provide the same WAMP semantics (RPC and Pub/Sub) through a request/response interface combined with either long-polling or Server-Sent Events for server-to-client messaging.
 :::
 
-Both transports support **cookie-based authentication**, which is designed to work seamlessly with [OIDC authentication](/concepts/oidc_authentication). After a user authenticates via OIDC, the browser automatically sends the ticket cookie with every transport request, enabling a frictionless transition from web login to WAMP session.
+Both transports support **cookie-based authentication**, designed to work with [OIDC authentication](/concepts/oidc_authentication): after a user authenticates via OIDC, the browser sends the resulting ticket cookie with every transport request, so the web login carries over to the WAMP session without a separate authentication step.
 
 ### When to Use HTTP Transports
 

@@ -6,7 +6,7 @@ outline: [2,3]
 To write distributed application components in your favorite language, you will need a WAMP client library so that your component can connect to Bondy.
 
 ::: tip Bondy clients
-We are working on the development of several OSS client libraries ourselves too, we will link them here when ready e.g. Erlang/Elixir, Android and iOS clients.
+[Bondy Connect](/reference/wamp_clients/bondy_connect) is Bondy's own production client for the BEAM (Erlang/Elixir) — see below. Android and iOS clients are still in development; they'll be linked here once ready.
 :::
 
 There are community-maintained client libraries implementations for most popular programming languages. The WAMP Specification website has an [up-to-date list](https://wamp-proto.org/implementations.html#libraries) of community-supported client libraries.

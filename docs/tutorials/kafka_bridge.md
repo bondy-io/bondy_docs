@@ -7,11 +7,11 @@ To enable the Kafka Bridge modify the `broker_bridge.kafka.enabled` option in th
 broker_bridge.kafka.enabled = on
 ```
 
-A subscription can be dynamically created and removed at runtime using the HTTP and WAMP APIs or it can be created at Bondy initialisation time through a configuration file.
+Subscriptions are configured through a specification file, loaded when Bondy starts.
 
 ## Statically configuring subscriptions
 
-To configure one or more subscriptions you need to define a specification file using the [Bridge Subscription Specification Format]() and modify the `bondy.conf` to tell Bondy where to find it.
+To configure one or more subscriptions you need to define a specification file using the [Broker Bridge Specification Object](/reference/configuration/broker_bridge#broker-bridge-specification-object) format and modify the `bondy.conf` to tell Bondy where to find it.
 
 The following snippet provides an example subscriptions specification file.
 
@@ -86,4 +86,4 @@ broker_bridge.kafka.topics.user_events = ${USER_EVENTS_TOPIC}
 
 ## Dynamically configuring subscriptions
 
-TBD
+There is currently no WAMP or HTTP API for adding or removing a subscription at runtime — the specification file, loaded at startup as shown above, is the only supported way to configure the Kafka Bridge today.

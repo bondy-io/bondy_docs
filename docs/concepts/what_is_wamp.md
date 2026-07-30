@@ -3,78 +3,52 @@ draft: false
 ---
 # What is WAMP
 
-The Web Application Messaging Protocol (WAMP) is an open standard that unifies the two fundamental patterns of distributed application communication—Remote Procedure Calls and Publish/Subscribe—into a single, elegant protocol.
+The Web Application Messaging Protocol (WAMP) is an open standard that unifies the two fundamental patterns of distributed application communication — Remote Procedure Calls and Publish/Subscribe — into a single protocol.
 
-## The Protocol That Changes Everything
+## The problem WAMP addresses
 
-Most application protocols force you to choose: Do you need request-response communication? Use HTTP or gRPC. Need event distribution? Use a message broker. Want both? You'll need multiple protocols, multiple client libraries, and the integration complexity that comes with them.
+Most application protocols specialize in one communication pattern: HTTP or gRPC for request-response, a message broker for event distribution. Using both patterns in one application means integrating multiple protocols and multiple client libraries.
 
-WAMP takes a different approach. It recognizes that modern distributed applications need both communication patterns, often simultaneously. Instead of forcing you to cobble together different technologies, WAMP provides both RPC and Pub/Sub in a unified protocol designed from the ground up for distributed systems.
+WAMP provides RPC and Pub/Sub in a single protocol designed for distributed systems, so a web app, a mobile app, backend services, and IoT devices can use one client library and one set of capabilities regardless of which pattern a given interaction needs.
 
-The result is elegant: your web app, mobile app, backend services, and IoT devices all speak the same language, use the same client library, and enjoy the same capabilities—whether they're calling procedures, receiving events, or both.
+## Why WAMP exists
 
-## Why WAMP Matters
+WAMP combines RPC and Pub/Sub, over multiple transports and serialization formats, so a single protocol can handle both north-south (client-to-server) and east-west (service-to-service) traffic in a distributed application. This unification means:
 
-WAMP was created to solve a fundamental problem: the fragmentation of application messaging. By combining RPC and Pub/Sub into a single protocol with multiple transports and serialization formats, WAMP can handle all messaging requirements of a distributed application—both North-South (client-to-server) and East-West (service-to-service) traffic.
+- **One protocol** instead of a separate stack per communication pattern.
+- **One client library** to learn and use across RPC and Pub/Sub.
+- **One infrastructure component** to deploy and operate.
+- **No impedance mismatch** between the request-response and event-driven parts of an application.
 
-This unification delivers tangible benefits:
-
-- **Reduced complexity** - One protocol instead of many
-- **Faster development** - One client library to learn and use
-- **Lower operational overhead** - One infrastructure component to deploy and manage
-- **Better integration** - No impedance mismatch between different communication patterns
-
-WAMP is a community-driven open standard, with its [specification](https://wamp-proto.org/wamp_latest_ietf.html) freely available under an open license. Anyone can implement it, use it, or extend it.
+WAMP is a community-driven open standard; its [specification](https://wamp-proto.org/wamp_latest_ietf.html) is freely available under an open license, and anyone can implement, use, or extend it.
 
 ::: info Like D-Bus over a network
-[D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions. It offers the same two basic workflows as WAMP—RPC and Pub/Sub—but whereas WAMP is designed for distributed systems over a network, D-Bus is designed for inter-process communication (IPC) on a single host.
+[D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service that runs by default in most Linux distributions. It offers the same two basic workflows as WAMP — RPC and Pub/Sub — but whereas WAMP is designed for distributed systems over a network, D-Bus is designed for inter-process communication (IPC) on a single host.
 :::
 
-## WAMP for the AI Age: Agent-to-Agent Communication
+## WAMP for agent-to-agent communication
 
-As AI agents become central to modern applications, the need for robust agent-to-agent communication has never been more critical. AI agents need to discover services, invoke functions, coordinate actions, and react to events—often in real-time. They require authentication, authorization, and the ability to communicate peer-to-peer without rigid client-server hierarchies.
+An AI agent needs to discover services, invoke functions, coordinate actions, and react to events, often concurrently. That requires authentication, authorization, and the ability to communicate peer-to-peer, rather than only within a fixed client-server hierarchy.
 
-WAMP is uniquely positioned as the ideal protocol for AI agent communication, offering capabilities that emerging alternatives like MCP (Model Context Protocol) and other agent-to-agent protocols are only beginning to address—and it's been production-ready for years.
+WAMP covers this in a single protocol, and has been running in production for over a decade — longer than agent-specific protocols such as MCP (Model Context Protocol) have existed.
 
-### Why WAMP Excels for AI Agents
+### What WAMP provides
 
-**Complete Out-of-the-Box Solution**
+- **RPC for function calling** — agents invoke capabilities on other agents or services.
+- **Pub/Sub for event coordination** — agents subscribe to events and publish state changes.
+- **Authentication** — cryptosign, tickets, OAuth2, and other methods verify agent identity.
+- **Authorization** — fine-grained RBAC controls what each agent can access.
+- **Service discovery** — agents discover available procedures and topics dynamically.
+- **Load balancing** — multiple agents can provide the same capability, with calls distributed across them automatically.
+- **Multi-tenancy** — realms isolate different agent systems from each other.
 
-WAMP provides everything AI agents need in a single, unified protocol:
+A protocol that covers only one of function calling or event coordination requires assembling a second protocol for the other. WAMP provides both from one connection.
 
-- **RPC for function calling** - Agents invoke capabilities on other agents or services
-- **Pub/Sub for event coordination** - Agents subscribe to events and publish state changes
-- **Authentication** - Multiple methods (cryptosign, tickets, OAuth2) to verify agent identity
-- **Authorization** - Fine-grained RBAC to control what each agent can access
-- **Service discovery** - Agents discover available procedures and topics dynamically
-- **Load balancing** - Multiple agents can provide the same capability with automatic distribution
-- **Multi-tenancy** - Isolate different agent systems through realms
+### Peer-to-peer agent architecture
 
-Competing protocols require you to assemble these capabilities from multiple sources. With WAMP, they're built-in and work together seamlessly.
+WAMP does not distinguish client and server roles: every connected agent can register procedures for other agents to call, call procedures on other agents, publish events, and subscribe to events, all over one connection. This matters for agent systems where the client/server distinction doesn't hold cleanly — an agent that analyzes images may also need to accept analysis requests from other agents, and a planning agent may coordinate execution agents while also answering queries from a monitoring agent. Protocols built around a client-server or hierarchical model (MCP among them) constrain this kind of symmetric interaction; WAMP's routed RPC does not.
 
-**True Peer-to-Peer Agent Architecture**
-
-Unlike protocols that maintain client-server distinctions, WAMP enables genuine peer-to-peer agent communication. Every agent can:
-
-- **Expose capabilities** by registering procedures that other agents can invoke
-- **Consume capabilities** by calling procedures on other agents
-- **Broadcast state** by publishing events to topics
-- **React to events** by subscribing to relevant topics
-
-This symmetry is crucial for AI agent ecosystems where the distinction between "client" and "server" is artificial. An agent analyzing images might also need to accept analysis requests from other agents. A planning agent might coordinate with execution agents while also responding to queries from monitoring agents.
-
-WAMP makes this natural. MCP and similar protocols typically impose hierarchical models that constrain how agents interact.
-
-**Agent Coordination Patterns Made Simple**
-
-AI agents frequently need complex coordination patterns:
-
-- **Multi-agent workflows** - Chain agent capabilities together
-- **Event-driven reactions** - Agents respond to environmental changes
-- **Collaborative problem-solving** - Multiple agents work on shared goals
-- **Agent orchestration** - Supervisor agents coordinate worker agents
-
-With WAMP's unified RPC and Pub/Sub:
+### Example: two agents coordinating over RPC and Pub/Sub
 
 ```javascript
 // Agent registers its capability
@@ -105,178 +79,109 @@ wampy.call('ai.agent.vision.analyze', null, {
 });
 ```
 
-One protocol, one connection, multiple coordination patterns.
+One protocol and one connection cover both the function call and the event notification.
 
-**Production-Ready Infrastructure**
+### Compared to MCP and similar agent protocols
 
-WAMP has been used in production for over a decade. Routers like [Bondy](/concepts/what_is_bondy) provide:
+MCP focuses on connecting AI models to data sources and tools, typically through a client-server pattern. It does not, by itself, provide native Pub/Sub for agent coordination, peer-to-peer semantics for symmetric agent interaction, built-in authentication and authorization, or multi-tenancy. Building a complete agent system on MCP means pairing it with additional protocols and infrastructure for those concerns; WAMP provides all of them from a single router. See [What is Bondy](/concepts/what_is_bondy) for a WAMP router built on this model.
 
-- **Horizontal scalability** - Scale agent populations to millions
-- **High availability** - Fault-tolerant, self-healing clusters
-- **Low latency** - Sub-millisecond routing for time-critical agent interactions
-- **Transport flexibility** - WebSocket, TCP, Unix sockets as needed
-- **Zero external dependencies** - Deploy anywhere without additional infrastructure
+### Example use cases
 
-Newer agent protocols are still maturing their infrastructure story. WAMP's is proven.
+- **Multi-agent LLM systems** — a research agent queries knowledge bases and publishes findings; a synthesis agent subscribes to those findings and generates a report; a validation agent checks outputs and invokes corrections. All three coordinate over the same router.
+- **Agentic workflow automation** — a data-collection agent publishes raw data; a processing agent subscribes and transforms it; a decision agent analyzes results and invokes an action agent; a monitoring agent tracks health and triggers interventions.
+- **Distributed AI inference** — an edge agent handles local inference for latency-sensitive requests; a cloud agent handles heavier computation; the router load-balances between them and distributes model-update events.
+- **Cross-vendor agent interoperability** — agents built on different frameworks interoperate because they speak the same wire protocol, with realms isolating unrelated agent systems from each other.
 
-### Beyond Limited Agent Protocols
+## Core architecture: routed communication
 
-**MCP (Model Context Protocol)** focuses primarily on connecting AI models to data sources and tools, typically in a client-server pattern. While useful for its specific use case, it lacks:
+WAMP is a routed protocol: every component — web app, mobile app, backend service, IoT device — connects to a WAMP Router, which handles message routing, authentication, authorization, and session management, rather than each component handling these concerns itself.
 
-- Native event/pub-sub capabilities for agent coordination
-- Peer-to-peer semantics for symmetric agent interaction
-- Built-in authentication and authorization
-- Multi-tenancy and isolation primitives
-- Production-grade routing infrastructure
+Routing everything through one component gives:
 
-**Other Agent-to-Agent protocols** often face similar limitations:
-
-- Narrow focus on specific interaction patterns
-- Require additional protocols for complete agent systems
-- Limited production deployments and infrastructure
-- Proprietary or vendor-specific implementations
-
-**WAMP provides the complete foundation** that agent systems need. Rather than assembling multiple protocols and infrastructure components, you deploy a WAMP router and build agent systems with all capabilities integrated and working together.
-
-### Real-World AI Agent Use Cases
-
-**Multi-Agent LLM Systems**
-
-Connect multiple specialized language models where each agent has distinct capabilities:
-- Research agents query knowledge bases and publish findings
-- Synthesis agents subscribe to research results and generate reports
-- Validation agents check outputs and invoke corrections
-- All coordinated through WAMP's RPC and pub/sub
-
-**Agentic Workflow Automation**
-
-Build agent-driven automation where:
-- Data collection agents publish raw data streams
-- Processing agents subscribe and transform data
-- Decision agents analyze results and invoke action agents
-- Monitoring agents track system health and trigger interventions
-
-**Distributed AI Inference**
-
-Deploy inference across edge and cloud:
-- Edge agents handle local inference with low latency
-- Cloud agents provide heavy computational capabilities
-- Load balancing distributes requests automatically
-- Pub/sub coordinates model updates and configuration
-
-**Collaborative Agent Environments**
-
-Enable agents from different vendors and frameworks to interoperate:
-- Each agent speaks WAMP regardless of internal implementation
-- Secure multi-tenancy isolates competing agent systems
-- Dynamic discovery allows agents to find and use new capabilities
-- Standardized protocol eliminates integration code
-
-## Core Architecture: Routed Communication
-
-WAMP is fundamentally a routed protocol. All application components—web apps, mobile apps, backend services, IoT devices—connect to a WAMP Router. The Router handles message routing, authentication, authorization, and session management, freeing your application code from these concerns.
-
-This architecture brings several advantages:
-
-- **Decoupling** - Components don't need to know about each other's location or identity
-- **Dynamic discovery** - Procedures and topics are discovered at runtime, not compile time
-- **Load balancing** - Multiple components can implement the same procedure, with the router distributing calls
-- **Security** - Centralized authentication and fine-grained authorization at the routing layer
+- **Decoupling** — a component doesn't need to know another component's location or identity.
+- **Dynamic discovery** — procedures and topics are discovered at runtime, not fixed at compile time.
+- **Load balancing** — multiple components can implement the same procedure, with the router distributing calls across them.
+- **Centralized security** — authentication and fine-grained authorization live at the routing layer, not duplicated in every component.
 
 <ZoomImg src="/assets/wamp_flows.png" width="600"/>
 
-## Unified Routing for RPC and Pub/Sub
+## RPC and Pub/Sub as routed patterns
 
-WAMP's genius lies in treating both RPC and Pub/Sub as first-class routing patterns, not afterthoughts or workarounds.
+WAMP treats both RPC and Pub/Sub as routed patterns, rather than layering one on top of point-to-point connections.
 
 ### Remote Procedure Calls
 
-In WAMP, RPCs are routed through the Router, not directly addressed from caller to callee. This seemingly simple change has profound implications:
+A WAMP call is routed through the Router rather than addressed directly from caller to callee, which gives:
 
-- **Peer-to-peer semantics** - Any client can be both a caller and a callee
-- **Dynamic routing** - The router determines which implementation handles each call
-- **Location transparency** - Callers don't need to know where callees are located
-- **Built-in load balancing** - Multiple callees can register the same procedure
+- **Peer-to-peer semantics** — any client can be both a caller and a callee.
+- **Dynamic routing** — the router decides which registered implementation handles a given call.
+- **Location transparency** — a caller doesn't need to know where the callee is running.
+- **Load balancing** — multiple callees can register the same procedure.
 
-This is fundamentally different from traditional RPC systems like HTTP/REST or gRPC, where communication is direct and unidirectional (client calls server, never the reverse). With WAMP, a browser can expose procedures for backend services to call. A mobile app can be an RPC server. This opens up architectural possibilities that simply don't exist with traditional protocols.
+This differs from HTTP/REST or gRPC, where the connection is direct and unidirectional (the client calls the server, never the reverse). Because WAMP routes the call, a browser can expose a procedure for a backend service to call, and a mobile app can act as an RPC server — roles a direct client-server protocol cannot support without a separate side channel.
 
 ### Publish/Subscribe
 
-WAMP's Pub/Sub follows the same routed architecture. Publishers send events to topics via the Router, which delivers them to all interested subscribers. The Router handles:
+WAMP's Pub/Sub follows the same routed model: a publisher sends an event to a topic via the Router, which delivers it to every interested subscriber. The router handles:
 
-- **Topic-based routing** - Events are addressed by URI, not destination
-- **Pattern matching** - Subscribers can use exact, prefix, or wildcard matching
-- **Publisher isolation** - Publishers don't know (or need to know) who's listening
-- **Flexible delivery** - Subscribers can filter, exclude, or whitelist publishers
+- **Topic-based routing** — an event is addressed by URI, not by destination.
+- **Pattern matching** — a subscription can use exact, prefix, or wildcard matching.
+- **Publisher isolation** — a publisher does not need to know who, if anyone, is subscribed.
+- **Delivery filtering** — a subscriber can be excluded or whitelisted per publication.
 
-## The Peer-to-Peer Revolution
+## No client/server distinction
 
-Traditional protocols maintain a strict client-server dichotomy. Clients consume APIs. Servers provide them. WAMP obliterates this distinction.
+Every WAMP client is a peer: over a single connection, it can call procedures on other components, register procedures for other components to call, publish events, and subscribe to events — all four roles are available to every client at once. This enables patterns that are awkward to build on a strict client-server protocol:
 
-In WAMP, every client is a peer. A browser can:
-- Call procedures on backend services (traditional client role)
-- Register procedures for backends to call (traditional server role)
-- Publish events (publisher role)
-- Subscribe to events (subscriber role)
+- **Server-initiated operations** — a backend calls a procedure on the frontend directly, without a separate push channel.
+- **Device orchestration** — IoT devices call procedures on each other through the router.
+- **Multi-party workflows** — several components coordinate directly rather than through a hub each side has to poll.
 
-All four roles are available to every client, all over a single connection. This peer-to-peer programming model enables architectural patterns that are awkward or impossible with traditional protocols:
+## Multi-tenancy through realms
 
-- **Server-initiated operations** - The backend can call procedures on the frontend without WebSocket hacks
-- **Device orchestration** - IoT devices can call procedures on each other through the router
-- **Distributed workflows** - Complex multi-party interactions become straightforward
+A WAMP Router organizes clients into realms — isolated routing and administrative domains that a client selects when it establishes a session. Within a realm:
 
-## Multi-Tenancy Through Realms
-
-WAMP Routers organize clients into realms—isolated routing and administrative domains. When establishing a session, clients specify which realm to join. Once connected:
-
-- **Namespace isolation** - Clients in one realm cannot access procedures or topics in another
-- **Independent permissions** - Each realm has its own authorization rules
-- **Shared infrastructure** - Realms are virtual, requiring no additional resources
-- **Unlimited scalability** - Create as many realms as needed
+- **Namespace isolation** — a client in one realm cannot reach a procedure or topic in another.
+- **Independent permissions** — each realm has its own authorization rules.
+- **No added infrastructure** — a realm is virtual; creating one does not require provisioning anything.
 
 <ZoomImg src="/assets/realm_diagram.png"/>
 
-Realms support fine-grained URI-based permissions using exact, prefix, or wildcard matching. This allows precise control over who can call which procedures and subscribe to which topics, all without modifying application code.
+Realms support URI-based permissions with exact, prefix, or wildcard matching, so which procedures and topics a client can reach is controlled at the routing layer rather than in application code.
 
-## Transport Flexibility
+## Transport flexibility
 
-WAMP is transport-agnostic. It works over any transport that is:
-- Message-oriented
-- Ordered
-- Reliable
-- Bi-directional
+WAMP runs over any transport that is message-oriented, ordered, reliable, and bidirectional. In practice this includes:
 
-In practice, this means WAMP runs over:
+- **WebSocket** — for browser and mobile apps.
+- **Raw TCP** — for backend services.
+- **Unix domain sockets** — for local IPC.
+- **TLS** — layered under any of the above for secure connections.
 
-- **WebSocket** - For browser and mobile apps
-- **Raw TCP** - For backend services
-- **Unix Domain Sockets** - For local IPC
-- **TLS** - For secure communications
+A client chooses its transport independently of every other client on the same router — a browser over WebSocket and a backend service over raw TCP interoperate through the same Router.
 
-Clients choose their transport based on their needs and constraints. A browser uses WebSocket. A backend service might use TCP for lower overhead. An embedded device might use Unix sockets. All communicate seamlessly through the Router.
+## Serialization options
 
-## Serialization Options
+WAMP does not mandate one serialization format. A client chooses:
 
-WAMP doesn't mandate a single serialization format. Clients can choose based on their requirements:
+- **JSON** — human-readable, universally supported.
+- **MessagePack** — a compact binary format.
+- **CBOR** — Concise Binary Object Representation, for constrained environments.
 
-- **JSON** - Human-readable, universally supported
-- **MessagePack** - Compact binary format for efficiency
-- **CBOR** - Concise Binary Object Representation for constrained environments
+The Router converts between formats as needed, so clients using different serializations still communicate.
 
-The Router handles conversion when necessary, allowing clients using different serializations to communicate transparently.
+## Session workflow
 
-## How WAMP Works: The Workflow
+A WAMP session follows:
 
-A typical WAMP session follows this flow:
+1. **Connection** — the client connects to the Router over its chosen transport and serialization.
+2. **Authentication** — the Router authenticates the client using one of the realm's configured methods.
+3. **Authorization** — the Router grants permissions based on the realm's configuration.
+4. **Communication** — the client performs RPC and Pub/Sub operations.
 
-1. **Connection** - Client connects to the Router using chosen transport and serialization
-2. **Authentication** - Router authenticates the client using one of several supported methods
-3. **Authorization** - Router grants permissions based on realm configuration
-4. **Communication** - Client performs RPC and Pub/Sub operations
+### RPC
 
-### RPC Operations
-
-**Register a Procedure:**
+**Register a procedure:**
 
 ```javascript
 wampy.register('com.example.add', {
@@ -294,7 +199,7 @@ wampy.register('com.example.add', {
 });
 ```
 
-**Call a Procedure:**
+**Call a procedure:**
 
 ```javascript
 wampy.call('com.example.add', [3, 4], {
@@ -307,9 +212,9 @@ wampy.call('com.example.add', [3, 4], {
 });
 ```
 
-### Pub/Sub Operations
+### Pub/Sub
 
-**Subscribe to a Topic:**
+**Subscribe to a topic:**
 
 ```javascript
 wampy.subscribe('com.example.events', function(args, kwargs, details) {
@@ -317,7 +222,7 @@ wampy.subscribe('com.example.events', function(args, kwargs, details) {
 });
 ```
 
-**Publish an Event:**
+**Publish an event:**
 
 ```javascript
 wampy.publish('com.example.events', ['Hello World'], {
@@ -325,28 +230,17 @@ wampy.publish('com.example.events', ['Hello World'], {
 });
 ```
 
-## What Makes WAMP Unique
+## What distinguishes WAMP
 
-Five key features distinguish WAMP from other application messaging protocols:
+1. **Multi-tenancy through realms** — virtual isolation for security and routing, with no added infrastructure.
+2. **Unified messaging patterns** — RPC and Pub/Sub in one protocol, not one layered on top of the other.
+3. **Routed RPC with peer-to-peer semantics** — any client can be both caller and callee.
+4. **Transport independence** — WebSocket, TCP, Unix sockets, or any other reliable bidirectional transport.
+5. **Serialization flexibility** — JSON, MessagePack, CBOR, or a custom format.
 
-1. **Multi-tenancy through Realms** - Virtual isolation for security and routing without infrastructure overhead
+Together, these mean a WAMP Router provides RPC, Pub/Sub, authentication, authorization, service discovery, and load balancing from a single infrastructure component, rather than a combination of several.
 
-2. **Unified messaging patterns** - Both RPC and Pub/Sub in a single protocol, not layered on top of each other
+## See also
 
-3. **Routed RPC with peer-to-peer semantics** - Any client can be both caller and callee, enabling true distributed architectures
-
-4. **Transport independence** - Run over WebSocket, TCP, Unix sockets, or any reliable bi-directional transport
-
-5. **Serialization flexibility** - Choose JSON, MessagePack, CBOR, or implement your own
-
-By combining these features, a WAMP Router provides everything needed for distributed application messaging—RPC, Pub/Sub, authentication, authorization, service discovery, and load balancing—in a single infrastructure component.
-
-## The Result: Simplicity at Scale
-
-WAMP reduces technology stack complexity, accidental complexity, and networking overhead. Instead of assembling and maintaining multiple messaging technologies—each with its own protocol, client library, and operational characteristics—you deploy a single WAMP Router and use a single client library.
-
-Your browser app, mobile app, backend services, and IoT devices all speak WAMP. They all get the same capabilities. They all benefit from the same security model. And they all communicate seamlessly, regardless of where they're deployed or what language they're written in.
-
-This is the vision of WAMP: a universal application messaging protocol that makes distributed systems simpler, more powerful, and more elegant.
-
-Ready to see WAMP in action? [Explore Bondy](/concepts/what_is_bondy), a production-ready WAMP router that brings these capabilities to life.
+- [What is Bondy](/concepts/what_is_bondy) — a production WAMP router implementing everything described here.
+- [Architecture](/concepts/architecture) — how a WAMP router's storage and routing layers are built.

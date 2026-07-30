@@ -24,34 +24,15 @@ Choose what is the best installation option for you.
 
 ## Install from Source
 
+Building from source gives you full control over the build — useful if you're contributing to Bondy, need a platform without a Docker image, or want to customize the build. See [Install from Source](/guides/install/source) for the full prerequisites and build steps.
+
 ## Install using Docker
+
+The fastest way to get a single node running: pull the official image, mount a config directory, and start it. See [Install using Docker](/guides/install/docker) for the full walkthrough.
 
 ## Install using Kubernetes
 
-### Prerequisites
-* Docker
-* Kubernetes
-
-### Steps
-Bondy provides a Peer Discovery feature which enables a Bondy node to discover other nodes using a defined discovery type and form a cluster automatically. This is very handy when deploying using orchestration technologies like Kubernetes.
-
-Check this [example K8s manifest](https://gitlab.com/leapsight/bondy_kubernetes).
-
-In the example `bondy.conf` file you will find the following snippet that enables Peer Discovery and uses `bondy_peer_discovery_dns_agent` as type.
-
-```
-cluster.parallelism = 2
-cluster.peer_port = ${BONDY_CLUSTER_PEER_PORT}
-cluster.peer_discovery.enabled = on
-cluster.peer_discovery.automatic_join = on
-cluster.peer_discovery.polling_interval = 10s
-cluster.peer_discovery.timeout = 5s
-cluster.peer_discovery.type = bondy_peer_discovery_dns_agent
-cluster.peer_discovery.config.service_name = ${BONDY_SERVICE_NAME}
-cluster.tls.enabled = off
-```
-
-For more information about this options check the [Complete Configuration Reference](/reference/configuration/index) section.
+For a production, orchestrated deployment: run the same Docker image as a `StatefulSet` behind a headless `Service`, using DNS-based peer discovery to form a cluster automatically as pods come up. See [Install using Kubernetes](/guides/install/kubernetes) for a worked example, and [Running a Cluster](/guides/deployment/running_a_cluster) for peer discovery in depth.
 
 
 ## Default Port Numbers

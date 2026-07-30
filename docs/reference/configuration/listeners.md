@@ -7,7 +7,7 @@ Configure the network listeners for the different protocols and gateways.
 @[config](admin_api.http.enabled,on|off,on,v0.8.8)
 
 ::: warning
-We recommend disabling this listener for production and using the HTTS listener instead.
+Disable this listener for production; use the HTTPS listener instead.
 :::
 
 @[config](admin_api.http.port,port_number,18081,v0.8.8)
@@ -107,7 +107,7 @@ When more than one hop is present in `X-Forwarded-For`, Bondy walks the chain fr
 @[config](admin_api.https.enabled,on|off,on,v0.8.8)
 
 ::: warning
-We recommend disabling this listener for production and using the HTTS listener instead.
+Disable this listener for production; use the HTTPS listener instead.
 :::
 
 @[config](admin_api.https.port,port_number,18081,v0.8.8)

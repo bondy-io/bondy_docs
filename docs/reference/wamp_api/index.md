@@ -37,3 +37,13 @@ The following is a catalogue of APIs organised by service. Each service provides
 <Features
     class="VPHomeFeatures"
     :features="theme.sidebar['/reference/wamp_api'][0].items.filter(function(item){return item.isFeature})"/>
+
+## Utility Procedures
+
+A small number of procedures don't belong to any single entity or feature.
+
+##### bondy.ping() -> "pong" {.wamp-procedure}
+A liveness check: always succeeds and returns the string `"pong"`, regardless of the caller's realm, authentication, or permissions — there is nothing to configure and no error it can raise.
+
+##### bondy.telemetry.metrics {.wamp-procedure}
+Reserved, not implemented — calling it raises `wamp.error.no_such_procedure`. Bondy's actual metrics are exposed over Prometheus's own protocol, not WAMP; see the [Prometheus Metrics Reference](/reference/metrics) for the full catalogue and the `/metrics` endpoint it's served from.

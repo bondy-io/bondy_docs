@@ -4,7 +4,7 @@
 
 ### What is Bondy?
 
-Bondy is an open-source, always-on and scalable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple and secured communication protocol.
+Bondy is an open-source application networking platform that connects the elements of a distributed application — web and mobile apps, IoT devices, and backend microservices — combining event mesh and service mesh capabilities in a single protocol.
 
 Read more about Bondy in the [What is Bondy](/concepts/what_is_bondy) section.
 
@@ -28,9 +28,7 @@ For a further comparison with other products and technologies we invite you to r
 
 ### How is Bondy different than other WAMP routers?
 
-Bondy provides a unique sets of features which sets it apart from other WAMP router implementations in terms of *scalability, reliability, high-performance and operational simplicity*.
-
-Read more about this differences in [What is Bondy](https://www.notion.so/What-is-Bondy-fac8112658494e0ca15611a8cfd201e8) page.
+See [How is Bondy Different](/concepts/how_is_bondy_different) for a full comparison, covering scalability, availability, and operational simplicity.
 
 ## Protocol Support
 
@@ -51,13 +49,13 @@ Please find the answers to this question in the [WAMP Compliance](/concepts/wamp
 
 ### In which programming language is Bondy implemented?
 
-Bondy is implemented in Erlang, a wonderful programming language and operating system for concurrent and (soft) real-time applications that is behind the success of many real-time messaging platforms like Whatsapp.
+Bondy is implemented in Erlang, a programming language and runtime built for concurrent, soft-real-time applications — the same runtime behind other real-time messaging platforms such as WhatsApp.
 
 ### Why does Bondy use an eventually consistent model?
 
-Because we wanted Bondy to be scalable and always-on in the cases of inter- and/or intra-datacentre connectivity disruptions.
+So that Bondy stays scalable and available through inter- or intra-datacentre connectivity disruptions.
 
-We think it is really stupid to design super scalable and fault-tolerant backend architectures using NoSQL databases, eventually consistency and more sophisticated techniques like CRDTs only to then define a message routing and/or API gateway layer that relies on strong consistency e.g. SQL database. All the hard work you've done in the backend to provide an always-on system is then hampered by an entry point which is not!
+An eventually consistent, CRDT-based backend gains little if the message routing or API gateway layer in front of it depends on strong consistency (e.g. a SQL database): a disruption at that layer takes the whole system down regardless of how available the backend is behind it. Bondy's routing layer uses the same eventually consistent model as its storage layer, so the property holds end to end.
 
 ## Realms
 
@@ -83,9 +81,7 @@ Most data entities in Bondy are resident in memory to reduce latency e.g. routin
 
 The answer is "not now" for some data entities while "not ever" for some others.
 
-For example, some data entities could be managed externally and we have plans to enable that capability through plugins e.g. managing user identities in an external LDAP or database. But for some others it would be in detriment of Bondy's capabilities and the architectural tradeoffs that justify its current design.
-
-Please refer to [Why does Bondy use its own embedded database?](https://www.notion.so/FAQs-f4c4d6b48cfa40e7b3e6fc6d0173ac87).
+For example, some data entities could be managed externally, and there are plans to enable that through plugins, e.g. managing user identities in an external LDAP or database. But for others, doing so would undermine the architectural trade-offs that justify Bondy's current design — see the previous answer.
 
 ## License
 
@@ -95,15 +91,15 @@ Yes.
 
 ### Is Bondy open-source software?
 
-Yes. See [How is Bondy licensed?](https://www.notion.so/FAQs-f4c4d6b48cfa40e7b3e6fc6d0173ac87).
+Yes. See [How is Bondy licensed?](#how-is-bondy-licensed).
 
 ### How is Bondy licensed?
 
-Leapsight Bondy is licensed under the Apache License 2.0, review a copy of the license [here](https://gitlab.com/leapsight/bondy/blob/develop/LICENSE).
+Bondy is licensed under the Apache License 2.0; review a copy of the license [here](https://github.com/bondy-io/bondy/blob/develop/LICENSE).
 
 ### How is this documentation licensed?
 
-You can find the answer in the [Documentation License](https://www.notion.so/Documentation-License-47b7f938c4c343a89672e9f67f000f5c)  page.
+See [Documentation License](/about/terms_and_policies#documentation-license).
 
 ## Commercial Support
 

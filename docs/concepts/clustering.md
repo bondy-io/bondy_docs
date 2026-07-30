@@ -70,7 +70,7 @@ Bondy replicates control plane data across cluster nodes as **per-table CRDTs** 
 - **Access control rules** - Permissions, role assignments, source definitions
 - **API Gateway specifications** - HTTP routing rules and transformations
 
-Deleting a value here is itself a replicated operation, and the space it occupied is only physically reclaimed once every cluster member has provably seen the deletion — see [Deletion and Reclamation](/concepts/deletion_and_reclamation) for why that distinction is necessary and how Bondy makes it safe.
+Deleting a value here is itself a replicated operation, and the space it occupied is only physically reclaimed once every node has provably seen the deletion — see [Deletion and Reclamation](/concepts/deletion_and_reclamation) for why that distinction is necessary and how Bondy makes it safe.
 
 ### Eventual Consistency
 
@@ -102,14 +102,12 @@ Bondy tracks which node hosts each client session and routes messages accordingl
 
 ### Automatic Discovery
 
-Bondy supports multiple peer discovery mechanisms:
+Bondy supports two peer discovery strategies, configured via `cluster.peer_discovery.type`:
 
-1. **DNS-based** - Query DNS records for cluster peers
-2. **Multicast** - Broadcast on local network (development only)
-3. **Static** - Manually configured list of seed nodes
-4. **Kubernetes** - Query Kubernetes API for pod IPs
+1. **DNS-based** — query a DNS record that resolves to every peer's address. This is the recommended approach for production, works in any cloud or on-premise environment, and is also how a Kubernetes deployment clusters — point it at a headless Service's DNS name.
+2. **Static list** — a manually configured, fixed list of peer addresses. Simpler for a small cluster whose membership doesn't change, at the cost of needing every node's config updated when it does.
 
-The recommended approach for production is **DNS-based discovery**, which works in all cloud and on-premise environments.
+See [Running a Cluster](/guides/deployment/running_a_cluster) for the configuration steps, and [Cluster Configuration Reference](/reference/configuration/cluster) for every `cluster.peer_discovery.*` key.
 
 ### Join Process
 

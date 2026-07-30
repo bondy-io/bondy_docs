@@ -9,6 +9,8 @@ The Grant object serves to manage and enforce permissions within an RBAC system.
 
 It is an essential element in RBAC systems for defining and managing permissions, ensuring that access to resources is controlled, and aligning with organizational security policies.
 
+To check what a grant actually allows — without performing the action it would gate — see [`bondy.rbac.authorize`](/reference/wamp_api/rbac#check-an-authorization).
+
 <ZoomImg src="/assets/rbac.png"/>
 
 ## Types
@@ -16,7 +18,7 @@ It is an essential element in RBAC systems for defining and managing permissions
 The object used to create a new grant.
 The representation of the grant is also returned by the read operations.
 
-The object represents as overview of the all grant properties but the available properties are detailed in each particular operation.
+The object represents an overview of all the grant properties; the available properties are detailed for each particular operation.
 
 <DataTreeView :data="grant" :maxDepth="10" />
 
@@ -47,11 +49,13 @@ These procedures facilitate the management of permissions in an RBAC system by a
 |[List the group grants](#list-grants-of-the-group)|`bondy.group.grants`|
 |[List the user grants](#list-grants-of-the-user)|`bondy.user.grants`|
 
+## Creating and revoking
+
 ### Create a new grant
 #### bondy.grant.create(realm_uri(), input_data()) -> grant() {.wamp-procedure}
 This procedure is used to create a new grant, which assigns specific permissions to a user, group, or role for a particular resource. By invoking `bondy.grant.create`, administrators can specify who (the principal) is being granted access, what resources they can access, and what actions they are permitted to perform.
 
-It creates a new grant and add it on the given realm uri.
+It creates a new grant and adds it to the given realm uri.
 
 Use cases:
 - grant **permissions** on any to `all` | {**user** | **group** [,...]}
@@ -75,7 +79,7 @@ None.
 
 * [wamp.error.no_such_realm](/reference/wamp_api/errors/wamp_no_such_realm): when the given realm uri does not exist.
 * [bondy.error.unknown_roles](/reference/wamp_api/errors/unknown_roles): when the given roles do not exist.
-* [bondy.error.invalid_data](/reference/wamp_api/errors/invalid_data): when there validation failures on the given data.
+* [bondy.error.invalid_data](/reference/wamp_api/errors/invalid_data): when there are validation failures on the given data.
 
 #### Examples
 
@@ -164,7 +168,7 @@ None.
 
 * [wamp.error.no_such_realm](/reference/wamp_api/errors/wamp_no_such_realm): when the given realm uri does not exist.
 * [bondy.error.unknown_roles](/reference/wamp_api/errors/unknown_roles): when the given roles do not exist.
-* [bondy.error.invalid_data](/reference/wamp_api/errors/invalid_data): when there validation failures on the given data.
+* [bondy.error.invalid_data](/reference/wamp_api/errors/invalid_data): when there are validation failures on the given data.
 
 #### Examples
 
@@ -218,6 +222,8 @@ call bondy.grant.revoke \
 }' | jq
 ```
 :::
+
+## Querying
 
 ### List grants of the realm
 #### bondy.realm.grants(realm_uri()) -> [grant()] {.wamp-procedure}

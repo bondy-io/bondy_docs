@@ -14,20 +14,21 @@ related:
       description: Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status.
 ---
 # Using Same Sign-on
-Learn how to use create and use a Same Sign-on Realm.
+Learn how to create and use a Same Sign-on realm.
 
 ## Introduction
 
-We are going to use an example to demonstrate how easy it is to create an SSO Realm and use it with two other realms to allow Same Sign-on.
+This tutorial builds an SSO realm and links two other realms to it, so a single set of credentials authenticates across all three.
 
 In this example we will have a user called `Linda` and three realms `com.example.realm.1`, `com.example.realm.2` and `com.example.realm.3`.
 
-`Linda` needs to have access to all realms.Without SSO Realms `Linda` will have separate credentials per realm.
+`Linda` needs to have access to all realms. Without SSO realms `Linda` would have separate credentials per realm.
 
-So the goal of this tutorial is to teach you how to use SSO Realms to allow these users to be able to authenticate in all three realms using a single set of credentials.
+So the goal of this tutorial is to teach you how to use SSO realms to allow these users to be able to authenticate in all three realms using a single set of credentials.
 
+## Steps
 
-## 1. Creating the SSO realm
+### 1. Create the SSO realm
 The first thing we need to do is create the SSO Realm. Let's call it `com.example.sso`.
 
 The following shows how to create it using the [Realm WAMP API](/reference/wamp_api/realm) to do it.
@@ -61,10 +62,10 @@ Congratulations, that's all we need to define this realm as an SSO realm!
 Also notice that on line 4 we disallow connections. This means no user can open a session attached to this realm (which is the recommended option) as the role of this realm is just to become a shared Identity Provider for other realms.
 
 ::: info Note
-Notice that disallowing connections doesn't affect our abiilty to manage the realm, because to do it we need to open as session attached to the [Master Realm](/concepts/realms#master-realm) anyway.
+Notice that disallowing connections doesn't affect our ability to manage the realm, because to do it we need to open a session attached to the [Master Realm](/concepts/realms#master-realm) anyway.
 :::
 
-## 2. Creating the user realms
+### 2. Create the user realms
 Now that we have the SSO realm we can put it to work. We now need to create the three realms.
 
 To do that we just need to use the following declaration, replacing the value for `uri` property with the respective ones defined in the previous section.
@@ -105,7 +106,7 @@ Line 7 tells the `com.example.realm.1` realm to delegate the management of crede
 
 Notice that this does not prevent you from having local users (with local credentials) in those realms. By default adding a realm will NOT use the SSO Realm. We need to tell Bondy we want that when creating the users. We will do this in the next step.
 
-## 3. Adding the user
+### 3. Add the user
 Now that all realms have been created we will add `Linda` as an "SSO user".
 
 We have two options:
@@ -115,7 +116,7 @@ We have two options:
 * **Indirect option** : Add the user to each realm (only available If the user does not yet exist in the SSO realm):
     1. Create the user in the `com.example.realm.1` realm, passing the parameter `sso_realm_uri` with the URI of the SSO realm supported by the realm , as it will be demonstrated below. Bondy will automatically create the user in the SSO realm.
 
-In the following example we will use **Indirect Option** to create the user `Linda` in the three realms realm **which will result in the user being also created in the SSO realm** and linked to it.
+In the following example we will use **Indirect Option** to create the user `Linda` in the three realms **which will result in the user being also created in the SSO realm** and linked to it.
 
 ::: code-group
 ```Javascript 11
@@ -182,7 +183,7 @@ The following diagram shows the end result:
 
 <ZoomImg src="/assets/sso_example.png"/>
 
-Now `Linda` can authenticate to all three realms using a single set of credentuals. Moreover, performing a password change on any of the three realms will actually change it in the SSO realm, having immediate effect across all associated realms.
+Now `Linda` can authenticate to all three realms using a single set of credentials. Moreover, performing a password change on any of the three realms will actually change it in the SSO realm, having immediate effect across all associated realms.
 
 ## FAQs
 ### Is this the same as Single Sign-on?
@@ -203,9 +204,5 @@ Changing credentials (`password` or `authorized_keys`) can be done by calling th
 
 ### Can I create local (non SSO) users on my realm?
 
-Yes. Users can still be created just on your realm (aka a "Local" user). T
-
-To do this we just create the user without specifying a value for the property `sso_realm_uri` or setting it to `null`.
-
-
+Yes. Users can still be created just on your realm (aka a "local" user). To do this, create the user without specifying a value for the property `sso_realm_uri`, or set it to `null`.
 

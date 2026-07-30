@@ -15,7 +15,7 @@ occupied is physically reclaimed.
 Whether the reclamation scheduler ticks. Deletion (`bondy_db:delete/3`)
 always converges and is unaffected by this setting: turning reclamation off
 only stops the underlying tombstone from being *physically* reclaimed once
-every cluster member has certified it causally stable. With it off,
+every node has certified it causally stable. With it off,
 tombstones are retained indefinitely, exactly as if reclamation did not
 exist.
 

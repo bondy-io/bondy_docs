@@ -1,6 +1,10 @@
 ---
 outline: [2,3]
 related:
+    - type: reference
+      text: OAuth2 Administration
+      link: /reference/wamp_api/oauth2
+      description: Manage the API client and resource owner identities behind these tokens, and revoke refresh tokens administratively.
     - type: tutorial
       text: Marketplace HTTP API Gateway Tutorial
       link: /tutorials/getting_started/marketplace_api_gateway
@@ -17,7 +21,7 @@ OAuth2 tokens in Bondy are JWT (JSON Web Tokens) that can be used to authenticat
 
 ## Description
 
-OAuth2-based authentication allows clients to present an authentication token when making HTTP requests to Bondy's HTTP API Gateway. These tokens are issued and managed through HTTP endpoints, not WAMP procedures.
+OAuth2-based authentication allows clients to present an authentication token when making HTTP requests to Bondy's HTTP API Gateway. A token itself is issued, refreshed, and revoked through the HTTP endpoints below, not a WAMP procedure. The *identities* behind these tokens — API clients and resource owners — and administrative revocation of their refresh tokens are managed through WAMP procedures instead; see [OAuth2 Administration](/reference/wamp_api/oauth2).
 
 ## Important Considerations
 
@@ -122,6 +126,7 @@ The tokens are cryptographically signed and can be verified by the HTTP API Gate
 
 ## See Also
 
+- [OAuth2 Administration](/reference/wamp_api/oauth2) - Manage API client and resource owner identities, and revoke refresh tokens administratively
 - [Source](/reference/wamp_api/source) - Configure authentication methods for users
 - [User](/reference/wamp_api/user) - Manage user accounts
 - [Ticket](/reference/wamp_api/ticket) - Alternative authentication mechanism for WAMP

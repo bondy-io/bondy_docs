@@ -4,7 +4,7 @@ Learn about the Bondy runtime configuration, the Bondy configuration file, its s
 The complete behaviour of Bondy is defined by the combination of 3 types of "configuration" data:
 
 1. **Bondy node runtime configuration**, which controls things like network listeners, availability of optional services, security defaults, clustering and load regulation. This is mostly **static configuration** done by modifying the `bondy.conf` file and a set of environment variables.
-1. **Multi-tenancy security configuration**, which controls the definition of realms and its security including user identities, authentication and authorizacion policies, Same Sign-on and Single Sign-on. This is done dynamically by via the [Admin API](/reference/wamp_api/index). However, it can also be configured via the `bondy.conf` file.
+1. **Multi-tenancy security configuration**, which controls the definition of realms and its security including user identities, authentication and authorization policies, Same Sign-on and Single Sign-on. This is done dynamically via the [Admin API](/reference/wamp_api/index). However, it can also be configured via the `bondy.conf` file.
 1. **RPC and Pub/Sub configuration**, a.k.a **Control Plane**, which defines the available RPC procedures–their invocation policies e.g. load balancing–and PubSub subscriptions and their respective routing information. This is dynamic configured by clients and maintained in the Registry via [WAMP](/concepts/what_is_wamp).
 
 
@@ -29,11 +29,11 @@ Bondy will use the following environment variables to configure the node identit
 |Variable Name|Description|Default|
 |---|---|---|
 |`BONDY_ERL_NODENAME`|Name of the Bondy node.|`bondy`|
-|`BONDY_ERL_DISTRIBUTED_COOKIE`|Erlang distribute cookie to be used to connect a remote shell to a Bondy node|`bondy`|
+|`BONDY_ERL_DISTRIBUTED_COOKIE`|Erlang distributed cookie to be used to connect a remote shell to a Bondy node|`bondy`|
 |`BONDY_ETC_DIR`|The directory where the `bondy.conf` will be located. The host should Bondy executable to READ and WRITE files on this directory|See [File Location](#file-location) section below|
 |`BONDY_DATA_DIR`|The directory where Bondy will store its embedded database. Check the relevant requirements in the [Operating System Configuration](#operating-system-configuration) section below|`./data`|
 |`BONDY_LOG_DIR`|The directory where Bondy will write any defined logs|`./log`|
-|`BONDY_TMP_DIR`|The directly where Bondy will store any temporary data|`./tmp`|
+|`BONDY_TMP_DIR`|The directory where Bondy will store any temporary data|`./tmp`|
 
 :::info Notice
 In previous version of Bondy these options where configured using the `bondy.conf` file but that introduced certain issues with the configuration system.
@@ -48,7 +48,7 @@ During node startup, Bondy will check the existence of the file, parse it and va
 If a configuration file is not found at the [expected location](#file-location), Bondy will create one using default values.
 
 
-:::danger Cluster deplopyment
+:::danger Cluster deployment
 When deploying a Bondy cluster it is vital that the same `bondy.conf` file is used with all nodes.
 :::
 
@@ -152,136 +152,7 @@ security.config_file = ${BONDY_SECURITY_CONF_FILE}
 
 ## Operating System Configuration
 
-### Configuring Open File Limits
+### Open file limits
 
-Bondy can accumulate a large number of open file handles during operation. The creation of numerous data files is normal, and the storage backend performs periodic merges of data file collections to avoid accumulating file handles.
-
-To accommodate this you should increase the open files limit on your system.
-
-::: tip
-We recommend setting a soft limit of `65536` and a hard limit of `200000`.
-:::
-
-#### Temporary changing Open File Limits
-
-Most operating systems can check and change the open-files limit for the current shell session using the `ulimit` command.
-
-Start by checking the current open file limit values with:
-
-```bash
-ulimit -Hn # Hard limit
-ulimit -Sn # Soft limit
-```
-
-Set the limit by using:
-
-```bash
-ulimit -n 200000
-```
-::: warning
-The above configuration persists only for the duration of your shell session. To make the change permanent read the following section.
-:::
-
-#### Permanently changing Open File Limits
-
-To change the limit on a system-wide, permanent basis read the following sections.
-
-<tabs cache-lifetime="1000">
-<tab name="Linux">
-
-On most Linux distributions, the total limit for open files is controlled by `sysctl`.
-
-If you installed Bondy from a binary package, you will need to the add the following settings to the `/etc/security/limits.conf` file for the `bondy` user:
-
-```bash
-bondy soft nofile 65536
-bondy hard nofile 200000
-```
-
-</tab>
-
-<tab name="Debian and Ubuntu using PAM">
-
-You can enable PAM-based user limits so that non-root users, such as the `bondy` user, may specify a higher value for maximum open files.
-
-Edit `/etc/pam.d/common-session` and add the following line:
-
-```bash
-session required pam_limits.so
-```
-
-Save and close the file.
-If `/etc/pam.d/common-session-noninteractive` exists, append the same line as above.
-
-Then, edit `/etc/security/limits.conf` and append the following lines to the file:
-
-```bash
-soft nofile 65536
-hard nofile 200000
-```
-
-Save and close the file.
-
-(Optional) If you will be accessing the Bondy nodes via secure shell (SSH), you should also edit `/etc/ssh/sshd_config` and set the following line:
-
-```
-UseLogin yes
-```
-
-Restart the machine so the limits take effect and verify that the new limits are set with the following command:
-
-```bash
-ulimit -a
-```
-</tab>
-
-<tab name="Docker running on K8">
-
-Docker ulimits limit a program's resource utilization to prevent a run-away bug or security breach from bringing the whole system down.
-
-The instructions below describe how to check what your current value is, and then increase it to allow Bondy to run.
-
-**To increase the ulimit value:**
-
-1. Connect to the desired worker node and execute the following command:
-
-```bash
-systemctl show docker
-```
-
-1. Search for NOFILE.
-2. If the output is “1024”, edit the file:
-
-```bash
-/etc/sysconfig/docker
-```
-
-and replace the line:
-
-```bash
-OPTIONS=" — default-ulimit nofile=1024:4096"
-```
-
-with:
-
-```bash
-OPTIONS="--default-ulimit nofile=2000000:2000000"
-```
-
-1. Restart the Docker daemon
-
-```bash
-sudo systemctl restart docker
-```
-</tab>
-
-<tab name="DockerUser">
-
-Use docker run `--ulimit`
-
-```bash
-$ docker run --ulimit nofile=2000000:2000000
-```
-</tab>
-</tabs>
+Bondy can accumulate a large number of open file handles during operation — the storage backend's periodic merges of data files are normal and expected. Raise your system's open-file limit to accommodate this: see [How to Raise Bondy's Open File Limit](/guides/administration/raising_open_file_limits) for the OS-specific steps.
 

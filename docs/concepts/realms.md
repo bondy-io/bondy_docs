@@ -102,7 +102,7 @@ WAMP-SCRAM supports the Argon2 ([draft-irtf-cfrg-argon2](https://datatracker.iet
 ### Cryptosign
 WAMP-Cryptosign is a WAMP authentication method that uses public-private key cryptography. Specifically, it is based on [Ed25519](https://ed25519.cr.yp.to/) digital signatures, as described in [RFC8032](https://wamp-proto.org/wamp_latest_ietf.html#RFC8032).
 
-Ed25519 is an [elliptic curve signature scheme](https://ed25519.cr.yp.to/ed25519-20110926.pdf) that uses elliptic curve parameters equivalent to [Curve25519](https://cr.yp.to/ecdh.html). Curve25519 is a [SafeCurve](https://safecurves.cr.yp.to/) designed to be easy to implement and avoid security issues resulting from common implementation challenges and bugs. Ed25519 is intended to operate at around the 128-bit security level, and there are robust native implementations available as open-source, such as [libsodium](https://github.com/jedisct1/libsodium).
+Ed25519 is an [elliptic curve signature scheme](https://ed25519.cr.yp.to/ed25519-20110926.pdf) that uses elliptic curve parameters equivalent to [Curve25519](https://cr.yp.to/ecdh.html). Curve25519 is a [SafeCurve](https://safecurves.cr.yp.to/) designed to be easy to implement and avoid security issues resulting from common implementation challenges and bugs. Ed25519 is intended to operate at around the 128-bit security level, and open-source native implementations are available, such as [libsodium](https://github.com/jedisct1/libsodium).
 
 Using Cryptosign, the private key is never shared with Bondy. Instead, the user identity definition will contain with one or more public keys.
 

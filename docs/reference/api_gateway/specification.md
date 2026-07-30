@@ -93,10 +93,45 @@ This object will be accessible with the expression `{{"\{\{action.result\}\}"}}`
 <DataTreeView :data="wampResult" :maxDepth="10" />
 
 #### HTTP Forward Result
+The result of a [Forward Action](#forward-action) whose upstream responded with a status code below `400`.
+
+This object will be accessible with the expression `{{"\{\{action.result\}\}"}}`.
+
+```json
+{
+    "status_code": 200,
+    "headers": { "content-type": "application/json" },
+    "body": "...",
+    "uri": ""
+}
+```
+
+`uri` is the upstream response's `Location` header, if it sent one, or an empty string otherwise.
 
 ### Error Object
-::: warning TBD
-:::
+The shape of `{{"\{\{action.error\}\}"}}` when an action fails, for either a [WAMP Action](#wamp-action) or a [Forward Action](#forward-action).
+
+For a WAMP action, the error is the called procedure's own WAMP `ERROR` message, with an added `status_code` (derived from `error_uri` via the API's [`status_codes`](#api-object) map):
+
+```json
+{
+    "error_uri": "com.example.error.not_found",
+    "args": ["The requested resource was not found."],
+    "kwargs": {},
+    "details": {},
+    "status_code": 404
+}
+```
+
+For a Forward Action whose upstream responded with a status code of `400` or above, the error is the raw upstream response:
+
+```json
+{
+    "status_code": 404,
+    "headers": { "content-type": "application/json" },
+    "body": "..."
+}
+```
 
 ## Expression Language
 
@@ -225,7 +260,28 @@ The Version Object represents a particular API version.
 
 ::: details Version Object example
 ```json
-TBD
+{
+    "base_path": "/[v1.0]",
+    "is_active": true,
+    "is_deprecated": false,
+    "languages": ["en"],
+    "info": {
+        "title": "Marketplace API v1.0",
+        "description": "Version 1.0 of the Marketplace demo API."
+    },
+    "defaults": {
+        "timeout": 20000
+    },
+    "status_codes": {
+        "com.example.error.not_found": 404,
+        "com.example.error.internal_error": 500
+    },
+    "paths": {
+        "/services/echo": {
+            "get": { }
+        }
+    }
+}
 ```
 :::
 
@@ -281,7 +337,19 @@ A path specification to be used as a value to a key in the `paths` property of a
 
 ::: details Operation Object example
 ```json
-TBD
+{
+    "info": "Echoes the request body back to the caller.",
+    "body_max_bytes": 1048576,
+    "action": {
+        "type": "static",
+        "body": "{{request.body}}"
+    },
+    "response": {
+        "on_result": {
+            "body": "{{action.result}}"
+        }
+    }
+}
 ```
 :::
 
@@ -295,9 +363,18 @@ An action that returns a static response.
 
 <DataTreeView :data="staticAction" :maxDepth="10" />
 
-::: details Action Object example
+::: details Static Action example
 ```json
-TBD
+{
+    "type": "static",
+    "headers": {
+        "content-type": "application/json"
+    },
+    "body": {
+        "status": "operational",
+        "version": "1.0.0"
+    }
+}
 ```
 :::
 
@@ -310,7 +387,18 @@ An action that forwards the incoming HTTP request to an upstream HTTP endpoint.
 
 ::: details Forward Action Object example
 ```json
-TBD
+{
+    "type": "forward",
+    "http_method": "{{request.method}}",
+    "host": "upstream.example.com",
+    "path": "{{request.path}}",
+    "query_string": "{{request.query_string}}",
+    "headers": "{{request.headers}}",
+    "body": "{{request.body}}",
+    "timeout": 5000,
+    "connect_timeout": 5000,
+    "retries": 0
+}
 ```
 :::
 
@@ -415,7 +503,7 @@ CURRENTLY NOT IMPLEMENTED
 :::
 
 
-### OAuth2 AUthentication
+### OAuth2 Authentication
 
 <DataTreeView :data="oauth2" :maxDepth="10" />
 

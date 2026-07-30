@@ -221,7 +221,7 @@ com.myapp.orders.order.created
 com.myapp.products.product.created
 ```
 
-**Design URIs to leverage patterns:**
+**Design URIs to support pattern matching:**
 ```
 # Good - allows pattern matching
 com.myapp.orders.order.created

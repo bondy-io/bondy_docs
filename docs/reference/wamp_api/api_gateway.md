@@ -30,11 +30,6 @@ The following wamp api is used to configure and manage the [API Gateway Specific
 CURRENTLY NOT IMPLEMENTED
 :::
 
-### API Delete
-::: warning
-CURRENTLY NOT IMPLEMENTED
-:::
-
 ### API Get
 
 bondy.http_gateway.api.get(api_spec_id) -> result(api_spec){.wamp-procedure}
@@ -148,8 +143,35 @@ None.
 ```bash [Request]
 ./wick --url ws://localhost:18080/ws \
 --realm com.leapsight.bondy \
-call bondy.http_gateway.api.load \
+call bondy.http_gateway.api.list | jq
+```
 
+```json [Response]
+[
+  {
+    "defaults": {
+      "connect_timeout": 5000,
+      "headers": "{{variables.cors_headers}}",
+      "retries": 0,
+      "schemes": "{{variables.schemes}}",
+      "security": "{{variables.oauth2}}",
+      "timeout": 15000
+    },
+    "host": "_",
+    "id": "com.market.demo",
+    "meta": {},
+    "name": "Marketplace Demo API",
+    "realm_uri": "com.market.demo",
+    "status_codes": {
+      "com.example.error.internal_error": 500,
+      "com.example.error.not_found": 404,
+      "com.example.error.unknown_error": 500
+    },
+    "ts": -576459578303,
+    "variables": {},
+    "versions": {}
+  }
+]
 ```
 :::
 ::::::
@@ -225,5 +247,62 @@ None if it was loaded successfully
 :::
 ::::::
 
+### API Delete
+
+bondy.http_gateway.api.delete(api_spec_id){.wamp-procedure}
+
+Deletes the API spec with the given id and recompiles the HTTP dispatch tables to reflect the removal — the spec's routes stop resolving immediately, with no listener restart required.
+
+::: warning AUTHORIZATION
+This call is only available to sessions attached to the **Master Realm** with `wamp.call` permission.
+:::
+
+The call succeeds whether or not a spec matching the given id currently exists — deletion is idempotent, like every other write against Bondy's storage layer. The result carries no information about what (if anything) was deleted; call [`bondy.http_gateway.api.get`](#api-get) first if you need to confirm a spec existed before removing it.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+  :maxDepth="10"
+  :data="JSON.stringify({
+    '0':{
+      'type': 'string',
+      'required': true,
+      'description' : 'The id of the api spec you want to delete.'
+    }
+  })"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+A single positional result: the atom `ok`.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
+
+#### Examples
+
+:::::: details Success Call
+::: code-group
+```bash [Request]
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.http_gateway.api.delete \
+'com.market.demo' | jq
+```
+
+```json [Response]
+"ok"
+```
+:::
+::::::
 
 <!--@include: ../api_gateway/specification_data.md-->

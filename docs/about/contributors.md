@@ -1,6 +1,6 @@
 # Contributors
 
-Bondy is released under the [Apache 2 license](https://github.com/bondy-io/bondy/blob/a1267e7e5526db24f278e12315020753f3168b44/LICENSE)
+Bondy is released under the [Apache 2 license](https://github.com/bondy-io/bondy/blob/develop/LICENSE)
 
 If you don't know Erlang you can still contribute to the project, specially if you are interested in Bondy as a WAMP router, an important area of development is in the WAMP clients.
 

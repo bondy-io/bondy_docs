@@ -8,7 +8,7 @@ related:
     - type: tutorial
       text: How to use Same-sign on
       link: /tutorials/security/same_sign_on
-      description: Learn how to use create and use a Same Sign-on Realm.
+      description: Learn how to create and use a Same Sign-on Realm.
 ---
 # Realm
 Creating, retrieving and managing realms and also enabling, disabling and checking per realm security status.
@@ -22,14 +22,16 @@ Creating, retrieving and managing realms and also enabling, disabling and checki
 |Name|URI|
 |:---|:---|
 |[Create a realm](#create-a-realm)|`bondy.realm.create`|
-|[Retrieve a realm](#retrieve-a-realm)|`bondy.realm.get`|
 |[Update a realm](#update-a-realm)|`bondy.realm.update`|
-|[List all realms](#list-all-realms)|`bondy.realm.list`|
 |[Delete a realm](#delete-a-realm)|`bondy.realm.delete`|
-|[Retrieve if a realm security is enabled](#retrieve-if-a-realm-security-is-enabled)|`bondy.realm.security.is_enabled`|
+|[Retrieve a realm](#retrieve-a-realm)|`bondy.realm.get`|
+|[List all realms](#list-all-realms)|`bondy.realm.list`|
 |[Enable realm security](#enable-realm-security)|`bondy.realm.security.enable`|
 |[Disable realm security](#disable-realm-security)|`bondy.realm.security.disable`|
+|[Retrieve if a realm security is enabled](#retrieve-if-a-realm-security-is-enabled)|`bondy.realm.security.is_enabled`|
 |[Retrieve a realm security status](#retrieve-a-realm-security-status)|`bondy.realm.security.status`|
+
+## Creating, updating, and deleting
 
 ### Create a realm
 
@@ -122,95 +124,9 @@ call bondy.realm.create \
 ```
 :::
 
-### Retrieve a realm
-
-#### bondy.realm.get(uri) -> result(realm){.wamp-procedure}
-
-Retrieves the requested realm uri.
-
-#### Call
-
-##### Positional Args
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'uri',
-			'required': true,
-			'description' : 'The URI of the realm you want to retrieve.'
-		}
-	})"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-
-##### Positional Results
-The call result is a single positional argument containing a realm:
-
-<DataTreeView :data="realm" :maxDepth="10" />
-
-##### Keyword Results
-None.
-
-#### Errors
-
-* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
-
-#### Examples
-
-::: code-group
-```bash [Call]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.realm.get "com.leapsight.test_creation_1" | jq
-```
-
-```json [Result]
-{
-  "description": "A test creation realm",
-  "is_prototype": false,
-  "is_sso_realm": false,
-  "password_opts": {
-    "params": {
-      "iterations": 10000,
-      "kdf": "pbkdf2"
-    },
-    "protocol": "cra"
-  },
-  "public_keys": [
-    {
-      "crv": "P-256",
-      "kid": "123260399",
-      "kty": "EC",
-      "x": "cfhg9z_BOPDAEkYDcSFbpJ1jJVqLxTSlrCJDUYRkrxM",
-      "y": "zcdy7H1h1FDzwU8RFeuFxFMve9vCHUFnCOpdbMJfc4o"
-    },
-    {
-      "crv": "P-256",
-      "kid": "130260278",
-      "kty": "EC",
-      "x": "EDPzrOPJofWS1pm6WTI1oaNeJ7ITPz6ZjeTzXyl_8sM",
-      "y": "Ki46MYcsXNb19XwoqMMenWboBAdILYjY2eOBkaAkeyQ"
-    },
-    {
-      "crv": "P-256",
-      "kid": "57089265",
-      "kty": "EC",
-      "x": "x_i6fqY3YkzSBi60pDOPe6nS-fxcQ4AjkrTUOjyPvhM",
-      "y": "8oFJ9bernMMFzcrDBS07QiuL8fIeuqMXT-GrvwKKDZc"
-    }
-  ],
-  "security_status": "enabled",
-  "uri": "com.leapsight.test_creation_1"
-}
-```
-:::
-
 ### Update a realm
 
-#### bondy.realm.update(uri, input_data) -> <br>result(realm) {.wamp-procedure}
+#### bondy.realm.update(uri, input_data) -> result(realm) {.wamp-procedure}
 
 Updates the data of the provided realm uri. The realm is persisted and asynchronously replicated to all the nodes in the cluster.
 
@@ -308,6 +224,162 @@ call bondy.realm.update \
       "kty": "EC",
       "x": "GLwRYxvqT18LXKoIXGOYRKHM-CJzycno2OKn1-0pBZM",
       "y": "_GBlnw0VneuhLOkw7hWVB2dNfnpHL53m6pgBThVB_b0"
+    }
+  ],
+  "security_status": "enabled",
+  "uri": "com.leapsight.test_creation_1"
+}
+```
+:::
+
+### Delete a realm
+
+#### bondy.realm.delete(uri, [force]) -> result() {.wamp-procedure}
+
+Deletes the realm and all its associated objects.
+
+This call fails with an error if the realm has associated users. To override this behaviour use the `force` option.
+
+::: warning ADMIN AUTHORIZATION
+This call is only available when the session is attached to the Master Realm
+:::
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'uri',
+			'required': true,
+			'description' : 'The URI of the realm you want to delete.'
+		}
+	})"
+/>
+
+##### Keyword Args
+
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'force':{
+			'type': 'boolean',
+			'required': false,
+			'default': false,
+			'description' : 'Force the deletion of the realm, even if the realm still has associated users.'
+		}
+	})"
+/>
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
+* [bondy.error.active_users](/reference/wamp_api/errors/active_users): when there are associated users and the `force` option is false.
+
+#### Examples
+
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.realm.delete "com.leapsight.test_creation_1"
+```
+
+```bash [Call with force option]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.realm.delete "com.leapsight.test_creation_1" --kwarg force=true
+```
+:::
+
+## Querying
+
+### Retrieve a realm
+
+#### bondy.realm.get(uri) -> result(realm){.wamp-procedure}
+
+Retrieves the requested realm uri.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'uri',
+			'required': true,
+			'description' : 'The URI of the realm you want to retrieve.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+The call result is a single positional argument containing a realm:
+
+<DataTreeView :data="realm" :maxDepth="10" />
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
+
+#### Examples
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.realm.get "com.leapsight.test_creation_1" | jq
+```
+
+```json [Result]
+{
+  "description": "A test creation realm",
+  "is_prototype": false,
+  "is_sso_realm": false,
+  "password_opts": {
+    "params": {
+      "iterations": 10000,
+      "kdf": "pbkdf2"
+    },
+    "protocol": "cra"
+  },
+  "public_keys": [
+    {
+      "crv": "P-256",
+      "kid": "123260399",
+      "kty": "EC",
+      "x": "cfhg9z_BOPDAEkYDcSFbpJ1jJVqLxTSlrCJDUYRkrxM",
+      "y": "zcdy7H1h1FDzwU8RFeuFxFMve9vCHUFnCOpdbMJfc4o"
+    },
+    {
+      "crv": "P-256",
+      "kid": "130260278",
+      "kty": "EC",
+      "x": "EDPzrOPJofWS1pm6WTI1oaNeJ7ITPz6ZjeTzXyl_8sM",
+      "y": "Ki46MYcsXNb19XwoqMMenWboBAdILYjY2eOBkaAkeyQ"
+    },
+    {
+      "crv": "P-256",
+      "kid": "57089265",
+      "kty": "EC",
+      "x": "x_i6fqY3YkzSBi60pDOPe6nS-fxcQ4AjkrTUOjyPvhM",
+      "y": "8oFJ9bernMMFzcrDBS07QiuL8fIeuqMXT-GrvwKKDZc"
     }
   ],
   "security_status": "enabled",
@@ -653,17 +725,13 @@ call bondy.realm.list | jq
 ```
 :::
 
-### Delete a realm
+## Managing realm security
 
-#### bondy.realm.delete(uri; force=boolean -> result() {.wamp-procedure}
+### Enable realm security
 
-Deletes the realm and all its associated objects.
+#### bondy.realm.security.enable(uri) -> result() {.wamp-procedure}
 
-This call fails with an error if the realm has associated users. To override this behaviour use the `force` option.
-
-::: warning ADMIN AUTHORIZATION
-This call is only available when the session is attached to the Master Realm
-:::
+Enables the security for the realm identified with `uri`.
 
 #### Call
 
@@ -674,24 +742,13 @@ This call is only available when the session is attached to the Master Realm
 		'0':{
 			'type': 'uri',
 			'required': true,
-			'description' : 'The URI of the realm you want to delete.'
+			'description' : 'The URI of the realm you want to enable the security.'
 		}
 	})"
 />
 
 ##### Keyword Args
-
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'force':{
-			'type': 'boolean',
-			'required': false,
-			'default': false,
-			'description' : 'Force the deletion of the realm, even if the realm still has associated users.'
-		}
-	})"
-/>
+None.
 
 #### Result
 
@@ -704,23 +761,68 @@ None.
 #### Errors
 
 * [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
-* [bondy.error.active_users](/reference/wamp_api/errors/active_users): when there are associated users and the `force` option is false.
 
 #### Examples
-
 
 ::: code-group
 ```bash [Call]
 ./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.realm.delete "com.leapsight.test_creation_1"
-```
-
-```bash [Call with force option]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.realm.delete "com.leapsight.test_creation_1" --kwarg force=true
+call bondy.realm.security.enable "com.leapsight.test_creation_1"
 ```
 :::
 
+### Disable realm security
+
+#### bondy.realm.security.disable(uri) -> result() {.wamp-procedure}
+
+Disables security for the realm identified with `uri`.
+
+::: danger Danger
+Disabling security removes the various authentication and authorization checks that take place when establishing a session, performing operations against a Bondy Realm and/or routing messages.
+Use this option only during development.
+:::
+
+Users, groups, and other security resources remain available for configuration while security is disabled. The changes will be made effective when security is re-enabled.
+
+Realm security is enabled by default.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'uri',
+			'required': true,
+			'description' : 'The URI of the realm you want to disable the security.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
+
+#### Examples
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.realm.security.disable "com.leapsight.test_creation_1"
+```
+:::
 
 ### Retrieve if a realm security is enabled
 
@@ -768,103 +870,6 @@ call bondy.realm.security.is_enabled "com.leapsight.test_creation_1"
 
 ```json [Result]
 true
-```
-:::
-
-### Enable realm security
-
-#### bondy.realm.security.enable(uri) -> result() {.wamp-procedure}
-
-Enables the security for the realm identified with `uri`.
-
-#### Call
-
-##### Positional Args
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'uri',
-			'required': true,
-			'description' : 'The URI of the realm you want to enable the security.'
-		}
-	})"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-
-##### Positional Results
-None.
-
-##### Keyword Results
-None.
-
-#### Errors
-
-* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
-
-#### Examples
-
-::: code-group
-```bash [Call]
-/wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.realm.security.enable "com.leapsight.test_creation_1"
-```
-:::
-
-### Disable realm security
-
-#### bondy.realm.security.disable(uri) -> result() {.wamp-procedure}
-
-Disables security for the realm identified with `uri`.
-
-::: danger Danger
-Disabling security removes the various authentication and authorization checks that take place when establishing a session, performing operations against a Bondy Realm and/or routing messages.
-We recommend using this option only during development.
-:::
-
-Users, groups, and other security resources remain available for configuration while security is disabled. The changes will be made effective when security is re-enabled.
-
-Realm security is enabled by default.
-
-#### Call
-
-##### Positional Args
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'uri',
-			'required': true,
-			'description' : 'The URI of the realm you want to disable the security.'
-		}
-	})"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-
-##### Positional Results
-None.
-
-##### Keyword Results
-None.
-
-#### Errors
-
-* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided uri is not found.
-
-#### Examples
-
-::: code-group
-```bash [Call]
-/wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.realm.security.disable "com.leapsight.test_creation_1"
 ```
 :::
 
@@ -919,7 +924,6 @@ call bondy.realm.security.status "com.leapsight.test_creation_1"
 
 ## Topics
 
-### Realm Created
 #### bondy.realm.created{.wamp-topic}
 ##### Positional Results
 <DataTreeView
@@ -935,7 +939,6 @@ call bondy.realm.security.status "com.leapsight.test_creation_1"
 ##### Keyword Results
 None.
 
-### Realm Updated
 #### bondy.realm.updated{.wamp-topic}
 ##### Positional Results
 <DataTreeView
@@ -951,7 +954,6 @@ None.
 ##### Keyword Results
 None.
 
-### Realm Deleted
 #### bondy.realm.deleted{.wamp-topic}
 ##### Positional Results
 <DataTreeView

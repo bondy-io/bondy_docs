@@ -203,6 +203,10 @@ Backs [Registry Routing (RIB)](/concepts/registry_routing): the compact per-`(re
 | `bondy_sysmon_events_total` | Counter | BEAM system-monitor events, by `type` (`long_gc`, `long_schedule`, `large_heap`, `busy_port`, `busy_dist_port`) &mdash; previously logged and discarded, now counted. |
 | `erlang_vm_memory_*`, `erlang_vm_statistics_*`, `erlang_vm_system_info_*` | Gauge / Counter | Standard Erlang VM metrics (memory by type, run queue, reductions, process/port/atom counts, scheduler counts) from the underlying `prometheus_erlang` VM collectors &mdash; not Bondy-specific, but exposed on the same endpoint. |
 
+::: tip There is no WAMP metrics procedure
+`bondy.telemetry.metrics` is a reserved URI, not a working procedure — calling it raises `wamp.error.no_such_procedure`. Metrics are only exposed over this Prometheus endpoint.
+:::
+
 ## See also
 
 - [Monitoring a Bondy Cluster](/guides/administration/monitoring) &mdash; bring up the bundled Prometheus + Grafana stack, pre-wired to these families.

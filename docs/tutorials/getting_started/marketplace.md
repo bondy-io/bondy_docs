@@ -54,7 +54,7 @@ The diagram shows the following components:
 Market
 : A Python microservice implementing a simple marketplace.
 
-    Uses [AutobahnPython](https://github.com/crossbario/autobahn-python), WAMP client to open a session  on `com.example.demo` realm in Bondy and registers the WAMP procedures URIs (RPCs) the Web App and Bot instances will use to sell and buy goods.
+    Uses [AutobahnPython](https://github.com/crossbario/autobahn-python), WAMP client to open a session  on `com.market.demo` realm in Bondy and registers the WAMP procedures URIs (RPCs) the Web App and Bot instances will use to sell and buy goods.
 
 Bot
 : A Python microservice that creates named bots (via its CLI). Once a bot is created it will automatically bid for items.
@@ -159,11 +159,7 @@ Notice that once we enter the item the app receives a notification (Publish/Subs
 
 ### See the bots bidding for your items
 
-Once you click on `Save`, you'll see the bots starting to compete for the item, placing bids, unless your initial price is too high, i.e. more than $10,000.
-
-You should see something similar to the capture below:
-
-<ZoomImg src="/assets/tutorials/marketplace/sell_item.gif"/>
+Once you click on `Save`, you'll see the bots starting to compete for the item, placing bids, unless your initial price is too high, i.e. more than $10,000 — the same event stream shown in the capture above continues as bids come in.
 
 ## Under the hood
 
@@ -218,9 +214,7 @@ The `com.market.demo` realm is configured by the Make target responsible to runn
 
 Once connected, the `_on_join` method is called with the established session.
 
-The market registers 6 RPCs under the following URIs:
-
-Once it has established a session to Bondy the `com.example.demo` realm,  registers the following RPCs.
+Once it has established a session to Bondy on the `com.market.demo` realm, the market registers 6 RPCs under the following URIs:
 
 * `com.market.bidder.add` - Add a user as bidder
 * `com.market.bidder.gone` - Remove a user as bidder

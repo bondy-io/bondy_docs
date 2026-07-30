@@ -9,17 +9,17 @@ related:
 
 # What is Bondy
 
-Bondy is an open-source, distributed application networking platform that unifies the capabilities of an event mesh and service mesh into a single, always-on infrastructure component.
+Bondy is an open-source, distributed application networking platform that unifies the capabilities of an event mesh and a service mesh into a single, always-on infrastructure component.
 
-## The Problem Bondy Solves
+## The problem Bondy addresses
 
-Building distributed applications today means assembling a complex stack of technologies: API gateways, service meshes, message brokers, authentication services, and load balancers. Each component solves part of the puzzle, but together they create integration nightmares, operational complexity, and countless potential points of failure.
+A distributed application typically assembles several separate components to cover authentication, authorization, RPC, Pub/Sub, service discovery, routing, and traffic management: an API gateway, a service mesh, a message broker, an identity provider, a load balancer. Each covers part of the problem; integrating them is where most of the operational complexity lives.
 
-Bondy takes a radically different approach. Instead of layering multiple specialized components, it provides everything your distributed application needs in a single platform: authentication, authorization, RPC, Pub/Sub, service discovery, routing, and traffic management—all built on an open standard protocol.
+Bondy provides all of the above from a single platform, built on one open standard protocol, rather than composing several specialized components.
 
-## What Bondy Does
+## What Bondy does
 
-At its core, Bondy creates an application network—a dynamic overlay network that connects all elements of your distributed system. Web browsers, mobile apps, backend microservices, and IoT devices all connect to Bondy and communicate seamlessly, regardless of their location, language, or implementation.
+At its core, Bondy creates an application network — a dynamic overlay network that connects the elements of a distributed system: web browsers, mobile apps, backend microservices, and IoT devices all connect to Bondy and communicate over one protocol, regardless of location, language, or implementation.
 
 ::: definition Application network
 An application network is a dynamic [overlay network](https://en.wikipedia.org/wiki/Overlay_network) formed by a set of Bondy nodes that interconnects different types of applications and devices, ranging from web and mobile apps to IoT devices and backend microservices.
@@ -37,174 +37,99 @@ Bondy implements the [Web Application Messaging Protocol (WAMP)](/concepts/what_
 3. **Remote Procedure Calls (RPC)** with service discovery, routing, and traffic management
 4. **Publish/Subscribe** for event-driven communication
 
-This combination delivers event and service mesh capabilities in a unified platform. But Bondy goes further, offering additional integration options like an HTTP API Gateway, router bridging (Bondy Edge), and bridges to external message brokers.
+This combination gives Bondy the capabilities of both an event mesh and a service mesh in one platform. It also provides an HTTP API Gateway, router bridging (Bondy Edge), and bridges to external message brokers for integrating with infrastructure that predates it.
 
-## Built for the Real World
+## Open source
 
-Bondy wasn't designed in a lab or as an academic exercise. It was born from practical necessity—we needed a solution that could handle the demands of production distributed systems without drowning us in complexity.
+Bondy is licensed under Apache 2.0. The [source code](https://github.com/bondy-io/bondy) is publicly available on GitHub.
 
-### Open Source and Community-Driven
+## Architecture properties
 
-Bondy is open-source software licensed under Apache 2.0. The [source code](https://github.com/bondy-io/bondy) is freely available, and we welcome contributions from the community. You can use it, extend it, or fork it as your needs dictate.
+### Scaling
 
-### Scalable by Design
+Bondy is built on Erlang/OTP. A single Bondy node handles millions of concurrent client connections; adding nodes adds capacity. Every node in a cluster is equal — there is no leader node and no leader election.
 
-Scalability isn't an afterthought—it's fundamental to Bondy's architecture. Built on Erlang/OTP, Bondy leverages battle-tested distributed systems technology that powers global telecommunications infrastructure.
+Distributed routing delivers RPC and Pub/Sub messages between clients connected to different nodes in the cluster automatically, so throughput scales as nodes are added. See [Architecture](/concepts/architecture) for the mechanism.
 
-A single Bondy node can handle millions of concurrent client connections. Need more capacity? Add nodes. Bondy's masterless architecture means every node is equal—no special leader nodes, no single points of failure, no complicated failover mechanisms.
+### Availability
 
-The distributed routing automatically and efficiently delivers RPC and Pub/Sub messages between clients connected to different nodes in the cluster. As you scale horizontally, throughput scales with you.
+State replication uses an anti-entropy protocol that maintains consistency across the cluster without requiring a consensus round on every write. All nodes being equal means there is no leader election and no split-brain scenario.
 
-### Always-On Architecture
+Active anti-entropy continuously repairs missing or divergent state after node failures, data corruption, or network partitions, so a new node synchronizes with the cluster and begins handling traffic without manual intervention. See [Clustering](/concepts/clustering) for the full mechanism.
 
-In distributed systems, failure is not an exception—it's the norm. Networks partition, nodes crash, disks fail. Bondy is designed to keep running through all of it.
+### Cluster formation
 
-State replication uses a gossip-based protocol that maintains consistency across the cluster without sacrificing availability. All nodes are equal in the masterless architecture, so there's no leader election, no split-brain scenarios, no complex consensus protocols to understand and debug.
+Cluster formation is automatic: nodes discover each other through DNS (or another configured discovery mechanism) and maintain connectivity without operator intervention.
 
-Active anti-entropy continuously repairs missing or divergent state, healing the cluster from node failures, data corruption, or network partitions. When you bring new nodes online, they quickly synchronize with the cluster and begin handling traffic.
+Message routing adjusts as clients connect, disconnect, and move between nodes: a newly registered RPC procedure is immediately callable from any node in the cluster, and Bondy load-balances calls across multiple providers of the same procedure using a configurable strategy. None of this requires a restart or a configuration reload.
 
-The result: high availability even under adverse conditions. Your application keeps running when others would fail.
+### Client language and transport independence
 
-### Dynamically Adaptive
+Bondy's clients implement an open protocol available in multiple programming languages, over multiple transports, with multiple serialization formats. A backend service in Python, a web app in JavaScript, an IoT device in C, and a mobile app in Swift or Kotlin can all attach to the same realm and interoperate without an adapter or translation layer between them.
 
-Bondy adapts to your application in real-time. Cluster formation is automatic and self-healing—nodes discover each other through DNS and maintain connectivity without operator intervention.
+Clients choose WebSocket, raw TCP, or Unix domain sockets as a transport, and JSON, MessagePack, or CBOR as a serialization format, independently of each other.
 
-Message routing adjusts dynamically as clients connect, disconnect, and move between nodes. Register a new RPC procedure? It's immediately available to all clients across the cluster. Multiple services implement the same procedure? Bondy load-balances calls automatically using configurable strategies.
+### Deployment
 
-All of this happens at runtime, with no restarts, no configuration reloads, no service interruptions.
+Bondy runs on resource-constrained ARM devices at the edge, in VMs, in containers, or on bare metal, with no external dependencies — no separate distributed database, key-value store, service registry, or configuration server to operate alongside it.
 
-### Truly Polyglot
+## When to use Bondy
 
-Bondy clients implement an open protocol that works with multiple programming languages, transport mechanisms, and serialization formats. Your backend services can use Python, your web app JavaScript, your IoT devices C, and your mobile apps Swift or Kotlin—all communicating seamlessly without adapters or translation layers.
+### Microservices architectures
 
-Choose WebSocket for browsers, raw TCP for high-performance services, or Unix domain sockets for local IPC. Serialize with JSON for human readability, MessagePack for efficiency, or CBOR for constrained environments. Every client can make its own choices, and they all interoperate.
+A microservices architecture is a distributed system, and Bondy provides its networking layer: service discovery, load balancing, RPC, Pub/Sub, authentication, and authorization in one platform, in place of a separate service mesh, API gateway, and message broker.
 
-### Deploy Anywhere
+### Multi-platform applications
 
-Bondy runs wherever you need it: resource-constrained ARM devices at the edge, VMs in private clouds, containers in Kubernetes, or bare metal in your data center. There are no external dependencies—no distributed database, no key-value store, no service registry, no configuration server.
+Where web, mobile, and IoT clients each have their own technology stack, Bondy gives them a single protocol to integrate through, so frontend, backend, mobile, and firmware code can share the same client-side patterns.
 
-This independence means your applications survive technology churn. They won't break when Kubernetes evolves, when etcd changes its API, or when the cloud provider deprecates a service. Bondy is self-contained, battle-tested infrastructure that just works.
+### Peer-to-peer interactions
 
-DNS-based clustering makes deployment straightforward. Whether you're deploying on-premise or in the cloud, spin up your nodes, point them at each other via DNS, and they automatically form a cluster. No complicated orchestration, no manual configuration distribution.
+WAMP's routed RPC lets any client act as both Caller and Callee, so applications that need server-initiated operations on clients, device-to-device communication, or collaborative real-time interaction — video conferencing signalling, IoT device orchestration, collaborative editing — can be built directly on Bondy's peer-to-peer model, without a side-channel back to the client.
 
-## Why Choose Bondy
+### Edge and hybrid deployments
 
-### Simplify Development
+The same Bondy release runs at the edge (for local processing and failover during a network partition) and in the cloud (for coordination), with cluster bridging connecting the two.
 
-With Bondy, you use one client library instead of five. One protocol instead of half a dozen. One infrastructure component instead of an entire service mesh, API gateway, and message broker stack.
+### AI agent communication
 
-This isn't just about reducing lines of configuration—it's about reducing cognitive load. Your developers learn one API and use it everywhere: frontend, backend, mobile, IoT. No context switching, no integration code, no impedance mismatch between different messaging patterns.
+An AI agent system needs more than function calling: event coordination, service discovery, authentication, and authorization, plus the ability for an agent to expose capabilities as well as consume them. WAMP's routed RPC and Pub/Sub, combined with Bondy's RBAC, cover all of this in one protocol rather than requiring it to be assembled separately. See [WAMP for AI agents](/concepts/what_is_wamp#wamp-for-agent-to-agent-communication) for the detailed comparison against agent-specific protocols such as MCP.
 
-### Accelerate Delivery
+## Bondy compared to alternatives
 
-Go from zero to a fully functioning distributed application with a single infrastructure component. No API gateway configuration, no service mesh setup, no message broker clustering. Just connect your clients to Bondy and start building features.
+Bondy offers both RPC and Pub/Sub as first-class patterns, routed through a distributed, highly available infrastructure with built-in security — where most alternatives specialize in one dimension:
 
-WAMP operations like registering an RPC procedure (including its load balancing strategy) take a single line of code. No YAML manifests, no separate service discovery, no configuration management system. The protocol is the configuration.
+**Service meshes** (e.g. Istio) focus on service-to-service HTTP/gRPC traffic and require Kubernetes and sidecars. Bondy provides a peer-to-peer programming model, runs without a container orchestrator, and includes Pub/Sub natively.
 
-### Unlock New Capabilities
+**Message brokers** (e.g. RabbitMQ, Kafka) are built around Pub/Sub; RPC is not a first-class pattern. Bondy provides both, with authentication and authorization built in.
 
-Traditional RPC frameworks treat web browsers, mobile apps, and IoT devices as second-class citizens—they can call procedures, but they can't expose them. Bondy's peer-to-peer model changes this.
+**API gateways** expose backend services to external clients but don't address service-to-service communication or events. Bondy handles both north-south and east-west traffic through the same router.
 
-Now your backend can call procedures on the frontend. Your server can invoke operations on mobile apps or IoT devices. Browser tabs can communicate through the router. These capabilities open up architectural patterns that simply don't exist with conventional protocols.
-
-### Improve Operations
-
-Because Bondy handles sessions, authentication, authorization, and routing centrally, you gain unprecedented visibility into your distributed system. Every interaction flows through the router, making monitoring, debugging, and auditing straightforward.
-
-Fine-grained RBAC at the routing layer means you can control access to procedures and topics without modifying application code. Change a permission, and it takes effect immediately for all active sessions.
-
-### Maintain Independence
-
-Deploy Bondy without external dependencies, vendor lock-in, or technology obsolescence worries. Your application isn't coupled to Kubernetes, Istio, Envoy, or any other specific infrastructure technology.
-
-This independence is liberating. Migrate between cloud providers, move workloads to the edge, or bring everything on-premise—your application's messaging layer remains unchanged.
-
-### Integrate Gradually
-
-You don't need to rewrite everything to use Bondy. The embedded HTTP API Gateway lets you expose your existing HTTP services through Bondy, with OAuth2 authentication and dynamic API definitions using JSON configuration.
-
-Bridges to Kafka and other message brokers enable gradual integration with existing infrastructure. Start with new components using WAMP, integrate legacy systems through bridges, and migrate at your own pace.
-
-## When to Use Bondy
-
-Bondy shines in scenarios where distributed application complexity has become a bottleneck:
-
-### Microservices Architectures
-
-If you're building microservices, you're building a distributed system. Bondy provides the networking layer these architectures need: service discovery, load balancing, RPC, Pub/Sub, authentication, and authorization—all in one platform.
-
-Replace your service mesh, API gateway, and message broker with a single component. Reduce operational complexity while gaining capabilities.
-
-### Multi-Platform Applications
-
-When you have web, mobile, and IoT clients each with its own technology stack, integration becomes expensive. Bondy provides a universal protocol that works everywhere, reducing friction between teams and enabling code reuse.
-
-Frontend and backend teams speak the same language. Mobile developers use the same patterns as backend engineers. IoT firmware and cloud services share the same client library.
-
-### Peer-to-Peer Interactions
-
-Applications requiring server-initiated operations on clients, device-to-device communication, or collaborative real-time interactions need Bondy's peer-to-peer model.
-
-Enable video conferencing where browsers communicate directly through the router. Build IoT systems where devices orchestrate each other. Create collaborative editing where clients coordinate through pub/sub and RPC.
-
-### Edge and Hybrid Deployments
-
-Deploy Bondy at the edge for local processing and failover, with cluster bridging to the cloud for coordination. The same software, same configuration model, same operational characteristics—whether running on a Raspberry Pi or in a data center.
-
-### AI Agent Communication
-
-AI agents need comprehensive communication infrastructure—not just function calling, but event coordination, service discovery, authentication, authorization, and true peer-to-peer capabilities. Bondy provides everything AI agent systems require:
-
-- **Complete agent platform** - RPC, Pub/Sub, security, and discovery in one protocol
-- **True peer-to-peer** - Agents expose and consume capabilities symmetrically
-- **Sophisticated coordination** - Multi-agent workflows, event-driven reactions, collaborative problem-solving
-- **Production-ready infrastructure** - Scale to millions of agents with proven reliability
-
-Unlike emerging agent protocols like MCP that offer partial solutions, Bondy delivers the full stack that sophisticated multi-agent systems demand. From multi-agent LLM systems to agentic workflow automation to distributed AI inference, Bondy's WAMP foundation provides capabilities that limited agent protocols are only beginning to address.
-
-[Learn more about WAMP for AI agents](/concepts/what_is_wamp#wamp-for-the-ai-age-agent-to-agent-communication).
-
-## Bondy vs. Alternatives
-
-Unlike traditional application messaging solutions, Bondy offers both RPC and Pub/Sub as first-class patterns, routed through a distributed, highly available infrastructure with built-in security.
-
-**Compared to Service Meshes**: Service meshes like Istio focus on service-to-service HTTP/gRPC traffic and require Kubernetes, sidecars, and external dependencies. Bondy provides a peer-to-peer programming model, works anywhere, and includes Pub/Sub natively.
-
-**Compared to Message Brokers**: Message brokers like RabbitMQ and Kafka excel at pub/sub but treat RPC as an afterthought. Bondy provides both patterns equally, with authentication and authorization built in.
-
-**Compared to API Gateways**: API gateways expose backend services to external clients but don't help with service-to-service communication or events. Bondy handles North-South and East-West traffic uniformly.
-
-**Compared to Multiple Components**: Most architectures combine several of the above. Bondy replaces them all with a single platform, reducing integration complexity and operational overhead.
+Most architectures combine several of the components above; Bondy is intended to replace that combination with one platform.
 
 ::: info Like a distributed D-Bus over a network
 [D-Bus](https://en.wikipedia.org/wiki/D-Bus) is a platform-neutral messaging service in Linux distributions that offers RPC and Pub/Sub for inter-process communication on a single host.
 
-Bondy extends this model across the network and across hosts, providing the same unified messaging patterns for distributed applications that D-Bus provides for local processes.
+Bondy extends the same idea across the network and across hosts: one set of messaging patterns for RPC and Pub/Sub, available to every process in a distributed application the way D-Bus makes them available to every process on one host.
 :::
 
-## The Technology Behind Bondy
+## The technology behind Bondy
 
-Bondy is built on Erlang/OTP, the runtime system that powers telecommunications infrastructure handling billions of calls daily. This foundation provides:
+Bondy is built on Erlang/OTP, the runtime that also underlies telecommunications infrastructure handling large call volumes. This provides:
 
-- **Massive concurrency** - Millions of lightweight processes
-- **Fault tolerance** - "Let it crash" philosophy with supervisor trees
-- **Distribution** - Built-in clustering and communication primitives
-- **Hot code loading** - Update code without stopping the system
-- **Soft real-time** - Predictable latency and throughput
+- **Massive concurrency** — millions of lightweight processes per node
+- **Fault isolation** — a "let it crash" supervision model, where a failing process is restarted in isolation rather than taking down the node
+- **Distribution primitives** — clustering and inter-node communication built into the runtime
+- **Hot code loading** — code can be updated without stopping the node
+- **Soft real-time scheduling** — predictable latency and throughput under load
 
-For clustering and routing, Bondy uses [Partisan](https://partisan.dev), a high-performance alternative to Erlang's standard distribution. Partisan enables different network topologies, with current support for full-mesh configurations scaling to hundreds of nodes. Future versions will support peer-to-peer topologies based on HyParView, proven to scale to thousands of nodes.[^topo]
+For clustering and routing, Bondy uses [Partisan](https://partisan.dev) in place of Erlang's standard distribution protocol. Partisan supports multiple network topologies; Bondy currently deploys a full-mesh topology, scaling to hundreds of nodes.[^topo]
 
-[^topo]: Bondy uses [Partisan](https://partisan.dev), which allows different network topologies. Currently, Bondy deploys using full-mesh topology, scaling to hundreds of nodes. A peer-to-peer topology based on Partisan HyParView is in development, proven to scale up to 2,000 nodes. Partisan is maintained by the same team that created Bondy.
+[^topo]: A peer-to-peer topology based on Partisan's HyParView implementation, intended to scale to thousands of nodes, is in development. Partisan is maintained by the same team that builds Bondy.
 
-## Getting Started
+## Next steps
 
-Ready to simplify your distributed application architecture?
-
-- **Learn the concepts**: Understand [WAMP](/concepts/what_is_wamp) and [Bondy's architecture](/concepts/architecture)
-- **See it in action**: Follow the [getting started tutorial](/tutorials/getting_started/marketplace)
-- **Deploy it**: Check out the [deployment guides](/guides/deployment/running_a_cluster)
-- **Get support**: Join the [community forum](https://github.com/bondy-io/bondy/discussions)
-
-Bondy brings sanity back to distributed application development. It won't solve every problem—essential complexity remains—but it eliminates the accidental complexity that has plagued the industry for too long.
-
-Simple. Powerful. Open source. That's Bondy.
+- [WAMP](/concepts/what_is_wamp) and [Architecture](/concepts/architecture) — the concepts behind the protocol and the platform.
+- [Getting started tutorial](/tutorials/getting_started/marketplace) — build something with Bondy.
+- [Deployment guides](/guides/deployment/running_a_cluster) — run a cluster.
+- [Community forum](https://github.com/bondy-io/bondy/discussions) — ask a question.

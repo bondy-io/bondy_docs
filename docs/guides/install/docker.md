@@ -35,7 +35,7 @@ mkdir -p ${BONDY_HOME}/etc
 mkdir -p ${BONDY_HOME}/data
 ```
 
-Thew `etc` directory will be used by you to store Bondy's configuration, while the `data` directory will be used by Bondy to store its embedded database files.
+The `etc` directory will be used by you to store Bondy's configuration, while the `data` directory will be used by Bondy to store its embedded database files.
 
 ### 2. Prepare a `security.config.json` file
 
@@ -129,7 +129,7 @@ For production use make sure you understand Bondy's Security system and configur
 Again using your text editor create a file name `bondy.conf` in the `${BONDY_HOME}/etc` directory we created in the previous steps, containing the following content:
 
 ```text
-security.config_file = /bondy/etc/security_config.json
+security.config_file = /bondy/etc/security.config.json
 ```
 
 ### 4. Verify your setup

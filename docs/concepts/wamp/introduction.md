@@ -123,7 +123,7 @@ This, in effect, offers a Peer-to-peer programming model, where all WAMP clients
 
 This not only avoids the traditional distinction between RPC clients and RPC server, but also allows architectures that are impossible with traditional RPC frameworks. For example, in WAMP, a browser-based client can call procedures on another browser-based client or a mobile client!
 
-With WAMP we finally have a distributed systemns programming model that doesn't treat web browsers and smartphones as dumb terminals, which is the underlying (unspoken) assumption behind mainstream protocols like HTTP and gRPC. This is critical as smartphones today are 1,000 times more powerful than a supercomputer of the 80s[^1].
+WAMP's programming model doesn't treat web browsers and smartphones as passive terminals, an assumption mainstream protocols like HTTP and gRPC still make even though a modern smartphone has far more compute available than the terminals those protocols were designed around[^1].
 
 
 [^1]: The Cray-2 Supercomputer delivered 1.9 GFLOPS in 1982 while the current  Apple A16 delivers 2,000 GFLOPS.

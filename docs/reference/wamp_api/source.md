@@ -79,7 +79,7 @@ In this case is `alice` is authenticating and her peername matches the `127.0.0.
 ### input_data(){.datatype}
 The object used to create or update a source.
 
-The object represents as overview of the all source properties but the available properties are detailed in each particular operation.
+The object represents an overview of all the source properties; the available properties are detailed for each particular operation.
 
 <DataTreeView :data="inputCreateData" :maxDepth="10" />
 
@@ -98,9 +98,11 @@ The representation of the source returned by the read or write operations e.g. `
 |[List all sources from a realm](#list-all-sources-from-a-realm)|`bondy.source.list`|
 |[Find sources from a realm](#find-sources-from-a-realm)|`bondy.source.match`|
 
+## Creating and removing
+
 ### Add a source to a realm
 #### bondy.source.add(realm_uri(), input_data()) -> source() {.wamp-procedure}
-Creates a new source and add it on the provided realm uri. This operation is **idempotent** and works also as update.
+Creates a new source and adds it to the provided realm uri. This operation is **idempotent** and also works as an update.
 
 Publishes an event under topic [bondy.source.added](#bondy-source-added){.uri} after the source has been created.
 
@@ -218,6 +220,8 @@ call bondy.source.delete \
 ```
 :::
 
+## Querying
+
 ### Retrieve a source from a realm
 #### bondy.source.get(realm_uri, username, cidr) -> source() {.wamp-procedure}
 
@@ -288,10 +292,10 @@ call bondy.source.list \
 :::
 
 ### Find sources from a realm
-#### bondy.source.match(realm_uri() | realm_uri(), username() | realm_uri(), username(), ip()) -> [source()] {.wamp-procedure}
-Finds the requested sources on the provided realm uri according the search criteria.
+#### bondy.source.match(realm_uri(), username(), cidr()) -> [source()] {.wamp-procedure}
+Finds the requested sources on the provided realm uri according to the search criteria.
 
-If the realm uri doesn't exist it returns the default sources on the master realm
+If the realm uri doesn't exist, it returns the default sources on the master realm.
 
 #### Call
 

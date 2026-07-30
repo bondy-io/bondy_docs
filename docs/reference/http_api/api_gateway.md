@@ -26,9 +26,9 @@ The following http api is used to configure and manage the [Gateway Specificatio
 
 ### API Get
 
-It allows to retrieve the requested api spec id.
+Retrieves the full API spec with the given `id`.
 
-This endpoint is useful for example to be entirely sure to check if the api spec definition was properly loaded and activated.
+Useful for confirming that an API spec definition was loaded and activated exactly as submitted.
 
 ::: code-group
 ```bash [Request]
@@ -73,8 +73,8 @@ curl -X "GET" "http://localhost:18081/api_specs/com.market.demo" \
 ```json [bondy.error.not_found]
 {
   "code": "bondy.error.not_found",
-  "description": "",
-  "message": ""
+  "description": "The requested API spec does not exist.",
+  "message": "No API spec found with id 'com.market.demo'"
 }
 ```
 :::
@@ -82,7 +82,7 @@ curl -X "GET" "http://localhost:18081/api_specs/com.market.demo" \
 
 ### API Get Info
 
-It allows to retrieve the info (some attributes) of the requested api spec id.
+Retrieves a summary of attributes (host, id, name, realm, timestamp) for the API spec with the given `id`, without the full specification body.
 
 ::: code-group
 ```bash [Request]
@@ -111,8 +111,8 @@ curl -X "GET" "http://localhost:18081/api_specs/com.market.demo/info" \
 ```json [bondy.error.not_found]
 {
   "code": "bondy.error.not_found",
-  "description": "",
-  "message": ""
+  "description": "The requested API spec does not exist.",
+  "message": "No API spec found with id 'com.market.demo'"
 }
 ```
 :::
@@ -120,7 +120,7 @@ curl -X "GET" "http://localhost:18081/api_specs/com.market.demo/info" \
 
 ### API List
 
-It allows to retrieve the all loaded apis spec.
+Retrieves every API spec currently loaded and activated on the node.
 
 
 ::: code-group
@@ -260,6 +260,8 @@ curl -X "GET" "http://localhost:18081/api_specs" \
 
 #### Errors
 
+This endpoint takes no arguments and raises no documented error.
+
 
 ### API Load
 
@@ -298,7 +300,7 @@ curl -X "POST" "http://localhost:18081/services/load_api_spec" \
 ```json [wamp.error.invalid_argument]
 {
   "code": "wamp.error.invalid_argument",
-  "description": "",
+  "description": "The API spec definition failed validation.",
   "message": "There is no realm named 'com.example.my_api'"
 }
 ```

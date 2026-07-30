@@ -34,7 +34,7 @@ The port will default to the value of [cluster.peer_port](#cluster.peer_port).
 :::tip
 This options allows multiple values in case you should want to listen on multiple interfaces.
 
-However, normally you will use a single network interface. In that case we recommend disabling this option (by commenting it in your `bondy.config` file) and setting the `BONDY_ERL_NODENAME` environment variable using a fully-qualified host name e.g. `bondy@bondy1.mycluster.local`.
+However, normally you will use a single network interface. In that case, disable this option (by commenting it out in your `bondy.config` file) and set the `BONDY_ERL_NODENAME` environment variable using a fully-qualified host name e.g. `bondy@bondy1.mycluster.local`.
 
 Notice the [cluster.peer_port](#cluster.peer_port) might still be required for other Bondy features. Check the option documentation.
 :::
@@ -57,15 +57,15 @@ This value has two main purposes:
 2. Define the port in which peer nodes will listen when using a [Peer Discovery](#peer-discovery-automatic-join) strategy that does not provide port number e.g. DNS.
 
 :::tip
-For production environments we recommend setting the `BONDY_ERL_NODENAME` environment variable using a fully-qualified host name e.g. `bondy@bondy1.mycluster.local` and always setting the same value for `peer_port` on all peers.
+For production environments, set the `BONDY_ERL_NODENAME` environment variable using a fully-qualified host name e.g. `bondy@bondy1.mycluster.local` and always set the same value for `peer_port` on all peers.
 
 ```text
 cluster.peer_port = 18086
 ```
 
-However, if you want to make use of [cluster.listen_addrs](#cluster.listen_addrs) to listen to connections on multiple network interfaces, we recommend always
-setting the same value for `peer_port` on all peers, and having at least one
-address in `cluster.listen_addrs` having the same port value.
+However, if you want to make use of [cluster.listen_addrs](#cluster.listen_addrs) to listen to connections on multiple network interfaces, always set
+the same value for `peer_port` on all peers, and have at least one
+address in `cluster.listen_addrs` use the same port value.
 
 ```text
 cluster.listen_addrs = [192.168.50.174:18086]
@@ -135,7 +135,7 @@ If enabled then the cluster connection will be established over TLS (making the 
 The default value is `off`.
 
 ::: tip
-We recommend enabling this option for production use.
+Enable this option for production use.
 :::
 
 @[config](cluster.tls.allow_insecure,on|off,off,v1.0.0)
@@ -212,60 +212,54 @@ The summary machinery is instrumented on the Admin API `/metrics` endpoint (`bon
 
 ## Peer Discovery / Automatic Join
 
-@[config](cluster.peer_discovery.enabled,on|off,off)
+See [Running a Cluster](/guides/deployment/running_a_cluster) for a worked example of forming a cluster with these keys.
 
-Defines whether Bondy should actively search for peer nodes using a defined strategy.
+@[config](cluster.peer_discovery.enabled,on|off,off,v1.0.0)
 
-@[config](cluster.peer_discovery.type,string)
+Whether Bondy actively searches for peer nodes using the strategy configured below.
 
-Defines the module responsible for implementing the node discovery strategy. At the moment only options is `bondy_peer_discovery_dns_agent`.
+@[config](cluster.peer_discovery.type,dns&#124;list,N/A,v1.0.0)
 
+Selects the discovery strategy: `dns` resolves peer addresses from a DNS record (see `cluster.peer_discovery.config.*` below — `record_type`, `query`, `node_basename`), `list` uses a fixed, manually configured address list (`name`, `addresses`). A custom Partisan peer-discovery-agent module name is also accepted directly, for a strategy not built in to Partisan.
 
-@[config](cluster.peer_discovery.automatic_join,on|off,off)
+@[config](cluster.peer_discovery.automatic_join,on|off,off,v1.0.0)
 
-Defines whether Bondy will automatically join a discovered node forming a cluster.
+Whether Bondy automatically joins a peer once discovered. `cluster.peer_discovery.enabled` on its own only searches for peers; this key must also be on for Bondy to actually join them — a common point of confusion when a cluster doesn't form despite discovery being enabled.
 
-@[config](cluster.peer_discovery.join_retry_interval,time_duration_units,5s)
+@[config](cluster.peer_discovery.initial_delay,duration_time_units,10s,v1.0.0)
 
-Defines the time duration Bondy will wait between automatic join attempts.
+How long the discovery agent waits after startup before its first lookup.
 
-@[config](cluster.peer_discovery.polling_interval,time_duration_units,10s)
+@[config](cluster.peer_discovery.polling_interval,duration_time_units,10s,v1.0.0)
 
-Defines the time duration Bondy will wait between polling attempts.
+How long the discovery agent waits between lookups, after the first one.
 
-@[config](cluster.peer_discovery.timeout,time_duration_units,5s)
+@[config](cluster.peer_discovery.timeout,duration_time_units,5s,v1.0.0)
 
-Defines the time duration Bondy will wait for a response for a polling attempt.
+How long the discovery agent waits for a response to a single lookup before treating it as failed.
 
+@[config](cluster.peer_discovery.join_retry_interval,duration_time_units,5s,v1.0.0)
 
-@[config](cluster.peer_discovery.join_retry_interval,time_duration_units,5s,v1.0.0)
-
-The time the agent will wait to initiate the next join attempt. For this to
-take effect cluster.peer_discovery.automatic_join needs to be on.
+How long the agent waits before retrying a join attempt that failed. Only relevant when `cluster.peer_discovery.automatic_join` is on.
 
 @[config](cluster.peer_discovery.config.$name,string,N/A,v1.0.0)
 
-The configuration for the selected strategy in `cluster.peer_discovery.type`. Refer to each strategy documentation.
+Configuration for the selected `cluster.peer_discovery.type` strategy — refer to that strategy's own configuration keys (linked above) for what `$name` should be. For example, the `dns` strategy expects:
 
-
-Example: The selected type requires two params `keyA` and `keyB`.
-
+```text
+cluster.peer_discovery.config.record_type = a
+cluster.peer_discovery.config.query = bondy-cluster.internal
+cluster.peer_discovery.config.node_basename = bondy
 ```
-cluster.peer_discovery.config.keyA = valueA
-cluster.peer_discovery.config.keyB = valueB
-```
-
 
 @[config](cluster.peer_discovery.config.$name.$_,string,N/A,v1.0.0)
 
-The configuration for the selected strategy in `cluster.peer_discovery.type`. Refer to each strategy documentation.
+The array form of the same mechanism, for a strategy parameter that takes a list rather than a single value — for example, the `list` strategy's `addresses`:
 
-Example: The selected type requires two params `keyA` and `keyB` where the latter takes an array of values.
-
-```
-cluster.peer_discovery.config.keyA = value1
-cluster.peer_discovery.config.keyB._ = value2
-cluster.peer_discovery.config.keyB._ = value3
+```text
+cluster.peer_discovery.config.name = bondy
+cluster.peer_discovery.config.addresses._ = bondy1@10.0.0.1:18086
+cluster.peer_discovery.config.addresses._ = bondy2@10.0.0.2:18086
 ```
 
 ## Topology

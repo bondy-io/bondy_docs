@@ -7,9 +7,9 @@ A user is an identity that is able to authenticate into a Bondy Realm.
 ## Description
 A User is a person or software agent who wants to access a Realm. It can be authenticated and authorized; permissions (authorization) may be granted directly or via [Group](/reference/wamp_api/group) membership.
 
-Users have attributes associated with themelves like `username` or `aliases`, credentials (`password` or `authorized keys`) and `metadata` determined by the client applications.
+Users have attributes associated with themselves like `username` or `aliases`, credentials (`password` or `authorized keys`) and `metadata` determined by the client applications.
 
-When you create an user, you then have to grant it permissions by making it a member of a user [Group](/reference/wamp_api/group) that has appropriate permission attached (recommended), or by directly attaching permissions to the user. You also have to define one or more [Sources](/reference/wamp_api/source) which define the required authentication methods contextual to the user network location.
+When you create a user, you then have to grant it permissions by making it a member of a user [Group](/reference/wamp_api/group) that has appropriate permission attached (recommended), or by directly attaching permissions to the user. You also have to define one or more [Sources](/reference/wamp_api/source) which define the required authentication methods contextual to the user network location.
 
 ::: warning Reserved Names
 The following names are reserved and Bondy will not allow them to be used as a value for the user's username property: `all`, `anonymous`, `any`, `from`, `on`, `to`.
@@ -25,7 +25,7 @@ A user can have a maximum of 5 aliases.
 ### input_data(){.datatype}
 The object used to create or update a user.
 
-The object represents as overview of the all user properties but the available properties are detailed in each particular operation.
+The object represents an overview of all the user properties; the available properties are detailed for each particular operation.
 
 <DataTreeView :data="inputCreateData" :maxDepth="10" />
 
@@ -38,23 +38,25 @@ The representation of the user returned by the read or write operations e.g. `ge
 
 |Name|URI|
 |:---|:---|
-|[Add an user to a realm](#add-an-user-to-a-realm)|`bondy.user.add`|
-|[Add an alias to an user](#add-an-alias-to-an-user)|`bondy.user.add_alias`|
-|[Add a group to an user](#add-a-group-to-an-user)|`bondy.user.add_group`|
-|[Add groups to an user](#add-groups-to-an-user)|`bondy.user.add_groups`|
-|[Change the user password](#change-the-user-password)|`bondy.user.change_password`|
-|[Delete an user from a realm](#delete-an-user-from-a-realm)|`bondy.user.delete`|
-|[Disable an user in a realm](#disable-an-user-in-a-realm)|`bondy.user.disable`|
-|[Enable an user in a realm](#enable-an-user-in-a-realm)|`bondy.user.enable`|
-|[Retrieve an user from a realm](#retrieve-an-user-from-a-realm)|`bondy.user.get`|
-|[Check if an user is enabled](#check-if-an-user-is-enabled)|`bondy.user.is_enabled`|
+|[Add a user to a realm](#add-a-user-to-a-realm)|`bondy.user.add`|
+|[Update a user in a realm](#update-a-user-in-a-realm)|`bondy.user.update`|
+|[Delete a user from a realm](#delete-a-user-from-a-realm)|`bondy.user.delete`|
+|[Enable a user in a realm](#enable-a-user-in-a-realm)|`bondy.user.enable`|
+|[Disable a user in a realm](#disable-a-user-in-a-realm)|`bondy.user.disable`|
+|[Check if a user is enabled](#check-if-a-user-is-enabled)|`bondy.user.is_enabled`|
+|[Retrieve a user from a realm](#retrieve-a-user-from-a-realm)|`bondy.user.get`|
 |[List all users from a realm](#list-all-users-from-a-realm)|`bondy.user.list`|
-|[Remove an alias from an user](#remove-an-alias-from-an-user)|`bondy.user.remove_alias`|
-|[Remove a group from an user](#remove-a-group-from-an-user)|`bondy.user.remove_group`|
-|[Remove groups from an user](#remove-groups-from-an-user)|`bondy.user.remove_groups`|
-|[Update an user into a realm](#update-an-user-into-a-realm)|`bondy.user.update`|
+|[Change the user password](#change-the-user-password)|`bondy.user.change_password`|
+|[Add an alias to a user](#add-an-alias-to-a-user)|`bondy.user.add_alias`|
+|[Remove an alias from a user](#remove-an-alias-from-a-user)|`bondy.user.remove_alias`|
+|[Add a group to a user](#add-a-group-to-a-user)|`bondy.user.add_group`|
+|[Add groups to a user](#add-groups-to-a-user)|`bondy.user.add_groups`|
+|[Remove a group from a user](#remove-a-group-from-a-user)|`bondy.user.remove_group`|
+|[Remove groups from a user](#remove-groups-from-a-user)|`bondy.user.remove_groups`|
 
-### Add an user to a realm
+## Creating, updating, and deleting
+
+### Add a user to a realm
 #### bondy.user.add(realm_uri(), input_data()) -> user() {.wamp-procedure}
 Creates a new user and add it on the provided realm uri.
 
@@ -137,35 +139,17 @@ call bondy.user.add \
 ```
 :::
 
-### Add an alias to an user
-#### bondy.user.add_alias(realm_uri(), username(), alias()) {.wamp-procedure}
-Adds an alias to an existing user.
+### Update a user in a realm
+#### bondy.user.update(realm_uri(), username(), input_data()) -> user() {.wamp-procedure}
+Updates an existing user.
 
-If the user is an SSO user, the alias is added on the SSO Realm only.
+Publishes an event under topic [bondy.user.updated](#bondy-user-updated){.uri} after the user has been updated.
+Optionally, publishes an event under topic [bondy.user.credentials_changed](#bondy-user-credentials-changed){.uri} if the user's authorized_keys have been changed.
 
 #### Call
 
 ##### Positional Args
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The URI of the realm you want to modify the user.'
-		},
-		'1':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The username of the user you want to add an alias.'
-		},
-		'2':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The alias to add.'
-		}
-	})"
-/>
+<DataTreeView :data="updateArgs" :maxDepth="10" />
 
 ##### Keyword Args
 None.
@@ -173,230 +157,89 @@ None.
 #### Result
 
 ##### Positional Results
-None.
+<DataTreeView :data="updateResult" :maxDepth="10" />
 
 ##### Keyword Results
 None.
 
 #### Errors
 
-* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
-* [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
-* [bondy.error.property_range_limit](): when the value for property 'alias' already contains the maximum number of values allowed (5).
+* [bondy.error.missing_required_value](/reference/wamp_api/errors/missing_required_value): when a required value is not provided
+* [bondy.error.invalid_datatype](/reference/wamp_api/errors/invalid_datatype): when the data type is invalid
+* [bondy.error.invalid_value](/reference/wamp_api/errors/invalid_value): when the data value is invalid
+* [bondy.error.invalid_data](/reference/wamp_api/errors/invalid_data): when the data values are invalid
+* [bondy.error.no_such_groups](/reference/wamp_api/errors/no_such_groups): when any of the provided group name doesn't exist.
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided realm uri or username is not found.
+* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): for example when the provided `sso_realm_uri` property value doesn't exist.
 
 #### Examples
 
 ::: code-group
 ```bash [Call]
 ./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.add_alias \
-"com.leapsight.test_creation_1" "user_3" "user3_alias1"
-```
-
-```bash [Checking the updated user]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
+call bondy.user.update \
+"com.leapsight.test_creation_1" "user_3" \
+'{
+	"groups":["group_1","group_2"],
+	"enabled":true,
+	"authorized_keys":["1766c9e6ec7d7b354fd7a2e4542753a23cae0b901228305621e5b8713299ccdd"]
+}' | jq
 ```
 
 ```json [Result]
 {
   "aliases": [
+    "user3_alias5",
+    "user3_alias4",
+    "user3_alias3",
+    "user3_alias2",
     "user3_alias1"
   ],
-  "authorized_keys": [],
-  "enabled": true,
-  "groups": [
-    "group_1"
+  "authorized_keys": [
+    "1766C9E6EC7D7B354FD7A2E4542753A23CAE0B901228305621E5B8713299CCDD"
   ],
-  "has_authorized_keys": false,
-  "has_password": true,
-  "meta": {},
-  "sso_realm_uri": null,
-  "type": "user",
-  "username": "user_3",
-  "version": "1.1"
-}
-```
-:::
-
-::: code-group
-
-```bash [Checking if the authentication succeed with the alias]
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.test_creation_1 \
---authmethod=wampcra --authid="user3_alias1" --secret="my_password" \
-call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
-```
-
-```json [Result]
-{
-  "aliases": [
-    "user3_alias1"
-  ],
-  "authorized_keys": [],
-  "enabled": true,
-  "groups": [
-    "group_1"
-  ],
-  "has_authorized_keys": false,
-  "has_password": true,
-  "meta": {},
-  "sso_realm_uri": null,
-  "type": "user",
-  "username": "user_3",
-  "version": "1.1"
-}
-```
-:::
-
-### Add a group to an user
-#### bondy.user.add_group(realm_uri(), username(), group_name()) {.wamp-procedure}
-Adds a group name to an existing user.
-
-#### Call
-
-##### Positional Args
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The URI of the realm you want to modify the user.'
-		},
-		'1':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The username of the user you want to add a group name.'
-		},
-		'2':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The group name to add.'
-		}
-	})"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-
-##### Positional Results
-None.
-
-##### Keyword Results
-None.
-
-#### Errors
-
-* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
-* [bondy.error.no_such_groups](/reference/wamp_api/errors/no_such_groups): when the provided group name doesn't exist.
-* [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
-
-#### Examples
-
-::: code-group
-```bash [Call]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.add_group \
-"com.leapsight.test_creation_1" "user_3" "group_1"
-```
-
-```bash [Checking the updated user]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
-```
-
-```json [Result]
-{
-  "authorized_keys": [],
-  "enabled": true,
-  "groups": [
-    "group_1"
-  ],
-  "has_authorized_keys": false,
-  "has_password": true,
-  "meta": {},
-  "sso_realm_uri": null,
-  "type": "user",
-  "username": "user_3",
-  "version": "1.1"
-}
-```
-:::
-
-### Add groups to an user
-#### bondy.user.add_groups(realm_uri(), username(), [group_name()]) {.wamp-procedure}
-Adds a list of group names to an existing user.
-
-#### Call
-
-##### Positional Args
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The URI of the realm you want to modify the user.'
-		},
-		'1':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The username of the user you want to add a group names.'
-		},
-		'2':{
-			'type': 'array',
-			'required': true,
-			'description' : 'The group names to add.',
-			'items': {
-				'type': 'string'
-			}
-		}
-	})"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-
-##### Positional Results
-None.
-
-##### Keyword Results
-None.
-
-#### Errors
-
-* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
-* [bondy.error.no_such_groups](/reference/wamp_api/errors/no_such_groups): when any of the provided group names doesn't exist.
-* [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
-
-#### Examples
-
-::: code-group
-```bash [Call]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.add_groups \
-"com.leapsight.test_creation_1" "user_3" '["group_1","group_2"]'
-```
-
-```bash [Checking the updated user]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
-```
-
-```json [Result]
-{
-  "authorized_keys": [],
   "enabled": true,
   "groups": [
     "group_1",
-	"group_2"
+    "group_2"
   ],
-  "has_authorized_keys": false,
+  "has_authorized_keys": true,
+  "has_password": true,
+  "meta": {},
+  "sso_realm_uri": null,
+  "type": "user",
+  "username": "user_3",
+  "version": "1.1"
+}
+```
+:::
+::: details Success Call checking if the new keys were changed
+- Request
+```bash
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.test_creation_1 \
+--authmethod=cryptosign --authid="user_3" --private-key="4ffddd896a530ce5ee8c86b83b0d31835490a97a9cd718cb2f09c9fd31c4a7d7" \
+call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
+```
+- Response
+```json
+{
+  "aliases": [
+    "user3_alias5",
+    "user3_alias4",
+    "user3_alias3",
+    "user3_alias2",
+    "user3_alias1"
+  ],
+  "authorized_keys": [
+    "1766C9E6EC7D7B354FD7A2E4542753A23CAE0B901228305621E5B8713299CCDD"
+  ],
+  "enabled": true,
+  "groups": [
+    "group_1",
+    "group_2"
+  ],
+  "has_authorized_keys": true,
   "has_password": true,
   "meta": {},
   "sso_realm_uri": null,
@@ -407,9 +250,360 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
 :::
 
+### Delete a user from a realm
+#### bondy.user.delete(realm_uri(), username()) {.wamp-procedure}
+Deletes the requested username from the provided realm uri.
+
+Publishes an event under topic [bondy.user.deleted](#bondy-user-deleted){.uri} after the user has been deleted.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to delete the user.'
+		},
+		'1':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The username of the user you want to delete.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
+
+#### Examples
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.user.delete "com.leapsight.test_creation_1" "user_1"
+```
+:::
+
+## Enabling and disabling
+
+### Enable a user in a realm
+#### bondy.user.enable(realm_uri(), username()) {.wamp-procedure}
+Enables the requested username on the provided realm uri.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to enable the user.'
+		},
+		'1':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The username of the user you want to enable.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+#### Examples
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.user.enable "com.leapsight.test_creation_1" "user_1"
+```
+:::
+
+### Disable a user in a realm
+#### bondy.user.disable(realm_uri(), username()) {.wamp-procedure}
+Disables the requested username on the provided realm uri.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to disable the user.'
+		},
+		'1':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The username of the user you want to disable.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+#### Examples
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.user.disable "com.leapsight.test_creation_1" "user_1"
+```
+:::
+
+### Check if a user is enabled
+#### bondy.user.is_enabled(realm_uri(), username()) -> boolean() {.wamp-procedure}
+Checks if the requested username on the provided realm uri is enabled.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to check the user.'
+		},
+		'1':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The username of the user you want to check if is enabled.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
+* [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
+
+#### Examples
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.user.is_enabled "com.leapsight.test_creation_1" "user_1"
+```
+
+```json [Result]
+true
+```
+:::
+
+## Querying
+
+### Retrieve a user from a realm
+#### bondy.user.get(realm_uri(), username()) -> user() {.wamp-procedure}
+Retrieves the requested username on the provided realm uri.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to retrieve the user.'
+		},
+		'1':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The username of the user you want to retrieve.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+The call result is a single positional argument containing a user:
+
+<DataTreeView :data="user" :maxDepth="10" />
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided username is not found.
+
+#### Examples
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.user.get "com.leapsight.test_creation_1" "user_1" | jq
+```
+
+```json [Result]
+{
+  "authorized_keys": [],
+  "enabled": true,
+  "groups": [],
+  "has_authorized_keys": false,
+  "has_password": false,
+  "meta": {},
+  "sso_realm_uri": null,
+  "type": "user",
+  "username": "user_1",
+  "version": "1.1"
+}
+```
+:::
+
+### List all users from a realm
+#### bondy.user.list(realm_uri()) -> [user()] {.wamp-procedure}
+Lists all users of the provided realm uri.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to retrieve the users.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+The call result is a single positional argument containing a list of users.
+An empty list is returned when the provided realm uri doesn't exist.
+
+<DataTreeView :data="listResult" :maxDepth="10" />
+
+##### Keyword Results
+None.
+
+#### Errors
+None.
+
+#### Examples
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.user.list \
+"com.leapsight.test_creation_1" | jq
+```
+
+```json [Result]
+[
+  {
+    "authorized_keys": [],
+    "enabled": true,
+    "groups": [],
+    "has_authorized_keys": false,
+    "has_password": false,
+    "meta": {},
+    "sso_realm_uri": null,
+    "type": "user",
+    "username": "user_1",
+    "version": "1.1"
+  },
+  {
+    "authorized_keys": [],
+    "enabled": true,
+    "groups": [
+      "group_1"
+    ],
+    "has_authorized_keys": false,
+    "has_password": false,
+    "meta": {},
+    "sso_realm_uri": null,
+    "type": "user",
+    "username": "user_2",
+    "version": "1.1"
+  },
+  {
+    "authorized_keys": [],
+    "enabled": true,
+    "groups": [
+      "group_1"
+    ],
+    "has_authorized_keys": false,
+    "has_password": true,
+    "meta": {},
+    "sso_realm_uri": null,
+    "type": "user",
+    "username": "user_3",
+    "version": "1.1"
+  }
+]
+```
+:::
+
+## Managing the password
+
 ### Change the user password
 #### bondy.user.change_password(realm_uri(), username(), new_password(), old_password()) {.wamp-procedure}
-It allows to change the password to an existing user.
+Changes the password of an existing user.
 
 Publishes an event under topic [bondy.user.credentials_changed](#bondy-user-credentials-changed){.uri} after the user's password has been changed.
 
@@ -513,58 +707,13 @@ call bondy.user.change_password \
 ```
 :::
 
-### Delete an user from a realm
-#### bondy.user.delete(realm_uri(), username()) {.wamp-procedure}
-Deletes the requested username from the provided realm uri.
+## Managing aliases
 
-Publishes an event under topic [bondy.user.deleted](#bondy-user-deleted){.uri} after the user has been deleted.
+### Add an alias to a user
+#### bondy.user.add_alias(realm_uri(), username(), alias()) {.wamp-procedure}
+Adds an alias to an existing user.
 
-#### Call
-
-##### Positional Args
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The URI of the realm you want to delete the user.'
-		},
-		'1':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The username of the user you want to delete.'
-		}
-	})"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-
-##### Positional Results
-None.
-
-##### Keyword Results
-None.
-
-#### Errors
-
-* [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
-
-#### Examples
-
-::: code-group
-```bash [Call]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.delete "com.leapsight.test_creation_1" "user_1"
-```
-:::
-
-### Disable an user in a realm
-#### bondy.user.disable(realm_uri(), username()) {.wamp-procedure}
-Disables the requested username on the provided realm uri.
+If the user is an SSO user, the alias is added on the SSO Realm only.
 
 #### Call
 
@@ -575,166 +724,17 @@ Disables the requested username on the provided realm uri.
 		'0':{
 			'type': 'string',
 			'required': true,
-			'description' : 'The URI of the realm you want to disable the user.'
+			'description' : 'The URI of the realm you want to modify the user.'
 		},
 		'1':{
 			'type': 'string',
 			'required': true,
-			'description' : 'The username of the user you want to disable.'
-		}
-	})"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-
-##### Positional Results
-None.
-
-##### Keyword Results
-None.
-
-#### Errors
-
-#### Examples
-
-::: code-group
-```bash [Call]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.disable "com.leapsight.test_creation_1" "user_1"
-```
-:::
-
-### Enable an user in a realm
-#### bondy.user.enable(realm_uri(), username()) {.wamp-procedure}
-Enables the requested username on the provided realm uri.
-
-#### Call
-
-##### Positional Args
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The URI of the realm you want to enable the user.'
+			'description' : 'The username of the user you want to add an alias.'
 		},
-		'1':{
+		'2':{
 			'type': 'string',
 			'required': true,
-			'description' : 'The username of the user you want to enable.'
-		}
-	})"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-
-##### Positional Results
-None.
-
-##### Keyword Results
-None.
-
-#### Errors
-
-#### Examples
-
-::: code-group
-```bash [Call]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.enable "com.leapsight.test_creation_1" "user_1"
-```
-:::
-
-### Retrieve an user from a realm
-#### bondy.user.get(realm_uri(), username()) -> user() {.wamp-procedure}
-Retrieves the requested username on the provided realm uri.
-
-#### Call
-
-##### Positional Args
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The URI of the realm you want to retrieve the user.'
-		},
-		'1':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The username of the user you want to retrieve.'
-		}
-	})"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-
-##### Positional Results
-The call result is a single positional argument containing a user:
-
-<DataTreeView :data="user" :maxDepth="10" />
-
-##### Keyword Results
-None.
-
-#### Errors
-
-* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided username is not found.
-
-#### Examples
-
-::: code-group
-```bash [Call]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.get "com.leapsight.test_creation_1" "user_1" | jq
-```
-
-```json [Result]
-{
-  "authorized_keys": [],
-  "enabled": true,
-  "groups": [],
-  "has_authorized_keys": false,
-  "has_password": false,
-  "meta": {},
-  "sso_realm_uri": null,
-  "type": "user",
-  "username": "user_1",
-  "version": "1.1"
-}
-```
-:::
-
-### Check if an user is enabled
-#### bondy.user.is_enable(realm_uri(), username()) -> boolean() {.wamp-procedure}
-Allows to check if the requested username on the provided realm uri is enabled.
-
-#### Call
-
-##### Positional Args
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The URI of the realm you want to check the user.'
-		},
-		'1':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The username of the user you want to check if is enabled.'
+			'description' : 'The alias to add.'
 		}
 	})"
 />
@@ -754,111 +754,74 @@ None.
 
 * [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
 * [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
+* [bondy.error.property_range_limit](/reference/wamp_api/errors/property_range_limit): when the value for property 'alias' already contains the maximum number of values allowed (5).
 
 #### Examples
 
 ::: code-group
 ```bash [Call]
 ./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.is_enabled "com.leapsight.test_creation_1" "user_1"
+call bondy.user.add_alias \
+"com.leapsight.test_creation_1" "user_3" "user3_alias1"
+```
+
+```bash [Checking the updated user]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
 
 ```json [Result]
-true
+{
+  "aliases": [
+    "user3_alias1"
+  ],
+  "authorized_keys": [],
+  "enabled": true,
+  "groups": [
+    "group_1"
+  ],
+  "has_authorized_keys": false,
+  "has_password": true,
+  "meta": {},
+  "sso_realm_uri": null,
+  "type": "user",
+  "username": "user_3",
+  "version": "1.1"
+}
 ```
 :::
-
-### List all users from a realm
-#### bondy.user.list(realm_uri()) -> [user()] {.wamp-procedure}
-Lists all users of the provided realm uri.
-
-#### Call
-
-##### Positional Args
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-		'0':{
-			'type': 'string',
-			'required': true,
-			'description' : 'The URI of the realm you want to retrieve the users.'
-		}
-	})"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-
-##### Positional Results
-The call result is a single positional argument containing a list of users.
-An empty list is returned when the provided realm uri doesn't exist.
-
-<DataTreeView :data="listResult" :maxDepth="10" />
-
-##### Keyword Results
-None.
-
-#### Errors
-None.
-
-#### Examples
 
 ::: code-group
-```bash [Call]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.list \
-"com.leapsight.test_creation_1" | jq
+
+```bash [Checking if the authentication succeed with the alias]
+./wick --url ws://localhost:18080/ws \
+--realm com.leapsight.test_creation_1 \
+--authmethod=wampcra --authid="user3_alias1" --secret="my_password" \
+call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
 
 ```json [Result]
-[
-  {
-    "authorized_keys": [],
-    "enabled": true,
-    "groups": [],
-    "has_authorized_keys": false,
-    "has_password": false,
-    "meta": {},
-    "sso_realm_uri": null,
-    "type": "user",
-    "username": "user_1",
-    "version": "1.1"
-  },
-  {
-    "authorized_keys": [],
-    "enabled": true,
-    "groups": [
-      "group_1"
-    ],
-    "has_authorized_keys": false,
-    "has_password": false,
-    "meta": {},
-    "sso_realm_uri": null,
-    "type": "user",
-    "username": "user_2",
-    "version": "1.1"
-  },
-  {
-    "authorized_keys": [],
-    "enabled": true,
-    "groups": [
-      "group_1"
-    ],
-    "has_authorized_keys": false,
-    "has_password": true,
-    "meta": {},
-    "sso_realm_uri": null,
-    "type": "user",
-    "username": "user_3",
-    "version": "1.1"
-  }
-]
+{
+  "aliases": [
+    "user3_alias1"
+  ],
+  "authorized_keys": [],
+  "enabled": true,
+  "groups": [
+    "group_1"
+  ],
+  "has_authorized_keys": false,
+  "has_password": true,
+  "meta": {},
+  "sso_realm_uri": null,
+  "type": "user",
+  "username": "user_3",
+  "version": "1.1"
+}
 ```
 :::
 
-### Remove an alias from an user
+### Remove an alias from a user
 #### bondy.user.remove_alias(realm_uri(), username(), alias()) {.wamp-procedure}
 Removes an existing alias from an existing user.
 
@@ -903,7 +866,7 @@ None.
 
 * [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
 * [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
-* [bondy.error.property_range_limit](): when the value for property 'alias' already contains the maximum number of values allowed (5).
+* [bondy.error.property_range_limit](/reference/wamp_api/errors/property_range_limit): when the value for property 'alias' already contains the maximum number of values allowed (5).
 
 #### Examples
 
@@ -946,7 +909,167 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
 :::
 
-### Remove a group from an user
+## Managing group membership
+
+### Add a group to a user
+#### bondy.user.add_group(realm_uri(), username(), group_name()) {.wamp-procedure}
+Adds a group name to an existing user.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to modify the user.'
+		},
+		'1':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The username of the user you want to add a group name.'
+		},
+		'2':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The group name to add.'
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
+* [bondy.error.no_such_groups](/reference/wamp_api/errors/no_such_groups): when the provided group name doesn't exist.
+* [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
+
+#### Examples
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.user.add_group \
+"com.leapsight.test_creation_1" "user_3" "group_1"
+```
+
+```bash [Checking the updated user]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
+```
+
+```json [Result]
+{
+  "authorized_keys": [],
+  "enabled": true,
+  "groups": [
+    "group_1"
+  ],
+  "has_authorized_keys": false,
+  "has_password": true,
+  "meta": {},
+  "sso_realm_uri": null,
+  "type": "user",
+  "username": "user_3",
+  "version": "1.1"
+}
+```
+:::
+
+### Add groups to a user
+#### bondy.user.add_groups(realm_uri(), username(), [group_name()]) {.wamp-procedure}
+Adds a list of group names to an existing user.
+
+#### Call
+
+##### Positional Args
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+		'0':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The URI of the realm you want to modify the user.'
+		},
+		'1':{
+			'type': 'string',
+			'required': true,
+			'description' : 'The username of the user you want to add a group names.'
+		},
+		'2':{
+			'type': 'array',
+			'required': true,
+			'description' : 'The group names to add.',
+			'items': {
+				'type': 'string'
+			}
+		}
+	})"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+None.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
+* [bondy.error.no_such_groups](/reference/wamp_api/errors/no_such_groups): when any of the provided group names doesn't exist.
+* [wamp.error.no_such_principal](/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
+
+#### Examples
+
+::: code-group
+```bash [Call]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.user.add_groups \
+"com.leapsight.test_creation_1" "user_3" '["group_1","group_2"]'
+```
+
+```bash [Checking the updated user]
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
+```
+
+```json [Result]
+{
+  "authorized_keys": [],
+  "enabled": true,
+  "groups": [
+    "group_1",
+	"group_2"
+  ],
+  "has_authorized_keys": false,
+  "has_password": true,
+  "meta": {},
+  "sso_realm_uri": null,
+  "type": "user",
+  "username": "user_3",
+  "version": "1.1"
+}
+```
+:::
+
+### Remove a group from a user
 #### bondy.user.remove_group(realm_uri(), username(), group_name()) {.wamp-procedure}
 Removes an existing group name from an existing user.
 
@@ -1029,7 +1152,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```
 :::
 
-### Remove groups from an user
+### Remove groups from a user
 #### bondy.user.remove_groups(realm_uri(), username(), [group_name()]) {.wamp-procedure}
 Removes a list of group names from an existing user.
 
@@ -1084,7 +1207,6 @@ None.
 call bondy.user.remove_groups \
 "com.leapsight.test_creation_1" "user_3" '["group_1","group_2"]'
 ```
--
 
 ```bash [Checking the updated user]
 ./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
@@ -1104,117 +1226,6 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
   "enabled": true,
   "groups": [],
   "has_authorized_keys": false,
-  "has_password": true,
-  "meta": {},
-  "sso_realm_uri": null,
-  "type": "user",
-  "username": "user_3",
-  "version": "1.1"
-}
-```
-:::
-
-### Update an user into a realm
-#### bondy.user.update(realm_uri(), username(), input_data()) -> user() {.wamp-procedure}
-Updates an existing user.
-
-Publishes an event under topic [bondy.user.updated](#bondy-user-updated){.uri} after the user has been updated.
-Optionally, publishes an event under topic [bondy.user.credentials_changed](#bondy-user-credentials-changed){.uri} if the user's authorized_keys have been changed.
-
-#### Call
-
-##### Positional Args
-<DataTreeView :data="updateArgs" :maxDepth="10" />
-
-##### Keyword Args
-None.
-
-#### Result
-
-##### Positional Results
-<DataTreeView :data="updateResult" :maxDepth="10" />
-
-##### Keyword Results
-None.
-
-#### Errors
-
-* [bondy.error.missing_required_value](/reference/wamp_api/errors/missing_required_value): when a required value is not provided
-* [bondy.error.invalid_datatype](/reference/wamp_api/errors/invalid_datatype): when the data type is invalid
-* [bondy.error.invalid_value](/reference/wamp_api/errors/invalid_value): when the data value is invalid
-* [bondy.error.invalid_data](/reference/wamp_api/errors/invalid_data): when the data values are invalid
-* [bondy.error.no_such_groups](/reference/wamp_api/errors/no_such_groups): when any of the provided group name doesn't exist.
-* [bondy.error.not_found](/reference/wamp_api/errors/not_found): when the provided realm uri or username is not found.
-* [wamp.error.invalid_argument](/reference/wamp_api/errors/wamp_invalid_argument): for example when the provided `sso_realm_uri` property value doesn't exist.
-
-#### Examples
-
-::: code-group
-```bash [Call]
-./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
-call bondy.user.update \
-"com.leapsight.test_creation_1" "user_3" \
-'{
-	"groups":["group_1","group_2"],
-	"enabled":true,
-	"authorized_keys":["1766c9e6ec7d7b354fd7a2e4542753a23cae0b901228305621e5b8713299ccdd"]
-}' | jq
-```
-
-```json [Result]
-{
-  "aliases": [
-    "user3_alias5",
-    "user3_alias4",
-    "user3_alias3",
-    "user3_alias2",
-    "user3_alias1"
-  ],
-  "authorized_keys": [
-    "1766C9E6EC7D7B354FD7A2E4542753A23CAE0B901228305621E5B8713299CCDD"
-  ],
-  "enabled": true,
-  "groups": [
-    "group_1",
-    "group_2"
-  ],
-  "has_authorized_keys": true,
-  "has_password": true,
-  "meta": {},
-  "sso_realm_uri": null,
-  "type": "user",
-  "username": "user_3",
-  "version": "1.1"
-}
-```
-:::
-::: details Success Call checking if the new keys were changed
-- Request
-```bash
-./wick --url ws://localhost:18080/ws \
---realm com.leapsight.test_creation_1 \
---authmethod=cryptosign --authid="user_3" --private-key="4ffddd896a530ce5ee8c86b83b0d31835490a97a9cd718cb2f09c9fd31c4a7d7" \
-call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
-```
-- Response
-```json
-{
-  "aliases": [
-    "user3_alias5",
-    "user3_alias4",
-    "user3_alias3",
-    "user3_alias2",
-    "user3_alias1"
-  ],
-  "authorized_keys": [
-    "1766C9E6EC7D7B354FD7A2E4542753A23CAE0B901228305621E5B8713299CCDD"
-  ],
-  "enabled": true,
-  "groups": [
-    "group_1",
-    "group_2"
-  ],
-  "has_authorized_keys": true,
   "has_password": true,
   "meta": {},
   "sso_realm_uri": null,

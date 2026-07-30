@@ -20,7 +20,7 @@ related:
 ---
 # Beyond the Basics
 
-Once you've mastered the fundamentals of WAMP's RPC and Publish/Subscribe patterns, you can leverage advanced features that make distributed systems more robust, scalable, and reliable. This guide covers the essential capabilities that elevate WAMP from a simple messaging protocol to a production-ready application networking platform.
+Beyond WAMP's basic RPC and Publish/Subscribe patterns, this guide covers the advanced features a production deployment typically needs: load balancing, progressive results, and pattern-based routing.
 
 ## RPC Load Balancing
 
@@ -588,7 +588,7 @@ WAMP's beyond-the-basics features enable production-ready distributed systems:
 - **Timeouts** to prevent indefinite waiting
 - **Caller/publisher identification** for audit and authorization
 
-These capabilities are built into the protocol—no external load balancers, service registries, or complex infrastructure required. Bondy provides them all out of the box, making it simple to build systems that are both robust and scalable.
+These capabilities are built into the protocol — Bondy provides all of them without a separate load balancer, service registry, or other external infrastructure.
 
 Explore the deep dives for more details:
 - [Advanced RPC](/concepts/wamp/advanced/rpc) - Progressive calls, cancellation, trust levels

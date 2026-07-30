@@ -5,7 +5,11 @@
 
 @[config](load_regulation.enabled,on|off,on,v0.8.8)
 
+Reserved for future overload-protection tuning. The value is currently accepted but not consulted by any code path — changing it has no effect.
+
 @[config](load_regulation.router.pool.type,permanent|transient,transient,v0.8.8)
+
+Whether router pool workers are `permanent` (pre-spawned and kept alive between requests) or `transient` (spawned as needed and torn down once idle). This affects worker churn under bursty load, not the pool's steady-state capacity — see [load_regulation.router.pool.size](#load_regulationrouterpoolsize) below for that.
 
 @[config](load_regulation.router.pool.size,pos_integer,8,v0.8.8)
 
@@ -47,16 +51,12 @@ number of active erlang processes handling session events (default = 32).
 
 @[config](registry.partitions,pos_integer,32,v1.0.0)
 
-The number of registry partitions, i.e. the maximum
-number of active erlang processes handling registry trie serialised
-operations.
+The number of registry partitions, i.e. the maximum number of active Erlang
+processes handling registry operations that must be serialised.
 
-Check with the documentation which operations are concurrent and which are
-serialised to understand the impact.
-
-Notice that all registrations and subcritions for a realm are stored in the
-same (single) partition and partition assignment is based on hashing the
-realm uri across the number of partitions. So increasing the number of
-partitions will only  affect use cases in which you have a decent amount of
-realms.
+All registrations and subscriptions for a given realm are stored in the same
+(single) partition; partition assignment hashes the realm uri across the
+configured number of partitions. Raising this value only helps when many
+realms are in use — a single busy realm always serialises onto one
+partition regardless of this setting.
 
