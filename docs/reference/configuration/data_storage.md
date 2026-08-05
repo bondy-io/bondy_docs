@@ -135,6 +135,10 @@ Run-queue length per online scheduler — EWMA-smoothed across ticks — at or a
 
 Number of peers the sync scheduler samples from the Partisan cluster membership each tick.
 
+@[config](db.aae.prefix_hold,on|off,on,v1.0.0)
+
+Enforces per-origin prefix closure at the replay fold: a node never materialises a peer origin's later operation while an earlier one is missing (history truncated at every live peer before this node pulled it). The non-contiguous remainder is held — excluded from the fold and from the applied-frontier advance — and re-presents each replay until the gap fills or the frontier-gap detection schedules a catalogue rebootstrap, which supplies both the data and the frontier. This closes a window in which observed-remove (add-wins) tables could silently drop a concurrent add. Turning it off is an emergency measure only. The hold's one cost is that a permanently missing operation converts into a rebootstrap instead of a silent gap. Observability: `bondy_oplog_events_held_total` (hold engaging — a burst on a rejoining node is the mechanism working), `bondy_oplog_prefix_holes_total` (gaps that materialised — exclude own-origin transients before alerting), `bondy_oplog_seqs_burned_total` (permanently unfillable sequence numbers). See [Per-Origin Prefix Closure](/concepts/prefix_closure).
+
 ### Authentication Freshness Fence
 
 Because Bondy's storage layer has no consensus round, a partitioned node could otherwise authenticate against a stale view of the security tables. The freshness fence closes that gap.

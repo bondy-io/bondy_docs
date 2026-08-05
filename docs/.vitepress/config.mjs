@@ -720,6 +720,12 @@ function conceptsSidebar() {
             isFeature: true,
             description: "How Bondy safely reclaims space for deleted replicated data."
           },
+          {
+            text: 'Per-Origin Prefix Closure',
+            link: '/concepts/prefix_closure',
+            isFeature: true,
+            description: "How Bondy guarantees each node applies every origin's operations as an unbroken prefix, and repairs truncated history on rejoin."
+          },
         ]
       },
       {
