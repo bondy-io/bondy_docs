@@ -557,6 +557,12 @@ function guidesSidebar() {
             description: 'Run the bundled Prometheus and Grafana stack against your cluster.'
           },
           {
+            text: 'Load Regulation and Rate Limiting',
+            link: '/guides/administration/load_regulation_and_rate_limiting',
+            isFeature: true,
+            description: 'How Bondy protects itself from overload and from abuse, and what a client sees when either engages.'
+          },
+          {
             text: 'Simplifying realm management using prototypes',
             link: '/guides/administration/simplifying_realm_management_using_prototypes',
             isFeature: true
