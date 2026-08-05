@@ -30,6 +30,12 @@ The second is **abuse**: a single source sends far more than its fair share — 
 
 Bondy answers the first with **load regulation** and the second with **rate limiting**. This guide explains both: what each mechanism measures, when it acts, what a client observes when it does, and what you can watch to tell whether it is working.
 
+Three diagrams accompany it, one per section: the ingress lanes below, the [pools and queues](#the-pools-at-a-glance) further down, and the [regulators and their signals](#the-regulators-at-a-glance) at the end. They are dense by design, so each one zooms in place — use the controls, double-click, or <kbd>Ctrl</kbd>/<kbd>⌘</kbd> and scroll, and drag to pan. They stay sharp at any zoom.
+
+Start with ingress. Each transport gets its own lane because the gates genuinely differ per lane — and the dashed boxes are worth noting early, since they mark where nothing regulates anything today.
+
+<ZoomSvg src="/assets/load_regulation_ingress.svg" alt="Bondy ingress and admission per transport: five lanes — HTTP/HTTPS, WAMP WebSocket, WAMP TCP/TLS, Partisan and Bondy Bridge Relay — each running from client through listener and acceptor pool, connection admission, connection process, session admission and per-session limits." />
+
 ## Two questions, two mechanisms
 
 Every regulator in Bondy answers one of two questions.
@@ -93,6 +99,12 @@ This bound is deliberately far smaller than [`load_regulation.router.pool.capaci
 
 Sheds increment `bondy_wamp_dropped_total` with `reason="shed"` and a `family` label distinguishing relay from bridge-relay ingress.
 
+### The pools at a glance
+
+The flow pool is one of seven bounded pools and queues on the request path. They differ in what feeds them, what bounds them, and — the part worth knowing before an incident — what each does when it fills. Only the flow pool loses messages outright.
+
+<ZoomSvg src="/assets/load_regulation_pools.svg" alt="Bondy pools and worker queues: router pool, flow pool, session manager pool, job manager pool and FIFO queues, registry partitions, transport queue and anti-entropy reactor pool, each showing what feeds it, its configuration keys, and its overflow behaviour." />
+
 ::: tip Reading logs during a shed storm
 The log line accompanying a shed is itself rate-limited, so a shed storm cannot turn into a log storm. Expect fewer log lines than the counter suggests — trust the counter.
 :::
@@ -114,6 +126,12 @@ Both throttles exempt the shards backing the authentication freshness fence. Tho
 :::
 
 The work anti-entropy triggers when a sync lands — session close, RBAC cache invalidation, routing summary updates — runs on its own pool, sized by [`load_regulation.aae_reactor.pool.size`](/reference/configuration/overload_protection#load_regulation.aae_reactor.pool.size). Events are sharded by cell key, so a given cell's changes always run on the same worker and stay ordered. Raising this helps only when reactions for many distinct cells are in flight at once.
+
+### The regulators at a glance
+
+That completes the set. The diagram below collects every regulator with the signal it reads: the node load monitor and its single consumer, the four anti-entropy bounds, callee-side admission, and the counters that tell you any of it is engaging. It also makes explicit something easy to miss — the node monitor and anti-entropy sample the run queue **separately**, in different shapes, and neither feeds the other.
+
+<ZoomSvg src="/assets/load_regulation_signals.svg" alt="Bondy load regulators and their signals: the node load monitor and its watermarks, a comparison of the two independent run-queue signals, the fail-open principle, the four anti-entropy regulators, outbound and callee-side admission, and the metrics to watch." />
 
 ## Rate limiting inbound traffic
 

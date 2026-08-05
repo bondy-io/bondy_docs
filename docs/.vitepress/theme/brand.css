@@ -321,3 +321,20 @@ table.property-table > tbody > tr > td {
   font-size: 12px !important;
   color: var(--vp-c-text-3);
 }
+
+/* ---------------------------------------------------------------------------
+ * ZoomImg overlay stacking
+ *
+ * The shared template gives medium-zoom an overlay of z-index 20 and the
+ * zoomed image 21, both of which sit BELOW VitePress's own chrome — the
+ * sidebar is --vp-z-index-sidebar (60) and the nav is 30 — so a zoomed
+ * image opened on a page with a sidebar renders behind the left-hand menu.
+ * Lift both above every VitePress layer.
+ * ------------------------------------------------------------------------ */
+.medium-zoom-overlay {
+  z-index: 100 !important;
+}
+
+.medium-zoom-image--opened {
+  z-index: 101 !important;
+}

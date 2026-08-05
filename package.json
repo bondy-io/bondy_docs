@@ -28,7 +28,7 @@
     "check": "yarn format:check && yarn lint:md && yarn spellcheck"
   },
   "dependencies": {
-    "@leapsight/vitepress-template": "git+https://github.com/Leapsight/vitepress-template.git#v0.1.0",
+    "@leapsight/vitepress-template": "git+https://github.com/Leapsight/vitepress-template.git#v0.1.1",
     "@sindresorhus/slugify": "^2.1.1",
     "@types/markdown-it": "^14.1.2",
     "markdown-it": "^14.1.0",
