@@ -336,6 +336,11 @@ function nav() {
             activeMatch: '/reference/metrics'
           },
           {
+            text: 'Error Reference',
+            link: '/reference/errors',
+            activeMatch: '/reference/errors'
+          },
+          {
             text: 'Glossary',
             link: '/reference/glossary',
             activeMatch: '/reference/glossary'

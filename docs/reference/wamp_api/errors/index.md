@@ -1,5 +1,10 @@
 # Errors
-The catalogue of all error URIs used by Bondy and WAMP.
+
+The error URIs raised by the administrative WAMP API, with a page each.
+
+For the shape of the payload that accompanies any of them &mdash; and for the
+complete catalogue of error URIs across the router, the HTTP API Gateway and the
+cluster &mdash; see the [Error Reference](/reference/errors).
 
 ## Bondy Error URIs
 
