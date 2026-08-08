@@ -210,6 +210,34 @@ already running. Those have a page each under
 | `cluster_not_formed` | `bondy.error.cluster_not_formed` | `cluster_not_formed` | transient | 503 | K002 |
 | `partition_detected` | `bondy.error.partition_detected` | `partition_detected` | transient | 503 | K003 |
 
+### Mail
+
+| Type | URI | Code | Nature | HTTP | Handle |
+| --- | --- | --- | --- | --- | --- |
+| `mail_not_configured` | `bondy.error.mail_not_configured` | `mail_not_configured` | permanent | 501 | M001 |
+| `no_such_relay` | `bondy.error.no_such_relay` | `no_such_relay` | permanent | 400 | M002 |
+| `relay_not_permitted` | `bondy.error.relay_not_permitted` | `relay_not_permitted` | permanent | 403 | M003 |
+| `sender_not_permitted` | `bondy.error.sender_not_permitted` | `sender_not_permitted` | permanent | 403 | M004 |
+| `invalid_recipient` | `bondy.error.invalid_recipient` | `invalid_recipient` | permanent | 400 | M005 |
+| `mail_rejected` | `bondy.error.mail_rejected` | `mail_rejected` | permanent | 400 | M006 |
+| `mail_delivery_failed` | `bondy.error.mail_delivery_failed` | `mail_delivery_failed` | transient | 502 | M007 |
+| `relay_unavailable` | `bondy.error.relay_unavailable` | `relay_unavailable` | transient | 503 | M008 |
+| `mail_queue_full` | `bondy.error.mail_queue_full` | `mail_queue_full` | transient | 429 | M009 |
+
+A [mail relay](/concepts/mail) is operator-owned infrastructure, and none of
+these errors describes it. The payload carries the relay's configured **name**
+&mdash; which the caller supplied, or could read from `bondy.mail.relay.list`
+&mdash; and nothing else. No hostname, no username, no credential.
+
+The text of an SMTP reply never reaches a caller either. Only the three-digit
+reply code survives, because a relay banner is written by someone other than
+Bondy and may quote the recipient, the subject, or anything else its operator
+chose to put there.
+
+`mail_rejected` is **400 and not 502**: the relay was reachable and working,
+and declined this particular message, so a gateway status would invite a retry
+that cannot succeed.
+
 ### System
 
 | Type | URI | Code | Nature | HTTP | Handle |

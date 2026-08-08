@@ -455,6 +455,24 @@ function tutorialsSidebar() {
         ]
       },
       {
+        text: 'Integrations',
+        description: 'Forwarding WAMP events out to systems that do not speak WAMP.',
+        items: [
+          {
+            text: 'Sending Email with the SMTP Bridge',
+            link: '/tutorials/smtp_bridge',
+            isFeature: true,
+            description: 'Publish an event, read the email it produced — end to end against a local mail server.'
+          },
+          {
+            text: 'Kafka Bridge',
+            link: '/tutorials/kafka_bridge',
+            isFeature: true,
+            description: 'Re-publish WAMP events to a Kafka topic.'
+          }
+        ]
+      },
+      {
         text: 'Advanced Security Topics',
         items: [
           {
@@ -535,6 +553,12 @@ function guidesSidebar() {
             link: '/guides/programming/http_connector',
             isFeature: true,
             description: "Bridge WAMP RPC calls to upstream HTTP/REST services with step-by-step examples."
+          },
+          {
+            text: 'Sending Email',
+            link: '/guides/programming/sending_email',
+            isFeature: true,
+            description: "Send email from a WAMP client, or on a published event, with idempotency and error handling."
           }
         ]
       },
@@ -560,6 +584,12 @@ function guidesSidebar() {
             link: '/guides/administration/monitoring',
             isFeature: true,
             description: 'Run the bundled Prometheus and Grafana stack against your cluster.'
+          },
+          {
+            text: 'Configuring Mail Relays',
+            link: '/guides/administration/configuring_mail_relays',
+            isFeature: true,
+            description: 'Declare a relay, scope it to realms, wire up its credential, and verify it.'
           },
           {
             text: 'Load Regulation and Rate Limiting',
@@ -700,6 +730,12 @@ function conceptsSidebar() {
             link: '/concepts/broker_bridge',
             isFeature: true,
             description: "Re-publish WAMP events to Kafka, AWS SNS, Mailgun, or SendGrid."
+          },
+          {
+            text: 'Mail',
+            link: '/concepts/mail',
+            isFeature: true,
+            description: "Outbound email through operator-declared relays, kept off the routing path."
           },
           {
             text: 'HTTP Transports (Longpoll & SSE)',
@@ -915,6 +951,12 @@ function configurationSidebar() {
             isFeature: true
           },
           {
+            text: 'Mail',
+            description: 'Declare SMTP relays: endpoint, TLS, credentials, which realms may send and as whom.',
+            link: '/reference/configuration/mail',
+            isFeature: true
+          },
+          {
             text: 'Certificate Manager',
             description: 'Configure the CA trust store, server certificate rotation, and mTLS settings.',
             link: '/reference/configuration/cert_manager',
@@ -1004,6 +1046,11 @@ function wampAPISidebar() {
             link: '/reference/wamp_api/subscription',
             isFeature: true,
             description: "Introspecting Pub/Sub subscriptions: paginated and WAMP Meta API listing, matching, and subscriber lookup."
+          },
+          { text: 'Mail',
+            link: '/reference/wamp_api/mail',
+            isFeature: true,
+            description: "Sending email: send, send_async, status, relay listing and a relay test."
           },
           { text: 'Ticket',
             link: '/reference/wamp_api/ticket',

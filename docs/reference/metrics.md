@@ -195,6 +195,32 @@ Backs [Registry Routing (RIB)](/concepts/registry_routing): the compact per-`(re
 | `bondy_jobs_queue_depth`, `_enqueued_total` | Gauge / Counter | Queue depth and cumulative enqueue count per load-regulation pool shard &mdash; the router's async-work backpressure signal. |
 | `bondy_process_message_queue_len` | Gauge | Mailbox depth of critical singleton processes (`name`), e.g. `bondy_event_manager`, `bondy_registry`. |
 
+## Mail
+
+Outbound email, from `bondy_mail`. Empty on a node with no `mail.relay.*` configured &mdash; that is the [dormant state](/concepts/mail#dormant-until-configured), not a fault. Every family carries a `relay` label; **none carries a realm**, because relay names are bounded by `bondy.conf` and realms are not. Per-realm attribution lives in the logs and in the telemetry events these families are derived from.
+
+| Metric family | Type | Covers |
+|---|---|---|
+| `bondy_mail_accepted_total` | Counter | Messages validated, authorized and queued, by `relay` and `surface` (`rpc` \| `bridge`). Accepted is not delivered. |
+| `bondy_mail_sent_total` | Counter | Messages a relay accepted. |
+| `bondy_mail_failed_total` | Counter | Messages that will not be delivered, by `nature` (`permanent` \| `transient`) and `reason_class`. A transient failure counted here has exhausted its attempts or its deadline. |
+| `bondy_mail_retried_total` | Counter | Delivery retries, by `reason_class`. Only transient failures are retried. |
+| `bondy_mail_dead_letter_total` | Counter | Failed messages with no caller waiting to be told, by `reason_class`. Every message the broker bridge sends is in this category if it fails. |
+| `bondy_mail_rejected_total` | Counter | Messages refused *before* reaching a worker, by `reason` (`queue_full` \| `not_permitted` \| `oversized`). Nothing counted here was offered to a relay. |
+| `bondy_mail_rate_limited_total` | Counter | Messages refused by a relay's own rate limit. |
+| `bondy_mail_send_duration_milliseconds` | Histogram | The SMTP conversation once a worker had the message, including retries and the backoff between them. Excludes time spent queued. |
+| `bondy_mail_queue_wait_milliseconds` | Histogram | How long a message waited in front of a worker. |
+| `bondy_mail_queue_depth` | Gauge | Messages queued and not yet taken by a worker. |
+| `bondy_mail_relay_up` | Gauge | `1` when a relay's recent deliveries are succeeding, `0` when consecutive transient failures marked it down. Permanent failures do not change it: a rejected recipient says nothing about the relay. |
+
+Three of these distinctions decide what an operator does next, and are worth keeping straight:
+
+- **`failed` versus `rejected`.** `failed` means a relay declined a message it was shown. Nothing in `rejected` ever reached a relay &mdash; it was refused by a full queue, by authority, or by the size limit. Conflating them makes a saturated queue look like a broken relay.
+- **`nature`.** `permanent` means offering the message again produces the same answer, so somebody has to change something; `transient` means the relay or the network is the problem and it may succeed later. This is the single number that decides whether to page someone or wait.
+- **Two clocks.** Rising `queue_wait` with flat `send_duration` means the pool is too small for the load. Rising `send_duration` means the relay itself is slow. One end-to-end number would move for either and distinguish neither.
+
+A relay marked down also raises an alarm, visible as `bondy_alarm_active{alarm_id="{mail_relay_down,<relay>}"}`. Delivery recovers on the first success; the alarm clears after `health.success_threshold` successes, so a flapping relay does not flap the page.
+
 ## BEAM VM
 
 | Metric family | Type | Covers |

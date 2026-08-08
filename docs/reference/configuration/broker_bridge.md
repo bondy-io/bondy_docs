@@ -16,7 +16,11 @@ related:
 # Broker Bridge Configuration Reference
 The Broker Bridge subsystem runs a set of supervised, embedded WAMP subscribers that re-publish matching events to an external system — a message broker, an SMS gateway, or an email service — using the [Mops](/reference/api_gateway/expressions) expression language to map a WAMP event onto that system's own action shape. See [Broker Bridge](/concepts/broker_bridge) for the concepts behind the specification file and how a bridge module plugs into it.
 
-Four bridges ship with Bondy: [Kafka](#kafka), [AWS SNS](#aws-sns-sms) (SMS), [Mailgun](#mailgun) (email), and [SendGrid](#sendgrid) (email). Each is enabled independently and can be mixed within the same specification file — one subscription might forward to Kafka while another sends an SMS, both driven by the same running bridge.
+Five bridges ship with Bondy: [Kafka](#kafka), [AWS SNS](#aws-sns-sms) (SMS), [SMTP](#smtp) (email), [Mailgun](#mailgun) (email) and [SendGrid](#sendgrid) (email). Each is enabled independently and can be mixed within the same specification file — one subscription might forward to Kafka while another sends an SMS, both driven by the same running bridge.
+
+::: tip Use the SMTP bridge for email
+[SMTP](#smtp) is the supported path: it sends through a [mail relay](/concepts/mail) whose credentials, TLS settings and sender policy live in `bondy.conf`, on a bounded worker pool off the routing path. Mailgun and SendGrid predate it, configure the same underlying HTTP client through global application settings — so **enabling both at once is mutually destructive** — and support neither attachments nor custom headers.
+:::
 
 @[config](broker_bridge.config_file,path,'/platform_etc_dir/broker_bridge_config.json',v0.8.8)
 
@@ -89,6 +93,50 @@ Overrides the SNS endpoint host, for a non-default AWS endpoint (e.g. a local te
 @[config](broker_bridge.aws.secret_access_key,string,N/A,v0.8.8)
 
 The AWS credentials used to authenticate SNS requests.
+
+## SMTP
+Sends email through a [mail relay](/concepts/mail) declared in `bondy.conf`. The action carries the message; the relay carries the credentials, the TLS settings, which realms may send, and which senders they may claim. Nothing secret appears in a specification file.
+
+Delivery is asynchronous by construction. `apply_action` runs inside the subscriber that is delivering the event, so waiting there for an SMTP conversation would put a relay's latency directly on the router's event path — the bridge hands the message to a [bounded worker pool](/reference/configuration/mail#mail.relay.$name.pool.size) and returns. A slow or dead relay fills its queue and starts refusing; publish and subscribe are untouched.
+
+@[config](broker_bridge.smtp.enabled,on|off,off,v1.0.0-rc.60)
+
+Enables the SMTP bridge.
+
+::: warning Enable it on every node
+A broker bridge subscriber handles only **locally-published** events. A node where this is off silently drops the events published to it, so an event's fate depends on which node its publisher happened to connect to.
+:::
+
+There is nothing else to configure here: relays are declared under `mail.*`. See the [Mail Configuration Reference](/reference/configuration/mail).
+
+### Action
+
+```json
+{
+    "bridge": "bondy_smtp_bridge",
+    "match": {
+        "realm": "com.example.realm",
+        "topic": "com.example.user.registered",
+        "options": {"match": "exact"}
+    },
+    "action": {
+        "realm": "{{event.realm}}",
+        "relay": "transactional",
+        "to": "{{event.kwargs.email}}",
+        "subject": "\"Welcome, {{event.kwargs.name}}\"",
+        "text": "\"Your account is ready.\"",
+        "html": "\"<h1>Welcome</h1><p>Your account is ready.</p>\"",
+        "headers": {},
+        "options": {}
+    }
+}
+```
+
+`realm` is required and decides which realm's authority the send is evaluated against — it must be a realm the named relay permits. Every other key is the [mail request object](/reference/wamp_api/mail): `id`, `relay`, `from`, `to`, `cc`, `bcc`, `reply_to`, `subject`, `text`, `html`, `headers`, `attachments`, `priority` and `timeout`. Unknown keys are rejected when the specification is loaded, not silently dropped.
+
+::: info A missing template variable sends nothing
+Evaluating `{{event.kwargs.email}}` against an event that has no such key is a hard error, not an empty string. The action fails and no message is sent — a half-rendered email is worse than none.
+:::
 
 ## Mailgun
 Sends email via the Mailgun API (`text/plain` and/or `text/html` body content; no template support). An action needs `email_address`, `sender`, `subject`, and `body`.
