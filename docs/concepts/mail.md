@@ -49,6 +49,13 @@ caller — because a caller that blocks on a stalled relay has moved the stall
 rather than absorbed it. In the bridge's case that somewhere else is a
 subscriber processing router events.
 
+The queue is bounded twice: by how many messages may wait, and by how much they
+may hold. The second bound is the one that matters for the promise above. A
+relay that stops answering is *supposed* to fill its queue, so what that queue
+costs the rest of the node has to be a number an operator set — not a
+consequence of how large the messages happened to be. Each relay's messages wait
+in the worker processes that will deliver them, and nowhere else.
+
 The consequence an operator can rely on: a slow or dead relay degrades mail
 delivery and nothing else. Publish and subscribe throughput is unaffected
 throughout.
@@ -88,6 +95,12 @@ everything is permitted. Deriving the sender fails **closed**: forget to
 configure `allowed_from` and callers cannot set it at all.
 
 You cannot spoof what you cannot set.
+
+A sender may carry a display name — `Acme Ltd <no-reply@acme.com>` — and this
+changes nothing about the above. The allow-list is matched against the
+**address**, so `Trusted Sender <attacker@evil.example>` is checked on
+`evil.example` and refused. The name reaches the `From` header only; the
+envelope always carries the bare address.
 
 ## The realm is never an argument
 
@@ -137,6 +150,15 @@ email — which is exactly the situation an idempotency key exists for.
 Bondy locates the check by hashing the key onto a node and routing there, so a
 keyed request may make one extra hop inside the cluster. Without a key there is
 nothing to deduplicate and no hop to pay.
+
+A key is spent once a relay has been **shown** the message, which is not the
+same as the message having been delivered. Retrying a key whose message failed
+reports the failure and sends nothing, because Bondy cannot tell a relay that
+never saw a message from one that accepted it and then dropped the connection;
+a caller who genuinely wants another attempt uses another key. But a message
+that no relay ever saw — refused by a full queue, or shed from the queue after
+outliving `queue.ttl` — leaves its key available, because refusing to retry
+something that was never attempted would suppress an email that was never sent.
 
 One limitation, stated plainly: during a membership change two nodes may
 briefly both consider themselves the owner of a key. That window is inherent to

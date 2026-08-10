@@ -72,6 +72,9 @@ These families instrument the replicated storage layer described in [Architectur
 | `bondy_oplog_peer_last_sync_age_seconds`, `_peer_last_seen_age_seconds`, `_peer_state_entries`, `_peer_exclusions_total` | Gauge / Counter | Per-(instance, peer) sync recency, and exclusion of stale peers from a sync round. |
 | `bondy_aae_merge_conflicts_total` | Counter | Remote AAE merges that overwrote a concurrently-edited local security cell (an LWW conflict over-approximation), by `table`. |
 | `bondy_oplog_reclamation_stalled_total`, `_retirements_total` | Counter | Space-reclamation attempts stalled (naming the blocking members) and origin-retirement outcomes &mdash; see [Deletion and Reclamation](/concepts/deletion_and_reclamation). |
+| `bondy_oplog_events_held_total` | Counter | Operations a replay held because an earlier operation from the same origin is missing. A burst on a node rejoining after truncation is the mechanism working; a sustained rate on a healthy cluster means a gap is not filling &mdash; see [Per-Origin Prefix Closure](/concepts/prefix_closure). |
+| `bondy_oplog_prefix_holes_total` | Counter | Contiguity gaps that *materialised* into a fold. Only transient own-origin gaps from concurrent local commit reordering should register; exclude those before alerting. Any remote-origin count warrants investigation. |
+| `bondy_oplog_seqs_burned_total`, `_seqs_filled_total` | Counter | Sequence numbers a rejected write-ahead append could not return to the counter, and the burned seqs whose no-op backfill landed durably. Healthy operation keeps the two equal; a persistent shortfall is a permanent gap that converts into a catalogue rebootstrap on peers. |
 
 ### MST & page store
 
@@ -206,11 +209,11 @@ Outbound email, from `bondy_mail`. Empty on a node with no `mail.relay.*` config
 | `bondy_mail_failed_total` | Counter | Messages that will not be delivered, by `nature` (`permanent` \| `transient`) and `reason_class`. A transient failure counted here has exhausted its attempts or its deadline. |
 | `bondy_mail_retried_total` | Counter | Delivery retries, by `reason_class`. Only transient failures are retried. |
 | `bondy_mail_dead_letter_total` | Counter | Failed messages with no caller waiting to be told, by `reason_class`. Every message the broker bridge sends is in this category if it fails. |
-| `bondy_mail_rejected_total` | Counter | Messages refused *before* reaching a worker, by `reason` (`queue_full` \| `not_permitted` \| `oversized`). Nothing counted here was offered to a relay. |
+| `bondy_mail_rejected_total` | Counter | Messages refused *before any delivery was attempted*, by `reason` (`queue_full` \| `not_permitted` \| `oversized` \| `expired` \| `shutdown`). Nothing counted here was offered to a relay, so none of it counts against relay health. |
 | `bondy_mail_rate_limited_total` | Counter | Messages refused by a relay's own rate limit. |
 | `bondy_mail_send_duration_milliseconds` | Histogram | The SMTP conversation once a worker had the message, including retries and the backoff between them. Excludes time spent queued. |
 | `bondy_mail_queue_wait_milliseconds` | Histogram | How long a message waited in front of a worker. |
-| `bondy_mail_queue_depth` | Gauge | Messages queued and not yet taken by a worker. |
+| `bondy_mail_queue_depth` | Gauge | Messages queued for a relay and not yet taken by a worker, summed across its pool. This is the counter `queue.max_size` is enforced against rather than a separate observation of it, so the gauge and the bound cannot disagree. |
 | `bondy_mail_relay_up` | Gauge | `1` when a relay's recent deliveries are succeeding, `0` when consecutive transient failures marked it down. Permanent failures do not change it: a rejected recipient says nothing about the relay. |
 
 Three of these distinctions decide what an operator does next, and are worth keeping straight:

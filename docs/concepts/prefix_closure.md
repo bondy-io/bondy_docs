@@ -7,7 +7,7 @@ related:
     - text: Data Storage & AAE Configuration Reference
       type: Configuration Reference
       link: /reference/configuration/data_storage
-      description: Every storage and anti-entropy option, including db.aae.prefix_hold.
+      description: Every storage and anti-entropy option.
 ---
 
 # Per-Origin Prefix Closure
@@ -16,9 +16,9 @@ Every replicated Bondy table converges because every node eventually applies
 the same set of operations. The observed-remove (add-wins) tables rely on
 something stronger: that each node applies any single origin's operations as
 an unbroken prefix — operation 7 never lands where operations 5 and 6 are
-missing. This property is **per-origin prefix closure**. Bondy enforces it by
-default (`db.aae.prefix_hold`), and this page explains what breaks without
-it, how the enforcement works, and what its repair looks like in operation.
+missing. This property is **per-origin prefix closure**, and the fold enforces
+it unconditionally. This page explains what breaks without it, how the
+enforcement works, and what its repair looks like in operation.
 
 ## Why a prefix matters
 
@@ -54,8 +54,8 @@ tree — a hole beneath the maximum, with nothing left to flag it.
 
 ## The hold
 
-With `db.aae.prefix_hold` on (the default), the replay that folds synced
-operations into a table's materialised state enforces closure at the fold.
+The replay that folds synced operations into a table's materialised state
+enforces closure at the fold.
 Each batch is partitioned per remote origin into the contiguous run rising
 from that origin's applied frontier and the non-contiguous remainder. The
 run folds; the remainder is **held**:
@@ -82,17 +82,19 @@ peer's materialised cells and adopts its frontier, which supplies both the
 missing values and the bookkeeping in one act.
 
 The visible arc of an episode, in the
-[cluster-sync metrics](/reference/configuration/data_storage): a burst of
+[cluster-sync metrics](/reference/metrics#anti-entropy-sync-bootstrap-frontier-convergence): a burst of
 `bondy_oplog_events_held_total` on the rejoining node, then frontier-gap
 verdicts, then a scheduled rebootstrap, then quiet. A sustained held rate on
 a healthy cluster means a gap is not filling and deserves a look.
 
-## Turning it off
+## Why it is not optional
 
-`db.aae.prefix_hold = off` restores the unenforced fold: a rejoining node
-integrates a peer's truncated history as-is, the frontier advances past any
-hole, and the observed-remove exactness argument no longer holds. The knob
-exists as an emergency escape, not as a tuning option. The one cost of
-leaving enforcement on is that a permanently missing operation becomes a
-catalogue rebootstrap instead of a silent gap — a repair, in place of a
+Without enforcement a rejoining node integrates a peer's truncated history
+as-is, the applied frontier max-merges past any hole, and the
+observed-remove exactness argument no longer holds — a removal can drop an
+addition the writer never saw. The frontier is a per-origin maximum, so it
+cannot represent a hole and cannot report one either: the loss is silent.
+
+The one cost of enforcement is that a permanently missing operation becomes
+a catalogue rebootstrap instead of a silent gap — a repair, in place of a
 loss.

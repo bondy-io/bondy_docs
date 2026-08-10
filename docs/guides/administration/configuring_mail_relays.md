@@ -115,10 +115,17 @@ mail.relay.transactional.rate_limit.burst = 50
 ```
 
 `pool.size` is how many messages this relay delivers concurrently.
-`queue.max_size` is the bound in front of it — when it is full, sends are
+`queue.max_size` is the bound in front of it, **across the whole pool** — the
+workers divide it, they do not each get one — and when it is full, sends are
 refused immediately with
 [`bondy.error.mail_queue_full`](/reference/wamp_api/errors/mail_queue_full)
-rather than blocking the caller.
+rather than blocking the caller. `queue.max_bytes` (64MB by default) bounds the
+same queue in memory, and whichever is reached first refuses; size it from the
+messages you actually send, because a thousand queued messages is a very
+different amount of memory with attachments than without.
+
+The `bondy_mail_queue_depth` metric is that same count, so a dashboard reading
+near the bound is the signal to raise it or to add workers.
 
 Set `rate_limit.rate` to whatever your provider's quota allows. It protects the
 *relay*, so refusal happens on Bondy's side of the queue rather than as a `4xx`

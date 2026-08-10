@@ -67,7 +67,7 @@ and whether it may claim the sender it asked for
         'from': {
             'type': 'string',
             'required': false,
-            'description': 'Sender address. Defaults to the configured sender of the relay. If supplied, its domain must appear in the allowed_from list of the relay, or the request is refused.'
+            'description': 'Sender, as a bare address or as a display name and address: no-reply@acme.com or Acme Ltd <no-reply@acme.com>. Defaults to the configured sender of the relay. allowed_from is matched against the ADDRESS, so a display name grants nothing. A name may not contain a control character, a double quote or a backslash.'
         },
         'to': {
             'type': 'list',
@@ -87,7 +87,7 @@ and whether it may claim the sender it asked for
         'reply_to': {
             'type': 'string',
             'required': false,
-            'description': 'Reply-To address.'
+            'description': 'Reply-To, as a bare address or as a display name and address.'
         },
         'subject': {
             'type': 'string',
@@ -117,7 +117,7 @@ and whether it may claim the sender it asked for
         'priority': {
             'type': 'string',
             'required': false,
-            'description': 'normal (default) or low.'
+            'description': 'normal (default) or low. A low priority message waits behind every normal one queued for the same relay, however long it has been waiting itself.'
         },
         'timeout': {
             'type': 'integer',
@@ -256,10 +256,30 @@ None.
         0: {
             'type': 'map',
             'required': true,
-            'description': 'An object with status (queued, sent, failed or unknown), and where known: relay, attempts, nature (permanent or transient) and error_class.'
+            'description': 'An object with status (queued, sent, failed, shed or unknown), and where known: relay, attempts, nature (permanent or transient) and error_class.'
         }
     })"
 />
+
+| `status` | Meaning |
+| --- | --- |
+| `queued` | Accepted into a relay's queue on the owning node. |
+| `sent` | A relay took responsibility for the message. Not a delivery guarantee. |
+| `failed` | A relay was shown the message and it will not be delivered. |
+| `shed` | It was dropped from the queue before any relay saw it: it outlived `mail.relay.$name.queue.ttl`, or the worker holding it stopped. `error_class` says which. |
+| `unknown` | See below. |
+
+::: tip A shed message may be retried with the same idempotency key
+`failed` and `shed` differ in one way that matters to a client: an idempotency
+key whose message `failed` is spent, and sending it again reports the failure
+rather than sending anything. A key whose message was `shed` may be used again,
+and doing so sends.
+
+The rule behind both is the same — a key is consumed once a relay has been shown
+the message. Bondy cannot tell a relay that never saw a message from one that
+accepted it and dropped the connection, so a failure is not licence to send
+twice. A shed message was never offered to a relay at all.
+:::
 
 ::: info unknown means four different things, on purpose
 An id that never existed, a record that has aged out of `mail.status.ttl`, a
@@ -377,11 +397,21 @@ None.
 |[`bondy.error.relay_unavailable`](/reference/wamp_api/errors/relay_unavailable)|Transient|The relay could not be reached.|
 |[`bondy.error.mail_queue_full`](/reference/wamp_api/errors/mail_queue_full)|Transient|The relay's queue is at its bound.|
 
-Other errors a mail call can raise:
-[`bondy.error.invalid_data`](/reference/wamp_api/errors/invalid_data) for a
-malformed request or an unknown key,
-[`bondy.error.too_large_payload`](/reference/errors) for an oversized message,
-and `bondy.error.rate_limit_exceeded` when the relay's rate limit refuses.
+Other errors a mail call can raise, all of them in the
+[Error Reference](/reference/errors):
+
+- [`bondy.error.invalid_data`](/reference/wamp_api/errors/invalid_data) —
+  a malformed request, or a key the request contract does not recognise.
+- `bondy.error.too_large_payload` — the message, or its recipient count,
+  exceeds what the relay accepts. Permanent.
+- `bondy.error.rate_limit_exceeded` — the relay's rate limit refused it.
+  Transient.
+- `bondy.error.request_timeout` — a synchronous `send` reached its deadline
+  before the relay answered. Transient, and it says nothing about whether the
+  message was delivered: use `status.get` with the id.
+- [`bondy.error.unavailable`](/reference/wamp_api/errors/unavailable) — the
+  node that owns this idempotency key could not be reached. Transient, and no
+  message was sent.
 
 **No relay hostname, credential or SMTP banner ever appears in an error.** A
 relay's rejection text is written by someone other than Bondy, so only the

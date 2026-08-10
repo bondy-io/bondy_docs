@@ -67,7 +67,7 @@ Path to the Broker Bridge's JSON specification file, which declares the actual s
 Each entry in `subscriptions` names the target `bridge` module, a `match` selecting which realm/topic (with the usual `exact`/`prefix`/`wildcard` policy) triggers it, and an `action` — a Mops template evaluated against the event before being handed to that bridge's own action spec (see each bridge's section below for its `action` keys).
 
 ## Kafka
-Forwards WAMP events to Apache Kafka, and is by far the most configurable of the four — see the [Kafka Bridge Configuration Reference](/reference/configuration/kafka_bridge) for its clients, producer tuning, and topic mapping, and the [Kafka Bridge Tutorial](/tutorials/kafka_bridge) for a worked example.
+Forwards WAMP events to Apache Kafka, and is by far the most configurable of the five — see the [Kafka Bridge Configuration Reference](/reference/configuration/kafka_bridge) for its clients, producer tuning, and topic mapping, and the [Kafka Bridge Tutorial](/tutorials/kafka_bridge) for a worked example.
 
 @[config](broker_bridge.kafka.enabled,on|off,off,v0.8.8)
 
@@ -185,6 +185,6 @@ The SendGrid API endpoint and key.
 The default sender address, injected into the Mops evaluation context as `{{email_sender}}` for action templates that reference it.
 
 ## See also
-- [Broker Bridge](/concepts/broker_bridge) — the concepts behind subscriptions, actions, and the four bridge modules.
+- [Broker Bridge](/concepts/broker_bridge) — the concepts behind subscriptions, actions, and the five bridge modules.
 - [Kafka Bridge Configuration Reference](/reference/configuration/kafka_bridge) — Kafka's client, producer, and topic-mapping keys.
 - [Kafka Bridge Tutorial](/tutorials/kafka_bridge) — a worked example forwarding WAMP events to Kafka.

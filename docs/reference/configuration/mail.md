@@ -62,8 +62,36 @@ in a request; it can never request a longer one.
 
 @[config](mail.relay.$name.max_message_size,bytesize,25MB,v1.0.0-rc.60)
 
-Measured on the encoded message, after attachments are decoded from base64 and
-re-encoded. Exceeding it is a permanent failure and is never retried.
+Measured twice. At admission, against the decoded request — subject, both
+bodies, headers and attachments together — so an oversized message is refused
+before it occupies the queue. And exactly, on the encoded message, before it is
+offered to the relay.
+
+Every field counts towards it. The same megabytes are refused whether they
+arrive as an attachment or as an HTML body; a limit whose answer depends on
+which field you used is not one you can work with.
+
+::: warning The admission check allows for encoding, so it refuses at 70%
+A message becomes larger on the wire than it is in a request: base64 costs a
+third, and quoted-printable costs more than that on text that is not mostly
+ASCII. The admission check therefore refuses anything whose decoded size exceeds
+**70% of this limit**, so that a message it lets through will still fit once
+encoded.
+
+The margin applies to the whole request, not only to attachments — a 20MB plain
+text body against a 25MB relay is refused, and the error names both the size and
+the effective limit. Size a relay's `max_message_size` from what the relay
+accepts, and expect callers to be held to seven tenths of it.
+:::
+
+Exceeding it is a permanent failure and is never retried.
+
+@[config](mail.relay.$name.max_recipients,integer,100,v1.0.0-rc.60)
+
+The most envelope recipients one message may name. `to`, `cc` and `bcc` are
+counted together, because they all become `RCPT TO` commands in a single
+transaction and their sum is what the relay sees. RFC 5321 obliges a server to
+accept 100, which is why that is the default.
 
 ## Transport security
 
@@ -144,15 +172,28 @@ Prototypes](/guides/administration/simplifying_realm_management_using_prototypes
 
 @[config](mail.relay.$name.from,string,,v1.0.0-rc.60)
 
-The default sender, used for both the envelope and the `From` header. A request
-that does not name a sender gets this one — which is why a caller cannot spoof
-by default.
+The default sender. A request that does not name one gets this — which is why a
+caller cannot spoof by default.
+
+May carry a display name, which is where the brand a recipient sees belongs:
+
+```erlang
+mail.relay.transactional.from = Acme Ltd <no-reply@example.com>
+```
+
+The display name reaches the `From` header only. The envelope always carries
+the bare address, because `MAIL FROM` cannot hold anything else. A name may not
+contain a control character, a double quote or a backslash.
 
 @[config](mail.relay.$name.allowed_from,list,,v1.0.0-rc.60)
 
 Domains a caller may claim in a request's `from`. A comma-separated list, or
 `*` to disable sender restriction for this relay. **Unset means callers cannot
 set `from` at all** and always send as `mail.relay.$name.from`.
+
+Matching is against the **address**, never against what the caller supplied. A
+request for `Trusted Sender <attacker@evil.example>` is checked on
+`evil.example` and refused; a display name buys nothing.
 
 ::: warning Sender restriction is a narrowing, not a check
 A caller-supplied sender is only ever accepted from within this list. That is
@@ -166,25 +207,58 @@ validation you forgot to configure permits everything.
 @[config](mail.relay.$name.pool.size,integer,4,v1.0.0-rc.60)
 
 Workers for this relay, and therefore how many messages it delivers
-concurrently. Each worker owns its own queue.
+concurrently. Each worker holds its own messages, and the bounds below are the
+relay's — the pool divides them, it does not multiply them.
 
 @[config](mail.relay.$name.queue.max_size,integer,1000,v1.0.0-rc.60)
 
-The relay's total queue bound, divided across the pool. **A full queue refuses
-immediately** with a transient error rather than blocking the caller: blocking
-would move the stall onto whatever asked to send.
+How many messages may wait for this relay, across its whole pool. **A full
+queue refuses immediately** with a transient error rather than blocking the
+caller: blocking would move the stall onto whatever asked to send.
+
+@[config](mail.relay.$name.queue.max_bytes,bytesize,64MB,v1.0.0-rc.60)
+
+The same bound in bytes, measured on the decoded request. Whichever of the two
+is reached first refuses.
+
+::: tip Why two bounds
+A bound in messages says nothing about memory, because a message may be a
+hundred bytes or twenty megabytes. This is the one that decides how much a relay
+that has stopped answering can occupy, and it is the one to size from the mail
+you actually send.
+:::
 
 @[config](mail.relay.$name.queue.ttl,duration,5m,v1.0.0-rc.60)
 
-How long a message may sit queued before it is shed. A message nobody is
+How long a message may sit queued before it is shed unsent. A message nobody is
 waiting for any more is not worth a worker.
+
+A shed message is reported, not dropped: a synchronous caller receives a
+transient error rather than waiting out its own timeout, the message's status
+becomes `shed` with an `error_class` of `expired`, and
+`bondy_mail_rejected_total` counts it with the same reason. It does **not**
+count against the relay's health — a queue backing up says nothing about whether
+the relay is answering — and it does **not** consume the caller's idempotency
+key, because no relay was ever shown the message. Sending the same key again
+sends.
 
 @[config](mail.relay.$name.rate_limit.rate,number,0,v1.0.0-rc.60)
 
-Messages per second. `0` disables the limit. This protects the relay's own
-quota, so refusal happens on the caller's side of the queue.
+Messages per second, refilled continuously. `0` disables the limit. Fractional
+rates are accepted: a relay permitting thirty messages a minute is `0.5`.
+
+This protects the relay's own quota, so refusal happens on the caller's side of
+the queue — before the message occupies it. A refused message answers
+[`bondy.error.rate_limit_exceeded`](/reference/errors), which is transient.
+
+The limit is keyed per relay, not per realm, because the quota it protects
+belongs to the relay.
 
 @[config](mail.relay.$name.rate_limit.burst,integer,1,v1.0.0-rc.60)
+
+Token-bucket capacity: how many messages may be sent back to back before the
+rate above starts to bite. The default of `1` allows no burst at all, so a
+relay configured with a rate wants a burst chosen alongside it.
 
 ## Retries
 

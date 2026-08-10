@@ -215,10 +215,11 @@ bondy.mail.test("you@example.com", relay := "local_tls")
 ```
 
 Remove the `cacertfile` line and try again: the send fails with
-[`relay_unavailable`](/reference/wamp_api/errors/relay_unavailable), because
-verification against the operating-system trust store cannot vouch for a
-certificate the compose stack generated five minutes ago. That failure is
-verification working.
+[`bondy.error.mail_delivery_failed`](/reference/wamp_api/errors/mail_delivery_failed),
+because verification against the operating-system trust store cannot vouch for
+a certificate the compose stack generated five minutes ago. A failed TLS
+handshake is classified transient, so it is retried and then reported. That
+failure is verification working.
 
 ## Clean up
 

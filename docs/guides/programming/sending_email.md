@@ -90,12 +90,21 @@ If you need to know what happened, keep the `id` and ask.
 
 ```javascript
 const [status] = await session.call("bondy.mail.status.get", [result.id]);
-// { status: "sent", relay: "transactional", attempts: 1 }
-// or { status: "failed", nature: "permanent", error_class: "rejected" }
+// { status: "sent",   relay: "transactional", attempts: 1 }
+// { status: "failed", nature: "permanent", error_class: "rejected" }
+// { status: "shed",   nature: "transient",  error_class: "expired" }
 ```
 
-`unknown` means Bondy cannot say: the id never existed, the record has aged out
-of `mail.status.ttl`, it belongs to another realm, or its owning node is
+| `status` | Meaning |
+| --- | --- |
+| `queued` | Accepted into a relay's queue. |
+| `sent` | A relay took responsibility for it. |
+| `failed` | A relay was shown the message and it will not be delivered. |
+| `shed` | Dropped from the queue before any relay saw it — it outlived `queue.ttl`, or the worker holding it stopped. |
+| `unknown` | Bondy cannot say. |
+
+`unknown` means the id never existed, the record has aged out of
+`mail.status.ttl`, it belongs to another realm, or its owning node is
 unreachable. All four answer the same way on purpose.
 
 ## Not sending twice
@@ -113,13 +122,25 @@ await session.call("bondy.mail.send", [{
 ```
 
 The check is cluster-wide, so a retry that lands on a different node still
-sends one email. Two things to know:
+sends one email. Three things to know:
 
 - **The window is `mail.status.ttl`** (one hour by default). A retry policy
   that outlasts it will send twice.
 - **Scope the key to something specific.** `order-42` is not an imaginative
   key; Bondy already scopes it to your realm, but two features in the same
   realm can still collide.
+- **A key is spent once a relay has been shown the message**, whatever the
+  relay then did with it. Reusing a key whose message `failed` reports the
+  failure and sends nothing, because Bondy cannot tell a relay that never saw
+  a message from one that accepted it and dropped the connection. A key whose
+  message was never offered to a relay — refused by a full queue, or `shed` —
+  is free, and reusing it sends.
+
+::: tip Ask, do not infer
+Whether a key is still usable is not something the error tells you: a transient
+error may or may not have reached a relay. `bondy.mail.status.get` does tell
+you. `failed` means spent; `shed` and `unknown` mean free.
+:::
 
 ## Attachments, and a custom sender
 
@@ -202,9 +223,15 @@ try {
 } catch (e) {
     switch (e.error) {
         case "bondy.error.mail_queue_full":
+            // Transient, and nothing was offered to a relay. Retry with the
+            // SAME idempotency key: it is still free.
+            break;
         case "bondy.error.relay_unavailable":
         case "bondy.error.mail_delivery_failed":
-            // Transient. Try again later, with the same idempotency key.
+        case "bondy.error.request_timeout":
+            // Transient, but a relay may already have been shown the message,
+            // so the key may be spent. Retry with a NEW key, or ask
+            // bondy.mail.status.get about the old one first.
             break;
         case "bondy.error.invalid_recipient":
         case "bondy.error.mail_rejected":
