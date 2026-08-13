@@ -4,6 +4,7 @@ import { resolve } from 'node:path'
 import { SitemapStream } from 'sitemap'
 import mdCustomBlock from 'markdown-it-custom-block'
 import { withThemeDefaults } from '@leapsight/vitepress-template/theme/config'
+import { ORIGINS } from '@bondy/site-chrome/sitemap'
 
 const links = []
 
@@ -23,8 +24,18 @@ const base = process.env.DOCS_BASE ?? '/'
 
 export default withThemeDefaults(
   {
+    // @bondy/site-chrome ships raw .vue source, so Vite must compile it
+    // rather than treat it as an external CommonJS dep during SSR.
+    // withThemeDefaults merges this with its own package's entry.
+    vite: { ssr: { noExternal: ['@bondy/site-chrome'] } },
+
     // These are app level configs.
-    lang: 'en-GB',
+    // Pagefind shards its index by <html lang>, and the search box merges
+    // one bundle per property at query time. Each property indexes only its
+    // own build now, so a mismatch here no longer splits a shared index —
+    // but a bundle whose language nobody else declares still returns nothing
+    // to the others, so keep this in step with the other Bondy sites.
+    lang: 'en',
     titleTemplate: false,
     title: 'Bondy Developer',
     base,
@@ -36,15 +47,20 @@ export default withThemeDefaults(
       ['meta', { property: 'og:description', content: 'Learn how to develop, deploy and manage distributed applications using Bondy. Bondy is an open-source, always-on and scalable application networking platform connecting all elements of a distributed application—offering event and service mesh capabilities combined. From web and mobile apps to IoT devices and backend microservices, Bondy allows everything to talk using one simple communication protocol.' }],
       ['meta', { property: 'keywords', content: "distributed application, application networking platform, scalable, always-on, universal protocol, remote procedure call, RPC, service mesh, publish-subscribe, publish/subscribe, event mesh, authorization, authentication, web application messaging protocol, router, WAMP, wamp router, API gateway, kubernetes, microservices, p2p, erlang"
         }],
-      ['meta', {name: "theme-color", content: "#171916"}],
+      // Type system, shared with bondy.io: Inter (sans) and JetBrains Mono
+      // (code and the uppercase mono labels).
+      ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
+      ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
+      ['link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap' }],
+      ['meta', {name: "theme-color", content: "#f1efec"}],
       ['meta', {name: "msapplication-TileColor", content: "#171916"}],
-      ['meta', { name: "msapplication-config", content: "/assets/favicons/browserconfig.xml"}],
-      ['link', { rel: "apple-touch-icon", sizes: "180x180", href: "/assets/favicons/apple-touch-icon.png"}],
-      ['link', { rel: "icon", type: "image/png", sizes: "32x32", href: "/assets/favicons/favicon-32x32.png"}],
-      ['link', { rel: "icon", type: "image/png", sizes: "16x16", href: "/assets/favicons/favicon-16x16.png"}],
-      ['link', { rel: "manifest", href: "/assets/favicons/site.webmanifest"}],
-      ['link', { rel: "mask-icon", href: "/assets/favicons/safari-pinned-tab.svg", color: "#171916"}],
-      ['link', { rel: "shortcut icon", href: "/assets/favicons/favicon.ico"}],
+      ['meta', { name: "msapplication-config", content: `${base}assets/favicons/browserconfig.xml`}],
+      ['link', { rel: "apple-touch-icon", sizes: "180x180", href: `${base}assets/favicons/apple-touch-icon.png`}],
+      ['link', { rel: "icon", type: "image/png", sizes: "32x32", href: `${base}assets/favicons/favicon-32x32.png`}],
+      ['link', { rel: "icon", type: "image/png", sizes: "16x16", href: `${base}assets/favicons/favicon-16x16.png`}],
+      ['link', { rel: "manifest", href: `${base}assets/favicons/site.webmanifest`}],
+      ['link', { rel: "mask-icon", href: `${base}assets/favicons/safari-pinned-tab.svg`, color: "#171916"}],
+      ['link', { rel: "shortcut icon", href: `${base}assets/favicons/favicon.ico`}],
       ['link', { rel: "stylesheet", href: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" }],
       ['script',{
         defer: true,
@@ -185,18 +201,18 @@ export default withThemeDefaults(
     },
 
     themeConfig: {
+        // The torso header (theme/DocsNav.vue) renders the wordmark and the
+        // nav itself; VitePress's own navbar is hidden by torso.css. These
+        // stay for the surfaces that still read themeConfig (404, search).
         siteTitle: false,
-        logo: '/assets/logo.png',
+        logo: '/bondy-logo.svg',
 
         // Search
-        search: {
-          provider: 'algolia',
-          options: {
-            appId: '1GA3LX5N2C',
-            apiKey: '17d9078a92df8769b75e5a64a3d8f869',
-            indexName: 'bondy'
-          }
-        },
+        // Search comes from @bondy/site-chrome's SiteSearch, which merges this
+        // deploy's Pagefind bundle with the other Bondy deploys' bundles in the
+        // browser. VitePress's own provider is off so it does not render a
+        // second box.
+        search: false,
 
         socialLinks: [
             { icon: 'github', link: 'https://github.com/bondy-io'},
@@ -227,8 +243,11 @@ export default withThemeDefaults(
         // linking at /v<version>/, which is where the deploy workflow
         // unpacks that version's released package (see
         // .github/workflows/deploy.yml and release-docs.yml).
+        // The current version is deployed at the site root, not at
+        // /v<version>/, so it needs an explicit link: <NavbarVersion>
+        // otherwise falls back to /v<version>/ and sends readers to a 404.
         versions: [
-          { ...versionsManifest.current, current: true },
+          { ...versionsManifest.current, current: true, link: '/' },
           ...versionsManifest.archived.map(({ tag, ...v }) => v)
         ],
 
@@ -278,8 +297,15 @@ export default withThemeDefaults(
     ignoreDeadLinks: false,
   },
   {
-    // KaTeX CSS is linked in `head` above.
-    markdown: { math: true }
+    markdown: {
+      // KaTeX CSS is linked in `head` above.
+      math: true,
+      // The shared kit synthesizes an `# H1` from frontmatter `title:` for
+      // pages that don't open with a heading. Pages that select their own
+      // layout render their own masthead (the Diataxis home does), so they
+      // opt out and keep `title:` for the document title alone.
+      injectTitle: (env) => !env?.frontmatter?.layout
+    }
   }
 )
 
@@ -352,7 +378,7 @@ function nav() {
         items: [
           {
             text: 'Bondy.io',
-            link: 'https://www.bondy.io',
+            link: ORIGINS.website,
           },
           {
             text: 'FAQ',

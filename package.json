@@ -10,6 +10,7 @@
   "private": false,
   "devDependencies": {
     "markdownlint-cli": "^0.43.0",
+    "pagefind": "^1.5.2",
     "prettier": "^3.4.2",
     "vitepress": "^1.6.4"
   },
@@ -22,13 +23,16 @@
     "format:check": "prettier --check \"docs/**/*.md\" \"*.md\"",
     "lint:md": "markdownlint \"docs/**/*.md\" --ignore node_modules",
     "lint:md:fix": "markdownlint \"docs/**/*.md\" --ignore node_modules --fix",
-    "spellcheck": "make spellcheck",
-    "spellfix": "make spellfix",
+    "spellcheck": "just spellcheck",
+    "spellfix": "just spellfix",
     "outdated": "yarn outdated",
-    "check": "yarn format:check && yarn lint:md && yarn spellcheck"
+    "check": "yarn format:check && yarn lint:md && yarn spellcheck",
+    "docs:index": "pagefind --site docs/.vitepress/dist --output-path docs/.vitepress/dist/pagefind",
+    "docs:release": "yarn docs:build && yarn docs:index"
   },
   "dependencies": {
-    "@leapsight/vitepress-template": "git+https://github.com/Leapsight/vitepress-template.git#v0.1.1",
+    "@bondy/site-chrome": "git+https://github.com/bondy-io/bondy_site_chrome.git#v0.2.0",
+    "@leapsight/vitepress-template": "git+https://github.com/Leapsight/vitepress-template.git#v0.1.4",
     "@sindresorhus/slugify": "^2.1.1",
     "@types/markdown-it": "^14.1.2",
     "markdown-it": "^14.1.0",

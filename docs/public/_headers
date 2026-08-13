@@ -1,0 +1,11 @@
+# Netlify. Pagefind bundles are read cross-origin by the shared search
+# box: bondy.io, developer.bondy.io and lang.bondy.io each index only their
+# own pages, and the box merges the three in the browser at query time. The
+# dynamic import of pagefind.js and every index shard it then fetches are
+# cross-origin requests, so without this header the other properties silently
+# contribute no results.
+#
+# These are public static files on a public site, so * is the honest value —
+# and _headers cannot echo an allow-list back per request anyway.
+/pagefind/*
+  Access-Control-Allow-Origin: *

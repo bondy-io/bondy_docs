@@ -1,41 +1,102 @@
 /* ===============================================================
- * Bondy brand tokens and site-specific styling, loaded after the
- * shared theme's neutral defaults (see THEMING.md in the template
- * repo). Only genuinely bondy-specific rules live here: brand
- * colors/type, the WAMP URI/procedure/topic blocks, the
- * `@[config]`/`@[uri]` custom-block macro styling, and home-page
- * hero overrides. Tabs, buttons, columns, the DRAFT watermark and
- * definition blocks are already styled by the shared theme.
+ * Bondy documentation — brand tokens and site-specific styling,
+ * loaded after the shared theme's neutral defaults and after
+ * torso.css (see THEMING.md in the template repo).
+ *
+ * The palette, type and chrome come from @bondy/site-chrome,
+ * shared with
+ * bondy.io — paper/ink with the baked spruce accent, Inter for text
+ * and JetBrains Mono for code. What lives here is only what the
+ * documentation needs on top of that: the reading type scale, the
+ * WAMP URI/procedure/topic blocks and the `@[config]`/`@[uri]`
+ * custom-block macros. Tabs, buttons, columns, the DRAFT watermark
+ * and definition blocks are already styled by the shared theme.
  * =============================================================== */
 
 :root {
-  --vp-c-brand-1: #779e1b;
-  --vp-c-brand-2: #96c623;
-  --vp-c-brand-3: #597614;
-  --vp-c-brand-soft: rgba(150, 198, 35, 0.14);
+  /* Spruce, the Bondy accent. */
+  --vp-c-brand-1: #14705f;
+  --vp-c-brand-2: #0f5c4e;
+  --vp-c-brand-3: #14705f;
+  --vp-c-brand-soft: rgba(20, 112, 95, 0.16);
 
-  --vp-font-family-base:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Noto Sans', Helvetica, Arial,
-    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --vp-font-family-mono:
-    ui-monospace, system-ui, -apple-system, BlinkMacSystemFont, 'SF Mono', 'Inconsolata', 'Menlo',
-    'Courier', monospace;
-  --vp-code-font-size: 15px;
+  /* Paper. */
+  --vp-c-bg: #f1efec;
+  --vp-c-bg-alt: #e8e5e1;
+  --vp-c-bg-elv: #f1efec;
+  --vp-c-bg-soft: #e8e5e1;
+  --vp-c-bg-mute: #e8e5e1;
 
-  --vp-nav-logo-height: 55px;
+  --vp-c-divider: #dcd8d2;
+  --vp-c-border: #c9c5bf;
+  --vp-c-gutter: #dcd8d2;
+
+  /* Ink. */
+  --vp-c-text-1: #0b0b0c;
+  --vp-c-text-2: #4a4a4e;
+  --vp-c-text-3: #87847f;
+
+  --vp-sidebar-bg-color: #f1efec;
+
+  --vp-font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+  --vp-font-family-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --vp-code-font-size: 14px;
 }
 
 html.dark {
-  --vp-c-brand-1: #b0d45a;
-  --vp-c-brand-2: #cae291;
-  --vp-c-brand-3: #96c623;
-  --vp-c-brand-soft: rgba(150, 198, 35, 0.2);
+  --vp-c-brand-1: #5fd6b4;
+  --vp-c-brand-2: #4dbf9f;
+  --vp-c-brand-3: #14705f;
+  --vp-c-brand-soft: rgba(95, 214, 180, 0.16);
+
+  --vp-c-bg: #0c0d0e;
+  --vp-c-bg-alt: #16181a;
+  --vp-c-bg-elv: #16181a;
+  --vp-c-bg-soft: #16181a;
+  --vp-c-bg-mute: #16181a;
+
+  --vp-c-divider: #1d1f21;
+  --vp-c-border: #2a2c2e;
+  --vp-c-gutter: #0c0d0e;
+
+  --vp-c-text-1: #eeece8;
+  --vp-c-text-2: #a6a49f;
+  --vp-c-text-3: #6f6d69;
+
+  --vp-sidebar-bg-color: #0c0d0e;
 }
 
 body {
-  font-size: 17px;
-  letter-spacing: -0.374px;
-  line-height: 25px;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+}
+
+/* Headings carry the torso's tight negative tracking and 500 weight,
+   opened up to documentation line-heights — the website's 0.94 is a
+   display setting for 200px type, not for an H3 in a reference page. */
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3 {
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+.vp-doc h1 { letter-spacing: -0.045em; }
+
+/* The mono "eyebrow" voice, as used across bondy.io for small labels. */
+.VPSidebarItem .text,
+.VPDocOutlineItem a,
+.aside .outline-title {
+  letter-spacing: -0.01em;
+}
+.aside .outline-title {
+  font-family: var(--vp-font-family-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-3);
 }
 
 blockquote > p {
@@ -71,8 +132,6 @@ h5 {
   border-bottom: 1px solid var(--vp-c-divider);
 }
 
-/* Lead paragraph after the H1 is handled by the shared theme's Layout. */
-
 dt {
   font-weight: bold;
   font-style: italic;
@@ -80,31 +139,6 @@ dt {
 
 .footnotes {
   font-size: 14px;
-}
-
-/* -------------------------------------------------------------- */
-/* HOME HERO                                                       */
-/* -------------------------------------------------------------- */
-
-.VPHomeHero > div > div.main > h1 > span {
-  background: linear-gradient(to right, #ff6442 0%, #6667ab 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.VPImage {
-  max-width: 400px !important;
-}
-
-.logo {
-  margin-right: 20px;
-  margin-left: -15px;
-}
-
-.text-gradient {
-  background: linear-gradient(to right, #ff6442 0%, #6667ab 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 /* -------------------------------------------------------------- */
@@ -176,7 +210,7 @@ table.property-table > tbody > tr > td {
 
 .wamp-topic {
   background-color: var(--vp-c-brand-soft) !important;
-  border-color: rgba(150, 198, 35, 0.3) !important;
+  border-color: var(--vp-c-brand-soft) !important;
   border-left-color: var(--vp-c-brand-2) !important;
   margin-top: 20px;
   margin-bottom: 20px;

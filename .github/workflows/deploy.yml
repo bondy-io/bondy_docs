@@ -32,8 +32,12 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build documentation (current version)
-        run: yarn docs:build
+      # docs:release = docs:build + docs:index. The Pagefind bundle has to
+      # ship: search is merged in the browser from one bundle per property,
+      # so a deploy without /pagefind/ contributes nothing to site-wide
+      # search and its own search box comes up empty.
+      - name: Build and index documentation (current version)
+        run: yarn docs:release
 
       - name: Assemble combined site
         run: |

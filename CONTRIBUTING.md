@@ -7,6 +7,7 @@ Thank you for your interest in contributing to the Bondy Developer Documentation
 - Node.js 20 or higher (use `.nvmrc` file with `nvm use`)
 - Yarn package manager
 - Git
+- [`just`](https://just.systems) and [`codespell`](https://github.com/codespell-project/codespell) - only needed for `yarn spellcheck` / `yarn spellfix`
 
 ## Getting Started
 

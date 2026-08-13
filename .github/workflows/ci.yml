@@ -68,8 +68,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - uses: extractions/setup-just@v3
+
       - name: Install codespell
         run: pip install codespell
 
       - name: Run spellcheck
-        run: make spellcheck
+        run: just spellcheck

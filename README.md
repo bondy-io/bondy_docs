@@ -15,6 +15,7 @@ Visit [developer.bondy.io](https://developer.bondy.io) to view the live document
 
 - Node.js 20 or higher (use `.nvmrc` with `nvm use`)
 - Yarn package manager
+- [`just`](https://just.systems) and [`codespell`](https://github.com/codespell-project/codespell) - only needed for `yarn spellcheck` / `yarn spellfix`
 
 ### Setup
 
@@ -93,6 +94,22 @@ When a future rewrite needs the same treatment:
 1. Update `docs/versions.json`: move the current entry into `archived` (giving it a `tag`), and set a new `current`.
 2. Tag the commit you want frozen: `git tag -a docs-<version> -m "..."` and `git push origin docs-<version>`. This triggers `release-docs.yml`, which builds and publishes it once.
 3. Push the `versions.json` update to `master`. The next `deploy.yml` run picks up the new archived entry automatically — no further workflow changes needed.
+
+**The `version` field is the URL path, and it must equal the tag minus its `docs-` prefix.** `release-docs.yml` derives the base path a snapshot is built with from the tag name, while `deploy.yml` mounts that snapshot at `/v<version>/` from `versions.json`. If the two disagree the archived version still loads, but every stylesheet and script in it 404s. Use `label` for what the navbar should display when it differs from the path — e.g. the entry below is served at `/v1.0.0-rc.65.1/` and shown as `v1.0.0-rc`:
+
+```json
+{ "version": "1.0.0-rc.65.1", "label": "1.0.0-rc", "tag": "docs-1.0.0-rc.65.1" }
+```
+
+### Previewing the combined site locally
+
+`yarn docs:dev` only ever serves the current version. To see what actually gets deployed — current version plus every archived version at its own path:
+
+```bash
+just preview-site   # builds current, downloads archived releases, serves it all
+```
+
+This mirrors `deploy.yml` step for step. Archived packages are cached in `.cache/docs-releases/` and the assembled tree is written to `.site/`; both are gitignored. `just verify-versions` runs the same assembly and just checks each archived version's built-in base path against where it is mounted, without starting a server.
 
 ### One-time setup
 
