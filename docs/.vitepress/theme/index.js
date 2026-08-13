@@ -17,8 +17,9 @@ import Layout from './Layout.vue'
 // not part of the shared component set.
 import Badge from './Badge.vue'
 
-// The Diataxis directory for the router docs, used by docs/router.md.
-import DocsHome from './DocsHome.vue'
+// The Diataxis directory for one documentation set, used by docs/router.md
+// and docs/wamp.md.
+import DocsSet from './DocsSet.vue'
 
 // The portal index (developer.bondy.io/), used by docs/index.md.
 import DocsPortal from './DocsPortal.vue'
@@ -31,7 +32,7 @@ export default {
   Layout,
   enhanceApp({ app }) {
     app.component('Badge', Badge)
-    app.component('DocsHome', DocsHome)
+    app.component('DocsSet', DocsSet)
     app.component('DocsPortal', DocsPortal)
   }
 }

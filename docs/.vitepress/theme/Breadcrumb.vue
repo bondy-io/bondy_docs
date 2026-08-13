@@ -1,11 +1,11 @@
 <!-- Where the reader is, not where they can go.
 
-     A page like /reference/wamp_api/ titles its own H1 "Introduction" and its
+     A page like /router/reference/wamp_api/ titles its own H1 "Introduction" and its
      sidebar carries no group header, so without this nothing on screen names
      the API being read.
 
      Labels come from the names the rest of the site already uses (the nav and
-     reference/index.md), with the parent's word factored out where it would
+     each set's reference/index.md), with the parent's word factored out where it would
      repeat — "Reference / WAMP API", not "Reference / WAMP API Reference".
 
      This is docs-specific policy, so it lives here rather than in
@@ -26,11 +26,23 @@ const path = computed(() => {
   return p.replace(/\.html$/, '')
 })
 
+// The first segment is the documentation set. Each has a landing page, and
+// naming it is what tells a reader arriving from search which manual they
+// are in — the router's and the protocol's overlap in vocabulary.
+const SETS = {
+  router: { text: 'Bondy Router', link: '/router' },
+  wamp: { text: 'WAMP', link: '/wamp' },
+  about: { text: 'About', link: null }
+}
+
+// The second segment is the Diataxis section, within a set. `link` is
+// resolved against the set, so the same table serves every set; a section
+// with no index.md in that set is plain text rather than a 404.
 const SECTIONS = {
-  tutorials: { text: 'Tutorials', link: '/tutorials/index' },
-  guides: { text: 'How-to Guides', link: '/guides/index' },
-  reference: { text: 'Reference', link: '/reference/index' },
-  concepts: { text: 'Concepts', link: '/concepts/index' }
+  tutorials: { text: 'Tutorials', index: true },
+  guides: { text: 'How-to Guides', index: true },
+  reference: { text: 'Reference', index: true },
+  concepts: { text: 'Concepts', index: true }
 }
 
 // `link: true` marks the directories that have an index.md of their own.
@@ -41,7 +53,7 @@ const SUBSECTIONS = {
   'reference/wamp_api': { text: 'WAMP API', link: true },
   'reference/http_api': { text: 'HTTP API', link: true },
   'reference/api_gateway': { text: 'HTTP API Gateway', link: true },
-  'reference/wamp_clients': { text: 'WAMP Client Libraries', link: true },
+  'reference/clients': { text: 'Client Libraries', link: true },
   'tutorials/getting_started': { text: 'Getting Started' },
   'tutorials/security': { text: 'Security' },
   'guides/install': { text: 'Installation' },
@@ -50,8 +62,7 @@ const SUBSECTIONS = {
   'guides/programming': { text: 'Programming' },
   'guides/deployment': { text: 'Deployment' },
   'guides/administration': { text: 'Administration' },
-  'concepts/wamp': { text: 'WAMP' },
-  'concepts/wamp/advanced': { text: 'Advanced' }
+  'concepts/advanced': { text: 'Advanced' }
 }
 
 const humanize = (seg) =>
@@ -67,18 +78,36 @@ const crumbs = computed(() => {
   if (wasIndex) segs = segs.slice(0, -1)
   const isDirIndex = wasIndex || raw.endsWith('/')
 
-  const section = SECTIONS[segs[0]]
-  if (!section) return [{ text: 'Documentation', here: true }]
+  // Documentation / <set> / <section> / <subsections…> / <page>
+  const set = SETS[segs[0]]
+  if (!set) return [{ text: 'Documentation', here: true }]
 
-  const out = [{ text: section.text, href: withBase(section.link) }]
+  const out = [{ text: 'Documentation', href: withBase('/') }]
+  out.push({ text: set.text, href: set.link ? withBase(set.link) : null })
 
-  let acc = segs[0]
-  for (const seg of isDirIndex ? segs.slice(1) : segs.slice(1, -1)) {
+  // segs[1] is a section only if something follows it. /about/faq is a page
+  // directly under its set, and treating `faq` as a section put a spurious
+  // crumb in front of the page's own title.
+  const hasSection = segs.length > 2 || (isDirIndex && segs.length > 1)
+  const section = hasSection ? SECTIONS[segs[1]] : null
+  if (section) {
+    out.push({
+      text: section.text,
+      href: section.index ? withBase(`/${segs[0]}/${segs[1]}/index`) : null
+    })
+  } else if (hasSection && segs[1]) {
+    out.push({ text: humanize(segs[1]) })
+  }
+
+  // Subsections are keyed within the set, so `reference/http_api` matches
+  // whichever set the page is in.
+  let acc = segs[1] ?? ''
+  for (const seg of isDirIndex ? segs.slice(2) : segs.slice(2, -1)) {
     acc += '/' + seg
     const known = SUBSECTIONS[acc]
     out.push({
       text: known ? known.text : humanize(seg),
-      href: known && known.link ? withBase('/' + acc + '/index') : null
+      href: known && known.link ? withBase(`/${segs[0]}/${acc}/index`) : null
     })
   }
 

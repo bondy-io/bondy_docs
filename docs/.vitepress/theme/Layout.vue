@@ -24,19 +24,19 @@ const footerColumns = [
   {
     title: 'Learn',
     links: [
-      { text: 'Tutorials', href: withBase('/tutorials/index') },
-      { text: 'How-to Guides', href: withBase('/guides/index') },
-      { text: 'Concepts', href: withBase('/concepts/index') },
-      { text: 'Glossary', href: withBase('/reference/glossary') }
+      { text: 'Tutorials', href: withBase('/router/tutorials/index') },
+      { text: 'How-to Guides', href: withBase('/router/guides/index') },
+      { text: 'Concepts', href: withBase('/router/concepts/index') },
+      { text: 'Glossary', href: withBase('/router/reference/glossary') }
     ]
   },
   {
     title: 'Reference',
     links: [
-      { text: 'Configuration', href: withBase('/reference/configuration/index') },
-      { text: 'HTTP API', href: withBase('/reference/http_api/index') },
-      { text: 'WAMP API', href: withBase('/reference/wamp_api/index') },
-      { text: 'API Gateway', href: withBase('/reference/api_gateway/index') }
+      { text: 'Configuration', href: withBase('/router/reference/configuration/index') },
+      { text: 'HTTP API', href: withBase('/router/reference/http_api/index') },
+      { text: 'WAMP API', href: withBase('/router/reference/wamp_api/index') },
+      { text: 'API Gateway', href: withBase('/router/reference/api_gateway/index') }
     ]
   },
   {

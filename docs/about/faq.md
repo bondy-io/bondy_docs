@@ -6,13 +6,13 @@
 
 Bondy is an open-source application networking platform that connects the elements of a distributed application — web and mobile apps, IoT devices, and backend microservices — combining event mesh and service mesh capabilities in a single protocol.
 
-Read more about Bondy in the [What is Bondy](/concepts/what_is_bondy) section.
+Read more about Bondy in the [What is Bondy](/router/concepts/what_is_bondy) section.
 
 ### What is WAMP?
 
 The Web Application Messaging Protocol (WAMP) is an open, routed protocol for polyglot distributed applications with all application agents connecting to a WAMP Router that performs message routing between them. WAMP unifies the two most important communication patterns under a single protocol: Publish-Subscribe and Routed Remote Procedure Calls.
 
-Read more about Bondy in the [What is WAMP](/concepts/what_is_wamp) section.
+Read more about Bondy in the [What is WAMP](/wamp/concepts/what_is_wamp) section.
 
 ### How is WAMP different than other messaging technologies?
 
@@ -24,17 +24,17 @@ As its name implies, Publish & Subscribe offers at most once semantics a.k.a fir
 
 Being an extensible protocol means we can extend the message delivery guarantees and we have plans to do so e.g. at least once.
 
-For a further comparison with other products and technologies we invite you to review the [How is Bondy different](/concepts/how_is_bondy_different) section and the [WAMP Compared article](https://wamp-proto.org/comparison.html) in the protocol specification website.
+For a further comparison with other products and technologies we invite you to review the [How is Bondy different](/router/concepts/how_is_bondy_different) section and the [WAMP Compared article](https://wamp-proto.org/comparison.html) in the protocol specification website.
 
 ### How is Bondy different than other WAMP routers?
 
-See [How is Bondy Different](/concepts/how_is_bondy_different) for a full comparison, covering scalability, availability, and operational simplicity.
+See [How is Bondy Different](/router/concepts/how_is_bondy_different) for a full comparison, covering scalability, availability, and operational simplicity.
 
 ## Protocol Support
 
 ### Is Bondy multi-protocol?
 
-At its core Bondy implements the Web Application Messaging Protocol (WAMP). Learn why this is important in [Why Bondy](/concepts/why_bondy).
+At its core Bondy implements the Web Application Messaging Protocol (WAMP). Learn why this is important in [Why Bondy](/router/concepts/why_bondy).
 
 However, Bondy was envisioned as a multi-protocol router. Bondy already offers HTTP API Gateway capabilities, allowing to configure a mapping between arbitrary HTTP messages to WAMP messages, covering both RPC and Publish/Subscribe interactions.  Bondy also currently provides a Kafka Bridge, allowing to configure a mapping from WAMP topics to Kafka topics.
 
@@ -42,7 +42,7 @@ In the near future, Bondy will incorporate additional protocols and communicatio
 
 ### How compliant is Bondy to WAMP?
 
-Please find the answers to this question in the [WAMP Compliance](/concepts/wamp/compliance.md) page.
+Please find the answers to this question in the [WAMP Compliance](/wamp/concepts/compliance.md) page.
 
 
 ## Architecture
@@ -69,7 +69,7 @@ All messages within Bondy are routed within a realm. A client with a session att
 
 ### Does Bondy depend on an external database server?
 
-No, Bondy does not depend on any external database server. Every Bondy node embeds `bondy_db`, a purpose-built storage and replication stack: durable tables are backed by a `leveled` LSM-tree store, with per-table CRDT convergence replicated across the cluster via `bondy_oplog`'s anti-entropy protocol. See [Data Storage & Replication](/concepts/architecture) for details.
+No, Bondy does not depend on any external database server. Every Bondy node embeds `bondy_db`, a purpose-built storage and replication stack: durable tables are backed by a `leveled` LSM-tree store, with per-table CRDT convergence replicated across the cluster via `bondy_oplog`'s anti-entropy protocol. See [Data Storage & Replication](/router/concepts/architecture) for details.
 
 ### Why does Bondy use its own embedded database?
 

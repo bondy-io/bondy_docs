@@ -109,3 +109,6 @@ docs/.vitepress/cache
 # Local multi-version site preview (see `just site`)
 .site/
 .cache/docs-releases/
+
+# macOS
+.DS_Store
