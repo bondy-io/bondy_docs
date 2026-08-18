@@ -1,14 +1,14 @@
 ---
 layout: page
 pageClass: docs-home-page
-title: Bondy Router Documentation
-description: Develop, deploy and operate distributed applications with Bondy Router — tutorials, how-to guides, reference and concepts.
+title: Bondy Fabric Documentation
+description: Develop, deploy and operate distributed applications with Bondy Fabric — tutorials, how-to guides, reference and concepts.
 ---
 
 <DocsSet
   eyebrow="Platform"
-  title="Bondy Router"
-  stand="Everything needed to develop, deploy and operate Bondy Router, organised by what you came here to do."
+  title="Bondy Fabric"
+  stand="Everything needed to develop, deploy and operate Bondy Fabric, organised by what you came here to do."
   :groups="[
     {
       kicker: 'Learning-oriented',
@@ -18,7 +18,7 @@ description: Develop, deploy and operate distributed applications with Bondy Rou
       links: [
         { text: 'Get Bondy', href: '/router/tutorials/getting_started/get_bondy' },
         { text: 'The marketplace demo', href: '/router/tutorials/getting_started/marketplace' },
-        { text: 'Bondy Connect for the BEAM', href: '/wamp/tutorials/bondy_connect' },
+        { text: 'The marketplace API gateway', href: '/router/tutorials/getting_started/marketplace_api_gateway' },
         { text: 'Same Sign-On', href: '/router/tutorials/security/same_sign_on' }
       ]
     },
@@ -30,7 +30,7 @@ description: Develop, deploy and operate distributed applications with Bondy Rou
       links: [
         { text: 'Install using Docker', href: '/router/guides/install/docker' },
         { text: 'Run a cluster', href: '/router/guides/deployment/running_a_cluster' },
-        { text: 'Call and register procedures', href: '/wamp/guides/programming/rpc' },
+        { text: 'Load an API specification', href: '/router/guides/programming/loading_api_spec' },
         { text: 'Monitor a cluster', href: '/router/guides/administration/monitoring' }
       ]
     },
@@ -53,7 +53,7 @@ description: Develop, deploy and operate distributed applications with Bondy Rou
       blurb: 'What Bondy is, what it does, and why it is built the way it is. Read these when you want the model behind the behaviour rather than an instruction to follow.',
       links: [
         { text: 'What is Bondy?', href: '/router/concepts/what_is_bondy' },
-        { text: 'What is WAMP?', href: '/wamp/concepts/what_is_wamp' },
+        { text: 'Application networks', href: '/router/concepts/application_networks' },
         { text: 'Architecture', href: '/router/concepts/architecture' },
         { text: 'Clustering', href: '/router/concepts/clustering' }
       ]

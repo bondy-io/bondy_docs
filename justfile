@@ -46,8 +46,16 @@ site_dir      := ".site"
 release_cache := ".cache/docs-releases"
 preview_port  := "4180"
 
+# Structural navigation must never leave its documentation set: a reader in
+# the Fabric sidebar stays in Fabric. Cross-set pointers belong in a page's
+# `related:` frontmatter, which is an aside the reader chooses.
+
+# Check no sidebar links out of its own documentation set
+check-sets:
+    node scripts/check-set-boundaries.mjs
+
 # Build the current version only -> docs/.vitepress/dist
-build:
+build: check-sets
     yarn docs:build
 
 # Download each archived version's released package (skips what's cached)

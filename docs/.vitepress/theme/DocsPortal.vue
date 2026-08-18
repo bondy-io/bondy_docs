@@ -11,9 +11,12 @@
      resolveDocSets('docs') keeps this host's own sets relative and sends the
      rest to their origin. -->
 <script setup>
-import { resolveDocSets } from '@bondy/site-chrome'
+import { resolveDocGroups } from '@bondy/site-chrome'
 
-const sets = resolveDocSets('docs')
+// Bucketed by product line. A group with nothing in it drops out, so this
+// reads as a flat list until a second set joins a line — which is what keeps
+// the page honest while Platform has only Fabric in it.
+const groups = resolveDocGroups('docs')
 </script>
 
 <template>
@@ -28,13 +31,15 @@ const sets = resolveDocSets('docs')
         </p>
       </header>
 
-      <div class="dp-grid">
-        <a v-for="(s, i) in sets" :key="s.id" class="dp-set" :href="s.href">
-          <span class="dp-num">{{ String(i + 1).padStart(2, '0') }}</span>
-          <h2>{{ s.text }}</h2>
-          <p>{{ s.blurb }}</p>
-          <span class="dp-go">Read the docs →</span>
-        </a>
+      <div v-for="g in groups" :key="g.id" class="dp-group">
+        <p class="dp-line">{{ g.text }}</p>
+        <div class="dp-grid">
+          <a v-for="s in g.sets" :key="s.id" class="dp-set" :href="s.href">
+                        <h2>{{ s.text }}</h2>
+            <p>{{ s.blurb }}</p>
+            <span class="dp-go">Read the docs →</span>
+          </a>
+        </div>
       </div>
     </div>
   </div>

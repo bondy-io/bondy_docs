@@ -23,7 +23,7 @@ related:
 
 Bondy's Erlang-based WAMP client for the BEAM (Bondy, Erlang, Elixir, Gleam). One connection is one WAMP session on one realm; a process opens as many connections as it needs, each running its own supervised process tree. 
 
-`bondy_connect` has no dependency on the `bondy` router application — it embeds in any BEAM service — and supports all four WAMP client roles (Caller, Callee, Publisher, Subscriber), every Bondy transport, every Bondy authentication method, and supports the same features as Bondy Router.
+`bondy_connect` has no dependency on the `bondy` router application — it embeds in any BEAM service — and supports all four WAMP client roles (Caller, Callee, Publisher, Subscriber), every Bondy transport, every Bondy authentication method, and supports the same features as Bondy Fabric.
 
 This page documents the complete public API, grouped by what you use it to do. For a guided first run, see the [tutorial](/wamp/tutorials/bondy_connect).
 

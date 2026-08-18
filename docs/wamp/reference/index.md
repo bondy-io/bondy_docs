@@ -16,4 +16,4 @@ end.
 
 Bondy's own administration API — creating realms, users and grants — is not
 protocol material. It lives in
-[Bondy Router → WAMP API](/router/reference/wamp_api/index).
+[Bondy Fabric → WAMP API](/router/reference/wamp_api/index).

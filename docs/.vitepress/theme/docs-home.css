@@ -121,3 +121,33 @@
   .docs-portal .dp-set p,
   .docs-portal .dp-go { grid-column: 1; grid-row: auto; justify-self: start; }
 }
+
+/* Sets are grouped by product line. The line label replaces the numeral the
+   flat list used, so a reader sees "Platform / Bondy Fabric" rather than an
+   index that means nothing once there are several lines. */
+.docs-portal .dp-group { margin-top: 64px; }
+.docs-portal .dp-group + .dp-group { margin-top: 56px; }
+.docs-portal .dp-line {
+  font-family: var(--m); font-size: 10.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px;
+}
+.docs-portal .dp-group .dp-grid { margin-top: 0; }
+/* The flat list used `gap: 40px` for the column between the numeral and the
+   title. Without that column the same value lands between a set's title and
+   its blurb, which pushed them apart; the columns keep the gap, the rows do
+   not. */
+.docs-portal .dp-set {
+  grid-template-columns: 1fr 200px;
+  column-gap: 40px;
+  row-gap: 0;
+  padding: 30px 6px;
+}
+.docs-portal .dp-set h2 { grid-column: 1; margin-bottom: 10px; }
+.docs-portal .dp-set p { grid-column: 1; grid-row: 2; }
+.docs-portal .dp-go { grid-column: 2; grid-row: 1; }
+@media (max-width: 860px) {
+  .docs-portal .dp-set { grid-template-columns: 1fr; }
+  .docs-portal .dp-set h2,
+  .docs-portal .dp-set p,
+  .docs-portal .dp-go { grid-column: 1; grid-row: auto; }
+}

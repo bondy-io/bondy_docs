@@ -352,11 +352,6 @@ function nav() {
             activeMatch: '/router/reference/api_gateway'
           },
           {
-            text: 'WAMP Client Libraries',
-            link: '/wamp/reference/clients/index',
-            activeMatch: '/wamp/reference/clients'
-          },
-          {
             text: 'Metrics Reference',
             link: '/router/reference/metrics',
             activeMatch: '/router/reference/metrics'
@@ -532,25 +527,6 @@ function externalResources() {
 function tutorialsSidebar() {
   return [
       {
-        text: 'Get Started',
-        description: 'The fastest path from a running Bondy node to your first RPC call and Pub/Sub event.',
-        collapsible: true,
-        items: [
-          {
-            text: 'Getting Started with Wampy (JavaScript)',
-            link: '/wamp/tutorials/wampy',
-            isFeature: true,
-            description: 'Connect to Bondy from Node.js using Wampy: register and call a procedure, then publish and subscribe.'
-          },
-          {
-            text: 'Getting Started with Bondy Connect (Erlang/Elixir)',
-            link: '/wamp/tutorials/bondy_connect',
-            isFeature: true,
-            description: 'Connect to Bondy from Erlang or Elixir using bondy_connect: register and call a procedure, then publish and subscribe.'
-          }
-        ]
-      },
-      {
         text: 'Example Applications',
         description: 'Complete, worked applications to follow once you know the fundamentals.',
         items: [
@@ -629,27 +605,6 @@ function guidesSidebar() {
             description: 'See a starter manifest recipe and taylor it based on your needs.',
             isFeature: true
           },
-        ]
-      },
-      {
-        text: 'Programming with WAMP',
-        collapsible: true,
-        items: [
-          {
-            text: 'General',
-            link: '/wamp/guides/programming/general',
-            isFeature: true
-          },
-          {
-            text: 'Remote Procedure Calls',
-            link: '/wamp/guides/programming/rpc',
-            isFeature: true
-          },
-          {
-            text: 'Publish and Subscribe',
-            link: '/wamp/guides/programming/pub_sub',
-            isFeature: true
-          }
         ]
       },
       {
@@ -751,31 +706,6 @@ function guidesSidebar() {
 // Concepts Section
 function conceptsSidebar() {
   return [
-
-      {
-        text: 'Core Concepts',
-        description: "What every Bondy developer needs to build their first client: the two communication patterns WAMP provides.",
-        items: [
-          {
-            text: 'Communication Patterns',
-            link: '/wamp/concepts/communication_patterns',
-            isFeature: true,
-            description: "The two patterns — RPC and Pub/Sub — that together cover request-response and event distribution."
-          },
-          {
-            text: 'Routed RPC',
-            link: '/wamp/concepts/rpc',
-            isFeature: true,
-            description: "The Caller/Callee request-response pattern: how a procedure is registered, called, and routed."
-          },
-          {
-            text: 'Publish/Subscribe',
-            link: '/wamp/concepts/pubsub',
-            isFeature: true,
-            description: "The Publisher/Subscriber event pattern: how topics, subscriptions, and publications work."
-          }
-        ]
-      },
       {
         text: 'Realms & Security',
         description: "Once RPC and Pub/Sub are working, the next thing to understand: the domain your sessions attach to, and how they authenticate.",
@@ -785,18 +715,6 @@ function conceptsSidebar() {
             link: '/router/concepts/realms',
             isFeature: true,
             description: "Realms are authentication, authorization, routing and administrative domains that act as namespaces."
-          },
-          {
-            text: 'Connections and Sessions',
-            link: '/wamp/concepts/sessions',
-            isFeature: true,
-            description: "What a WAMP session is and how it relates to transports, realms, and authentication."
-          },
-          {
-            text: 'Security',
-            link: '/wamp/concepts/security',
-            isFeature: true,
-            description: "How Bondy authenticates and authorizes sessions within a realm."
           },
           {
             text: 'Same Sign-on',
@@ -884,32 +802,6 @@ function conceptsSidebar() {
         ]
       },
       {
-        text: 'Advanced WAMP Protocol',
-        description: "Protocol-level mechanics for once the basics are second nature.",
-        items: [
-          {
-            text: 'Naming Best Practices',
-            link: '/wamp/concepts/naming',
-            isFeature: true
-          },
-          {
-            text: 'Advanced RPC',
-            link: '/wamp/concepts/advanced/rpc',
-            isFeature: true
-          },
-          {
-            text: 'Advanced Publish/Subscribe',
-            link: '/wamp/concepts/advanced/pubsub',
-            isFeature: true
-          },
-          {
-            text: 'WAMP Compliance',
-            link: '/wamp/concepts/compliance',
-            isFeature: true
-          }
-        ]
-      },
-      {
         text: 'Background',
         description: "Optional reading: the reasoning and terminology behind Bondy and WAMP. Not required to build your first client.",
         items: [
@@ -930,18 +822,6 @@ function conceptsSidebar() {
             link: '/router/concepts/application_networks',
             isFeature: true,
             description: "Learn about application networks, their characteristics and benefits, and how Bondy is implementing them. "
-          },
-          {
-            text: 'What is WAMP',
-            link: '/wamp/concepts/what_is_wamp' ,
-            isFeature: true,
-            description: "Find out more about the Web Application Messaging Protocol. "
-          },
-          {
-            text: 'Introduction to WAMP',
-            link: '/wamp/concepts/introduction',
-            isFeature: true,
-            description:'Learn the WAMP basics including how to establish a session and use RPC and Publish/Subscribe.'
           },
           {
             text: 'How does Bondy work',
@@ -1000,7 +880,7 @@ function configurationSidebar() {
         ]
       },
       {
-        text: 'Router Configuration',
+        text: 'Fabric Configuration',
         items: [
           {
             text: 'Node',

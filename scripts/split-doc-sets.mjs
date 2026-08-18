@@ -7,7 +7,7 @@
  * it) would have interleaved protocol material with "how to operate Bondy"
  * in the same tree. This moves each set under its own prefix:
  *
- *     /router/…   operating and configuring Bondy Router
+ *     /router/…   operating and configuring Bondy Fabric
  *     /wamp/…     the WAMP protocol, for developers writing WAMP components
  *     /about/…    portal-level, shared by every set
  *
