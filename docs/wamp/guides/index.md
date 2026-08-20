@@ -18,4 +18,4 @@ theory is in [Concepts](/wamp/concepts/index).
 
 The examples run against Bondy, because that is the router we ship. What you
 are learning is the protocol; how Bondy itself is configured and operated is
-the [Bondy Fabric](/router) set.
+the [Bondy Connect](/router) set.

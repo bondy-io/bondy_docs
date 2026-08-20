@@ -152,9 +152,9 @@
 /reference/wamp_api/subscription  /router/reference/wamp_api/subscription  301!
 /reference/wamp_api/ticket  /router/reference/wamp_api/ticket  301!
 /reference/wamp_api/user  /router/reference/wamp_api/user  301!
-/reference/wamp_clients/bondy_connect  /wamp/reference/clients/bondy_connect  301!
+/reference/wamp_clients/bondy_connect  /wamp/reference/clients/bondy_connect_sdk  301!
 /reference/wamp_clients/index  /wamp/reference/clients/index  301!
-/tutorials/getting_started/bondy_connect  /wamp/tutorials/bondy_connect  301!
+/tutorials/getting_started/bondy_connect  /wamp/tutorials/bondy_connect_sdk  301!
 /tutorials/getting_started/get_bondy  /router/tutorials/getting_started/get_bondy  301!
 /tutorials/getting_started/marketplace  /router/tutorials/getting_started/marketplace  301!
 /tutorials/getting_started/marketplace_api_gateway  /router/tutorials/getting_started/marketplace_api_gateway  301!

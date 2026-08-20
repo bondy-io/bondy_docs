@@ -1,14 +1,14 @@
 ---
 layout: page
 pageClass: docs-home-page
-title: Bondy Fabric Documentation
-description: Develop, deploy and operate distributed applications with Bondy Fabric — tutorials, how-to guides, reference and concepts.
+title: Bondy Connect Documentation
+description: Develop, deploy and operate distributed applications with Bondy Connect — tutorials, how-to guides, reference and concepts.
 ---
 
 <DocsSet
   eyebrow="Platform"
-  title="Bondy Fabric"
-  stand="Everything needed to develop, deploy and operate Bondy Fabric, organised by what you came here to do."
+  title="Bondy Connect"
+  stand="Everything needed to develop, deploy and operate Bondy Connect, organised by what you came here to do."
   :groups="[
     {
       kicker: 'Learning-oriented',

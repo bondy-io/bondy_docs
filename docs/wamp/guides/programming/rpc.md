@@ -216,7 +216,7 @@ result = await self._session.call(
 ```
 :::
 
-This is off by default on the router (`wamp.dealer.progressive_call_results`) and negotiates silently — if either side didn't opt in, the callee just sees a plain call and returns once. See [Progressive Call Results](/wamp/concepts/advanced/rpc#progressive-call-results) for the cluster-wide ordering and timeout semantics, and the [`bondy_connect` reference](/wamp/reference/clients/bondy_connect) for the equivalent Erlang API.
+This is off by default on the router (`wamp.dealer.progressive_call_results`) and negotiates silently — if either side didn't opt in, the callee just sees a plain call and returns once. See [Progressive Call Results](/wamp/concepts/advanced/rpc#progressive-call-results) for the cluster-wide ordering and timeout semantics, and the [`bondy_connect` reference](/wamp/reference/clients/bondy_connect_sdk) for the equivalent Erlang API.
 
 ## Pattern-based Registrations
 

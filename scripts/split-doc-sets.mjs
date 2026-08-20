@@ -7,7 +7,7 @@
  * it) would have interleaved protocol material with "how to operate Bondy"
  * in the same tree. This moves each set under its own prefix:
  *
- *     /router/…   operating and configuring Bondy Fabric
+ *     /router/…   operating and configuring Bondy Connect
  *     /wamp/…     the WAMP protocol, for developers writing WAMP components
  *     /about/…    portal-level, shared by every set
  *
@@ -46,7 +46,7 @@ const MOVES = [
   ['/guides/programming/pub_sub', '/wamp/guides/programming/pub_sub'],
   ['/reference/wamp_clients', '/wamp/reference/clients'],
   ['/tutorials/getting_started/wampy', '/wamp/tutorials/wampy'],
-  ['/tutorials/getting_started/bondy_connect', '/wamp/tutorials/bondy_connect'],
+  ['/tutorials/getting_started/bondy_connect', '/wamp/tutorials/bondy_connect_sdk'],
 
   // ── Router: everything else that is not portal-level ──────────────────
   // Order matters only against the WAMP rules above, which are longer and

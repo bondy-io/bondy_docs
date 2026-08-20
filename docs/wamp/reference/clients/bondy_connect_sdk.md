@@ -1,9 +1,9 @@
 ---
 outline: [2,3]
 related:
-    - text: Getting Started with Bondy Connect
+    - text: Getting Started with Bondy Connect SDK
       type: Tutorial
-      link: /wamp/tutorials/bondy_connect
+      link: /wamp/tutorials/bondy_connect_sdk
       description: A hands-on introduction — connect, register and call a procedure, then publish and subscribe.
     - text: Advanced RPC
       type: Concepts
@@ -19,13 +19,13 @@ related:
       description: Enable the dealer's progressive_call_results and progressive_calls features on the router.
 ---
 
-# Bondy Connect
+# Bondy Connect SDK
 
 Bondy's Erlang-based WAMP client for the BEAM (Bondy, Erlang, Elixir, Gleam). One connection is one WAMP session on one realm; a process opens as many connections as it needs, each running its own supervised process tree. 
 
-`bondy_connect` has no dependency on the `bondy` router application — it embeds in any BEAM service — and supports all four WAMP client roles (Caller, Callee, Publisher, Subscriber), every Bondy transport, every Bondy authentication method, and supports the same features as Bondy Fabric.
+`bondy_connect` has no dependency on the `bondy` router application — it embeds in any BEAM service — and supports all four WAMP client roles (Caller, Callee, Publisher, Subscriber), every Bondy transport, every Bondy authentication method, and supports the same features as Bondy Connect.
 
-This page documents the complete public API, grouped by what you use it to do. For a guided first run, see the [tutorial](/wamp/tutorials/bondy_connect).
+This page documents the complete public API, grouped by what you use it to do. For a guided first run, see the [tutorial](/wamp/tutorials/bondy_connect_sdk).
 
 ::: definition Connection handle (`conn()`)
 `connect/1,2` returns an **opaque** handle: `{bondy_connect, pid() | atom()}`. Treat it as a token — pass it back to the API, never pattern-match on or otherwise depend on its shape. The handle stays valid across the connection's own internal reconnects; you do not get (or need) a new one when a dropped link re-establishes.

@@ -31,7 +31,7 @@
     "docs:release": "yarn docs:build && yarn docs:index"
   },
   "dependencies": {
-    "@bondy/site-chrome": "git+https://github.com/bondy-io/bondy_site_chrome.git#v0.6.0",
+    "@bondy/site-chrome": "git+https://github.com/bondy-io/bondy_site_chrome.git#v0.7.0",
     "@leapsight/vitepress-template": "git+https://github.com/Leapsight/vitepress-template.git#v0.1.4",
     "@sindresorhus/slugify": "^2.1.1",
     "@types/markdown-it": "^14.1.2",

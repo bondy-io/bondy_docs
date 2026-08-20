@@ -51,7 +51,7 @@ const footerColumns = [
 ]
 
 const BLURB =
-  'Documentation for Bondy Fabric — the always-on, distributed application ' +
+  'Documentation for Bondy Connect — the always-on, distributed application ' +
   'networking platform. Open source under Apache-2.0, by Leapsight.'
 </script>
 

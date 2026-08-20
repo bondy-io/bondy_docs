@@ -30,7 +30,7 @@ const path = computed(() => {
 // naming it is what tells a reader arriving from search which manual they
 // are in — the router's and the protocol's overlap in vocabulary.
 const SETS = {
-  router: { text: 'Bondy Fabric', link: '/router' },
+  router: { text: 'Bondy Connect', link: '/router' },
   wamp: { text: 'WAMP', link: '/wamp' },
   about: { text: 'About', link: null }
 }

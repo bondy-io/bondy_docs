@@ -123,7 +123,7 @@
 }
 
 /* Sets are grouped by product line. The line label replaces the numeral the
-   flat list used, so a reader sees "Platform / Bondy Fabric" rather than an
+   flat list used, so a reader sees "Platform / Bondy Connect" rather than an
    index that means nothing once there are several lines. */
 .docs-portal .dp-group { margin-top: 64px; }
 .docs-portal .dp-group + .dp-group { margin-top: 56px; }

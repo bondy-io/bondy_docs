@@ -480,7 +480,7 @@ function wampSidebar() {
       items: [
         { text: 'Wampy (Python)', link: '/wamp/tutorials/wampy',
           description: 'Connect, call and subscribe from Python.' },
-        { text: 'Bondy Connect (BEAM)', link: '/wamp/tutorials/bondy_connect',
+        { text: 'Bondy Connect SDK (BEAM)', link: '/wamp/tutorials/bondy_connect_sdk',
           description: 'Connect, call and subscribe from Erlang or Elixir.' }
       ]
     },
@@ -490,7 +490,7 @@ function wampSidebar() {
       items: [
         { text: 'WAMP Client Libraries', link: '/wamp/reference/clients/index', isFeature: true,
           description: 'The libraries available per language, and which Bondy ships itself.' },
-        { text: 'Bondy Connect', link: '/wamp/reference/clients/bondy_connect',
+        { text: 'Bondy Connect SDK', link: '/wamp/reference/clients/bondy_connect_sdk',
           description: 'The complete API reference for bondy_connect: every function, option and error shape.' }
       ]
     }
@@ -880,7 +880,7 @@ function configurationSidebar() {
         ]
       },
       {
-        text: 'Fabric Configuration',
+        text: 'Connect Configuration',
         items: [
           {
             text: 'Node',

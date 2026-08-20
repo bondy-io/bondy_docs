@@ -41,7 +41,7 @@ description: The Web Application Messaging Protocol — routed RPC and publish/s
       blurb: 'End-to-end walkthroughs. They run against Bondy, because that is the router we ship — what you are learning is the protocol.',
       links: [
         { text: 'Wampy (Python)', href: '/wamp/tutorials/wampy' },
-        { text: 'Bondy Connect (Erlang/Elixir)', href: '/wamp/tutorials/bondy_connect' }
+        { text: 'Bondy Connect SDK (Erlang/Elixir)', href: '/wamp/tutorials/bondy_connect_sdk' }
       ]
     },
     {
@@ -51,7 +51,7 @@ description: The Web Application Messaging Protocol — routed RPC and publish/s
       blurb: 'What to use to speak WAMP from your language, and the full API reference for the client Bondy ships itself.',
       links: [
         { text: 'WAMP client libraries', href: '/wamp/reference/clients/index' },
-        { text: 'Bondy Connect', href: '/wamp/reference/clients/bondy_connect' },
+        { text: 'Bondy Connect SDK', href: '/wamp/reference/clients/bondy_connect_sdk' },
         { text: 'Advanced RPC', href: '/wamp/concepts/advanced/rpc' },
         { text: 'Advanced Pub/Sub', href: '/wamp/concepts/advanced/pubsub' }
       ]
