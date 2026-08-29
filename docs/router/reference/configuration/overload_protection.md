@@ -88,12 +88,19 @@ number of active erlang processes handling session events (default = 32).
 
 @[config](registry.partitions,pos_integer,32,v1.0.0)
 
-The number of registry partitions, i.e. the maximum number of active Erlang
-processes handling registry operations that must be serialised.
+The number of registry partitions — the stores that hold registrations and
+subscriptions, each owned by one Erlang process.
 
-All registrations and subscriptions for a given realm are stored in the same
-(single) partition; partition assignment hashes the realm uri across the
-configured number of partitions. Raising this value only helps when many
-realms are in use — a single busy realm always serialises onto one
-partition regardless of this setting.
+The partition process is not a serialisation point: writes run in the
+caller's process, with exact-match indices going to concurrent ETS tables
+and prefix/wildcard indices to a persistent radix tree updated by
+path-copy plus a compare-and-swap on its root — concurrent writers retry
+on CAS loss (visible as `bondy_registry_ptrie_cas_retries_total`). The
+owning process holds the tables and runs the memory-reclamation janitors.
+
+All registrations and subscriptions for a given realm are stored in the
+same partition; assignment hashes the realm URI across the configured
+number of partitions. Raising this value spreads *realms* across more
+stores; a single busy realm always maps onto one partition regardless,
+where its prefix/wildcard writers contend on that store's root.
 

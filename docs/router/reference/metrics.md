@@ -177,7 +177,7 @@ Backs [Registry Routing (RIB)](/router/concepts/registry_routing): the compact p
 
 | Metric family | Type | Covers |
 |---|---|---|
-| `bondy_rate_limited_total` | Counter | Inbound requests denied by the rate limiter, by `class` (handshake / auth / connection / message). |
+| `bondy_rate_limited_total` | Counter | Inbound requests denied by the rate limiter, by `class` (handshake / auth / connection / http / message) and `scope` (node / listener / realm / realm_total — which budget refused). |
 | `bondy_rate_limiter_buckets` | Gauge | Live rate-limiter table entries &mdash; keyspace growth and GC health. |
 | `bondy_oidc_flows_inflight` | Gauge | Pending OIDC/PKCE login flows awaiting the callback. |
 

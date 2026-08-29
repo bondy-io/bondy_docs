@@ -673,6 +673,12 @@ function guidesSidebar() {
             description: 'Declare a relay, scope it to realms, wire up its credential, and verify it.'
           },
           {
+            text: 'Configuring Network Listeners',
+            link: '/router/guides/administration/configuring_listeners',
+            isFeature: true,
+            description: 'Declare the socket inventory: terminate TLS, split audiences, budget an exposed listener, drain a node.'
+          },
+          {
             text: 'Exposing an MCP Endpoint',
             link: '/router/guides/administration/exposing_an_mcp_endpoint',
             isFeature: true,

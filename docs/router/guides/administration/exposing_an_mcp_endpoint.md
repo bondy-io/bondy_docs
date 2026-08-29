@@ -223,9 +223,16 @@ issue, so a restricted session can never mint a wider ticket than itself.
 - **Versions**: restrict `listeners.$name.mcp.protocol_versions` when you
   want a modern-only endpoint; the default serves `2026-07-28`,
   `2025-11-25` and `2025-06-18`.
-- **Rate limiting**: MCP requests draw from the shared per-source-IP
-  `http` bucket — see
-  [Overload Protection](/router/reference/configuration/overload_protection).
+- **Rate limiting**: MCP requests draw from the per-source-IP `http`
+  class, which can be budgeted at three scopes that all must admit a
+  request: node-wide
+  ([`security.rate_limit.http.*`](/router/reference/configuration/security#rate-limiting)),
+  per listener
+  ([`listeners.$name.rate_limit.http.*`](/router/reference/configuration/listeners#rate-limiting) —
+  hold the Internet-facing MCP listener to a tighter budget than your
+  internal ones), and per realm (the realm's `rate_limit` property,
+  whose `total` kind is a per-node tenant quota — see the
+  [rate limiting guide](/router/guides/administration/load_regulation_and_rate_limiting#scopes-node-listener-realm)).
 - **Bounds**: `mcp.max_body_size` (4MB) and `mcp.max_inflight` (64 per
   session) have per-listener spellings; raise them deliberately.
 - **Metrics**: watch the `bondy_mcp_*` families — in particular

@@ -1,6 +1,10 @@
 ---
 outline: [2,3]
 related:
+    - text: Configuring Network Listeners
+      type: How-to Guide
+      link: /router/guides/administration/configuring_listeners
+      description: The common listener tasks worked through, from declaring an inventory to draining a node.
     - text: HTTP Transports
       type: Concept
       link: /router/concepts/http_transports
@@ -620,6 +624,74 @@ this way — every other value is the header's content, so
 `frame_options = office` sends `office`. Note there is no "empty value"
 spelling: `security_headers.hsts =` with nothing after it is a *syntax
 error* in `bondy.conf`, not an empty setting.
+
+## Rate limiting
+
+Per-listener budgets for the same token-bucket classes as the node-wide
+[`security.rate_limit.*`](/router/reference/configuration/security#rate-limiting)
+keys. A request is admitted only when the node scope, this listener's scope
+and — where the request addresses one — the realm's own budgets **all**
+admit it, so a listener budget can only narrow what the node allows. The
+model is described in
+[Understanding Load Regulation and Rate Limiting](/router/guides/administration/load_regulation_and_rate_limiting#rate-limiting-inbound-traffic).
+
+These keys have **no defaults**: a class block's presence enables that
+class's budget on this listener (independently of the node-scope master
+switch), and each budget requires both its `rate` (tokens per second) and
+`capacity` (burst size). The `enabled` key exists to park a configured
+budget without deleting its numbers.
+
+```
+listeners.public_ws.rate_limit.connection.rate = 30
+listeners.public_ws.rate_limit.connection.capacity = 60
+```
+
+@[config](listeners.$name.rate_limit.connection.enabled,on|off,,v1.0.0)
+
+@[config](listeners.$name.rate_limit.connection.rate,integer,,v1.0.0)
+
+Maximum sustained new-connection rate per source IP on this listener, in
+connections per second.
+
+@[config](listeners.$name.rate_limit.connection.capacity,integer,,v1.0.0)
+
+@[config](listeners.$name.rate_limit.handshake.enabled,on|off,,v1.0.0)
+
+@[config](listeners.$name.rate_limit.handshake.rate,integer,,v1.0.0)
+
+Maximum sustained WAMP `HELLO` rate per source IP on this listener, per
+second.
+
+@[config](listeners.$name.rate_limit.handshake.capacity,integer,,v1.0.0)
+
+@[config](listeners.$name.rate_limit.auth.enabled,on|off,,v1.0.0)
+
+@[config](listeners.$name.rate_limit.auth.rate,integer,,v1.0.0)
+
+Maximum sustained authentication-attempt rate per source IP on this
+listener, per second.
+
+@[config](listeners.$name.rate_limit.auth.capacity,integer,,v1.0.0)
+
+@[config](listeners.$name.rate_limit.http.enabled,on|off,,v1.0.0)
+
+@[config](listeners.$name.rate_limit.http.rate,integer,,v1.0.0)
+
+Maximum sustained HTTP request rate per source IP on this listener, in
+requests per second (requests, not connections). Throttled requests answer
+`429` with a `retry-after` header.
+
+@[config](listeners.$name.rate_limit.http.capacity,integer,,v1.0.0)
+
+@[config](listeners.$name.rate_limit.message.enabled,on|off,,v1.0.0)
+
+@[config](listeners.$name.rate_limit.message.rate,integer,,v1.0.0)
+
+Maximum sustained WAMP message rate (`CALL`/`PUBLISH`/`SUBSCRIBE`/`REGISTER`)
+per session established through this listener, in messages per second. The
+budget is resolved once at session open, like the node-scope message class.
+
+@[config](listeners.$name.rate_limit.message.capacity,integer,,v1.0.0)
 
 ## Carrier settings
 

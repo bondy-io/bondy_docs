@@ -41,6 +41,47 @@ const realmPrivate = {
     }
 };
 
+const rateLimitBudget = {
+    "type": "object",
+    "required": false,
+    "mutable": true,
+    "properties": {
+        "rate": {
+            "type": "integer",
+            "required": true,
+            "mutable": true,
+            "description": "Tokens per second — the sustained allowance. Must be a positive integer."
+        },
+        "capacity": {
+            "type": "integer",
+            "required": true,
+            "mutable": true,
+            "description": "The burst size — tokens a caller may spend at once before being held to the rate. Must be a positive integer."
+        }
+    }
+};
+
+const rateLimitClass = {
+    "type": "object",
+    "required": false,
+    "mutable": true,
+    "properties": {
+        "enabled": {
+            "type": "boolean",
+            "required": false,
+            "mutable": true,
+            "description": "Set to `false` to park this class's budgets without deleting the numbers. The block's presence enables it.",
+            "default": "`true`"
+        },
+        "per_caller": {...rateLimitBudget,
+            "description": "A budget per caller — per source IP, or per session for the message class."
+        },
+        "total": {...rateLimitBudget,
+            "description": "One budget shared by ALL of the realm's callers — the tenant quota. Enforced per node."
+        }
+    }
+};
+
 const realmPublic = {
     "description": {
         "type": "string",
@@ -99,6 +140,23 @@ const realmPublic = {
         "mutable": true,
         "description": "Whether security is enabled or not.",
         "default": "undefined"
+    },
+    "rate_limit" : {
+        "type": "object",
+        "required": false,
+        "mutable": true,
+        "description": "The realm's own rate-limit budgets — the realm scope of the rate-limiting chain (see the [rate limiting guide](/router/guides/administration/load_regulation_and_rate_limiting#rate-limiting-inbound-traffic)). A request is admitted only when the node, listener AND realm budgets all admit it, so these can only narrow what the node allows. Covers the classes a realm-addressed request reaches: `auth`, `http` and `message`. Setting the property to `null` on update clears it. \n:::warning\nBudgets are enforced per node: a `total` of N tokens per second bounds each cluster node separately.\n:::",
+        "properties": {
+            "auth": {...rateLimitClass,
+                "description": "Budgets for authentication attempts on this realm."
+            },
+            "http": {...rateLimitClass,
+                "description": "Budgets for HTTP requests addressing this realm (API Gateway, MCP)."
+            },
+            "message": {...rateLimitClass,
+                "description": "Budgets for WAMP CALL/PUBLISH/SUBSCRIBE/REGISTER messages on this realm's sessions."
+            }
+        }
     },
     "users" :  {
         "type": "array",

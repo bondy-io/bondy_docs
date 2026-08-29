@@ -219,11 +219,13 @@ Boot-time configuration application is declarative and idempotent: re-applying t
 
 ## Rate Limiting
 
-Inbound rate limiting applies token-bucket limits on connection establishment, handshakes, and authentication attempts, keyed by source IP. It is **off by default** and **fails open**: if the rate limiter process is not up, requests proceed unthrottled rather than being rejected. Each `rate` is tokens per second (steady-state); `capacity` is the burst size.
+Inbound rate limiting applies token-bucket limits on connection establishment, handshakes, authentication attempts, HTTP requests and WAMP messages, keyed by source IP (or by session, for messages). It is **off by default** and **fails open**: if the rate limiter process is not up, requests proceed unthrottled rather than being rejected. Each `rate` is tokens per second (steady-state); `capacity` is the burst size.
+
+The keys on this page configure the **node** scope — budgets shared by every listener and realm on the node. Budgets also exist at two narrower scopes: per listener ([`listeners.$name.rate_limit.*`](/router/reference/configuration/listeners#rate-limiting)) and per realm (the realm's own `rate_limit` property, managed through the [realm admin APIs](/router/reference/wamp_api/realm) and the security configuration file — not through `bondy.conf`). A request is admitted only when **every** configured scope admits it, so narrower scopes can only tighten what the node allows. The model is described in [Understanding Load Regulation and Rate Limiting](/router/guides/administration/load_regulation_and_rate_limiting#rate-limiting-inbound-traffic).
 
 @[config](security.rate_limit.enabled,on|off,off,v1.0.0)
 
-Master switch for inbound rate limiting.
+Master switch for **node-scope** inbound rate limiting. Listener and realm budgets are independent of it: each is enabled by its own configuration being present.
 
 @[config](security.rate_limit.handshake.rate,integer,10,v1.0.0)
 
@@ -248,6 +250,14 @@ Token-bucket refill rate, in tokens per second, for new connections per source I
 @[config](security.rate_limit.connection.capacity,integer,100,v1.0.0)
 
 Burst size (bucket capacity) for the same connection limit.
+
+@[config](security.rate_limit.http.rate,integer,100,v1.0.0)
+
+Token-bucket refill rate, in tokens per second, for HTTP requests per source IP — the API Gateway, Admin API and MCP endpoints. Requests, not connections, so it is a separate class from `connection`. Throttled requests answer `429` with a `retry-after` header.
+
+@[config](security.rate_limit.http.capacity,integer,500,v1.0.0)
+
+Burst size (bucket capacity) for the same HTTP request limit.
 
 @[config](security.rate_limit.message.enabled,on|off,off,v1.0.0)
 
