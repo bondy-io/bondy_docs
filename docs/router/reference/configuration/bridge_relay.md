@@ -71,6 +71,24 @@ Drops the connection after this much inactivity. Set to `infinity` to disable.
 
 Controls when the bridge connection process hibernates to reclaim memory: `idle` hibernates after a period of inactivity, `always` after every message, `never` disables it.
 
+## Keepalive
+
+@[config](bridge.$name.ping,on|off,on,v1.0.0)
+
+Whether the edge probes a silent connection with PING control messages. This affects client (edge) initiated pings only; the remote router's pings are always answered regardless.
+
+@[config](bridge.$name.ping.idle_timeout,duration_time_units,20s,v1.0.0)
+
+How long the connection may be silent before the edge probes it. This is not the same as `bridge.$name.idle_timeout`, which is the reap deadline.
+
+@[config](bridge.$name.ping.timeout,duration_time_units,10s,v1.0.0)
+
+How long a probe waits for its answer before counting as a failed attempt.
+
+@[config](bridge.$name.ping.max_attempts,integer,3,v1.0.0)
+
+How many unanswered probes mean a dead connection — after this many the edge drops it (and reconnects, when reconnection is on).
+
 ## Reconnection
 
 @[config](bridge.$name.reconnect,on|off,on,v1.0.0)
@@ -151,35 +169,34 @@ Only `out` currently does anything — `in` (and the `in` half of `both`) is acc
 
 ## Accepting bridges
 
-The other side of a bridge relay: a listener that accepts inbound connections from edge nodes bridging to this one.
+The other side of a bridge relay — the socket that accepts inbound
+connections from edge nodes bridging to this one — is an ordinary
+[listener](/router/reference/configuration/listeners) whose `protocol` is
+`bridge_relay`:
 
-@[config](bridge.listener.tcp,on|off,off,v1.0.0)
+```
+listeners.bridge.transport = tcp
+listeners.bridge.protocol  = bridge_relay
+listeners.bridge.port      = 18092
+```
 
-Enables the bridge relay listener, letting other nodes bridge to this one.
+The port is the one a bridging node points its own `bridge.$name.endpoint`
+at. All the listener-level settings apply — bind address, acceptor pool,
+connection limits, `ping.*`, TLS material for a `tls` transport — plus one
+key only this protocol reads:
+[`listeners.$name.auth_timeout`](/router/reference/configuration/listeners#listeners.$name.auth_timeout),
+how long a connected peer router has to authenticate before the connection
+is dropped (5s if unset). A bridge-relay listener is not available over
+`uds`, and declaring `services` on one is an error — it serves one
+protocol by definition.
 
-@[config](bridge.listener.tcp.port,port_number,18092,v1.0.0)
+@[configDeprecated](bridge.listener.tcp.*,listeners.bridge_relay_tcp.*,v1.0.0)
 
-TCP port the listener accepts bridge connections on — the same port a bridging node points its own `bridge.$name.endpoint` at.
+@[configDeprecated](bridge.listener.tls.*,listeners.bridge_relay_tls.*,v1.0.0)
 
-@[config](bridge.listener.tcp.ip,ip_address,N/A,v1.0.0)
-
-The interface to listen on, when the host has more than one.
-
-@[config](bridge.listener.tcp.ip_version,4&#124;6,4,v1.0.0)
-
-IP version for the listener.
-
-@[config](bridge.listener.tcp.acceptors_pool_size,integer,200,v1.0.0)
-
-Number of acceptor processes for the listener.
-
-@[config](bridge.listener.tcp.max_connections,integer,100000,v1.0.0)
-
-Maximum number of simultaneous bridge connections this listener accepts.
-
-@[config](bridge.listener.tcp.backlog,integer,1024,v1.0.0)
-
-Maximum length of the pending-connections queue.
+The removed `bridge.listener.{tcp,tls}.*` keys are no longer read; a file
+still setting them starts **no** bridge-relay listener at all. See
+[Migrating from the pre-1.0 keys](/router/reference/configuration/listeners#migrating-from-the-pre-1-0-keys).
 
 ## See also
 

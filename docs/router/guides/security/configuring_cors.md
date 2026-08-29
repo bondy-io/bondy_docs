@@ -20,7 +20,7 @@ This guide walks through common CORS and HTTP security header configurations for
 
 When a browser-based application (SPA, mobile web, etc.) makes requests to Bondy from a different origin, the browser enforces the [CORS policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). Without the right CORS headers, the browser blocks the response.
 
-Bondy configures CORS and security headers at the **listener level** in `bondy.conf`. Every endpoint served by that listener (API Gateway routes, SSE/long-poll WAMP transports, OIDC login/callback, OAuth2 token endpoints) inherits the same CORS policy.
+Bondy configures CORS and security headers at the **listener level** in `bondy.conf`, under `listeners.<name>.cors.*` and `listeners.<name>.security_headers.*`. Every endpoint served by that listener (API Gateway routes, SSE/long-poll WAMP transports, OIDC login/callback, OAuth2 token endpoints) inherits the same CORS policy. The examples below use listeners named `public_http` and `public_https` — substitute the names your [listener inventory](/router/reference/configuration/listeners) declares.
 
 ::: info
 See the [HTTP Security Headers Reference](/router/reference/configuration/http_security_headers) for the complete list of configuration keys.
@@ -31,8 +31,8 @@ See the [HTTP Security Headers Reference](/router/reference/configuration/http_s
 During development you typically want browsers to allow all cross-origin requests without friction. This is the default configuration:
 
 ```
-api_gateway.http.cors.enabled = on
-api_gateway.http.cors.allowed_origins = *
+listeners.public_http.cors.enabled = on
+listeners.public_http.cors.allowed_origins = *
 ```
 
 ::: warning
@@ -44,7 +44,7 @@ Wildcard origin forces `Access-Control-Allow-Credentials` to `false`. If your fr
 The most common production setup &mdash; one SPA served from a known domain:
 
 ```
-api_gateway.https.cors.allowed_origins = https://app.example.com
+listeners.public_https.cors.allowed_origins = https://app.example.com
 ```
 
 With this configuration:
@@ -57,7 +57,7 @@ With this configuration:
 When several frontends share the same Bondy cluster:
 
 ```
-api_gateway.https.cors.allowed_origins = https://app.example.com, https://admin.example.com, https://partner.example.com
+listeners.public_https.cors.allowed_origins = https://app.example.com, https://admin.example.com, https://partner.example.com
 ```
 
 The incoming `Origin` header is matched against this list. Only exact matches are reflected back.
@@ -67,19 +67,19 @@ The incoming `Origin` header is matched against this list. Only exact matches ar
 When you have many subdomains under the same base domain (e.g. per-tenant subdomains), use the `*.` prefix instead of listing every one:
 
 ```
-api_gateway.https.cors.allowed_origins = *.example.com
+listeners.public_https.cors.allowed_origins = *.example.com
 ```
 
 This matches `https://app.example.com`, `https://tenant1.example.com`, etc. It does **not** match the bare domain `https://example.com` &mdash; add it explicitly if needed:
 
 ```
-api_gateway.https.cors.allowed_origins = *.example.com, https://example.com
+listeners.public_https.cors.allowed_origins = *.example.com, https://example.com
 ```
 
 You can mix wildcard patterns with exact origins:
 
 ```
-api_gateway.https.cors.allowed_origins = *.example.com, https://partner.other.com
+listeners.public_https.cors.allowed_origins = *.example.com, https://partner.other.com
 ```
 
 The exact requesting origin is always reflected back in the `Access-Control-Allow-Origin` header. The `*.` pattern is purely a server-side config convenience.
@@ -89,7 +89,7 @@ The exact requesting origin is always reflected back in the `Access-Control-Allo
 If your frontend is served from the same domain as Bondy (e.g. via a reverse proxy), you can derive the origin automatically from the request:
 
 ```
-api_gateway.https.cors.allowed_origins = auto
+listeners.public_https.cors.allowed_origins = auto
 ```
 
 Bondy constructs the origin from `Scheme://Host[:Port]` of the incoming request (default ports 80 and 443 are omitted). This is equivalent to "same-origin only".
@@ -138,19 +138,19 @@ Beyond CORS, Bondy can set standard security response headers on every response.
 
 ```
 ## Enforce HTTPS via HSTS (HTTPS listener only)
-api_gateway.https.security_headers.hsts = max-age=31536000; includeSubDomains
+listeners.public_https.security_headers.hsts = max-age=31536000; includeSubDomains
 
 ## Prevent clickjacking
-api_gateway.https.security_headers.frame_options = DENY
+listeners.public_https.security_headers.frame_options = DENY
 
 ## Prevent MIME sniffing
-api_gateway.https.security_headers.content_type_options = nosniff
+listeners.public_https.security_headers.content_type_options = nosniff
 
 ## Content Security Policy (tune to your application)
-api_gateway.https.security_headers.content_security_policy = default-src 'self'; frame-ancestors 'none'
+listeners.public_https.security_headers.content_security_policy = default-src 'self'; frame-ancestors 'none'
 
 ## Suppress server version disclosure
-api_gateway.https.server_header =
+listeners.public_https.server_header =
 ```
 
 ### Disabling individual headers
@@ -159,16 +159,16 @@ Set any header value to an empty string to suppress it:
 
 ```
 ## No CSP (too complex for this deployment)
-api_gateway.https.security_headers.content_security_policy =
+listeners.public_https.security_headers.content_security_policy =
 
 ## No HSTS (TLS terminated at load balancer)
-api_gateway.https.security_headers.hsts =
+listeners.public_https.security_headers.hsts =
 ```
 
 ### Disabling all security headers
 
 ```
-api_gateway.http.security_headers.enabled = off
+listeners.public_http.security_headers.enabled = off
 ```
 
 ## Verifying your configuration

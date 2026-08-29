@@ -28,11 +28,10 @@ The following instructions assume the following:
 * Bondy is running at `localhost` on port `18081`
 
 ::: info Host and Port
-The above assumption means the `bondy.conf` file which you use to start Bondy contains the following configuration options:
-
-*  `admin_api.http.enabled = on`
-*  `admin_api.http.port = 18081`
-
+Port `18081` is where the reserved `admin` listener serves the Admin API by
+default — no configuration is needed. If your `bondy.conf` declares its own
+`listeners.admin.*` block, use the port it states; see the
+[Network Listeners Reference](/router/reference/configuration/listeners#the-reserved-admin-listener).
 :::
 
 ## Loading the API Specification

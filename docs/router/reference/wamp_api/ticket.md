@@ -188,6 +188,12 @@ const issue_opts = {
         description: "",
         mutable: true,
         required: false
+    },
+    authroles : {
+        type: "array",
+        description: "A role RESTRICTION for the delegation use case: a non-empty subset of the issuing session's own roles (groups). A session authenticated with the resulting ticket gets exactly these roles, non-negotiably — the bearer may request fewer at establishment but can never widen past them, and a request entirely outside them is refused. Requesting a role the issuing session does not hold refuses the issue. Absent means unrestricted, which is also how every ticket issued before this option existed behaves.",
+        mutable: true,
+        required: false
     }
 };
 
@@ -207,6 +213,12 @@ const claims = {
     authid: {
         type: "string",
         description: "identifies the principal that is the subject of the ticket. This is the WAMP session's username (a.k.a `authid').",
+        mutable: false,
+        required: false
+    },
+    authroles: {
+        type: "array",
+        description: "Present only on a role-restricted ticket: the subset of the issuer's roles a session authenticated with this ticket gets, non-negotiably. Absent means unrestricted.",
         mutable: false,
         required: false
     },

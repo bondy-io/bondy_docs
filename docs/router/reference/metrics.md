@@ -198,6 +198,34 @@ Backs [Registry Routing (RIB)](/router/concepts/registry_routing): the compact p
 | `bondy_jobs_queue_depth`, `_enqueued_total` | Gauge / Counter | Queue depth and cumulative enqueue count per load-regulation pool shard &mdash; the router's async-work backpressure signal. |
 | `bondy_process_message_queue_len` | Gauge | Mailbox depth of critical singleton processes (`name`), e.g. `bondy_event_manager`, `bondy_registry`. |
 
+## MCP Gateway
+
+The [MCP Gateway](/router/concepts/mcp_gateway), from `bondy_mcp`. Empty on
+a node with no listener declaring the `mcp` service. Families carry a
+`realm` label; call and read **counters** additionally carry the tool or
+resource `name`, while the duration **histograms** carry it only when
+[`mcp.metrics.label_by_name`](/router/reference/configuration/mcp#mcp.metrics.label_by_name)
+is on, so histogram cardinality stays independent of the manifest size.
+Client-controlled label sources (protocol version, request method) are
+sanitized to closed sets at the emission site — an unknown value is
+recorded as `other` rather than minting an attacker-chosen series.
+
+| Metric family | Type | Covers |
+|---|---|---|
+| `bondy_mcp_request_duration_microseconds` | Histogram | End-to-end handling of one MCP request, by `method`. |
+| `bondy_mcp_tool_calls_total`, `_tool_call_duration_microseconds` | Counter / Histogram | Tool calls, by `status` (`success` \| `input_required` \| `tool_error` \| `internal_error`). |
+| `bondy_mcp_resource_reads_total`, `_resource_read_duration_microseconds` | Counter / Histogram | Resource reads. |
+| `bondy_mcp_upstream_calls_total`, `_upstream_call_duration_microseconds` | Counter / Histogram | Calls Bondy makes to upstream MCP servers, by upstream. |
+| `bondy_mcp_upstream_drift_blocked_total` | Counter | Upstream tool definitions refused because their content drifted from the pinned hash. Anything counted here is blocked until approved. |
+| `bondy_mcp_manifest_rebuilds_total`, `_manifest_rebuild_duration_microseconds` | Counter / Histogram | Per-realm manifest compilations, by `trigger` (`demand` \| `db_event`). |
+| `bondy_mcp_manifest_entries` | Gauge | The census of compiled manifest entries per realm and kind, written absolutely at each rebuild. |
+| `bondy_mcp_manifest_collisions_total` | Counter | Catalogue entries skipped over a name collision. Each also raises a critical alarm naming the `(realm, name)`. |
+| `bondy_mcp_rbac_denied_total` | Counter | Authorization denials — a hidden listing entry, a refused call. |
+| `bondy_mcp_version_refused_total` | Counter | Requests refused over protocol-version negotiation, by (sanitized) `version`. |
+| `bondy_mcp_session_opened_total`, `_session_closed_total`, `bondy_mcp_active_sessions` | Counter / Gauge | Handshake-era session lifecycle; closes carry a `reason` (`client_close` \| `idle_timeout` \| `stored_session_closed` \| `server_shutdown` \| `crash` \| `other`). Modern-era requests are sessionless and appear only in the request families. |
+| `bondy_mcp_inflight_calls` | Gauge | Currently executing MCP-originated WAMP calls. At rest this is `0`; a resting non-zero value indicates a leak. |
+| `bondy_mcp_notifications_emitted_total`, `_resource_subscribes_total` | Counter | Notifications delivered on `subscriptions/listen` streams, and resource subscriptions accepted. |
+
 ## Mail
 
 Outbound email, from `bondy_mail`. Empty on a node with no `mail.relay.*` configured &mdash; that is the [dormant state](/router/concepts/mail#dormant-until-configured), not a fault. Every family carries a `relay` label; **none carries a realm**, because relay names are bounded by `bondy.conf` and realms are not. Per-realm attribution lives in the logs and in the telemetry events these families are derived from.

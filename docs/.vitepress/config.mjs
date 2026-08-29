@@ -541,6 +541,12 @@ function tutorialsSidebar() {
             link: '/router/tutorials/getting_started/marketplace_api_gateway',
             isFeature:true,
             description: 'A tutorial that demonstrates how to add an HTTP API to an existing project using the HTTP API Gateway.'
+          },
+          {
+            text: 'Marketplace for AI Agents (MCP)',
+            link: '/router/tutorials/getting_started/marketplace_mcp',
+            isFeature:true,
+            description: 'Expose the marketplace demo to AI agents as MCP tools — without touching the Autobahn Python microservice.'
           }
         ]
       },
@@ -655,10 +661,22 @@ function guidesSidebar() {
             description: 'Run the bundled Prometheus and Grafana stack against your cluster.'
           },
           {
+            text: 'Distributed Tracing',
+            link: '/router/guides/administration/distributed_tracing',
+            isFeature: true,
+            description: 'Enable OpenTelemetry span export, point it at Tempo, and make Bondy the trace boundary.'
+          },
+          {
             text: 'Configuring Mail Relays',
             link: '/router/guides/administration/configuring_mail_relays',
             isFeature: true,
             description: 'Declare a relay, scope it to realms, wire up its credential, and verify it.'
+          },
+          {
+            text: 'Exposing an MCP Endpoint',
+            link: '/router/guides/administration/exposing_an_mcp_endpoint',
+            isFeature: true,
+            description: 'Serve a realm to AI agents: declare the listener, publish interface metadata, connect a client.'
           },
           {
             text: 'Load Regulation and Rate Limiting',
@@ -774,6 +792,18 @@ function conceptsSidebar() {
             link: '/router/concepts/http_transports',
             isFeature: true,
             description: "Learn how to use HTTP long-polling and Server-Sent Events transports for WAMP sessions."
+          },
+          {
+            text: 'MCP Gateway',
+            link: '/router/concepts/mcp_gateway',
+            isFeature: true,
+            description: "Expose a realm's procedures and topics to AI agents as MCP tools and resources."
+          },
+          {
+            text: 'Telemetry',
+            link: '/router/concepts/telemetry',
+            isFeature: true,
+            description: "Metrics and W3C distributed tracing: propagation, span seats, minting and OTLP export."
           },
           {
             text: 'HTTP API Gateway',
@@ -898,6 +928,18 @@ function configurationSidebar() {
             text: 'Network Listeners',
             description: 'Configure the network listeners for the different protocols and gateways',
             link: '/router/reference/configuration/listeners',
+            isFeature: true
+          },
+          {
+            text: 'MCP Gateway',
+            description: 'The per-listener MCP edge keys and the node-global manifest, continuation and upstream settings',
+            link: '/router/reference/configuration/mcp',
+            isFeature: true
+          },
+          {
+            text: 'Telemetry',
+            description: 'Distributed tracing: OTLP span export and trace-context minting',
+            link: '/router/reference/configuration/telemetry',
             isFeature: true
           },
           {
@@ -1045,6 +1087,16 @@ function wampAPISidebar() {
             link: '/router/reference/wamp_api/mail',
             isFeature: true,
             description: "Sending email: send, send_async, status, relay listing and a relay test."
+          },
+          { text: 'Interface Metadata & Reflection',
+            link: '/router/reference/wamp_api/interface',
+            isFeature: true,
+            description: "Publishing procedure/topic/error metadata as documents, and reading it through WAMP Interface Reflection."
+          },
+          { text: 'MCP Gateway',
+            link: '/router/reference/wamp_api/mcp',
+            isFeature: true,
+            description: "Managing MCP overlay documents: bondy.mcp.overlay load, get, list and delete."
           },
           { text: 'Ticket',
             link: '/router/reference/wamp_api/ticket',
