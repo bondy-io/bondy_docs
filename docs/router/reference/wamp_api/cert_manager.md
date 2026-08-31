@@ -23,6 +23,22 @@ The typical workflow for certificate renewal:
 2. Call `bondy.cert_manager.rotate_listener` or `bondy.cert_manager.rotate_all` to reload them.
 3. New connections immediately use the updated certificates.
 
+### Authority
+
+::: warning Master realm only
+Every procedure on this page requires a session on the **master realm**
+(`com.leapsight.bondy`), and answers `wamp.error.not_authorized` anywhere else.
+
+None of them takes a realm argument, because none of them is a per-realm
+decision: the CA trust store and a listener's certificate are **node** state,
+shared by every realm the node serves. A tenant reloading them would reach every
+other tenant on that node.
+
+The ordinary `wamp.call` permission applies on top, so these procedures are
+grantable and revocable like any other — but a grant alone is not enough, and a
+realm with security disabled does not become an exception.
+:::
+
 
 ## Procedures
 

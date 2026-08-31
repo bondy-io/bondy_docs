@@ -113,11 +113,25 @@ WAMP data plane is unaffected by a broken mail relay.
 `catalogue_id` is the id with its instance replaced by `_`. That is your join
 key for the next step.
 
+`details.consecutive_failures` reads `1` because you set
+`failure_threshold = 1`, so one failure was the transition. It is the count at
+the moment the alarm was raised, and it stays there.
+
 Now call `bondy.mail.test` again, twice. Call `bondy.alarm.list` once more —
-still **one** alarm, with `consecutive_failures` grown. Raising an alarm that
-is already raised restates it; it does not create a second one. This is the
-whole difference between an alarm and a log line: the alarm says the condition
-is true, not that a thing happened.
+still **one** alarm, and unchanged: `consecutive_failures` still reads `1`.
+
+Two things are happening, and they are worth separating.
+
+An alarm is identified by its id, so raising one that is already raised
+restates it rather than creating a second one. That is the whole difference
+between an alarm and a log line: the alarm says the condition *is true*, not
+that a thing *happened*. Three failures, one alarm.
+
+But this relay never even restates. Its producer raises on the *transition* to
+down and then stops reporting, so `details` holds the failure count as it was
+at the moment the condition became true. Most producers are written this way.
+The alarm answers "is this relay down", and it is; "how far down" is what the
+`observe_with` references in the next step are for.
 
 ## 4. Follow the runbook
 
@@ -226,16 +240,20 @@ The alarm has gone, but the history has not. Call `bondy.alarm.history`:
   "node": "bondy1@127.0.0.1",
   "events": [
     {"id": ["mail_relay_down", "demo"], "action": "cleared", "severity": "major", "at": 1756640120000},
-    {"id": ["mail_relay_down", "demo"], "action": "updated", "severity": "major", "at": 1756640060000},
     {"id": ["mail_relay_down", "demo"], "action": "raised",  "severity": "major", "at": 1756640000000}
   ]
 }
 ```
 
-Newest first. Notice what is **not** there: you called `bondy.mail.test` three
-times in step 3, and the history holds one `raised` and one `updated`, not
-three entries. A restatement is only a transition when the alarm's content
-changes — here, when `consecutive_failures` moved.
+Newest first, and only two entries: you called `bondy.mail.test` four times
+across steps 2, 3 and 5, and the ring holds one `raised` and one `cleared`.
+
+The ring holds **transitions**, not reports. Two rules produce that. A producer
+that restates an alarm whose content has not changed records nothing — a
+restatement is a transition only when something in the alarm actually moves.
+And this producer does not restate at all, which is why there is no `updated`
+here: it reported the condition becoming true, then reported it becoming
+false.
 
 This ring is per node and holds the last 100 transitions. It is for the
 operator who is already looking; Prometheus holds the durable series.

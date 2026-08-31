@@ -25,9 +25,13 @@ An alarm is a statement that a **condition is true now**. It is not an event,
 not a log line, and not a notification. A condition either holds or it does
 not, so an alarm is identified by its id and raising one that is already
 raised restates it rather than creating a second alarm. When the condition
-stops holding, the alarm clears — with two exceptions the
-[catalogue](/router/reference/alarms) names, where nothing observes the
-condition becoming false and the alarm latches until the node restarts.
+stops holding, the alarm clears.
+
+Clearing is the producer's job, and each producer observes its condition on its
+own schedule — a probe interval, a sweep, the next request. So an alarm clears
+one cycle after the condition goes away rather than at the instant it does, and
+"cleared" means "this producer has since looked and found nothing", not
+"someone marked it resolved".
 
 That framing decides most of the design. A log line records that something
 happened at a moment; an alarm answers "what is wrong with this node right

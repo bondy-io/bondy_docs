@@ -181,9 +181,11 @@ returns the last 100 transitions on the node that serves the call, newest
 first, and does **not** fan out. To survey a cluster, call it on each node and
 read the `node` field of each reply.
 
-A restatement that changed nothing is not a transition and will not appear. If
-you expected an entry and do not see one, the alarm was re-reported with
-identical content rather than changing.
+A restatement that changed nothing is not a transition and will not appear, and
+most producers do not restate at all — they report the condition becoming true,
+then becoming false. If you expected an entry and do not see one, nothing
+changed; use the entry's `observe_with` references for how a condition has been
+developing since it was raised.
 
 ::: warning The ring bounds transitions, not time
 An alarm flapping on a three-second probe fills all 100 slots in five minutes.

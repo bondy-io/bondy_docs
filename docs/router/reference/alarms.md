@@ -38,9 +38,10 @@ written `_` below and rendered on the wire as a list of strings.
 | **Observe with** | Read-only procedures and metrics that show more, each as `{kind, ref}` with `kind` either `procedure` or `metric`. Never a mutating procedure. The [task catalogue](/router/reference/wamp_api/task) uses the same field name and shape. |
 | **Tasks** | Procedures sanctioned as a remediation, from the [task catalogue](/router/reference/wamp_api/task). An empty list means Bondy has no remediation for this condition. |
 
-Most conditions clear when their producer next observes them to be false. Two
-do not — both retention limits latch until the node restarts, and each says so
-at its entry.
+Every condition clears when its producer next observes it to be false. Each
+producer observes on its own schedule, so an alarm clears one cycle after the
+condition goes away rather than at the instant it does — the entry says which
+cycle where it is not obvious.
 
 ## Integration — an external dependency is failing
 
@@ -56,7 +57,7 @@ An HTTP connector service is failing its liveness probe.
 - **Configuration** `http_connector.services.$service.liveness.interval`,
   `http_connector.services.$service.liveness.failure_threshold`,
   `http_connector.services.$service.liveness.success_threshold`
-- **Signals** metrics `bondy_http_connector_pool_up`,
+- **Observe with** metrics `bondy_http_connector_pool_up`,
   `bondy_http_connector_liveness_probes_total`
 - **Tasks** none
 
@@ -71,7 +72,7 @@ An outbound mail relay is failing its health check.
 - **Details** `relay`, `consecutive_failures`
 - **Configuration** `mail.relay.$name.health.failure_threshold`,
   `mail.relay.$name.health.success_threshold`
-- **Signals** `bondy.mail.status.get`, `bondy.mail.relay.list`, metrics
+- **Observe with** `bondy.mail.status.get`, `bondy.mail.relay.list`, metrics
   `bondy_mail_relay_up`, `bondy_mail_failed_total`
 - **Tasks** [`bondy.mail.test`](/router/reference/wamp_api/task)
 
@@ -86,13 +87,51 @@ exposed**.
 - **Details** none — the realm and the colliding name are carried in the id
   itself, which renders as `["bondy_mcp_name_collision", "<realm>", "<name>"]`
 - **Configuration** none
-- **Signals** `bondy.mcp.overlay.list`, `bondy.mcp.overlay.get`
+- **Observe with** `bondy.mcp.overlay.list`, `bondy.mcp.overlay.get`
 - **Tasks** `bondy.mcp.overlay.load`, `bondy.mcp.overlay.delete`
 
 Both sides are withheld rather than one being picked, so a collision is always
 visible as absence rather than as a silently wrong binding. The alarm clears on
 the first manifest rebuild in which the collision is gone. See
 [MCP Gateway](/router/concepts/mcp_gateway).
+
+### `{retained_messages_count_limit, _}`
+
+A realm's retained messages have reached the configured count limit; further
+messages are not retained.
+
+- **Severity** `warning` · **Readiness** unaffected
+- **Details** `limit` · **Configuration** `wamp.message_retention.max_messages`
+- **Observe with** none · **Tasks** none
+
+Publishing continues normally; only retention stops. This is one of two alarms
+raised on a request path, so it may carry an `onset_trace_id` naming the
+publication that first crossed the ceiling.
+
+The ceiling is a node-wide *value*, but it is applied to each realm's own
+counters — so the condition is per realm and the id names the realm it holds
+for. One realm at its ceiling says nothing about another.
+
+Cleared by the retained-message eviction pass, which re-evaluates the ceiling
+for every realm currently holding one of these alarms. That pass runs once a
+minute, so expect up to a minute between a realm dropping back under its
+ceiling and the alarm clearing.
+
+### `{retained_messages_memory_limit, _}`
+
+A realm's retained messages have reached the configured memory limit; further
+messages are not retained.
+
+- **Severity** `warning` · **Readiness** unaffected
+- **Details** `limit` · **Configuration** `wamp.message_retention.max_memory`
+- **Observe with** none · **Tasks** none
+
+Per realm and cleared on the same cycle as the count limit above.
+
+::: tip A memory limit of `0` means no limit
+Unlike `max_messages`, this key accepts `0`, and `0` disables the ceiling
+rather than setting it to zero.
+:::
 
 ## Node — this node cannot do something
 
@@ -105,7 +144,7 @@ The durable `main` database could not be opened.
   `bondy_namespace_catalog:main_status/0`
 - **Details** none
 - **Configuration** `platform_data_dir`
-- **Signals** none · **Tasks** none
+- **Observe with** none · **Tasks** none
 
 The readiness flag deliberately bypasses the alarm subsystem. A condition
 this severe must survive a crash of the handler reporting it, so it is recorded
@@ -119,43 +158,7 @@ A write-ahead-log drain is processing frames without committing a new position.
 - **Severity** `major` · **Readiness** unaffected
 - **Details** `instance_id`, `stalled_for_ms`, `committed_position`
 - **Configuration** `db.drain.stall_alarm`
-- **Signals** none · **Tasks** none
-
-### `retained_messages_count_limit`
-
-Retained messages have reached the configured count limit; further messages are
-not retained.
-
-- **Severity** `warning` · **Readiness** unaffected
-- **Details** none · **Configuration** `wamp.message_retention.max_messages`
-- **Signals** none · **Tasks** none
-
-Publishing continues normally; only retention stops. This is one of two alarms
-raised on a request path, so it may carry an `onset_trace_id` naming the
-publication that first crossed the ceiling.
-
-::: warning This alarm latches
-Nothing clears it. Retention has no path that observes the count falling back
-under the limit, so once raised the alarm stays raised until the node restarts —
-including after messages are taken and the realm is well under its ceiling
-again. Read it as "this node hit the ceiling since it started", not as "this
-node is at the ceiling now". Use the realm's retained-message counters to
-answer the second question.
-:::
-
-### `retained_messages_memory_limit`
-
-Retained messages have reached the configured memory limit; further messages
-are not retained.
-
-- **Severity** `warning` · **Readiness** unaffected
-- **Details** none · **Configuration** `wamp.message_retention.max_memory`
-- **Signals** none · **Tasks** none
-
-::: warning This alarm latches
-As with the count limit above, nothing clears it; it stays raised until the
-node restarts.
-:::
+- **Observe with** none · **Tasks** none
 
 ## Cluster — convergence is affected
 
@@ -166,7 +169,7 @@ disabled cluster-wide.
 
 - **Severity** `major` · **Readiness** unaffected
 - **Details** none · **Configuration** `db.origin_retirement.path`
-- **Signals** none · **Tasks** none
+- **Observe with** none · **Tasks** none
 
 Replication continues. What stops is the reclamation of retired origins, so
 metadata grows until the path is writable again.
@@ -178,7 +181,7 @@ they cannot converge.
 
 - **Severity** `major` · **Readiness** unaffected
 - **Details** none · **Configuration** `cluster.max_message_size`
-- **Signals** metrics `bondy_oplog_sync_oversized_item_total`,
+- **Observe with** metrics `bondy_oplog_sync_oversized_item_total`,
   `bondy_oplog_sync_oversized_item_last_bytes`
 - **Tasks** none
 
