@@ -159,9 +159,82 @@ Published whenever this node's Partisan connection to a peer goes down — a gra
 ##### Keyword Results
 None.
 
-## Not yet implemented
+### List peer connections
+##### bondy.cluster.connections() -> map() {.wamp-procedure}
 
-`bondy.cluster.join`, `bondy.cluster.leave`, and `bondy.cluster.connections` are reserved URIs with no working implementation — calling any of them raises `wamp.error.no_such_procedure`. This is deliberate, not an oversight in progress: retiring a node from a cluster is a causally significant act — [Deletion and Reclamation](/router/concepts/deletion_and_reclamation) only licenses space reclamation once every member has certified a tombstone stable, so a `leave` call that merely replied "success" without actually retiring the member through Partisan would leave reclamation permanently stalled on a member that was never really removed. Until that path is implemented, refusing the call outright is safer than a call that appears to work but silently corrupts an invariant elsewhere. Use the peer-discovery configuration in [Running a Cluster](/router/guides/deployment/running_a_cluster) to join and grow a cluster today.
+The peer-plane connections this node currently holds. Master realm only.
+
+| Key | Type | Meaning |
+|---|---|---|
+| `node` | string | The node answering. Connections are per node, so this call is not a cluster view. |
+| `connections` | list | One entry per open connection: `node`, `channel`, and `listen_addr` as `{ip, port}`. |
+
+A node may hold several connections to one peer — one per Partisan channel —
+so a peer appears once per channel.
+
+### Remove a node from the cluster
+##### bondy.cluster.leave(node) -> map() {.wamp-procedure}
+
+Removes `node` from the Partisan membership. Master realm only, and the only
+[task](/router/reference/wamp_api/task) graded `destructive`.
+
+`node` is the name as it appears in `bondy.cluster.members`, and must be
+given even when removing the node serving the call. Naming the target is the
+point of the procedure.
+
+Supports `dry_run: true`, which runs the survey below and reports without
+removing anything.
+
+::: danger Leaving is a decommission, not a pause
+Membership is what the storage layer counts for reclamation: a node in the
+membership is one the rest of the cluster waits on, and removing it is what
+releases them. The same removal makes the node's origins unclaimed, so the
+retirement pass may reap them — and a node rejoining under the same name is
+handed a **new** origin, with its former history foreign and its frontier
+entries gone.
+
+There is no procedure that undoes this. Run the dry run first.
+:::
+
+**The survey.** Before removing anything, Bondy asks every member that will
+remain whether it is ready, and refuses the removal when any of them is
+**silent** or reports itself **not ready**. Both are the same hazard: the
+retirement pass that follows reaps origins no live member claims, is
+fail-closed on a member it cannot ask, and cannot tell a member that is up but
+not fully started from one that has genuinely relinquished its origins.
+
+The reply carries the survey either way:
+
+| Key | Type | Meaning |
+|---|---|---|
+| `node` | string | The node named for removal. |
+| `safe` | boolean | Whether the survey permits the removal. |
+| `members` | list | Each remaining member's `node`, `ready` flag and `oplog_instances` count. |
+| `silent` | list of string | Members that did not answer within 5 seconds. |
+| `not_ready` | list of string | Members that answered and are not ready. |
+
+`oplog_instances` is **reported, not enforced**. A member with fewer
+registered instances than its peers is the under-advertising case the survey
+cannot rule out by itself, and a cluster may be heterogeneous by design — so
+the count is put in front of the operator rather than turned into a refusal
+Bondy would be guessing at.
+
+#### Errors
+
+| Error | When |
+|---|---|
+| `bondy.error.not_a_member` | `node` is not in the current membership. The name is resolved without creating an atom, so an unknown name is refused rather than interned. |
+| `bondy.error.unsafe_to_leave` | The survey found a silent or not-ready member. The payload names which. |
+| `wamp.error.not_authorized` | Called from a realm other than the master realm. |
+
+## Not implemented
+
+`bondy.cluster.join` is a reserved URI and raises
+`wamp.error.no_such_procedure`. Joining needs a full Partisan node
+specification — name, listen addresses and channels — which a procedure
+argument conveys poorly, and the peer-discovery configuration in
+[Running a Cluster](/router/guides/deployment/running_a_cluster) already forms
+and grows clusters.
 
 ## See also
 

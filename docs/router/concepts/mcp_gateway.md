@@ -121,7 +121,7 @@ described procedure additionally becomes a tool named by its WAMP URI, and
 every described topic a resource. In both modes an overlay entry that
 claims a procedure **replaces** its URI-named entry — a rename is a
 rename, not an alias — and two entries claiming one name with different
-WAMP bindings are both skipped while a critical alarm names the collision,
+WAMP bindings are both skipped while an alarm names the collision,
 so a broken catalogue is loud rather than quietly wrong.
 
 The manifest is compiled per realm and cached; a change to either layer —
@@ -197,6 +197,44 @@ revocation. Combined with a group per capability tier ("this group may call
 X, Y and Z"), this is also how one user gets different capability through
 different channels: the web app session carries every role, the agent's
 ticket carries one.
+
+### What Bondy exposes to agents by default: nothing
+
+`curated` is the default manifest mode, so a fresh node serves an MCP endpoint
+with an **empty** manifest. Describing a procedure for reflection is not
+consent to expose it to an agent; loading an overlay is the act that exposes,
+and it is the operator's.
+
+Bondy ships one overlay document and loads neither it nor anything else.
+[`bondy.mcp.overlay.suggested`](/router/reference/wamp_api/mcp) hands it over;
+`bondy.mcp.overlay.load` puts it into effect. `bondy_sre_read` names the
+[alarm](/router/reference/wamp_api/alarm) and
+[task](/router/reference/wamp_api/task) read procedures as tools and the three
+alarm event topics as resources, in the master realm — enough for an SRE agent
+to observe a cluster, correlate an alarm with its catalogue entry, and
+*recommend* a remediation with its impact and blast radius stated.
+
+**No shipped document exposes an administrative procedure as a tool, and that
+is a decision rather than an omission.** A listener carrying both `mcp` and
+`admin_api` is a boot error, because an agent surface must not share a socket
+with the surface that administers realms, users and grants. That guard does not
+reach the realm dimension: the realm is a path segment, so one MCP listener
+serves every realm a principal can authenticate into. A shipped document naming
+`bondy.listener.suspend` or `bondy.router.bridge.stop` as a tool would place
+administrative procedures in front of exactly the audience the boot error
+exists to keep them away from, with RBAC as the only remaining control.
+
+Two further properties make that trade a bad one. A tool description is
+**prompt** — everything in `tools/list` enters a model's context, so an action
+tool turns every document the agent reads into an argument about whether to run
+it. And the failure modes are asymmetric: loading a read document and finding
+it dull costs an afternoon, while loading an action document to see what it
+does, on a cluster where an agent already holds broad grants, is an incident.
+
+An operator who does want an acting agent writes the overlay themselves and
+names it in a change record. `bondy.task.catalogue` supplies the material —
+every sanctioned procedure with its `impact`, `blast_radius` and argument
+schemas.
 
 ## Bondy as an MCP client: upstreams
 

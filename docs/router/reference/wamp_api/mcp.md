@@ -13,6 +13,10 @@ related:
       type: How-to Guide
       link: /router/guides/administration/exposing_an_mcp_endpoint
       description: Loading an overlay in context.
+    - text: Giving an Agent Read-Only Access
+      type: How-to Guide
+      link: /router/guides/administration/giving_an_agent_read_only_access
+      description: Adopting the shipped `bondy_sre_read` overlay under a scoped ticket.
 ---
 
 # MCP Gateway
@@ -51,12 +55,12 @@ the manifest holds exactly the entries overlays name. Under `derived`,
 described procedures and topics also surface URI-named, and an entry that
 claims one **replaces** its URI-named form — a rename, not an alias. In
 both modes, two entries claiming one name with different WAMP bindings
-are both skipped from the manifest and a critical alarm names the
+are both skipped from the manifest and a `major` alarm names the
 collision.
 
 ## Procedures
 
-All four require admin authority, exactly like `bondy.interface.*`: an
+All five require admin authority, exactly like `bondy.interface.*`: an
 overlay document may target any realm, so managing one is an operator act.
 Call them from the master realm.
 
@@ -80,3 +84,20 @@ Removes the document. Under the default `curated`
 [manifest mode](/router/reference/configuration/mcp#mcp.manifest.mode) the
 entries it named disappear from the manifest; under `derived`, a claimed
 procedure reverts to its URI-named form.
+
+#### bondy.mcp.overlay.suggested() -> [result] {.wamp-procedure}
+
+The overlay documents Bondy ships, as `{"documents": [...]}`, in the shape
+`bondy.mcp.overlay.load` accepts.
+
+Returning a document is not loading it. This procedure writes nothing; it
+exists so that adopting a shipped surface needs no console step and no copy of
+the document outside the build. Load one by passing it to
+`bondy.mcp.overlay.load` unchanged, or edit it first — it is an ordinary
+document once you hold it.
+
+One document ships today, `bondy_sre_read`: the four
+[alarm](/router/reference/wamp_api/alarm) and two
+[task](/router/reference/wamp_api/task) read procedures as tools, and the three
+alarm event topics as resources, all naming the master realm. See
+[Giving an Agent Read-Only Access](/router/guides/administration/giving_an_agent_read_only_access).

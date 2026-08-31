@@ -134,8 +134,8 @@ These families track cluster membership and inter-node connectivity &mdash; the 
 | `bondy_cluster_connection_up_total`, `_connection_down_total` | Counter | Connection establishment and teardown, by `peer`, `channel` and (for teardown) exit `reason`. |
 | `bondy_cluster_connect_latency_milliseconds`, `_tls_handshake_milliseconds` | Histogram | Outbound connection latency and inbound TLS handshake latency, by `result`; a spike in handshake errors is the slowloris signal. |
 | `bondy_cluster_peer_rtt_milliseconds`, `_peer_send_pending_bytes` | Histogram / Gauge | Inter-node heartbeat round-trip time and send-queue backpressure, by `peer`, `channel` and `side`. |
-| `bondy_alarms`, `_alarm_active` | Gauge | Active OTP alarm count, and a `1` per active alarm labelled by `alarm_id`. |
-| `bondy_node_ready` | Gauge | `1` when the node reports ready &mdash; the same flag the `/ready` probe serves. |
+| `bondy_alarms`, `_alarm_active` | Gauge | Active alarm count, and a `1` per active alarm labelled by `alarm_id`. The label is the alarm's id rendered whole, so a per-instance condition contributes one series per instance (`{mail_relay_down,<<"smtp1">>}`), not one per family. See the [Alarm Catalogue](/router/reference/alarms). |
+| `bondy_node_ready` | Gauge | `1` when the node reports ready &mdash; the same oracle the `/ready` probe serves: boot complete, durable store open, and no raised alarm declaring `affects_ready`. |
 
 ## Router & WAMP
 
@@ -219,7 +219,7 @@ recorded as `other` rather than minting an attacker-chosen series.
 | `bondy_mcp_upstream_drift_blocked_total` | Counter | Upstream tool definitions refused because their content drifted from the pinned hash. Anything counted here is blocked until approved. |
 | `bondy_mcp_manifest_rebuilds_total`, `_manifest_rebuild_duration_microseconds` | Counter / Histogram | Per-realm manifest compilations, by `trigger` (`demand` \| `db_event`). |
 | `bondy_mcp_manifest_entries` | Gauge | The census of compiled manifest entries per realm and kind, written absolutely at each rebuild. |
-| `bondy_mcp_manifest_collisions_total` | Counter | Catalogue entries skipped over a name collision. Each also raises a critical alarm naming the `(realm, name)`. |
+| `bondy_mcp_manifest_collisions_total` | Counter | Catalogue entries skipped over a name collision. Each also raises a `major` alarm naming the `(realm, name)`. |
 | `bondy_mcp_rbac_denied_total` | Counter | Authorization denials — a hidden listing entry, a refused call. |
 | `bondy_mcp_version_refused_total` | Counter | Requests refused over protocol-version negotiation, by (sanitized) `version`. |
 | `bondy_mcp_session_opened_total`, `_session_closed_total`, `bondy_mcp_active_sessions` | Counter / Gauge | Handshake-era session lifecycle; closes carry a `reason` (`client_close` \| `idle_timeout` \| `stored_session_closed` \| `server_shutdown` \| `crash` \| `other`). Modern-era requests are sessionless and appear only in the request families. |

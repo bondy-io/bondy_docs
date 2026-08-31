@@ -223,6 +223,10 @@ Inbound rate limiting applies token-bucket limits on connection establishment, h
 
 The keys on this page configure the **node** scope — budgets shared by every listener and realm on the node. Budgets also exist at two narrower scopes: per listener ([`listeners.$name.rate_limit.*`](/router/reference/configuration/listeners#rate-limiting)) and per realm (the realm's own `rate_limit` property, managed through the [realm admin APIs](/router/reference/wamp_api/realm) and the security configuration file — not through `bondy.conf`). A request is admitted only when **every** configured scope admits it, so narrower scopes can only tighten what the node allows. The model is described in [Understanding Load Regulation and Rate Limiting](/router/guides/administration/load_regulation_and_rate_limiting#rate-limiting-inbound-traffic).
 
+::: tip Checking is cheap — refusing is not
+The checks themselves are no reason to hold back: a budget that is never exceeded costs one lock-free atomic operation per configured scope per message — a single field read when nothing is configured — with no measurable effect on throughput or latency. The expensive outcome of rate limiting is a budget sized too tight for legitimate traffic. Size budgets for abuse, leave them enabled, and watch `bondy_rate_limited_total`; the [guide's scopes section](/router/guides/administration/load_regulation_and_rate_limiting#scopes-node-listener-realm) carries the full guidance.
+:::
+
 @[config](security.rate_limit.enabled,on|off,off,v1.0.0)
 
 Master switch for **node-scope** inbound rate limiting. Listener and realm budgets are independent of it: each is enabled by its own configuration being present.

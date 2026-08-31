@@ -17,6 +17,10 @@ related:
       type: How-to Guide
       link: /router/guides/administration/monitoring
       description: The bundled Prometheus + Grafana + Tempo stack.
+    - text: Alarms
+      type: Concept
+      link: /router/concepts/alarms
+      description: The third thing an operator watches — conditions that are true now.
 ---
 
 # Telemetry
@@ -108,6 +112,22 @@ fresh, sampled context minted at the caller's node (head-sampled by
 so the backend sees a complete, rooted trace. A context the caller
 attached is always honoured and never re-minted; pub/sub is excluded from
 minting for the same fan-out reason as above.
+
+### Correlation with alarms
+
+An [alarm](/router/concepts/alarms) raised on a request path carries
+`onset_trace_id`, the trace id of the occurrence that raised the condition, so
+an operator holding an alarm can jump to the exact request that tripped it.
+
+The field is absent on most alarms, and that follows from the propagation model
+above rather than from an omission: a trace rides in a message's options, so a
+producer with no request to inherit from has none. Seven of the nine conditions
+Bondy can raise are background probes, appliers and sweepers. Bondy leaves the
+field absent there rather than minting an id that would correlate with nothing.
+
+`onset_trace_id` names the **first** occurrence and survives restatement, the
+same way `raised_at` does — an alarm up for an hour points at the request that
+started it, not at the most recent one.
 
 ### Export
 

@@ -639,7 +639,10 @@ These keys have **no defaults**: a class block's presence enables that
 class's budget on this listener (independently of the node-scope master
 switch), and each budget requires both its `rate` (tokens per second) and
 `capacity` (burst size). The `enabled` key exists to park a configured
-budget without deleting its numbers.
+budget without deleting its numbers. The checks are cheap enough to leave
+enabled everywhere — one lock-free atomic operation per configured scope
+per message, with no measurable effect on throughput or latency; see
+[Checking is cheap — refusing is not](/router/guides/administration/load_regulation_and_rate_limiting#scopes-node-listener-realm).
 
 ```
 listeners.public_ws.rate_limit.connection.rate = 30

@@ -40,7 +40,7 @@
 
   --vp-font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
   --vp-font-family-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --vp-code-font-size: 14px;
+  --vp-code-font-size: 15px;
 }
 
 html.dark {
@@ -97,6 +97,82 @@ body {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--vp-c-text-3);
+}
+
+/* ---------------------------------------------------------------------------
+ * Prose inline code — the accent, as in the deck
+ *
+ * The shared template quiets VitePress's code pill down to plain body ink
+ * (@leapsight/vitepress-template base.css: `.vp-doc :not(pre) > code { color:
+ * var(--vp-c-text-1) }`), which leaves `foo` reading as ordinary text in a
+ * different face. bondy_slidev colours the same span with the brand accent,
+ * and that is the treatment the Bondy properties should share.
+ *
+ * --vp-c-brand-1 is already the accent, and already flips: #14705f on paper,
+ * #5fd6b4 at night — the same two values the deck calls --acc-l / --acc-d. So
+ * the token does the work and there is nothing to keep in step by hand.
+ *
+ * Contrast, WCAG relative luminance against the substrate: 5.21:1 by day
+ * (#14705f on #f1efec) and 10.90:1 at night (#5fd6b4 on #0c0d0e). Both clear
+ * AA for body text.
+ *
+ * The leading `html` is only there for weight: the template's rule is (0,1,2)
+ * and this has to win regardless of which order the two stylesheets land in
+ * the bundle.
+ *
+ * The deck also sets a tinted chip behind the span (background var(--soft),
+ * 0.1em/0.4em padding, 5px radius). Not adopted here — running documentation
+ * has far more inline code per paragraph than a slide, and the chips stack up
+ * into visual noise. Colour alone carries the distinction.
+ * ------------------------------------------------------------------------ */
+html .vp-doc :not(pre) > code {
+  color: var(--vp-c-brand-1);
+  /* The template sets 0.85em. Mono reads optically larger than Inter at the
+     same size, which is why it is under 1, but 0.85 undersets it against this
+     site's 19.76px prose. 0.9em: 17.8px in a paragraph, 14.4px in a list
+     item — code still scales with whatever text hosts it. */
+  font-size: 0.9em;
+}
+
+/* ---------------------------------------------------------------------------
+ * Fenced code blocks — one size, and a gutter that lines up
+ *
+ * The template sets `font-size: 0.9em` on BOTH the `pre` and the `code` inside
+ * a language block (@leapsight/vitepress-template base.css), and em compounds:
+ * 16px -> 14.4px on the pre -> 12.96px on the code. VitePress's line-number
+ * gutter does not compound — it takes the absolute --vp-code-font-size — so
+ * the two ran at different line heights and the numbers drifted away from the
+ * lines they number.
+ *
+ * Measured in headless Chrome on the built site, before this rule: gutter
+ * 14px/23.8px against code 12.96px/22.032px — 1.768px of drift per line, so a
+ * 20-line block ended ~35px out. `lineNumbers: true` is on site-wide, so every
+ * block was affected.
+ *
+ * Naming the absolute token on both elements fixes the size and the alignment
+ * with one value: no compounding, and the gutter is reading the same variable
+ * by construction rather than by coincidence.
+ * ------------------------------------------------------------------------ */
+html .vp-doc div[class*='language-'] pre,
+html .vp-doc div[class*='language-'] code {
+  font-size: var(--vp-code-font-size);
+}
+
+/* ---------------------------------------------------------------------------
+ * Sidebar type scale
+ *
+ * The template sets the sidebar for density — 13px links under 12px uppercase
+ * group labels. This site's sidebars are read as much as they are scanned, so
+ * both go up a step. The gap between label and link is kept: the label is an
+ * eyebrow, and it should stay quieter than the pages under it.
+ * ------------------------------------------------------------------------ */
+.VPSidebar .VPSidebarItem.is-link .text {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.VPSidebar .VPSidebarItem.level-0 > .item > .text,
+.VPSidebar .VPSidebarItem.level-1.collapsible > .item > .text {
+  font-size: 12.5px;
 }
 
 blockquote > p {
@@ -371,4 +447,24 @@ table.property-table > tbody > tr > td {
 
 .medium-zoom-image--opened {
   z-index: 101 !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Sidebar curtain vs. the taller Bondy chrome bar — TEMPORARY
+ *
+ * VitePress pins its .VPSidebar .curtain with a hardcoded `top: -64px` while
+ * taking its height and margin from --vp-nav-height. @bondy/site-chrome raises
+ * that variable to 106px when the docs bar shows its subbar, so the curtain
+ * pins 42px low and paints over the first group heading of every sidebar.
+ *
+ * Fixed upstream in @bondy/site-chrome v0.7.1 (src/styles/chrome.css, next to
+ * the declaration that raises --vp-nav-height), where the full derivation and
+ * the headless-Chrome measurements are recorded. package.json already names
+ * v0.7.1, but the lockfile still resolves v0.7.0 — `yarn install` needs SSH
+ * credentials for the other git dependency. Delete this block once the
+ * lockfile has actually moved; until then it is what keeps the first sidebar
+ * heading visible.
+ * ------------------------------------------------------------------------ */
+:root:has(.chrome-nav--docs) .VPSidebar .curtain {
+  top: calc(var(--vp-nav-height) * -1);
 }

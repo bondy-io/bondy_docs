@@ -167,7 +167,7 @@ document.
 
 An overlay entry that claims a procedure *replaces* its URI-named tool — a
 rename, not an alias. Two entries claiming one name with different bindings
-are both skipped and a critical alarm names the collision.
+are both skipped and an alarm names the collision.
 
 ## 5. Verify
 

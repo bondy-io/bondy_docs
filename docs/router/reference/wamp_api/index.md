@@ -34,9 +34,12 @@ Bondy also offers equivalent [HTTP APIs](/router/reference/http_api/index) for m
 ## Services
 The following is a catalogue of APIs organised by service. Each service provides APIs to manage (or get information about) an Entity or Feature.
 
-<Features
-    class="VPHomeFeatures"
-    :features="theme.sidebar['/router/reference/wamp_api'][0].items.filter(function(item){return item.isFeature})"/>
+<div v-for="section in theme.sidebar['/router/reference/wamp_api']">
+    <h3 v-if="section.items.filter(function(item){return item.isFeature}).length > 0">{{section.text}}</h3>
+    <Features
+        class="VPHomeFeatures"
+        :features="section.items.filter(function(item){return item.isFeature})"/>
+</div>
 
 ## Utility Procedures
 

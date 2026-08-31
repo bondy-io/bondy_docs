@@ -195,6 +195,10 @@ Buckets are node-local. A realm `total` of N tokens per second bounds each node 
 
 The denial metric's `scope` label says which scope refused: `node`, `listener`, `realm` (a caller over its own realm budget) or `realm_total` (the realm's shared quota exhausted) — so a hot caller and an exhausted tenant quota are distinguishable at a glance.
 
+::: tip Checking is cheap — refusing is not
+Do not size budgets down out of concern for the cost of the checks themselves. With nothing configured the per-message check is a single field read; each configured scope adds one lock-free atomic operation per message, and the realm `total` one shared-table consult — all of it orders of magnitude below the cost of routing the message, with no measurable effect on message throughput or latency at any scope combination. The `connection`, `handshake` and `auth` classes cost one keyed-table consult per scope per *attempt*, a similarly negligible fraction of establishing a session. The expensive outcome of rate limiting is a budget sized too tight for legitimate traffic: refusals, retries and reconnect storms cost far more than the checks ever will. Size budgets for abuse, leave them enabled, and watch `bondy_rate_limited_total` rather than pre-emptively loosening.
+:::
+
 ### Buckets and keyspace
 
 Source IP is an unbounded, transient dimension: a flood from a churning set of addresses would mint a bucket per address and never release one. Bondy's keyed limiter creates a bucket on first use and a background sweep deletes buckets idle beyond a TTL, so the keyspace cannot grow without bound. The hot path stays a lock-free table lookup plus an atomic check. Per-session message buckets have a definite owner and are freed at session teardown instead — except the realm `total`, which is shared by every session on the realm and therefore lives in the keyed table with the per-IP buckets, swept by idleness like them.
