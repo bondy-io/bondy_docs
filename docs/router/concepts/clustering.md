@@ -85,7 +85,7 @@ This means:
 - The system automatically reconciles conflicts when healed
 
 ::: tip Active Anti-Entropy
-Bondy uses **Active Anti-Entropy (AAE)** to proactively detect and repair state divergence. AAE periodically compares each shard's Merkle Search Tree against a peer's and pulls only the divergent pages, ensuring convergence even after prolonged partitions. See the [Data Storage & Active Anti-entropy Configuration Reference](/router/reference/configuration/data_storage#active-anti-entropy) for the sync protocol and its tunables, including the authentication freshness fence that refuses to authenticate against provably stale security state.
+Bondy uses **Active Anti-Entropy (AAE)** to proactively detect and repair state divergence. AAE periodically compares each shard's Merkle Search Tree against a peer's and pulls only the divergent pages, ensuring convergence even after prolonged partitions. See [Convergence](/router/concepts/convergence) for what a sync round does and how a replica that is genuinely behind is detected and repaired, and the [Data Storage & Active Anti-entropy Configuration Reference](/router/reference/configuration/data_storage#active-anti-entropy) for its tunables, including the authentication freshness fence that refuses to authenticate against provably stale security state.
 :::
 
 ### Message Routing
@@ -161,6 +161,19 @@ After failures or partitions:
 2. **State synchronization** - AAE detects and repairs divergence
 3. **Membership updates** - Cluster membership list is reconciled
 4. **Normal operation** - Cluster returns to fully consistent state
+
+Recovery is not instantaneous, and how long it takes depends on what failed.
+Ordinary lag closes on the next anti-entropy tick. A replica whose history a
+peer has already compacted past cannot be repaired by syncing at all, and needs
+a catalogue re-bootstrap — which Bondy schedules only after the gap has been
+observed twice, because the remedy transfers a whole projection. So a node that
+has just returned and is still missing data is normally inside the detection
+window rather than faulty.
+
+[Convergence](/router/concepts/convergence) explains those mechanisms, and
+[Verifying Cluster
+Convergence](/router/guides/administration/verifying_cluster_convergence) is the
+procedure for telling the two cases apart on a running cluster.
 
 ## Scaling
 

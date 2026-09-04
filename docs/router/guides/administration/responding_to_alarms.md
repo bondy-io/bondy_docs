@@ -174,12 +174,31 @@ at step 2 without a follow-up call.
 
 Publication is demand-gated: with no subscriber, nothing is produced.
 
-## Reading one node's history
+## Reading the transition history
 
 [`bondy.alarm.history`](/router/reference/wamp_api/alarm#bondy.alarm.history)
-returns the last 100 transitions on the node that serves the call, newest
-first, and does **not** fan out. To survey a cluster, call it on each node and
-read the `node` field of each reply.
+returns alarm transitions across the cluster, newest first, as a page of
+`values`. Each transition names the node that recorded it.
+
+The walk takes the serving node's transitions first and reaches its peers only
+if that node's ring does not fill the page, so a busy node can crowd a quiet
+peer out of the first page. Page with the `cursor` keyword argument to reach
+the rest, or set `receive_progress` to stream the whole walk. **A node missing
+from a page is not a node with nothing to report** — it may be a node the walk
+has not got to yet. Use `bondy.alarm.list` for that question.
+
+**Read `not_reached` before you read `values`**, the same way you read
+`nodes.silent` before you read `alarms`. It names the nodes this walk asked for
+history and did not hear from, so a page that is short because a node was
+unreachable does not read as a page that is short. It accumulates across pages
+— a node named once stays named — so the last page of a walk states the whole
+truth about it.
+
+A page is bounded in time as well as in size: the whole page shares a 5 second
+budget, and `CALL.Options._deadline` caps it. A page that runs out stops early
+and its cursor resumes where it stopped, so keep paging rather than retrying.
+On a stream, set `_deadline` — the WAMP call timeout only measures the gap
+between chunks, so it will not bound a slowly-dripping walk.
 
 A restatement that changed nothing is not a transition and will not appear, and
 most producers do not restate at all — they report the condition becoming true,

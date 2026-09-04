@@ -18,6 +18,8 @@ related:
 
 A cluster forms and grows through Partisan's automatic peer discovery, configured entirely through `bondy.conf` — see [Running a Cluster](/router/guides/deployment/running_a_cluster) — not through a WAMP procedure. This page covers the procedures and topics that let a session observe cluster membership and connectivity.
 
+**Every procedure on this page is master realm only.** `bondy.cluster.members` and `bondy.cluster.info` were not, until 2026-09-02: `bondy.*` procedures are dispatched statically, so those two URIs resolved in any realm and only the absence of an RBAC grant stood between a tenant session and them. `bondy.cluster.info` answers this node's `node_spec`, which carries its listen addresses and ports.
+
 ## Procedures
 
 |Name|URI|
@@ -27,7 +29,11 @@ A cluster forms and grows through Partisan's automatic peer discovery, configure
 
 ### Retrieve cluster members
 ##### bondy.cluster.members() -> [string()] {.wamp-procedure}
-Returns every node Partisan considers part of the cluster's membership, whether or not this node currently has a live connection to it. Compare against [`bondy.cluster.info`](#retrieve-cluster-info)'s `nodes` field, which lists only nodes this node is presently connected to — during a partition, `members` still lists a partitioned-away node; `info`'s `nodes` does not.
+Master realm only. Returns every node Partisan considers part of the cluster's membership, whether or not this node currently has a live connection to it. Compare against [`bondy.cluster.info`](#retrieve-cluster-info)'s `nodes` field, which lists only nodes this node is presently connected to — during a partition, `members` still lists a partitioned-away node; `info`'s `nodes` does not.
+
+The list is **sorted** and free of duplicates, so two calls against a settled cluster return an identical list and a client may diff them directly.
+
+The membership is read from a lock-free table rather than asked of the process that maintains it, so this procedure answers even while that process is busy — which is exactly when an operator asks who is in the cluster.
 
 #### Call
 
@@ -55,11 +61,14 @@ None.
 None.
 
 #### Errors
-None documented.
+
+| Error | When |
+|---|---|
+| `wamp.error.not_authorized` | Called from a realm other than the master realm. |
 
 ### Retrieve cluster info
 ##### bondy.cluster.info() -> map() {.wamp-procedure}
-Returns this node's own Partisan node specification together with the nodes it currently has a live connection to.
+Master realm only. Returns this node's own Partisan node specification together with the nodes it currently has a live connection to. The specification names the addresses and ports this node accepts peer connections on, which is why it is not a tenant-visible procedure.
 
 #### Call
 
@@ -111,7 +120,10 @@ None.
 None.
 
 #### Errors
-None documented.
+
+| Error | When |
+|---|---|
+| `wamp.error.not_authorized` | Called from a realm other than the master realm. |
 
 ## Topics
 
@@ -210,8 +222,15 @@ The reply carries the survey either way:
 | `node` | string | The node named for removal. |
 | `safe` | boolean | Whether the survey permits the removal. |
 | `members` | list | Each remaining member's `node`, `ready` flag and `oplog_instances` count. |
-| `silent` | list of string | Members that did not answer within 5 seconds. |
+| `silent` | list of string | Members that did not answer within the survey's budget. |
 | `not_ready` | list of string | Members that answered and are not ready. |
+
+**The survey is bounded in time.** It waits 5 seconds for the members it asks,
+and `CALL.Options._deadline` (milliseconds from now) caps that — a caller can
+shorten the wait, never lengthen it. A caller whose deadline is already spent
+gets the fail-closed reading: every remaining member is reported `silent` and
+`safe` is `false`. "I ran out of time" and "everyone answered" must not produce
+the same verdict when the verdict authorises a decommission.
 
 `oplog_instances` is **reported, not enforced**. A member with fewer
 registered instances than its peers is the under-advertising case the survey

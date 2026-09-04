@@ -70,6 +70,10 @@ These families instrument the replicated storage layer described in [Architectur
 | `bondy_oplog_aae_enabled` | Gauge | `1` when AAE is enabled on this node. |
 | `bondy_oplog_instance_frontier_hash`, `_frontier_origins`, `_frontier_seq_total` | Gauge | The per-instance applied-frontier version vector: a stable hash for cross-node convergence comparison (`count_values` in PromQL &mdash; no scrape-time cross-node calls), its origin count, and its summed sequence number (monotone; a cross-node gap shows replication lag). |
 | `bondy_oplog_peer_last_sync_age_seconds`, `_peer_last_seen_age_seconds`, `_peer_state_entries`, `_peer_exclusions_total` | Gauge / Counter | Per-(instance, peer) sync recency, and exclusion of stale peers from a sync round. |
+| `bondy_oplog_doored_events_total` | Counter | Never-applied peer operations at or below the local watermark that the **watermark door** accepted instead of discarding &mdash; folded into the projection inline, or held for the applier's replay, by `action`. A steady rate under write load is the door doing its job; see [Convergence](/router/concepts/convergence#the-watermark-door). |
+| `bondy_oplog_frontier_gap_verdicts_total` | Counter | Completed sync rounds that left the peer's applied frontier strictly ahead of ours after settle, by `peer`. A single verdict per (instance, peer) is a benign transient that heals on the next round; repeats trip the re-bootstrap remedy. |
+| `bondy_oplog_rebootstraps_scheduled_total` | Counter | Catalogue re-bootstraps scheduled, by `peer` &mdash; because a peer reclaimed pages this replica needs, or because a frontier gap struck twice. Streams the peer's whole projection, so a climbing count for one pair means the remedy is not fixing the cause. |
+| `bondy_oplog_mst_rebuilt_total` | Counter | Unservable-own-root self-heals: the instance dropped a tree whose own root had lost pages (after proving no peer is stranded) and resumed anti-entropy on a fresh one, by `reason`. Should be zero; any occurrence means pages went missing. |
 | `bondy_aae_merge_conflicts_total` | Counter | Remote AAE merges that overwrote a concurrently-edited local security cell (an LWW conflict over-approximation), by `table`. |
 | `bondy_oplog_reclamation_stalled_total`, `_retirements_total` | Counter | Space-reclamation attempts stalled (naming the blocking members) and origin-retirement outcomes &mdash; see [Deletion and Reclamation](/router/concepts/deletion_and_reclamation). |
 | `bondy_oplog_events_held_total` | Counter | Operations a replay held because an earlier operation from the same origin is missing. A burst on a node rejoining after truncation is the mechanism working; a sustained rate on a healthy cluster means a gap is not filling &mdash; see [Per-Origin Prefix Closure](/router/concepts/prefix_closure). |
@@ -82,12 +86,15 @@ These families instrument the replicated storage layer described in [Architectur
 |---|---|---|
 | `bondy_mst_merges_total`, `_merges_abandoned_total`, `_merge_duration_microseconds` | Counter / Histogram | Merkle Search Tree reconciliation merges: outcome and duration. |
 | `bondy_mst_gc_runs_total` | Counter | MST store GC runs, by `result`. |
+| `bondy_mst_gc_aborted_total` | Counter | GC sweeps abandoned because the current root was unservable (pages a live root needs were missing at sweep time). Aborting stops the sweep amplifying a hole into subtree loss. `classification` names the layer that lost the page: `deleted` (store), `tombstoned` (freed but readable), `transient` (readable on re-probe, nothing lost). Per-hash evidence outlives the log &mdash; read it with `bondy_oplog_instance:gc_aborts/0,1`. |
 | `bondy_mst_broadcasts_total`, `_broadcast_bytes_total` | Counter | CRDT gossip message and byte counts, by `direction`. |
 | `bondy_mst_seals_total`, `_seal_records_total`, `_seal_bytes_total`, `_seal_duration_microseconds` | Counter / Histogram | Pack-store seal operations: records and bytes sealed, and seal latency, by `kind`. |
 | `bondy_mst_page_store_ops_total`, `_page_store_bytes_total` | Counter | Page store read/write operations and bytes, by `op`. |
 | `bondy_mst_page_store_gc_runs_total`, `_gc_pages_dropped_total`, `_gc_packs_retired_total`, `_gc_freed_bytes_total` | Counter | Page store GC sweep outcomes. |
 | `bondy_mst_page_store_recoveries_total`, `_pack_idx_rebuilds_total` | Counter | Incoming-pack recovery and sealed-pack index rebuild outcomes, by `result`. |
 | `bondy_oplog_compactions_total`, `_compaction_duration_microseconds` | Counter / Histogram | MST compaction runs and duration. |
+| `bondy_oplog_compaction_holds_total` | Counter | Compaction cycles whose truncation point was **capped** below an operation the projection has not folded yet, so the cycle truncated less than its frontier allowed &mdash; or nothing. Sustained growth means the applier's replay is not keeping up with delivery for that instance; convergence is protected, but disk grows. |
+| `bondy_oplog_gc_scheduler_inflight` | Gauge | MST GC and compaction runs currently executing. |
 
 ### Secondary indexes
 

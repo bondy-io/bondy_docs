@@ -58,7 +58,7 @@ no arguments and returns the documents Bondy ships:
 |---|---|---|
 | `bondy.alarm.list` | tool | Every alarm raised across the cluster, plus which nodes were silent. |
 | `bondy.alarm.get` | tool | One alarm by its wire id, and where it holds. |
-| `bondy.alarm.history` | tool | The serving node's last 100 transitions. |
+| `bondy.alarm.history` | tool | A page of the cluster's transitions, newest first, naming any node the page could not reach. |
 | `bondy.alarm.catalogue` | tool | Every condition this build can raise, with what to observe and the sanctioned tasks. |
 | `bondy.task.catalogue` | tool | Every sanctioned remediation, with its impact, blast radius and arguments. |
 | `bondy.task.describe` | tool | Whether one procedure is a sanctioned task. |

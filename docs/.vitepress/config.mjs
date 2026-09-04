@@ -740,6 +740,12 @@ function guidesSidebar() {
           description: 'Enable OpenTelemetry span export, point it at Tempo, and make Bondy the trace boundary.'
         },
         {
+          text: 'Verifying Cluster Convergence',
+          link: '/router/guides/administration/verifying_cluster_convergence',
+          isFeature: true,
+          description: 'Establish whether replicated state has converged, and whether a cluster that has not is repairing itself or stuck.'
+        },
+        {
           text: 'Responding to an Alarm',
           link: '/router/guides/administration/responding_to_alarms',
           isFeature: true,
@@ -908,6 +914,12 @@ function conceptsSidebar() {
           link: '/router/concepts/bridge_relay',
           isFeature: true,
           description: 'Link one Bondy Connect node, as a client, to a remote router — sharing a subset of a realm without joining its cluster.'
+        },
+        {
+          text: 'Convergence',
+          link: '/router/concepts/convergence',
+          isFeature: true,
+          description: 'What "converged" means precisely, how a replica catches up, and how Bondy Connect detects and repairs a replica that is genuinely behind.'
         },
         {
           text: 'Per-Origin Prefix Closure',

@@ -1,8 +1,8 @@
 # bondy.error.stale
-When a pagination `_cursor` no longer matches the query it was minted for.
+When a pagination `cursor` no longer matches the query it was minted for.
 
 ## Description
-Raised by a paginated `bondy.*` procedure — for example [`bondy.registration.list`](/router/reference/wamp_api/registration#list-registrations-paginated) — when the `_cursor` passed in `CALL.Options` was minted under a different schema or node-walk shape than the one now in effect (a Bondy upgrade changed the cursor encoding, or the cursor was replayed against a different query). Restart pagination from the first page (omit `_cursor`) rather than retrying the same one.
+Raised by a paginated `bondy.*` procedure — for example [`bondy.registration.list`](/router/reference/wamp_api/registration#list-registrations-paginated) — when the `cursor` keyword argument was minted under a different schema or node-walk shape than the one now in effect (a Bondy upgrade changed the cursor encoding, or the cursor was replayed against a different query). Restart pagination from the first page (omit `cursor`) rather than retrying the same one.
 
 ##### Positional Results
 <DataTreeView

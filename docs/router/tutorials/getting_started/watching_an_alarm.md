@@ -237,13 +237,27 @@ The alarm has gone, but the history has not. Call `bondy.alarm.history`:
 
 ```json
 {
-  "node": "bondy1@127.0.0.1",
-  "events": [
-    {"id": ["mail_relay_down", "demo"], "action": "cleared", "severity": "major", "at": 1756640120000},
-    {"id": ["mail_relay_down", "demo"], "action": "raised",  "severity": "major", "at": 1756640000000}
-  ]
+  "values": [
+    {"id": ["mail_relay_down", "demo"], "action": "cleared", "severity": "major",
+     "at": 1756640120000, "node": "bondy1@127.0.0.1", "seq": 2},
+    {"id": ["mail_relay_down", "demo"], "action": "raised",  "severity": "major",
+     "at": 1756640000000, "node": "bondy1@127.0.0.1", "seq": 1}
+  ],
+  "has_more": false,
+  "not_reached": []
 }
 ```
+
+That is a **page**, the same shape every paginated Bondy procedure answers.
+`has_more` is `false`, so this one holds everything — on a one-node cluster
+with two transitions it always will. On a real cluster the walk takes this
+node's ring first and reaches its peers only if the page is not full, and you
+follow it with the `cursor` the reply then carries.
+
+`not_reached` is empty, which is the answer you want: it names the nodes the
+walk asked for history and did not hear from. An empty page with a node in
+`not_reached` is a different answer from an empty page without one — the same
+distinction `nodes.silent` draws for `bondy.alarm.list`.
 
 Newest first, and only two entries: you called `bondy.mail.test` four times
 across steps 2, 3 and 5, and the ring holds one `raised` and one `cleared`.

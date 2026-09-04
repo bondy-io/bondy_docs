@@ -69,16 +69,18 @@ Returns a cluster-wide page of every subscription in the realm, in node-then-ent
 />
 
 ##### Keyword Args
-None. Pagination is driven by the two `CALL.Options` extension keys below, not by keyword call arguments.
+Pagination is driven by the two keyword arguments below. They were
+`CALL.Options` extension keys (`_limit` / `_cursor`) until 2026-09-01; the
+option form is no longer read.
 
 <DataTreeView
     :maxDepth="10"
     :data="JSON.stringify({
-        '_limit':{
+        'limit':{
             'type': 'integer',
-            'description' : 'Maximum number of entries to return. A non-integer or out-of-range value is silently replaced with the default rather than raising an error, since CALL.Options extensions are untyped. Defaults to 100; the ceiling is 1000.'
+            'description' : 'Maximum number of entries to return. A non-integer or out-of-range value is silently replaced with the default rather than raising an error: a page size has a sane default, so bounding the call is a better answer than refusing it. Defaults to 100; the ceiling is 1000.'
         },
-        '_cursor':{
+        'cursor':{
             'type': 'string',
             'description' : 'The opaque `cursor` from a previous page\'s result, to resume from. Omit for the first page.'
         }
@@ -101,7 +103,7 @@ None. Pagination is driven by the two `CALL.Options` extension keys below, not b
 None.
 
 #### Errors
-Raises `bondy.error.stale` if `_cursor` was minted by an incompatible cursor schema or node-walk shape (the caller should restart from the first page), or `bondy.error.malformed` if `_cursor` isn't a decodable cursor at all.
+Raises `bondy.error.stale` if `cursor` was minted by an incompatible cursor schema or node-walk shape (the caller should restart from the first page), or `bondy.error.malformed` if `cursor` isn't a decodable cursor at all. Unlike `limit`, a cursor has no tolerant fallback: a resume position cannot be guessed.
 
 ### Match a topic URI (paginated)
 ##### bondy.subscription.match(realm_uri, uri) -> page(subscription) {.wamp-procedure}
@@ -124,7 +126,7 @@ As [`bondy.subscription.list`](#list-subscriptions-paginated), restricted to the
 />
 
 ##### Keyword Args
-Same `_limit` / `_cursor` `CALL.Options` extension keys as [`bondy.subscription.list`](#list-subscriptions-paginated).
+Same `limit` / `cursor` keyword arguments as [`bondy.subscription.list`](#list-subscriptions-paginated).
 
 #### Result
 ##### Positional Results
@@ -563,7 +565,7 @@ export default {
                     "mutable": false
                 },
                 "cursor" : {
-                    "description": "An opaque token to pass as \`_cursor\` for the next page. Present only when \`has_more\` is \`true\`.",
+                    "description": "An opaque token to pass as \`cursor\` for the next page. Present only when \`has_more\` is \`true\`.",
                     "type": "string",
                     "required": false,
                     "mutable": false

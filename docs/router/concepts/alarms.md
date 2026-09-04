@@ -160,8 +160,19 @@ probe fills it in five minutes. It is a convenience for an operator who is
 already looking, never the audit record. Every transition is also logged, and
 Prometheus holds the durable series.
 
-History does not fan out across the cluster. Merging rings from several nodes
-would require their clocks to be ordered, and the reply names its node instead.
+History reads across the cluster, but it never **merges**. Merging rings from
+several nodes would require their clocks to be ordered, and nothing here can do
+that. The walk sidesteps the problem rather than solving it: it drains the
+serving node's ring, then the next member's, then the next, and concatenates.
+Two transitions from different nodes are never compared, so no cross-node clock
+ordering is asserted and none is needed — and every event names the node whose
+ring recorded it, so sort by `at` yourself if you want a cluster-wide timeline.
+
+The walk is paginated, and it is honest about its own reach. Every page carries
+`not_reached`, the members it asked for history and did not hear from, and that
+set accumulates across the pages of one walk. A node that could not be asked is
+not a node that answered "nothing" — the same distinction `bondy.alarm.list`
+draws with `silent`.
 
 ## Correlation: which request caused this
 
@@ -206,7 +217,7 @@ clearing one without fixing the condition would make the surface lie.
 
 | Surface | What it gives you |
 |---|---|
-| [`bondy.alarm.*` procedures](/router/reference/wamp_api/alarm) | The cluster view, one alarm by id, this node's history, and the catalogue. |
+| [`bondy.alarm.*` procedures](/router/reference/wamp_api/alarm) | The cluster view, one alarm by id, a page of the cluster's transition history, and the catalogue. |
 | [`bondy.alarm.{raised,updated,cleared}` topics](/router/reference/wamp_api/alarm#events) | The same alarm shape, pushed on transition, in the master realm. |
 | [Prometheus](/router/reference/metrics) | `bondy_alarms`, `bondy_alarm_active` and `bondy_node_ready`, with the alarm family as a bounded label. |
 | Logs | Every transition, at `warning` for a raise or update and `notice` for a clear. |

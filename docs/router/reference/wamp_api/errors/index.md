@@ -26,7 +26,7 @@ cluster &mdash; see the [Error Reference](/router/reference/errors).
 * [bondy.error.mail_not_configured](/router/reference/wamp_api/errors/mail_not_configured): when no mail relay is configured, or the named one cannot be used as configured.
 * [bondy.error.mail_queue_full](/router/reference/wamp_api/errors/mail_queue_full): when a mail relay's queue is at its bound.
 * [bondy.error.mail_rejected](/router/reference/wamp_api/errors/mail_rejected): when a mail relay refused the message.
-* [bondy.error.malformed](/router/reference/wamp_api/errors/malformed): when a pagination `_cursor` isn't a decodable cursor at all.
+* [bondy.error.malformed](/router/reference/wamp_api/errors/malformed): when a pagination `cursor` isn't a decodable cursor at all.
 * [bondy.error.missing_required_value](/router/reference/wamp_api/errors/missing_required_value): when a required value is not provided.
 * [bondy.error.no_such_groups](/router/reference/wamp_api/errors/no_such_groups): when there is a group name that doesn't exist.
 * [bondy.error.no_such_relay](/router/reference/wamp_api/errors/no_such_relay): when the named mail relay does not exist.
@@ -37,7 +37,7 @@ cluster &mdash; see the [Error Reference](/router/reference/errors).
 * [bondy.error.relay_unavailable](/router/reference/wamp_api/errors/relay_unavailable): when a mail relay could not be reached.
 * [bondy.error.running](/router/reference/wamp_api/errors/running): when an operation cannot proceed because the resource it targets is running or restarting.
 * [bondy.error.sender_not_permitted](/router/reference/wamp_api/errors/sender_not_permitted): when the requested sender address is outside what the mail relay allows.
-* [bondy.error.stale](/router/reference/wamp_api/errors/stale): when a pagination `_cursor` no longer matches the query it was minted for.
+* [bondy.error.stale](/router/reference/wamp_api/errors/stale): when a pagination `cursor` no longer matches the query it was minted for.
 * [bondy.error.timeout](/router/reference/wamp_api/errors/timeout): when the operation execution can't be performed in the provided timeout.
 * [bondy.error.too_many_results](/router/reference/wamp_api/errors/too_many_results): when a bounded `wamp.*` meta enumeration would exceed its result limit.
 * [bondy.error.unavailable](/router/reference/wamp_api/errors/unavailable): when one or more cluster nodes could not be reached to confirm the result of a cluster-wide request.
@@ -53,3 +53,4 @@ cluster &mdash; see the [Error Reference](/router/reference/errors).
 * [wamp.error.no_such_realm](/router/reference/wamp_api/errors/wamp_no_such_realm): when the given realm uri does not exist.
 * [wamp.error.no_such_registration](/router/reference/wamp_api/errors/wamp_no_such_registration): when no registration exists for the given registration id.
 * [wamp.error.no_such_subscription](/router/reference/wamp_api/errors/wamp_no_such_subscription): when no subscription exists for the given subscription id.
+* [wamp.error.timeout](/router/reference/wamp_api/errors/wamp_timeout): when an operation did not finish within the `_deadline` the caller set.

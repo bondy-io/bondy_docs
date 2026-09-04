@@ -89,7 +89,7 @@ How long a per-shard WAL drain may actively process frames without committing an
 
 Bondy's storage layer converges leaderlessly: peers compare Merkle Search Tree root hashes and exchange only the divergent pages, rather than comparing every key. A sync scheduler discovers peers from the live Partisan cluster membership and runs sync sessions over a dedicated Partisan channel, converging each node's view of every replicated table — security (users/grants), realms, the API gateway, the registry, and more.
 
-> **Concept:** see [Clustering](/router/concepts/clustering) for how this fits into cluster formation and convergence generally.
+> **Concept:** see [Convergence](/router/concepts/convergence) for what a sync round does, how a replica that is genuinely behind is detected, and what the repair costs; and [Clustering](/router/concepts/clustering) for how this fits into cluster formation.
 
 @[config](db.aae,on|off,on,v1.0.0)
 
@@ -215,5 +215,7 @@ The `leveled` backend that replaced RocksDB has no equivalent `bondy.conf` tunin
 
 - [Reclamation Configuration Reference](/router/reference/configuration/reclamation) — how anti-entropy's confirmed roots license space reclamation.
 - [Deletion and Reclamation](/router/concepts/deletion_and_reclamation) — the concept behind reclamation.
+- [Convergence](/router/concepts/convergence) — what these options converge, and how a lagging replica is detected and repaired.
+- [Verifying Cluster Convergence](/router/guides/administration/verifying_cluster_convergence) — checking the result on a running cluster.
 - [Clustering](/router/concepts/clustering) — cluster formation and convergence generally.
 - [Upgrading to 1.0.0](/router/guides/deployment/upgrading_to_1_0_0) — the full migration procedure from 1.0.0-rc.65.
