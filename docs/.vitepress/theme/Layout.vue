@@ -45,7 +45,8 @@ const footerColumns = [
       { text: 'bondy.io', href: ORIGINS.website },
       { text: 'GitHub', href: GITHUB_ROUTER },
       { text: 'Community', href: `${ORIGINS.website}/community/` },
-      { text: 'Support', href: `${ORIGINS.website}/support` }
+      { text: 'Support', href: `${ORIGINS.website}/support` },
+      { text: 'Code of Conduct', href: `${ORIGINS.website}/code-of-conduct` }
     ]
   }
 ]
