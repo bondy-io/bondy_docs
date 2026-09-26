@@ -187,9 +187,9 @@
   dependencies:
     buffer "^6.0.3"
 
-"@bondy/site-chrome@git+https://github.com/bondy-io/bondy_site_chrome.git#v0.9.4":
-  version "0.9.4"
-  resolved "git+https://github.com/bondy-io/bondy_site_chrome.git#771bf7f741a54fb728eda035ad0bfb0f1ae09b05"
+"@bondy/site-chrome@git+https://github.com/bondy-io/bondy_site_chrome.git#v0.9.5":
+  version "0.9.5"
+  resolved "git+https://github.com/bondy-io/bondy_site_chrome.git#80f8362cdd034c735ccad9bdc205ff7a952d0bb2"
 
 "@digitalbazaar/http-client@^3.4.1":
   version "3.4.1"
