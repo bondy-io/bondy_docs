@@ -142,7 +142,7 @@ These families track cluster membership and inter-node connectivity &mdash; the 
 | `bondy_cluster_connect_latency_milliseconds`, `_tls_handshake_milliseconds` | Histogram | Outbound connection latency and inbound TLS handshake latency, by `result`; a spike in handshake errors is the slowloris signal. |
 | `bondy_cluster_peer_rtt_milliseconds`, `_peer_send_pending_bytes` | Histogram / Gauge | Inter-node heartbeat round-trip time and send-queue backpressure, by `peer`, `channel` and `side`. |
 | `bondy_alarms`, `_alarm_active` | Gauge | Active alarm count, and a `1` per active alarm labelled by `alarm_id`. The label is the alarm's id rendered whole, so a per-instance condition contributes one series per instance (`{mail_relay_down,<<"smtp1">>}`), not one per family. See the [Alarm Catalogue](/router/reference/alarms). |
-| `bondy_node_ready` | Gauge | `1` when the node reports ready &mdash; the same oracle the `/ready` probe serves: boot complete, durable store open, and no raised alarm declaring `affects_ready`. |
+| `bondy_node_ready` | Gauge | `1` when the node reports ready &mdash; the same oracle the `/ready` probe serves: boot complete, durable store open, every storage shard running, and no raised alarm declaring `affects_ready`. |
 
 ## Router & WAMP
 
@@ -175,7 +175,6 @@ Backs [Registry Routing (RIB)](/router/concepts/registry_routing): the compact p
 | Metric family | Type | Covers |
 |---|---|---|
 | `bondy_registry_rib_members`, `_stub_cells` | Gauge | Live local registry entries feeding this node's routing summaries, and remote routing-summary stubs held by this node, by registry type. |
-| `bondy_registry_rib_damping_suppressions_total` | Counter | Routing-summary updates suppressed by the flap-damping window (`registry.rib.damping`). |
 | `bondy_registry_rib_divergences` | Gauge | Keys where the routing summaries disagree with the registry's own ground truth, as of the last periodic consistency sweep (`registry.rib.check_interval`). |
 | `bondy_rpc_rib_retries_total` | Counter | Pre-invocation retries of cluster calls after an owner-side completion miss, by `outcome` (node / local / exhausted). |
 | `bondy_rpc_rib_completions_total` | Counter | Owner-side completions of node-addressed cluster calls, by `outcome` (ok / miss). |

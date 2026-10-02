@@ -3,5 +3,5 @@ dist
 docs/.vitepress/cache
 docs/.vitepress/dist
 *.lock
-yarn.lock
+package-lock.json
 package-lock.json

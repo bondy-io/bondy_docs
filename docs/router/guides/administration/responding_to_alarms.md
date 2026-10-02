@@ -96,7 +96,7 @@ clear.
 ## 4. Check what you may do
 
 Read the entry's `tasks`. **An empty list is an answer**: Bondy has no
-sanctioned remediation for that condition, and six of the nine conditions are
+sanctioned remediation for that condition, and twelve of the fourteen conditions are
 in that position. Fix the underlying cause or escalate — do not improvise
 against the admin API.
 
@@ -217,7 +217,10 @@ An alarm declaring `affects_ready` takes the node out of rotation: `/ready`
 answers 503 while it is up. Check with
 `bondy.alarm.list` and look for `"affects_ready": true`.
 
-No condition in the current catalogue declares it. The one condition that stops
-a node serving — `bondy_db_main_unavailable` — reports readiness by a separate
-mechanism, so a node that is NOT READY with no `affects_ready` alarm raised is
-reporting a failed durable store, not a bug.
+No condition in the current catalogue declares it. The two conditions that stop
+a node serving its tables — `bondy_db_main_unavailable` and
+`bondy_oplog_instance_down` — report readiness by a separate mechanism, so a
+node that is NOT READY with no `affects_ready` alarm raised is reporting a
+failed durable store or a stopped storage shard, not a bug. Check which with
+`bondy.alarm.list`: both alarms are still raised, they just do not drive
+readiness.

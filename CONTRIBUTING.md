@@ -5,9 +5,9 @@ Thank you for your interest in contributing to the Bondy Developer Documentation
 ## Prerequisites
 
 - Node.js 20 or higher (use `.nvmrc` file with `nvm use`)
-- Yarn package manager
+- npm (ships with Node.js)
 - Git
-- [`just`](https://just.systems) and [`codespell`](https://github.com/codespell-project/codespell) - only needed for `yarn spellcheck` / `yarn spellfix`
+- [`just`](https://just.systems) and [`codespell`](https://github.com/codespell-project/codespell) - only needed for `npm run spellcheck` / `npm run spellfix`
 
 ## Getting Started
 
@@ -21,13 +21,13 @@ cd bondy_docs
 2. **Install dependencies**
 
 ```bash
-yarn install
+npm install
 ```
 
 3. **Start the development server**
 
 ```bash
-yarn docs:dev
+npm run docs:dev
 ```
 
 The documentation site will be available at `http://localhost:5173`
@@ -139,29 +139,29 @@ Before submitting a PR, run the following checks:
 
 ```bash
 # Check formatting
-yarn format:check
+npm run format:check
 
 # Check markdown linting
-yarn lint:md
+npm run lint:md
 
 # Check spelling
-yarn spellcheck
+npm run spellcheck
 
 # Run all checks at once
-yarn check
+npm run check
 ```
 
 ### Auto-fixing Issues
 
 ```bash
 # Auto-format markdown files
-yarn format
+npm run format
 
 # Auto-fix markdown lint issues
-yarn lint:md:fix
+npm run lint:md:fix
 
 # Auto-fix spelling issues (interactive)
-yarn spellfix
+npm run spellfix
 ```
 
 ## Building
@@ -169,7 +169,7 @@ yarn spellfix
 To build the documentation:
 
 ```bash
-yarn docs:build
+npm run docs:build
 ```
 
 The built site will be in `docs/.vitepress/dist/`
@@ -177,7 +177,7 @@ The built site will be in `docs/.vitepress/dist/`
 To preview the built site:
 
 ```bash
-yarn docs:preview
+npm run docs:preview
 ```
 
 ## Submitting Changes
@@ -195,7 +195,7 @@ git checkout -b feature/your-feature-name
 
 3. **Test your changes**
    - Run the dev server and verify your changes
-   - Run all quality checks (`yarn check`)
+   - Run all quality checks (`npm run check`)
    - Build and preview the site
 
 4. **Commit your changes**

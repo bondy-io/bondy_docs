@@ -16,7 +16,7 @@ default:
 
 # Start the VitePress dev server with hot reload
 dev:
-    yarn docs:dev
+    npm run docs:dev
 
 # Run spell checker
 spellcheck:
@@ -56,7 +56,7 @@ check-sets:
 
 # Build the current version only -> docs/.vitepress/dist
 build: check-sets
-    yarn docs:build
+    npm run docs:build
 
 # Download each archived version's released package (skips what's cached)
 fetch-versions:

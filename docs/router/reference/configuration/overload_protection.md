@@ -20,13 +20,39 @@ The node returns to the normal state when the sampled run queue length falls to 
 
 How often the load monitor samples the run queue. The sample is cheap; this interval bounds how quickly the busy state reacts to a change in load.
 
+## Memory Monitor
+
+The memory monitor samples the node's memory use against its limit and exposes a binary high/normal status that the admission gates consult, alongside the load monitor. Inside a cgroup it reads the cgroup: use is the cgroup's anonymous memory and the limit is the cgroup's, because that is the limit the kernel enforces. Outside one, or when `load_regulation.memory_monitor.limit` is set, use is the runtime's own total against that limit. With neither a configured limit nor a bounded cgroup, the monitor logs this once at start and never reports high.
+
+Entering or leaving the high state requires the crossing to hold for three consecutive samples. Entering it raises the [`bondy_memory_high`](/router/reference/alarms#bondy-memory-high) alarm; leaving it clears the alarm.
+
+@[config](load_regulation.memory_monitor.high_watermark,pos_integer,85,v1.0.0)
+
+The node enters the memory-high state when its sampled use reaches this percentage of its limit. While it holds, the admission gates refuse new work with a retryable refusal; work already admitted is not shed.
+
+@[config](load_regulation.memory_monitor.low_watermark,integer,75,v1.0.0)
+
+The node returns to normal when its sampled use falls to this percentage of its limit. Must be below the high watermark: the gap is the hysteresis that stops the status flapping at the boundary.
+
+@[config](load_regulation.memory_monitor.sample_interval,duration_time_units,1s,v1.0.0)
+
+How often the memory monitor samples memory use. Memory moves more slowly than the run queue, so the default is ten times the load monitor's.
+
+@[config](load_regulation.memory_monitor.limit,bytesize,,v1.0.0)
+
+The memory limit to compare against when the node is not in a cgroup that sets one (a bare VM, a developer's machine), or when the cgroup's limit is not the one that matters. When set it wins over the cgroup, and use is then measured as the runtime's own total (`erlang:memory(total)`). Unset by default.
+
 ## Session Admission
 
 @[config](load_regulation.hello.enabled,on|off,on,v1.0.0)
 
-Enables the session admission gate. While the node is in the busy state (see the load monitor options above), a new `HELLO` is refused immediately with a retryable `wamp.error.unavailable` `ABORT`, instead of being accepted into a session open that deep run queues would stretch past the client's timeout while holding a socket and session state.
+Enables the session admission gate. While the node is in the busy state or the memory-high state (see the monitor options above), a new `HELLO` is refused immediately with a retryable `wamp.error.unavailable` `ABORT`, instead of being accepted into a session open that deep run queues would stretch past the client's timeout while holding a socket and session state.
 
 Sessions already established, and handshakes already past `HELLO`, are unaffected — the gate protects the latency of admitted sessions rather than sharing the overload with them. Refusals increment `bondy_wamp_dropped_total` with `reason="admission"` and `family="hello"`.
+
+@[config](load_regulation.oauth2.enabled,on|off,on,v1.0.0)
+
+Enables the admission gate at the OAuth2 token and revocation endpoints, the HTTP counterpart of `load_regulation.hello.enabled`. While the node is in the busy state or the memory-high state, a request is answered immediately with a retryable `503` and a `Retry-After` header, before any credential verification, store read or token write. Requests already past the gate are unaffected.
 
 ## Load Regulation
 

@@ -3,10 +3,10 @@
  * loaded after the shared theme's neutral defaults and after
  * torso.css (see THEMING.md in the template repo).
  *
- * The palette, type and chrome come from @bondy/site-chrome,
- * shared with
- * bondy.io — paper/ink with the baked spruce accent, Inter for text
- * and JetBrains Mono for code. What lives here is only what the
+ * The palette, the VitePress theme tokens (--vp-c-*), type and
+ * chrome come from @bondy/site-chrome, shared with bondy.io —
+ * paper/ink with the baked spruce accent, Inter for text and
+ * JetBrains Mono for code. What lives here is only what the
  * documentation needs on top of that: the reading type scale, the
  * WAMP URI/procedure/topic blocks and the `@[config]`/`@[uri]`
  * custom-block macros. Tabs, buttons, columns, the DRAFT watermark
@@ -14,56 +14,7 @@
  * =============================================================== */
 
 :root {
-  /* Spruce, the Bondy accent. */
-  --vp-c-brand-1: #14705f;
-  --vp-c-brand-2: #0f5c4e;
-  --vp-c-brand-3: #14705f;
-  --vp-c-brand-soft: rgba(20, 112, 95, 0.16);
-
-  /* Paper. */
-  --vp-c-bg: #f1efec;
-  --vp-c-bg-alt: #e8e5e1;
-  --vp-c-bg-elv: #f1efec;
-  --vp-c-bg-soft: #e8e5e1;
-  --vp-c-bg-mute: #e8e5e1;
-
-  --vp-c-divider: #dcd8d2;
-  --vp-c-border: #c9c5bf;
-  --vp-c-gutter: #dcd8d2;
-
-  /* Ink. */
-  --vp-c-text-1: #0b0b0c;
-  --vp-c-text-2: #4a4a4e;
-  --vp-c-text-3: #87847f;
-
-  --vp-sidebar-bg-color: #f1efec;
-
-  --vp-font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
-  --vp-font-family-mono: 'JetBrains Mono', ui-monospace, monospace;
   --vp-code-font-size: 15px;
-}
-
-html.dark {
-  --vp-c-brand-1: #5fd6b4;
-  --vp-c-brand-2: #4dbf9f;
-  --vp-c-brand-3: #14705f;
-  --vp-c-brand-soft: rgba(95, 214, 180, 0.16);
-
-  --vp-c-bg: #0c0d0e;
-  --vp-c-bg-alt: #16181a;
-  --vp-c-bg-elv: #16181a;
-  --vp-c-bg-soft: #16181a;
-  --vp-c-bg-mute: #16181a;
-
-  --vp-c-divider: #1d1f21;
-  --vp-c-border: #2a2c2e;
-  --vp-c-gutter: #0c0d0e;
-
-  --vp-c-text-1: #eeece8;
-  --vp-c-text-2: #a6a49f;
-  --vp-c-text-3: #6f6d69;
-
-  --vp-sidebar-bg-color: #0c0d0e;
 }
 
 body {
@@ -73,19 +24,142 @@ body {
   text-wrap: pretty;
 }
 
-/* Headings carry the torso's tight negative tracking and 500 weight,
-   opened up to documentation line-heights — the website's 0.94 is a
-   display setting for 200px type, not for an H3 in a reference page. */
-.vp-doc h1,
-.vp-doc h2,
-.vp-doc h3 {
+/* ---------------------------------------------------------------------------
+ * Reading type — bondy.io's article body (blog.css, `.torso-blog .body`)
+ *
+ * Scoped to the markdown flow, `.vp-doc > div > *`: VitePress renders a
+ * page's markdown as the children of that one div, while custom blocks (and
+ * the @[config]/@[uri] macros, which are custom blocks), DataTreeView,
+ * ::: button and <Features> all nest deeper. So those keep their own compact
+ * type by structure, with no exemption list to keep in step.
+ *
+ * Headings classed .wamp-procedure / .wamp-topic / .datatype are reference
+ * blocks styled below, not prose headings, so they are excluded.
+ *
+ * Two departures from the website, both forced by the layout: the column is
+ * VitePress's (~690px beside the sidebar and outline) rather than the
+ * website's 900px, which already holds the 66ch measure the website sets, so
+ * no max-width is added; and the H1 keeps the website's floor (38px) and
+ * tracking but caps at 56px, the website's 74px scaled to that column.
+ * ------------------------------------------------------------------------ */
+.vp-doc > div > :is(p, ul, ol) {
+  font-size: 18px;
+  color: var(--ink-2);
+}
+.vp-doc > div > p {
+  margin: 0 0 26px;
+  line-height: 1.68;
+}
+/* The reference blocks are inline-block (or wrap one), so their margins never
+   collapsed: the space between a block and the prose under it was VitePress's
+   16px paragraph top margin, which the rule above removes. Measured across
+   every configuration and WAMP API reference page, each p/ul after a block
+   lost exactly 16px; this puts it back and moves nothing else. */
+.vp-doc > div > :is(.wamp-procedure, .wamp-topic, .datatype, .config-param-deprecated, :has(> .config-param), :has(> .config-param-deprecated)) + :is(p, ul, ol) {
+  margin-top: 16px;
+}
+.vp-doc > div > :is(p, ul, ol) strong { color: var(--ink); font-weight: 500; }
+.vp-doc > div > :is(p, ul, ol, table, blockquote) a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+  font-weight: inherit;
+}
+.vp-doc > div > :is(p, ul, ol, table, blockquote) a:hover {
+  color: var(--blue);
+  text-decoration-color: var(--blue);
+}
+
+.vp-doc > div > h1 {
+  font-size: clamp(38px, 4vw, 56px);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+  margin-bottom: 26px;
+}
+/* The lead paragraph is the website's standfirst (`.art .stand`). */
+.vp-doc > div > h1 + p {
+  font-size: clamp(18px, 2vw, 23px);
+  line-height: 1.48;
+  letter-spacing: -0.01em;
+}
+.vp-doc > div > h2:not(.wamp-procedure, .wamp-topic, .datatype) {
+  font-size: clamp(26px, 3vw, 36px);
   font-weight: 500;
   letter-spacing: -0.035em;
-  line-height: 1.15;
+  line-height: 1.1;
+  color: var(--ink);
+  margin: 52px 0 18px;
+  padding: 0;
+  border: 0;
 }
-.vp-doc h1 { letter-spacing: -0.045em; }
+.vp-doc > div > h3:not(.wamp-procedure, .wamp-topic, .datatype) {
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin: 40px 0 12px;
+}
+/* H4 and H5 are the reference pages' structural labels ("Call", "Result",
+   "Errors"; "Positional Args"), so they take the website's two label voices:
+   the eyebrow (base.css `.eyebrow`) and the kicker (`.kicker`) on a hairline. */
+.vp-doc > div > h4:not(.wamp-procedure, .wamp-topic, .datatype) {
+  font-family: var(--m);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin: 32px 0 10px;
+}
+.vp-doc > div > h5:not(.wamp-procedure, .wamp-topic, .datatype) {
+  font-family: var(--m);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin: 10px 0 20px;
+  padding-top: 24px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line-2);
+}
+.vp-doc .header-anchor { color: var(--ink-3); font-weight: 400; }
 
-/* The mono "eyebrow" voice, as used across bondy.io for small labels. */
+.vp-doc > div > :is(ul, ol) {
+  margin: 0 0 26px;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  line-height: 1.6;
+}
+.vp-doc > div > :is(ul, ol) li > p { margin: 0; }
+.vp-doc > div > blockquote {
+  margin: 40px 0;
+  padding: 0 0 0 26px;
+  border-left: 2px solid var(--blue);
+  font-size: 21px;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.vp-doc > div > blockquote > p { font-size: inherit; color: inherit; margin: 0; }
+.vp-doc > div > hr { border: 0; border-top: 1px solid var(--line); margin: 52px 0; }
+.vp-doc > div > table { margin: 0 0 26px; }
+.vp-doc img { max-width: 100%; border-radius: 12px; }
+.vp-doc figcaption {
+  font-family: var(--m);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-top: 12px;
+}
+
+/* The mono "kicker" voice, as used across bondy.io for small labels
+   (base.css: 13px, .12em, --ink-2). */
 .VPSidebarItem .text,
 .VPDocOutlineItem a,
 .aside .outline-title {
@@ -93,69 +167,107 @@ body {
 }
 .aside .outline-title {
   font-family: var(--vp-font-family-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
+  font-size: 13px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--vp-c-text-3);
+  color: var(--vp-c-text-2);
 }
 
 /* ---------------------------------------------------------------------------
- * Prose inline code — the accent, as in the deck
+ * Code — bondy.io's treatment
  *
- * The shared template quiets VitePress's code pill down to plain body ink
- * (@leapsight/vitepress-template base.css: `.vp-doc :not(pre) > code { color:
- * var(--vp-c-text-1) }`), which leaves `foo` reading as ordinary text in a
- * different face. bondy_slidev colours the same span with the brand accent,
- * and that is the treatment the Bondy properties should share.
+ * Inline code is the website's chip (base.css, `.torso code:not(pre code)`):
+ * accent text on a --paper-2 chip, .85em of the text that hosts it. --blue on
+ * --paper-2 is 4.76:1 by day and 9.97:1 at night (figures from that file).
  *
- * --vp-c-brand-1 is already the accent, and already flips: #14705f on paper,
- * #5fd6b4 at night — the same two values the deck calls --acc-l / --acc-d. So
- * the token does the work and there is nothing to keep in step by hand.
+ * Fenced code renders on the website's dark plate (blog.css) in both
+ * appearances, so Shiki's dark palette is forced (`--shiki-dark`, with the
+ * github-light / github-dark-default pair set in config.mjs). The plate's
+ * colours are set through VitePress's own code tokens rather than by
+ * out-ranking its rules. The website has no line numbers or code groups;
+ * those take the plate's existing vocabulary — 58% paper for dim text (5.2:1
+ * on the plate, per blog.css) and 18% paper for hairlines (base.css `.plate
+ * .ph`).
  *
- * Contrast, WCAG relative luminance against the substrate: 5.21:1 by day
- * (#14705f on #f1efec) and 10.90:1 at night (#5fd6b4 on #0c0d0e). Both clear
- * AA for body text.
- *
- * The leading `html` is only there for weight: the template's rule is (0,1,2)
- * and this has to win regardless of which order the two stylesheets land in
- * the bundle.
- *
- * The deck also sets a tinted chip behind the span (background var(--soft),
- * 0.1em/0.4em padding, 5px radius). Not adopted here — running documentation
- * has far more inline code per paragraph than a slide, and the chips stack up
- * into visual noise. Colour alone carries the distinction.
+ * The leading `html` is only there for weight: the template's and VitePress's
+ * rules are (0,1,x)/(0,2,2) and these must win whatever the bundle order.
  * ------------------------------------------------------------------------ */
+:root {
+  /* 15.3px = .85 × the 18px prose, the website's block and inline size. It is
+     absolute because VitePress's line-number gutter reads this variable while
+     the template sizes `pre` and `code` in em, which compounds (16px -> 14.4px
+     -> 12.96px) and drifted the numbers ~1.8px per line off the lines they
+     number. Naming the token on both elements below keeps the gutter and the
+     code on one value by construction. */
+  --vp-code-font-size: 15.3px;
+  --vp-code-block-bg: var(--plate);
+  --vp-code-block-color: var(--blue-ink);
+  --vp-code-block-divider-color: rgba(241, 239, 236, 0.18);
+  --vp-code-line-number-color: rgba(241, 239, 236, 0.58);
+  --vp-code-lang-color: rgba(241, 239, 236, 0.58);
+  --vp-code-copy-code-bg: rgba(241, 239, 236, 0.08);
+  --vp-code-copy-code-hover-bg: rgba(241, 239, 236, 0.08);
+  --vp-code-tab-text-color: rgba(241, 239, 236, 0.58);
+  --vp-code-tab-hover-text-color: var(--blue-ink);
+  --vp-code-tab-active-text-color: var(--blue-ink);
+  --vp-code-tab-active-bar-color: var(--acc-d);
+}
+
 html .vp-doc :not(pre) > code {
-  color: var(--vp-c-brand-1);
-  /* The template sets 0.85em. Mono reads optically larger than Inter at the
-     same size, which is why it is under 1, but 0.85 undersets it against this
-     site's 19.76px prose. 0.9em: 17.8px in a paragraph, 14.4px in a list
-     item — code still scales with whatever text hosts it. */
-  font-size: 0.9em;
+  background: var(--paper-2);
+  border: 1px solid var(--line-2);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--blue);
 }
 
-/* ---------------------------------------------------------------------------
- * Fenced code blocks — one size, and a gutter that lines up
- *
- * The template sets `font-size: 0.9em` on BOTH the `pre` and the `code` inside
- * a language block (@leapsight/vitepress-template base.css), and em compounds:
- * 16px -> 14.4px on the pre -> 12.96px on the code. VitePress's line-number
- * gutter does not compound — it takes the absolute --vp-code-font-size — so
- * the two ran at different line heights and the numbers drifted away from the
- * lines they number.
- *
- * Measured in headless Chrome on the built site, before this rule: gutter
- * 14px/23.8px against code 12.96px/22.032px — 1.768px of drift per line, so a
- * 20-line block ended ~35px out. `lineNumbers: true` is on site-wide, so every
- * block was affected.
- *
- * Naming the absolute token on both elements fixes the size and the alignment
- * with one value: no compounding, and the gutter is reading the same variable
- * by construction rather than by coincidence.
- * ------------------------------------------------------------------------ */
+html .vp-doc div[class*='language-'] {
+  border-radius: 20px;
+  margin: 40px 0;
+}
+html.dark .vp-doc div[class*='language-'] {
+  border: 1px solid var(--line);
+}
+html .vp-doc div[class*='language-'] pre {
+  padding: 30px 28px;
+}
+/* With the gutter, the code's left inset is the gutter plus the code's own
+   24px, so the pre adds none; the gutter's top padding follows the pre's. */
+html .vp-doc div[class*='language-'].line-numbers-mode pre {
+  padding-left: 0;
+}
+html .vp-doc .line-numbers-wrapper {
+  padding-top: 30px;
+}
 html .vp-doc div[class*='language-'] pre,
 html .vp-doc div[class*='language-'] code {
   font-size: var(--vp-code-font-size);
+}
+html .vp-doc div[class*='language-'] span {
+  color: var(--shiki-dark, inherit);
+}
+
+/* A code group is one plate: the tabs are its rounded top and the blocks
+   below it are square-topped (VitePress already zeroes their top margin and
+   radii). The group carries the plate's outer margin instead of its blocks. */
+html .vp-doc .vp-code-group {
+  margin: 40px 0;
+}
+html .vp-doc .vp-code-group div[class*='language-'] {
+  margin: 0;
+}
+html .vp-doc .vp-code-group .tabs {
+  margin: 0;
+  border-radius: 20px 20px 0 0;
+}
+html.dark .vp-doc .vp-code-group .tabs {
+  border: 1px solid var(--line);
+  border-bottom: 0;
+}
+html.dark .vp-doc .vp-code-group div[class*='language-'] {
+  border-top: 0;
 }
 
 /* ---------------------------------------------------------------------------
@@ -175,11 +287,6 @@ html .vp-doc div[class*='language-'] code {
   font-size: 12.5px;
 }
 
-blockquote > p {
-  line-height: 1.651rem !important;
-  font-size: 1.15rem !important;
-}
-
 /* Prevent sub/sup from affecting line height. */
 sup,
 sub {
@@ -189,23 +296,6 @@ sub {
 }
 sub {
   top: 0.4em;
-}
-
-h4 {
-  margin-top: 30px;
-  margin-bottom: 10px;
-  padding-top: 10px;
-  text-transform: uppercase;
-  font-family: var(--vp-font-family-mono);
-}
-
-h5 {
-  margin-top: 10px;
-  margin-bottom: 20px;
-  padding-top: 24px;
-  font-size: 13px;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--vp-c-divider);
 }
 
 dt {
@@ -447,24 +537,4 @@ table.property-table > tbody > tr > td {
 
 .medium-zoom-image--opened {
   z-index: 101 !important;
-}
-
-/* ---------------------------------------------------------------------------
- * Sidebar curtain vs. the taller Bondy chrome bar — TEMPORARY
- *
- * VitePress pins its .VPSidebar .curtain with a hardcoded `top: -64px` while
- * taking its height and margin from --vp-nav-height. @bondy/site-chrome raises
- * that variable to 106px when the docs bar shows its subbar, so the curtain
- * pins 42px low and paints over the first group heading of every sidebar.
- *
- * Fixed upstream in @bondy/site-chrome v0.7.1 (src/styles/chrome.css, next to
- * the declaration that raises --vp-nav-height), where the full derivation and
- * the headless-Chrome measurements are recorded. package.json already names
- * v0.7.1, but the lockfile still resolves v0.7.0 — `yarn install` needs SSH
- * credentials for the other git dependency. Delete this block once the
- * lockfile has actually moved; until then it is what keeps the first sidebar
- * heading visible.
- * ------------------------------------------------------------------------ */
-:root:has(.chrome-nav--docs) .VPSidebar .curtain {
-  top: calc(var(--vp-nav-height) * -1);
 }

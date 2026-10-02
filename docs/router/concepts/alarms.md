@@ -68,7 +68,7 @@ is *not* a task, and that every declared detail key is actually delivered at the
 raise site.
 
 That last check is worth naming precisely, because the guarantee is narrower
-than it sounds: three of the nine entries declare detail keys and six declare
+than it sounds: ten of the fourteen entries declare detail keys and four declare
 none, so the check proves an entry cannot lie about what it declares — not
 that every alarm carries structured detail.
 
@@ -90,9 +90,10 @@ must *not* drain the node, because the whole WAMP data plane is unaffected. A
 failed durable store is also `major` and must.
 
 Today every catalogue entry declares `affects_ready => false`. That is a
-finding rather than an oversight — of the nine conditions, only
-`bondy_db_main_unavailable` stops the node serving, and its readiness flag
-deliberately does not travel through the alarm at all. Conditions that must
+finding rather than an oversight — of the fourteen conditions, only
+`bondy_db_main_unavailable` and `bondy_oplog_instance_down` stop the node
+serving its tables, and their readiness signals deliberately do not travel
+through the alarm at all. Conditions that must
 survive an alarm-handler crash are recorded outside the alarm subsystem and
 only mirrored as an alarm, so that a crash of the reporting mechanism cannot
 erase the report.
@@ -117,11 +118,12 @@ tribal knowledge:
   be an entry in the [task catalogue](/router/reference/wamp_api/task), which
   carries its `impact` and `blast_radius`.
 
-**Six of the nine entries have no task, and that is the answer rather than a
-gap.** Only the mail relay and the MCP name collision have a remediation in
-the WAMP API; nothing in `bondy.*` fixes a stalled drain, an unopenable durable
-store, an unwritable retirement set, an oversized sync item or a retention
-ceiling. An empty list is what an operator — or an agent — needs: it stops the
+**Twelve of the fourteen entries have no task, and that is the answer rather
+than a gap.** Only the mail relay and the MCP name collision have a remediation
+in the WAMP API; nothing in `bondy.*` fixes a stalled drain, an unopenable
+durable store, a stopped storage shard, memory pressure, a frontier hole, a
+receipt-derived frontier, an undeclared table a peer replicates into, an
+unwritable retirement set, an oversized sync item or a retention ceiling. An empty list is what an operator — or an agent — needs: it stops the
 search rather than inviting improvisation.
 
 Every rendered alarm carries a `catalogue_id`, because an alarm's id is

@@ -27,7 +27,14 @@ export default withThemeDefaults(
     // @bondy/site-chrome ships raw .vue source, so Vite must compile it
     // rather than treat it as an external CommonJS dep during SSR.
     // withThemeDefaults merges this with its own package's entry.
-    vite: { ssr: { noExternal: ['@bondy/site-chrome'] } },
+    // Fonts are never inlined: Vite base64-inlines assets under 4 KB, which
+    // would put the @fontsource subset files (greek, cyrillic, …, and .woff
+    // fallbacks) into the render-blocking stylesheet, though a browser
+    // fetches a subset only when the page uses its glyphs. Same as bondy.io.
+    vite: {
+      build: { assetsInlineLimit: (file) => (/\.woff2?$/.test(file) ? false : undefined) },
+      ssr: { noExternal: ['@bondy/site-chrome'] }
+    },
 
     // These are app level configs.
     // Pagefind shards its index by <html lang>, and the search box merges
@@ -48,10 +55,8 @@ export default withThemeDefaults(
       ['meta', { property: 'keywords', content: "distributed application, application networking platform, scalable, always-on, universal protocol, remote procedure call, RPC, service mesh, publish-subscribe, publish/subscribe, event mesh, authorization, authentication, web application messaging protocol, router, WAMP, wamp router, API gateway, kubernetes, microservices, p2p, erlang"
         }],
       // Type system, shared with bondy.io: Inter (sans) and JetBrains Mono
-      // (code and the uppercase mono labels).
-      ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
-      ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
-      ['link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap' }],
+      // (code and the uppercase mono labels), both self-hosted — see the
+      // font imports in theme/index.js.
       ['meta', {name: "theme-color", content: "#f1efec"}],
       ['meta', {name: "msapplication-TileColor", content: "#171916"}],
       ['meta', { name: "msapplication-config", content: `${base}assets/favicons/browserconfig.xml`}],
@@ -80,7 +85,11 @@ export default withThemeDefaults(
 
     markdown: {
         toc: { level: [3] },
-        theme: 'one-dark-pro',
+        // Fences render on bondy.io's dark plate in both appearances (see
+        // brand.css), so only the dark theme's colours reach the page; the
+        // pair is the website's. github-dark-default's comments are 4.69:1 on
+        // the plate, where github-dark's were 3.0:1.
+        theme: { light: 'github-light', dark: 'github-dark-default' },
         lineNumbers: true,
         attrs: {
           leftDelimiter: '{',
@@ -92,6 +101,13 @@ export default withThemeDefaults(
           // Bondy-specific `@[name](args)` reference macros. Tabs,
           // buttons, columns and definitions come from the shared
           // theme's markdown kit (see @leapsight/vitepress-template/theme/config).
+          // Config keys, enum datatypes and default values are dotted
+          // identifiers, `|`-separated alternatives (written `&#124;` in the
+          // markdown) and paths with no break opportunity, so on a phone a long
+          // one ran off the page. A <wbr> after each separator lets a line
+          // break at segment boundaries and renders nothing otherwise. Display
+          // text only: ids and hrefs keep the raw key.
+          const wrappable = (s) => String(s).replace(/([./|]|&#124;)/g, '$1<wbr>')
           md.use(mdCustomBlock, {
             // URI
             uri (str) {
@@ -132,13 +148,13 @@ export default withThemeDefaults(
             <span>
                 <span class="custom-block-title">
                     <a href="#${param}" aria-hidden="true"></a>
-                    ${param}
+                    ${wrappable(param)}
                 </span>
-                <span class="config-param-meta">&nbsp;::&nbsp;${datatype}</span>
+                <span class="config-param-meta"> ::&nbsp;${wrappable(datatype)}</span>
             </span>
         </span>
         <div class="since-version">
-            <span class="config-param-meta">Default = ${defaultValue}</span>
+            <span class="config-param-meta">Default = ${wrappable(defaultValue)}</span>
             <span>Since&nbsp;${since}</span>
         </div>
     </div>`;
@@ -154,10 +170,10 @@ export default withThemeDefaults(
         <span class="config-param-badge-deprecated">Deprecated</span>
         <span class="config-param-old">
             <a href="#${oldKey}" aria-hidden="true"></a>
-            ${oldKey}
+            ${wrappable(oldKey)}
         </span>
         <span class="config-param-arrow">renamed to</span>
-        <a class="config-param-new" href="#${newKey}"><code>${newKey}</code></a>
+        <a class="config-param-new" href="#${newKey}"><code>${wrappable(newKey)}</code></a>
         ${since ? `<span class="config-param-meta">since&nbsp;${since}</span>` : ''}
     </div>`;
             },
@@ -172,7 +188,7 @@ export default withThemeDefaults(
         <span class="config-param-badge-deprecated">Removed</span>
         <span class="config-param-old">
             <a href="#${oldKey}" aria-hidden="true"></a>
-            ${oldKey}
+            ${wrappable(oldKey)}
         </span>
         ${reason ? `<span class="config-param-meta">${reason}</span>` : ''}
         ${since ? `<span class="config-param-meta">since&nbsp;${since}</span>` : ''}
@@ -189,9 +205,9 @@ export default withThemeDefaults(
                 <span class="config-param-badge">config</span>
                 <span class="custom-block-title">
                     <a href="#${obj.key}" aria-hidden="true"></a>
-                    ${obj.key}
+                    ${wrappable(obj.key)}
                 </span>
-                <span class="config-param-meta">&nbsp;::&nbsp;${datatype}</span>
+                <span class="config-param-meta"> ::&nbsp;${datatype}</span>
             </span>
         </span>
     </div>`;
@@ -393,6 +409,7 @@ function nav() {
         { text: 'WAMP API', link: '/router/reference/wamp_api/index' },
         { text: 'HTTP API', link: '/router/reference/http_api/index' },
         { text: 'HTTP API Gateway', link: '/router/reference/api_gateway/index' },
+        { text: 'Serialization', link: '/router/reference/serialization' },
         { text: 'Metrics', link: '/router/reference/metrics' },
         { text: 'Alarms', link: '/router/reference/alarms' },
         { text: 'Logging', link: '/router/reference/logging' },
@@ -1030,7 +1047,8 @@ function referenceSidebar() {
         { text: 'Configuration', link: '/router/reference/configuration/index' },
         { text: 'WAMP API', link: '/router/reference/wamp_api/index' },
         { text: 'HTTP API', link: '/router/reference/http_api/index' },
-        { text: 'HTTP API Gateway', link: '/router/reference/api_gateway/index' }
+        { text: 'HTTP API Gateway', link: '/router/reference/api_gateway/index' },
+        { text: 'Serialization', link: '/router/reference/serialization' }
       ]
     },
     {

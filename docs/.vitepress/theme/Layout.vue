@@ -9,14 +9,15 @@
 
      Everything generic — the bar, the burger, the night toggle, the footer
      grid, the palette — comes from @bondy/site-chrome. What stays here is
-     only what is specific to this site: the breadcrumb, the version picker,
-     and the footer's Diataxis column set. Search comes from the chrome too —
+     only what is specific to this site: the page head (breadcrumb and
+     version picker, PageHead.vue, which sits with the page rather than in
+     the bar) and the footer's Diataxis column set. Search comes from the chrome too —
      it spans all three deploys, so it cannot belong to any one of them. -->
 <script setup>
-import Theme, { NavbarVersion } from '@leapsight/vitepress-template/theme'
+import Theme from '@leapsight/vitepress-template/theme'
 import { SiteNav, SiteFooter, SiteSearch, GITHUB_ROUTER, ORIGINS } from '@bondy/site-chrome'
 import { withBase } from 'vitepress'
-import Breadcrumb from './Breadcrumb.vue'
+import PageHead from './PageHead.vue'
 
 const { Layout } = Theme
 
@@ -61,11 +62,11 @@ const BLURB =
     <template #layout-top>
       <SiteNav active="docs" self="docs" layout="docs" :github="GITHUB_ROUTER">
         <template #search><SiteSearch self="docs" /></template>
-        <template #subbar>
-          <Breadcrumb />
-          <NavbarVersion />
-        </template>
       </SiteNav>
+    </template>
+    <template #doc-before><PageHead /></template>
+    <template #page-top>
+      <div class="bondy-chrome page-head-band"><div class="wrap"><PageHead /></div></div>
     </template>
   </Layout>
   <SiteFooter

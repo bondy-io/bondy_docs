@@ -56,11 +56,32 @@ nothing to configure to turn it on.
 Local calls and events never leave the node — they resolve against the local
 registry directly.
 
+## Restarts and clocks
+
+A summary cell carries its node's latest *reading* of how many live entries it
+has, stamped from a node-wide hybrid logical clock. On every replica the
+highest-stamped reading wins, so a reading left over from before a restart is
+replaced by the node's next one, never added to or subtracted from.
+
+The registry lives in memory, in the node's `registry` database. Every open of
+that database is followed by a restore that rewrites the node's summary cells
+from its registry. It opens at boot, and again whenever one of its processes
+dies in a running node: the node then closes and reopens the whole database
+and logs `A process of the bondy_db registry DB died; reopening the DB` at
+error level.
+
+This relies on one operational rule: **a node's wall clock must not go back,
+across a restart, past the last stamp the node issued.** A node restarted with
+its clock stepped far enough back writes readings that lose to its own older
+ones, and a peer may keep routing to callees the node no longer has. Keep node
+clocks synchronised (NTP or equivalent) and never step a clock backwards
+across a restart.
+
 ## Configuration
 
-Routing on the RIB is unconditional; there is nothing to enable. Two optional
-settings tune observability and flap control, and neither changes what the
-registry replicates. See the
+Routing on the RIB is unconditional; there is nothing to enable. One optional
+setting tunes observability; it does not change what the registry
+replicates. See the
 [Registry Routing section](/router/reference/configuration/cluster#registry-routing-rib)
 of the Cluster Configuration Reference for the exact keys, defaults, and the
 Prometheus metrics the summary machinery exposes.

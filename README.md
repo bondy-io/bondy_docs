@@ -14,8 +14,8 @@ Visit [developer.bondy.io](https://developer.bondy.io) to view the live document
 ### Prerequisites
 
 - Node.js 20 or higher (use `.nvmrc` with `nvm use`)
-- Yarn package manager
-- [`just`](https://just.systems) and [`codespell`](https://github.com/codespell-project/codespell) - only needed for `yarn spellcheck` / `yarn spellfix`
+- npm (ships with Node.js)
+- [`just`](https://just.systems) and [`codespell`](https://github.com/codespell-project/codespell) - only needed for `npm run spellcheck` / `npm run spellfix`
 
 ### Setup
 
@@ -27,13 +27,13 @@ cd bondy_docs
 
 2. Install dependencies
 ```bash
-yarn install
+npm install
 ```
-`yarn install` fetches `@leapsight/vitepress-template` directly from its (public) git repo — no credentials needed.
+`npm install` fetches `@leapsight/vitepress-template` and `@bondy/site-chrome` directly from their public git repos over HTTPS — no credentials or SSH key needed.
 
 3. Start development server
 ```bash
-yarn docs:dev
+npm run docs:dev
 ```
 
 The site will be available at `http://localhost:5173`
@@ -41,23 +41,23 @@ The site will be available at `http://localhost:5173`
 ## Available Scripts
 
 ### Development
-- `yarn docs:dev` - Start development server with hot reload
-- `yarn docs:preview` - Preview production build locally
+- `npm run docs:dev` - Start development server with hot reload
+- `npm run docs:preview` - Preview production build locally
 
 ### Building
-- `yarn docs:build` - Build for production (includes assets and sitemap)
+- `npm run docs:build` - Build for production (includes assets and sitemap)
 
 ### Code Quality
-- `yarn format` - Format markdown files with Prettier
-- `yarn format:check` - Check formatting without making changes
-- `yarn lint:md` - Lint markdown files
-- `yarn lint:md:fix` - Auto-fix markdown linting issues
-- `yarn spellcheck` - Check spelling
-- `yarn spellfix` - Auto-fix spelling issues (interactive)
-- `yarn check` - Run all checks (format, lint, spell)
+- `npm run format` - Format markdown files with Prettier
+- `npm run format:check` - Check formatting without making changes
+- `npm run lint:md` - Lint markdown files
+- `npm run lint:md:fix` - Auto-fix markdown linting issues
+- `npm run spellcheck` - Check spelling
+- `npm run spellfix` - Auto-fix spelling issues (interactive)
+- `npm run check` - Run all checks (format, lint, spell)
 
 ### Maintenance
-- `yarn outdated` - List outdated dependencies
+- `npm outdated` - List outdated dependencies
 
 ## Project Structure
 
@@ -103,7 +103,7 @@ When a future rewrite needs the same treatment:
 
 ### Previewing the combined site locally
 
-`yarn docs:dev` only ever serves the current version. To see what actually gets deployed — current version plus every archived version at its own path:
+`npm run docs:dev` only ever serves the current version. To see what actually gets deployed — current version plus every archived version at its own path:
 
 ```bash
 just preview-site   # builds current, downloads archived releases, serves it all
@@ -147,8 +147,8 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 1. Fork and create a feature branch
 2. Make your changes
-3. Run quality checks: `yarn check`
-4. Test locally: `yarn docs:dev`
+3. Run quality checks: `npm run check`
+4. Test locally: `npm run docs:dev`
 5. Submit a pull request
 
 ## Technology Stack

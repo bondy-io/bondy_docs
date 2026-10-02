@@ -30,6 +30,10 @@ This guide covers the supported migration path: back up your data using the back
 Starting a 1.0.0 node against a pre-1.0.0 data directory does not migrate it and does not fail loudly — the new storage engine simply doesn't recognise the old files and starts with an empty database. Follow the migration procedure below instead.
 :::
 
+::: info Upgrading from a 1.0.0 pre-release
+None of the migration below applies to a cluster already running a 1.0.0 pre-release that carries `bondy_db` (for example `1.0.0-rc.olive` or `1.0.0-rc.pear`). Upgrade it with a **full cluster restart**: stop every node, then start them all on the new release. Rolling upgrades are not supported. The registry is held in memory, so the restart loses nothing; clients reconnect and register again.
+:::
+
 ## Prerequisites
 
 - **Erlang/OTP 28 or later** on every host that will run 1.0.0 (see [Install from Source](/router/guides/install/source) for the full toolchain). This is a hard requirement, up from OTP 24.

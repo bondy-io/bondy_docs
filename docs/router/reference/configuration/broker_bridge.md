@@ -73,6 +73,10 @@ Forwards WAMP events to Apache Kafka, and is by far the most configurable of the
 
 Enables the Kafka bridge.
 
+An action's `options.encoding` chooses how the record value is serialized:
+`json`, `msgpack` (with the [text and bytes rule](/router/reference/serialization#text-and-bytes)),
+`erl` (the Erlang External Term Format) or `bert`.
+
 ## AWS SNS (SMS)
 Sends SMS messages via AWS SNS (`erlcloud_sns:publish_to_phone/2`) — not general SNS pub/sub, specifically the SMS delivery path. An action needs only `phone_number` (E.164 format) and `text_message`.
 

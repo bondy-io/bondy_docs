@@ -198,17 +198,17 @@ you have legitimately large control-plane payloads that exceed the default.
 
 ## Registry Routing (RIB)
 
-Cross-node call and event routing is unconditional — there is nothing to enable. These two settings tune observability and flap control only; neither changes what the registry replicates. See [Registry Routing (RIB)](/router/concepts/registry_routing) for the concept.
+Cross-node call and event routing is unconditional — there is nothing to enable. The one setting below tunes observability only; it does not change what the registry replicates. See [Registry Routing (RIB)](/router/concepts/registry_routing) for the concept.
 
 @[config](registry.rib.check_interval,duration_time_units,5m,v1.0.0)
 
 How often each node compares its summary cells against the registry ground truth per realm, logging a warning naming any divergence found. `0` disables the sweep.
 
-@[config](registry.rib.damping,duration_time_units,0,v1.0.0)
+The summary machinery is instrumented on the Admin API `/metrics` endpoint (`bondy_registry_rib_members`, `bondy_registry_rib_stub_cells`, `bondy_registry_rib_divergences`, `bondy_rpc_rib_completions_total`, `bondy_rpc_rib_retries_total`), and covered by a dedicated **Registry RIB** section in the bundled Grafana dashboard.
 
-Route-flap damping window. `0` (the default) disables it. On a node whose callee count for a procedure changes rapidly, a non-zero window coalesces updates that change only the callee count to at most one write per window. A procedure's first registration on a node, or its last one leaving, always propagates immediately regardless of this setting.
-
-The summary machinery is instrumented on the Admin API `/metrics` endpoint (`bondy_registry_rib_members`, `bondy_registry_rib_stub_cells`, `bondy_registry_rib_divergences`, `bondy_registry_rib_damping_suppressions_total`, `bondy_rpc_rib_completions_total`, `bondy_rpc_rib_retries_total`), and covered by a dedicated **Registry RIB** section in the bundled Grafana dashboard.
+::: warning Keep node clocks from stepping backwards
+A node's summary cells are stamped from a node-wide hybrid logical clock, and on every replica the highest-stamped reading wins. A node restarted with its wall clock stepped back past the last stamp it issued writes readings that lose to its own older ones, so a peer may keep routing to callees the node no longer has. Keep node clocks synchronised (NTP or equivalent) and never step a clock backwards across a restart. See [Registry Routing (RIB)](/router/concepts/registry_routing#restarts-and-clocks).
+:::
 
 ## Peer Discovery / Automatic Join
 

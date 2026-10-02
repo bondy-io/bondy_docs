@@ -7,36 +7,24 @@
    site has.
    ============================================================ */
 
-/* ── breadcrumb (theme/Breadcrumb.vue) ─────────────────────
-   Rendered into SiteNav's `subbar` slot. The chrome styles that row's
-   links generically; these rules cover the parts only a breadcrumb has —
-   the plain-text crumbs for directories that are not pages, the
-   separators, and the current page. The version picker sits hard right. */
-.chrome-nav .subbar .crumb {
-  display: flex; align-items: center; gap: 10px;
-  min-width: 0; overflow-x: auto; scrollbar-width: none;
-}
-.chrome-nav .subbar .crumb::-webkit-scrollbar { display: none; }
-.chrome-nav .subbar .crumb a,
-.chrome-nav .subbar .crumb span {
-  font-family: var(--m); font-size: 10.5px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--ink-3); white-space: nowrap;
-}
-.chrome-nav .subbar .crumb a:hover { color: var(--blue); }
-.chrome-nav .subbar .crumb .sep { opacity: 0.45; }
-.chrome-nav .subbar .crumb .here { color: var(--ink); }
-.chrome-nav .subbar .ls-nav-version { margin-left: auto; flex: none; }
+/* ── page head band (Layout.vue, page-layout pages) ─────────
+   The portal and set pages have no doc column, so the page head sits in a
+   band aligned with their `.wrap`. Its own styles are in PageHead.vue. */
+.page-head-band { padding-top: 28px; }
+.page-head-band + .docs-home, .page-head-band ~ * .docs-home { padding-top: 40px; }
 
-/* ── the Diataxis home (theme/DocsHome.vue) ──────────────── */
+/* ── the Diataxis home (theme/DocsSet.vue) ───────────────
+   Type follows bondy.io's base.css: the eyebrow and kicker label voices and
+   the shared hero h1 scale used by its Language/Platform/Support pages. */
 .docs-home { padding: 86px 0 100px; min-height: calc(100vh - var(--vp-nav-height)); }
 .docs-home .eyebrow {
-  font-family: var(--m); font-size: 11px; letter-spacing: 0.16em;
+  font-family: var(--m); font-size: 18px; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--blue); margin-bottom: 22px;
 }
 .docs-home .dh-head h1 {
-  font-size: clamp(56px, 10vw, 120px);
-  font-weight: 500; letter-spacing: -0.05em; line-height: 0.9;
-  margin: 0 0 18px -0.045em;
+  font-size: clamp(46px, 7.4vw, 100px);
+  font-weight: 500; letter-spacing: -0.045em; line-height: 0.94;
+  margin: 0 0 18px;
 }
 .docs-home .stand { font-size: 17.5px; line-height: 1.55; color: var(--ink-2); max-width: 52ch; }
 
@@ -50,14 +38,14 @@
 }
 .docs-home .dh-grid section:nth-child(even) { padding-left: 44px; border-left: 1px solid var(--line-2); }
 .docs-home .kicker {
-  font-family: var(--m); font-size: 10.5px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px;
+  font-family: var(--m); font-size: 13px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink-2); margin-bottom: 14px;
 }
 .docs-home .dh-grid h2 {
   font-size: clamp(30px, 3.6vw, 44px); font-weight: 500;
   letter-spacing: -0.04em; line-height: 1; margin: 0 0 16px;
 }
-.docs-home .dh-blurb { font-size: 15.5px; line-height: 1.55; color: var(--ink-2); max-width: 46ch; }
+.docs-home .dh-blurb { font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 46ch; }
 .docs-home .dh-grid ul { list-style: none; margin: 24px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .docs-home .dh-grid li a {
   display: inline-flex; align-items: baseline; gap: 9px;
@@ -96,8 +84,8 @@
 .docs-portal .dp-set:last-child { border-bottom: 1px solid var(--line); }
 .docs-portal .dp-set:hover { background: var(--paper-2); }
 .docs-portal .dp-num {
-  font-family: var(--m); font-size: 10.5px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--ink-3);
+  font-family: var(--m); font-size: 13px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink-2);
 }
 .docs-portal .dp-set h2 {
   font-size: clamp(30px, 3.6vw, 44px); font-weight: 500;
@@ -106,7 +94,7 @@
 }
 .docs-portal .dp-set p {
   grid-column: 2; grid-row: 2;
-  font-size: 15.5px; line-height: 1.55; color: var(--ink-2); max-width: 52ch;
+  font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 52ch;
 }
 .docs-portal .dp-go {
   grid-column: 3; grid-row: 1; justify-self: end;
@@ -128,8 +116,8 @@
 .docs-portal .dp-group { margin-top: 64px; }
 .docs-portal .dp-group + .dp-group { margin-top: 56px; }
 .docs-portal .dp-line {
-  font-family: var(--m); font-size: 10.5px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px;
+  font-family: var(--m); font-size: 13px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink-2); margin-bottom: 14px;
 }
 .docs-portal .dp-group .dp-grid { margin-top: 0; }
 /* The flat list used `gap: 40px` for the column between the numeral and the

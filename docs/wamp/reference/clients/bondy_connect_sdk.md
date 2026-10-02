@@ -498,6 +498,13 @@ The `reconnect` key of the connect spec (merged over these defaults):
 
 `connect/1,2` is fail-fast on the *first* attempt by default: a dead endpoint returns `{error, _}` immediately instead of retrying within `connect/1,2`'s own call. Set `retry_initial_connect => true` to retry that first attempt within the same reconnect budget instead. Once the budget (`max_retries` or `deadline`, whichever comes first) is exhausted, the connection gives up and terminates with exit reason `{shutdown, {reconnect_failed, _}}`; `status/1` then reports `down`.
 
+How a failure is retried depends on whether the session had opened:
+
+- **A session that was up and then dropped** starts a fresh reconnect sequence: the budget is reset and the first attempt is immediate.
+- **A connection that failed before its session opened** — refused, aborted, or dropped before `WELCOME` — waits out the backoff and consumes the budget, as a failed connect does. A router that accepts every connection and then drops it is therefore never redialled in a tight loop. This includes a refused protocol upgrade while a restarting router's listener comes up.
+- **A router `GOODBYE` with `wamp.close.system_shutdown`**, which every session receives during a graceful router restart, is retried after a backoff delay even though the session was up, because the router is saying it is going away. Any other router `GOODBYE` ends the connection.
+- **A router `ABORT`** is retried only when it describes a condition that could clear: its `nature` is `transient`, or, from a router that sends no `nature`, its URI is on a short allow-list of transient errors. Any other `ABORT` ends the connection.
+
 ### Keepalive (ping/pong)
 
 An idle raw-socket connection is probed with WAMP pings; unanswered pings tear the link down (triggering the reconnect above). The `ping` key of the connect spec:

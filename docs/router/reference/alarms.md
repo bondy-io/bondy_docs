@@ -151,6 +151,94 @@ this severe must survive a crash of the handler reporting it, so it is recorded
 outside the alarm state and only mirrored as an alarm. Durable operations fail
 while this holds.
 
+### `{bondy_oplog_instance_down, _}`
+
+A storage shard instance is not running, so its tables are unavailable on this
+node.
+
+- **Severity** `critical` · **Readiness** the node reports **NOT READY**, but
+  not through this alarm — readiness is read from
+  `bondy_oplog_instance_keeper:not_running/0`
+- **Details** `instance_id`
+- **Configuration** none
+- **Observe with** none · **Tasks** none
+
+A shard instance restarts in place after a crash. When its supervisor gives up
+after repeated crashes, the instance is stopped, this alarm is raised, and the
+instance is started again with its original options after a backoff: 1 s,
+doubling to 60 s per consecutive failure, reset once the instance stays up for
+60 s. The alarm clears when the instance is running again, or when it was
+stopped on purpose (its table was closed). Like `bondy_db_main_unavailable`,
+the readiness signal is recorded outside the alarm subsystem and only mirrored
+as an alarm.
+
+### `bondy_memory_high`
+
+The node's memory use is above the high watermark of its limit, and admission
+gates refuse new work.
+
+- **Severity** `major` · **Readiness** unaffected
+- **Details** `usage_bytes`, `limit_bytes`, `source`
+- **Configuration** `load_regulation.memory_monitor.high_watermark`,
+  `load_regulation.memory_monitor.low_watermark`,
+  `load_regulation.memory_monitor.limit`
+- **Observe with** none · **Tasks** none
+
+While it holds, a new session open or token issue is refused with a retryable
+error; work already admitted is not shed. It clears when sampled use falls to
+the low watermark, each crossing held for three consecutive samples. Inside a
+cgroup the limit is the cgroup's; otherwise it is
+`load_regulation.memory_monitor.limit`, and with neither the monitor never
+raises this alarm. See
+[Overload Protection](/router/reference/configuration/overload_protection#memory-monitor).
+
+### `{bondy_oplog_frontier_hole, _}`
+
+A storage shard instance has carried a gap in its applied frontier for longer
+than the alarm threshold.
+
+- **Severity** `major` · **Readiness** unaffected
+- **Details** `instance_id`, `held_for_ms`, `holes`, `origins`
+- **Configuration** `db.frontier.hole_alarm` (default `5m`)
+- **Observe with** none · **Tasks** none
+
+`origins` carries, per origin, the sequence number the gap starts at and how
+much is stranded above it. The standing condition is also exported as the
+`bondy_oplog_instance_frontier_holes` and
+`bondy_oplog_instance_frontier_pending_seqs` metrics. The check runs every
+10 s and keeps running when anti-entropy is off.
+
+### `{bondy_oplog_bucket_unroutable, _}`
+
+A storage shard instance received replicated data for a table it does not
+declare, and withheld the peer's frontier.
+
+- **Severity** `major` · **Readiness** unaffected
+- **Details** `instance_id`, `buckets`
+- **Configuration** none
+- **Observe with** none · **Tasks** none
+
+`buckets` names exactly the tables to declare. Until they are, each
+anti-entropy round leaves this instance behind the peer and schedules another
+catalogue re-bootstrap; the alarm is what marks that cycle as this cause rather
+than a peer that compacted history.
+
+### `{bondy_oplog_frontier_receipt_derived, _}`
+
+A storage shard instance restored an applied frontier that an earlier release
+derived from receipt rather than from applying.
+
+- **Severity** `major` · **Readiness** unaffected
+- **Details** `instance_id`, `origins`, `claimed`
+- **Configuration** none
+- **Observe with** none · **Tasks** none
+
+Such a frontier may claim an applied prefix over data that was never applied,
+which hides a real gap from the convergence checks and lets the unapplied
+events be truncated. No merge can lower a frontier entry, so this cannot be
+repaired in place: wipe this instance's data directory and let it
+re-bootstrap from a peer.
+
 ### `{bondy_oplog_drain_stalled, _}`
 
 A write-ahead-log drain is processing frames without committing a new position.

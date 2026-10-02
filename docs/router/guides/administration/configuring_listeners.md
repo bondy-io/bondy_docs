@@ -236,10 +236,14 @@ quotas compose with this — is the subject of the
 ## Answer probes before the node is ready
 
 An orchestrator's liveness probe and the metrics scrape are useful
-precisely while the node is still starting. `start_phase = early` starts a
-listener before every `normal` one, while the node still reports
-`initialising` — which is why the built-in `admin` listener (carrying
-`/ping`, `/ready` and `/metrics`) is declared early. If you move probes or
+precisely while the node is still starting. `start_phase = early` binds a
+listener before the storage layer opens, which on a node with enough data can
+take minutes: `/ping` answers throughout, so a liveness probe does not kill a
+node that is still opening its store, and `/ready` answers `503` until the node
+is ready. The rest of an early listener's routes, `/metrics` included, answer
+`404` until the node's services start, which is still before every `normal`
+listener binds. That is why the built-in `admin` listener (carrying `/ping`,
+`/ready` and `/metrics`) is declared early. If you move probes or
 metrics onto a listener of your own, carry the phase over:
 
 ```
@@ -250,8 +254,9 @@ listeners.probes.start_phase = early
 listeners.probes.services    = admin, metrics
 ```
 
-`/ready` answering means the normal phase finished binding — use it, not
-`/ping`, as the signal to route traffic to the node.
+Point a liveness probe at `/ping` and a readiness probe at `/ready`. `/ready`
+answering `200` means the normal phase finished binding — use it, not `/ping`,
+as the signal to route traffic to the node.
 
 ## Take the node out of rotation without a restart
 

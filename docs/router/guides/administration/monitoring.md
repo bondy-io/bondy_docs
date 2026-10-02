@@ -110,7 +110,7 @@ Per-node router internals, WAMP session and messaging traffic, the HTTP API gate
 - **WAMP — sessions & transports** &mdash; session churn and close reasons, session duration, router-initiated ping RTT.
 - **WAMP — messaging & RPC** &mdash; message mix by type, call round-trip latency (heatmap, quantiles, slowest procedures), in-flight invocations per procedure, dropped messages, registration/subscription churn.
 - **HTTP — API gateway & admin listeners** &mdash; status-class, error and duration panels, including per-route golden signals.
-- **Registry RIB — routing summaries, retry & presence** &mdash; the routing-summary machinery behind [Registry Routing](/router/concepts/registry_routing): summary occupancy, damping suppressions, consistency-sweep divergences, and cross-node call retry/completion outcomes.
+- **Registry RIB — routing summaries, retry & presence** &mdash; the routing-summary machinery behind [Registry Routing](/router/concepts/registry_routing): summary occupancy, consistency-sweep divergences, and cross-node call retry/completion outcomes.
 
 ### Bondy — Runtime / BEAM
 

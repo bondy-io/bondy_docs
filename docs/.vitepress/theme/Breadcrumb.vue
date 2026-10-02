@@ -9,12 +9,13 @@
      repeat — "Reference / WAMP API", not "Reference / WAMP API Reference".
 
      This is docs-specific policy, so it lives here rather than in
-     @bondy/site-chrome, and is passed into SiteNav's `subbar` slot. -->
+     @bondy/site-chrome. It is rendered by PageHead.vue above the page's H1,
+     so it lists the ancestors only; the H1 names the page itself. -->
 <script setup>
 import { computed } from 'vue'
 import { withBase, useData, useRoute } from 'vitepress'
 
-const { site, page } = useData()
+const { site } = useData()
 const route = useRoute()
 
 // Route path with the deploy base stripped, so matching works the same on
@@ -80,7 +81,7 @@ const crumbs = computed(() => {
 
   // Documentation / <set> / <section> / <subsections…> / <page>
   const set = SETS[segs[0]]
-  if (!set) return [{ text: 'Documentation', here: true }]
+  if (!set) return []
 
   const out = [{ text: 'Documentation', href: withBase('/') }]
   out.push({ text: set.text, href: set.link ? withBase(set.link) : null })
@@ -111,11 +112,8 @@ const crumbs = computed(() => {
     })
   }
 
-  // The page itself, unless its title just repeats the crumb above it (a
-  // section index such as /tutorials/index, titled "Tutorials").
-  const title = page.value.title
-  if (title && title !== out[out.length - 1].text) out.push({ text: title, here: true })
-
+  // The page itself is not a crumb: the trail sits directly above the
+  // page's own H1 (PageHead.vue), which already names it.
   return out
 })
 </script>
@@ -125,11 +123,7 @@ const crumbs = computed(() => {
     <template v-for="(c, i) in crumbs" :key="c.text + i">
       <span v-if="i" class="sep" aria-hidden="true">/</span>
       <a v-if="c.href" :href="c.href">{{ c.text }}</a>
-      <span
-        v-else
-        :class="{ here: c.here }"
-        :aria-current="c.here ? 'page' : undefined"
-      >{{ c.text }}</span>
+      <span v-else>{{ c.text }}</span>
     </template>
   </nav>
 </template>

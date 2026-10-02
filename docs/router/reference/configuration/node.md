@@ -29,6 +29,22 @@ Change this from its default: an unchanged, publicly-known cookie lets anyone wh
 Use environment variable `BONDY_DATA_DIR` instead
 :::
 
+:::warning The data directory must accept `fsync` on a directory
+The durable stores make a write crash-safe by writing a temporary file, syncing
+it, renaming it into place and then syncing the directory, so that the rename
+itself survives a power loss. The data directory must therefore be on a
+filesystem that accepts `fsync` on a directory. APFS does, and so do the
+overlay and tmpfs mounts of a Linux container.
+
+A store also syncs its directory when it opens, before it reads anything there.
+When a directory cannot be synced, `main` fails to open and the node reports
+NOT READY with the [`bondy_db_main_unavailable`](/router/reference/alarms#bondy-db-main-unavailable)
+alarm; a storage shard that cannot sync is restarted, and while it is stopped
+the node reports NOT READY with the
+[`bondy_oplog_instance_down`](/router/reference/alarms#bondy-oplog-instance-down)
+alarm.
+:::
+
 @[config](platform_etc_dir,path,'./etc',v0.1.0)
 
 :::danger DEPRECATED

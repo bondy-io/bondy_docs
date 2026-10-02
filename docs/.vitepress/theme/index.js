@@ -8,6 +8,12 @@
 //
 // Only genuinely bondy_docs-specific pieces live here.
 import Theme from '@leapsight/vitepress-template/theme'
+// Fonts are self-hosted, as on bondy.io. Inter comes from VitePress's default
+// theme (vitepress/dist/client/theme-default/index.js imports its fonts.css),
+// so loading it again only downloads the face twice. JetBrains Mono, which
+// VitePress does not ship, comes from @fontsource at the weights used.
+import '@fontsource/jetbrains-mono/400.css'
+import '@fontsource/jetbrains-mono/500.css'
 import '@bondy/site-chrome/styles/chrome.css'
 
 // Swaps in the shared chrome around the template's Layout.

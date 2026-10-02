@@ -150,9 +150,14 @@ included) that were deferred while it was off.
 
 @[config](listeners.$name.start_phase,early|normal,normal,v1.0.0)
 
-`early` starts the listener before any `normal` one, while the node still
-reports `initialising` — so a liveness or readiness probe, or the metrics
-scrape, answers before the node is ready to serve WAMP sessions. Reaching
+`early` binds the listener before the storage layer opens, serving only the
+liveness (`/ping`) and readiness (`/ready`) routes: `/ping` answers while
+storage opens, which can take minutes on a node with enough data, and `/ready`
+answers `503` until the node is ready. Every other route on an early listener,
+`/metrics` and `/ws` among them, answers `404` until the node's services
+start, when the full route set is mounted. That is still before any `normal`
+listener binds, so the metrics scrape answers before the node serves WAMP
+sessions. Reaching
 `ready` means the normal phase finished binding, not that no client has
 connected yet — nothing gates connection acceptance on the node's readiness
 status.
