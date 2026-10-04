@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@bondy/site-chrome": "git+https://github.com/bondy-io/bondy_site_chrome.git#v0.9.13",
-    "@leapsight/vitepress-template": "git+https://github.com/Leapsight/vitepress-template.git#v0.1.18",
+    "@leapsight/vitepress-template": "git+https://github.com/Leapsight/vitepress-template.git#v0.1.19",
     "@sindresorhus/slugify": "^2.1.1",
     "@types/markdown-it": "^14.1.2",
     "markdown-it": "^14.1.0",
