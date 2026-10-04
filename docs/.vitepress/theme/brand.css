@@ -183,11 +183,10 @@ body {
  * Fenced code renders on the website's dark plate (blog.css) in both
  * appearances, so Shiki's dark palette is forced (`--shiki-dark`, with the
  * github-light / github-dark-default pair set in config.mjs). The plate's
- * colours are set through VitePress's own code tokens rather than by
- * out-ranking its rules. The website has no line numbers or code groups;
- * those take the plate's existing vocabulary — 58% paper for dim text (5.2:1
- * on the plate, per blog.css) and 18% paper for hairlines (base.css `.plate
- * .ph`).
+ * colours, and the code-group plate with its header-style tab strip, come
+ * from @bondy/site-chrome (VitePress's own code tokens and the template's
+ * code-group knobs) and so does the single block's shape and forced dark
+ * palette, shared with the website. What stays here is the code size.
  *
  * The leading `html` is only there for weight: the template's and VitePress's
  * rules are (0,1,x)/(0,2,2) and these must win whatever the bundle order.
@@ -200,17 +199,6 @@ body {
      number. Naming the token on both elements below keeps the gutter and the
      code on one value by construction. */
   --vp-code-font-size: 15.3px;
-  --vp-code-block-bg: var(--plate);
-  --vp-code-block-color: var(--blue-ink);
-  --vp-code-block-divider-color: rgba(241, 239, 236, 0.18);
-  --vp-code-line-number-color: rgba(241, 239, 236, 0.58);
-  --vp-code-lang-color: rgba(241, 239, 236, 0.58);
-  --vp-code-copy-code-bg: rgba(241, 239, 236, 0.08);
-  --vp-code-copy-code-hover-bg: rgba(241, 239, 236, 0.08);
-  --vp-code-tab-text-color: rgba(241, 239, 236, 0.58);
-  --vp-code-tab-hover-text-color: var(--blue-ink);
-  --vp-code-tab-active-text-color: var(--blue-ink);
-  --vp-code-tab-active-bar-color: var(--acc-d);
 }
 
 html .vp-doc :not(pre) > code {
@@ -223,51 +211,9 @@ html .vp-doc :not(pre) > code {
   color: var(--blue);
 }
 
-html .vp-doc div[class*='language-'] {
-  border-radius: 20px;
-  margin: 40px 0;
-}
-html.dark .vp-doc div[class*='language-'] {
-  border: 1px solid var(--line);
-}
-html .vp-doc div[class*='language-'] pre {
-  padding: 30px 28px;
-}
-/* With the gutter, the code's left inset is the gutter plus the code's own
-   24px, so the pre adds none; the gutter's top padding follows the pre's. */
-html .vp-doc div[class*='language-'].line-numbers-mode pre {
-  padding-left: 0;
-}
-html .vp-doc .line-numbers-wrapper {
-  padding-top: 30px;
-}
 html .vp-doc div[class*='language-'] pre,
 html .vp-doc div[class*='language-'] code {
   font-size: var(--vp-code-font-size);
-}
-html .vp-doc div[class*='language-'] span {
-  color: var(--shiki-dark, inherit);
-}
-
-/* A code group is one plate: the tabs are its rounded top and the blocks
-   below it are square-topped (VitePress already zeroes their top margin and
-   radii). The group carries the plate's outer margin instead of its blocks. */
-html .vp-doc .vp-code-group {
-  margin: 40px 0;
-}
-html .vp-doc .vp-code-group div[class*='language-'] {
-  margin: 0;
-}
-html .vp-doc .vp-code-group .tabs {
-  margin: 0;
-  border-radius: 20px 20px 0 0;
-}
-html.dark .vp-doc .vp-code-group .tabs {
-  border: 1px solid var(--line);
-  border-bottom: 0;
-}
-html.dark .vp-doc .vp-code-group div[class*='language-'] {
-  border-top: 0;
 }
 
 /* ---------------------------------------------------------------------------
