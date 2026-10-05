@@ -2,13 +2,13 @@
 layout: page
 pageClass: docs-home-page
 title: Bondy Connect Documentation
-description: Develop, deploy and operate distributed applications with Bondy Connect — tutorials, how-to guides, reference and concepts.
+description: Build on, deploy and operate Bondy Connect, whichever protocol your components speak — tutorials, how-to guides, reference and concepts.
 ---
 
 <DocsSet
   eyebrow="Platform"
   title="Bondy Connect"
-  stand="Everything needed to develop, deploy and operate Bondy Connect, organised by what you came here to do."
+  stand="Everything needed to build on, deploy and operate Bondy Connect, organised by what you came here to do. Components reach it over WAMP, HTTP/REST or MCP; each is covered in every section below."
   :groups="[
     {
       kicker: 'Learning-oriented',
@@ -18,6 +18,7 @@ description: Develop, deploy and operate distributed applications with Bondy Con
       links: [
         { text: 'Get Bondy', href: '/router/tutorials/getting_started/get_bondy' },
         { text: 'The marketplace demo', href: '/router/tutorials/getting_started/marketplace' },
+        { text: 'Your first WAMP component (Python)', href: '/router/tutorials/wamp/wampy' },
         { text: 'The marketplace API gateway', href: '/router/tutorials/getting_started/marketplace_api_gateway' },
         { text: 'Same Sign-On', href: '/router/tutorials/security/same_sign_on' }
       ]
@@ -29,6 +30,7 @@ description: Develop, deploy and operate distributed applications with Bondy Con
       blurb: 'Directions for getting a specific job done. They assume you know what you are trying to achieve and want the steps, not the theory.',
       links: [
         { text: 'Install using Docker', href: '/router/guides/install/docker' },
+        { text: 'Call and register procedures', href: '/router/guides/programming/wamp/rpc' },
         { text: 'Run a cluster', href: '/router/guides/deployment/running_a_cluster' },
         { text: 'Load an API specification', href: '/router/guides/programming/loading_api_spec' },
         { text: 'Monitor a cluster', href: '/router/guides/administration/monitoring' }
@@ -43,6 +45,7 @@ description: Develop, deploy and operate distributed applications with Bondy Con
         { text: 'Configuration Reference', href: '/router/reference/configuration/index' },
         { text: 'HTTP API Reference', href: '/router/reference/http_api/index' },
         { text: 'WAMP Administration API', href: '/router/reference/wamp_api/index' },
+        { text: 'Bondy Connect SDK', href: '/router/reference/clients/bondy_connect_sdk' },
         { text: 'Glossary', href: '/router/reference/glossary' }
       ]
     },
@@ -52,6 +55,7 @@ description: Develop, deploy and operate distributed applications with Bondy Con
       href: '/router/concepts/index',
       blurb: 'What Bondy is, what it does, and why it is built the way it is. Read these when you want the model behind the behaviour rather than an instruction to follow.',
       links: [
+        { text: 'What is WAMP?', href: '/router/concepts/wamp/what_is_wamp' },
         { text: 'What is Bondy?', href: '/router/concepts/what_is_bondy' },
         { text: 'Application networks', href: '/router/concepts/application_networks' },
         { text: 'Architecture', href: '/router/concepts/architecture' },

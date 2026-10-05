@@ -7,7 +7,7 @@ related:
       description: Overview of Bondy's capabilities and use cases.
     - text: What is WAMP
       type: concepts
-      link: /wamp/concepts/what_is_wamp
+      link: /router/concepts/wamp/what_is_wamp
       description: Understanding the Web Application Messaging Protocol.
     - text: Architecture
       type: concepts

@@ -90,4 +90,4 @@ None — denial is reported as a `false` result (with an explanatory `message`),
 ## See also
 - [Grant](/router/reference/wamp_api/grant) — create, revoke, and list the grants this check evaluates.
 - [Group](/router/reference/wamp_api/group) — grants can target a group as well as a user; a user's effective permissions include every group they belong to.
-- [Security](/wamp/concepts/security) — the realm/authentication/authorization model this check is part of.
+- [Security](/router/concepts/wamp/security) — the realm/authentication/authorization model this check is part of.

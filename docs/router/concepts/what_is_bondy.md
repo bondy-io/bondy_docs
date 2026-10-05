@@ -3,7 +3,7 @@ draft: false
 related:
     - type: concepts
       text: What is WAMP
-      link: /wamp/concepts/what_is_wamp
+      link: /router/concepts/wamp/what_is_wamp
       description: Find out more about the Web Application Messaging Protocol
 ---
 
@@ -30,7 +30,7 @@ An application network is a dynamic [overlay network](https://en.wikipedia.org/w
   caption="Bondy application network"
   width="600"/>
 
-Bondy implements the [Web Application Messaging Protocol (WAMP)](/wamp/concepts/what_is_wamp), an open standard that provides:
+Bondy implements the [Web Application Messaging Protocol (WAMP)](/router/concepts/wamp/what_is_wamp), an open standard that provides:
 
 1. **Authentication** with multiple methods including anonymous, password, cryptosign, and OAuth2
 2. **Authorization** through fine-grained Role-Based Access Control (RBAC)
@@ -67,7 +67,7 @@ Message routing adjusts as clients connect, disconnect, and move between nodes: 
 
 Bondy's clients implement an open protocol available in multiple programming languages, over multiple transports, with multiple serialization formats. A backend service in Python, a web app in JavaScript, an IoT device in C, and a mobile app in Swift or Kotlin can all attach to the same realm and interoperate without an adapter or translation layer between them.
 
-Clients choose WebSocket, raw TCP, or Unix domain sockets as a transport, and JSON, MessagePack, or CBOR as a serialization format, independently of each other.
+Clients choose WebSocket, raw TCP, Unix domain sockets, or HTTP long-poll and Server-Sent Events as a transport, and JSON, MessagePack, or CBOR as a serialization format. The HTTP transports carry JSON only; on the others, the transport and the serialization are independent of each other.
 
 ### Deployment
 
@@ -93,7 +93,7 @@ The same Bondy release runs at the edge (for local processing and failover durin
 
 ### AI agent communication
 
-An AI agent system needs more than function calling: event coordination, service discovery, authentication, and authorization, plus the ability for an agent to expose capabilities as well as consume them. WAMP's routed RPC and Pub/Sub, combined with Bondy's RBAC, cover all of this in one protocol rather than requiring it to be assembled separately. See [WAMP for AI agents](/wamp/concepts/what_is_wamp#wamp-for-agent-to-agent-communication) for the detailed comparison against agent-specific protocols such as MCP.
+An AI agent system needs more than function calling: event coordination, service discovery, authentication, and authorization, plus the ability for an agent to expose capabilities as well as consume them. WAMP's routed RPC and Pub/Sub, combined with Bondy's RBAC, cover all of this in one protocol rather than requiring it to be assembled separately. See [WAMP for AI agents](/router/concepts/wamp/what_is_wamp#wamp-for-agent-to-agent-communication) for the detailed comparison against agent-specific protocols such as MCP.
 
 ## Bondy compared to alternatives
 
@@ -129,7 +129,7 @@ For clustering and routing, Bondy uses [Partisan](https://partisan.dev) in place
 
 ## Next steps
 
-- [WAMP](/wamp/concepts/what_is_wamp) and [Architecture](/router/concepts/architecture) — the concepts behind the protocol and the platform.
+- [WAMP](/router/concepts/wamp/what_is_wamp) and [Architecture](/router/concepts/architecture) — the concepts behind the protocol and the platform.
 - [Getting started tutorial](/router/tutorials/getting_started/marketplace) — build something with Bondy.
 - [Deployment guides](/router/guides/deployment/running_a_cluster) — run a cluster.
 - [Community forum](https://github.com/bondy-io/bondy/discussions) — ask a question.

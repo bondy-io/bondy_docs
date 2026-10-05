@@ -146,8 +146,8 @@ curl -X "GET" "http://localhost:18081/api_specs" \
     "realm_uri": "com.leapsight.test",
     "status_codes": {
       "bondy.error.already_exists": 400,
-      "bondy.error.badarg": 400,
-      "bondy.error.no_such_user": 400,
+      "wamp.error.invalid_argument": 400,
+      "wamp.error.no_such_principal": 400,
       "bondy.error.not_found": 404
     },
     "ts": -576460749718,

@@ -22,9 +22,11 @@ Five bridges ship with Bondy: [Kafka](#kafka), [AWS SNS](#aws-sns-sms) (SMS), [S
 [SMTP](#smtp) is the supported path: it sends through a [mail relay](/router/concepts/mail) whose credentials, TLS settings and sender policy live in `bondy.conf`, on a bounded worker pool off the routing path. Mailgun and SendGrid predate it, configure the same underlying HTTP client through global application settings — so **enabling both at once is mutually destructive** — and support neither attachments nor custom headers.
 :::
 
-@[config](broker_bridge.config_file,path,'/platform_etc_dir/broker_bridge_config.json',v0.8.8)
+@[config](broker_bridge.config_file,path,none,v0.8.8)
 
 Path to the Broker Bridge's JSON specification file, which declares the actual subscriptions and their per-bridge action mappings.
+
+There is no default. When the key is unset, the Broker Bridge starts with no subscriptions. When the key names a file that does not exist, the Broker Bridge also starts with no subscriptions, and logs nothing about the missing file. A file that exists but does not parse stops the Broker Bridge.
 
 ## Broker Bridge Specification Object
 

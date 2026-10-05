@@ -4,7 +4,7 @@ outline: [2,3]
 related:
     - text: Network Listeners
       type: Configuration Reference
-      link: /router/reference/configuration/listeners#api-gateway-http-listener
+      link: /router/reference/configuration/listeners#identity-and-mount
       description: Configure the network listeners for the HTTP API Gateway.
     - text: Security
       type: Configuration Reference
@@ -88,14 +88,14 @@ You access the values in this object by writing expressions using the [API Speci
 #### WAMP Result
 The result for a [WAMP Action](#wamp-action).
 
-This object will be accessible with the expression `{{"\{\{action.result\}\}"}}`.
+This object will be accessible with the expression `{{action.result}}`.
 
 <DataTreeView :data="wampResult" :maxDepth="10" />
 
 #### HTTP Forward Result
 The result of a [Forward Action](#forward-action) whose upstream responded with a status code below `400`.
 
-This object will be accessible with the expression `{{"\{\{action.result\}\}"}}`.
+This object will be accessible with the expression `{{action.result}}`.
 
 ```json
 {
@@ -109,7 +109,7 @@ This object will be accessible with the expression `{{"\{\{action.result\}\}"}}`
 `uri` is the upstream response's `Location` header, if it sent one, or an empty string otherwise.
 
 ### Error Object
-The shape of `{{"\{\{action.error\}\}"}}` when an action fails, for either a [WAMP Action](#wamp-action) or a [Forward Action](#forward-action).
+The shape of `{{action.error}}` when an action fails, for either a [WAMP Action](#wamp-action) or a [Forward Action](#forward-action).
 
 For a WAMP action, the error is the called procedure's own WAMP `ERROR` message, with an added `status_code` (derived from `error_uri` via the API's [`status_codes`](#api-object) map):
 
@@ -181,17 +181,16 @@ The following table shows some example expressions being evaluated against the A
 
 |Expression String|Evaluates To|
 |---|---|
-|`{{"\{\{request.method\}\}"}}`|`POST`|
-|`{{"\{\{request.body\}\}"}}`|`{"id": 12345, "bill_to":...}`|
-|`{{"\{\{request.body.sku\}\}"}}`|`"ZPK1972"`|
-|`{{"The sku number is \{\{request.body.sku\}\}"}}`|`"The sku number is ZPK1972"`|
-|`{{"\{\{request.body.price\}\}"}}`|`13.99`|
-|`{{"\{\{request.body.price \|> integer\}\}"}}`|`13`|
-|`{{"\{\{request.body.price \|> string\}\}"}}`|`"13.99"`|
-|`{{"\{\{request.body.customer.first_name\}\}"}}`|`"John"`|
-|`{{"\{\{request.body.customer.first_name\}\}"}} {{"\{\{request.body.customer.last_name\}\}"}}`|`"John Doe"`|
-|`{{"\{\{variables.foo\}\}"}}`|Returns the value of the `foo` variable|
-|`{{"\{\{defaults.status_codes\}\}"}}`|Returns the status codes map|
+|`{{request.method}}`|`POST`|
+|`{{request.body}}`|`{"id": 12345, "bill_to":...}`|
+|`{{request.body.sku}}`|`"ZPK1972"`|
+|`"The sku number is {{request.body.sku}}"`|`"The sku number is ZPK1972"`|
+|`{{request.body.price}}`|`13.99`|
+|`{{request.body.price \|> integer}}`|`13`|
+|`{{request.body.customer.first_name}}`|`"John"`|
+|`"{{request.body.customer.first_name}} {{request.body.customer.last_name}}"`|`"John Doe"`|
+|`{{variables.foo}}`|Returns the value of the `foo` variable|
+|`{{status_codes}}`|Returns the status codes map|
 
 ::: info Learn more
 Expressions also allow to set values in the context and use functions to manipulate the request data. Learn more about expressions in the [API Specification Expressions](/router/reference/api_gateway/expressions) reference section.
@@ -355,7 +354,7 @@ A path specification to be used as a value to a key in the `paths` property of a
 
 ## Action Object
 
-The API Gateway currently supports 3 types of actions.
+The API Gateway supports four types of action: `static`, `forward`, `wamp_call` and `wamp_publish`.
 
 ### Static Action
 An action that returns a static response.
@@ -432,10 +431,30 @@ An action that transforms an incoming HTTP request to a WAMP operation.
 ```
 :::
 
+### WAMP Publish Action
+An action that publishes an event to a WAMP topic, with `type` set to `wamp_publish`. Its fields are those of the WAMP call action, with `topic` in place of `procedure`: `topic`, `options`, `args` and `kwargs`. The parser also requires `timeout` and `retries`. Every field can be an expression evaluated against the [API Context](#api-context).
+
+On success, `action.result` is `{"publication_id": <id>}`.
+
+::: details WAMP Publish Action example
+
+```json
+{
+    "type": "wamp_publish",
+    "topic": "com.example.account.created",
+    "options": {},
+    "args": ["{{request.body}}"],
+    "kwargs": {},
+    "timeout": 15000,
+    "retries": 0
+}
+```
+:::
+
 ## Response Object
 The response object defines what the API Gateway should respond in case of a successful result or error. The purpose of this declaration is to be able to customise the outcome of the action performed according to the [Action Object](#action-object) declaration.
 
-The outcome is obtained from the [API Context](#api-context) `action` property by using an expression such as `{{"\{\{action.result.PROP\}\}"}}` (in case of a successful result) and `{{"\{\{action.error.PROP\}\}"}}` (in case of an error) where `PROP` will depend on the type of action performed.
+The outcome is obtained from the [API Context](#api-context) `action` property by using an expression such as `{{action.result.PROP}}` (in case of a successful result) and `{{action.error.PROP}}` (in case of an error) where `PROP` will depend on the type of action performed.
 
 
 <DataTreeView :data="response" :maxDepth="10" />
@@ -481,64 +500,82 @@ The API Specification parser will use this object to find a default value for th
 <DataTreeView :data="defaults" :maxDepth="10" />
 
 ## Security Object
-The Security Object defines the authentication method to be used for an API Version. The supported authentication methods are:
+The Security Object defines how requests to an API version authenticate. The router enforces only two of the schemes the parser accepts:
 
-* Basic Authentication
-* API Key
-* OAuth2
-    * Client Credentials
-    * Resource Owner Password
+| `type` | Requests to the version's paths | Routes Bondy adds under the version's `base_path` |
+|---|---|---|
+| (empty object) | Served without authentication. | None. |
+| `oauth2` | Require a valid Bondy OAuth2 access token. | The token and revoke paths, `/oauth/jwks`, and a [verify route](#verify-route). |
+| `oidc` | **Refused.** | `/oidc/login`, `/oidc/<provider>/callback`, `/oidc/logout`, and a [verify route](#verify-route). See [OIDC Authentication](/router/concepts/oidc_authentication). |
+| `basic` | **Refused.** | None. |
+| `api_key` | **Refused.** | None. |
 
-
-### Basic Authentication
-
-<DataTreeView :data="basicSecurity" :maxDepth="10" />
-
-
-### API Key Authentication
-
-<DataTreeView :data="apiKeySecurity" :maxDepth="10" />
-::: warning
-CURRENTLY NOT IMPLEMENTED
+::: danger `basic`, `api_key` and `oidc` do not protect a path
+A specification using one of these schemes loads, but Bondy refuses every request to the version's own paths and logs a warning. It never serves them without authentication. Use `oauth2` to protect an HTTP API. The `oidc` scheme exists to run the browser login flow, whose ticket cookie then authenticates WAMP sessions over the [HTTP transports](/router/concepts/http_transports), or a reverse proxy through the verify route.
 :::
-
 
 ### OAuth2 Authentication
 
 <DataTreeView :data="oauth2" :maxDepth="10" />
 
+### Basic Authentication
+
+<DataTreeView :data="basicSecurity" :maxDepth="10" />
+
+### API Key Authentication
+
+<DataTreeView :data="apiKeySecurity" :maxDepth="10" />
+
+### Verify route
+
+The `oauth2` and `oidc` schemes add a route that lets a reverse proxy, such as NGINX with `auth_request`, ask whether a request carries a valid Bondy credential. It is mounted at `<base_path>/oauth/verify` for `oauth2` and `<base_path>/oidc/verify` for `oidc`; set `verify_path` in the Security Object to change it. It verifies against the realm the specification is bound to.
+
+The route accepts `GET` and `HEAD`. It reads the credential from the first of these that is present, and does not fall back to a later one if that credential fails:
+
+1. `Authorization: Bearer <credential>`
+2. `X-Bondy-Ticket: <ticket>`
+3. The `bondy_ticket_<realm_uri>` cookie set by the OIDC login flow
+
+It checks the credential's signature, expiry and revocation; that its scope covers the realm and its issuer is trusted by the realm; that the user is enabled and still exists; and that the realm still allows connections. A credential issued by the OIDC login flow for an identity Bondy does not store locally passes without a local user.
+
+| Outcome | Status | Response |
+|---|---|---|
+| Valid credential | `200` | A JSON body with `active`, `authid`, `authrealm`, `realm`, `authroles`, `authmethod`, `scope`, `issued_at`, `expires_at` and `expires_in`, and the headers `x-bondy-authid`, `x-bondy-authrealm`, `x-bondy-realm`, `x-bondy-authroles` (comma-separated), `x-bondy-authmethod` and `x-bondy-expires-at`. |
+| Anything else | `401` | A JSON error body with `active: false`. |
+
+Every failure answers `401`, including server-side ones, because NGINX turns any other non-2xx status from `auth_request` into a `500`. The route answers *who* the caller is, not what they may do.
+
+## Loading Specifications at Startup
+
+Specifications are usually loaded at runtime through the [HTTP API](/router/reference/http_api/api_gateway). A node can also load them from a file on every boot.
+
+@[config](api_gateway.config_file,path,none,v0.8.8)
+
+The path of a JSON file holding one specification object or an array of them. When the key is unset, no file is loaded.
+
+Each node reads the file on every boot, before its listeners start, and stores each valid specification in the replicated store, from where it reaches the other nodes. A specification identical to the stored one is not written again, so an unchanged file produces no replicated writes on reboot.
+
+The file only adds and updates specifications. Removing a specification from the file does not delete it from the store; delete it with the `bondy.http_gateway.api.delete` WAMP procedure.
+
+Bondy does not stop the boot over a bad file:
+
+- A missing file logs a warning.
+- A file that is not valid JSON logs an error, and nothing from it is loaded.
+- A specification that fails validation logs an error. In an array, the specifications before it are loaded and the ones after it are not.
+
 ## Default Values
 
 ### Status Codes
-The following are the default values used to initialise the [API Context](#api-context).
+Every error URI in Bondy's catalogue has a default HTTP status, listed in the `HTTP` column of the [Error Reference](/router/reference/errors). Bondy initialises the [API Context](#api-context) `status_codes` map from that catalogue. Any URI not in the catalogue, including your own application's error URIs, maps to `500` unless the specification maps it.
+
+Override or extend the defaults with the specification's `status_codes` key:
 
 ```json
 {
-    "bondy.error.already_exists": 400, // BAD REQUEST
-    "bondy.error.not_found": 404, // NOT FOUND
-    "bondy.error.bad_gateway": 504, // SERVICE UNAVAILABLE
-    "bondy.error.http_gateway.invalid_expression": 500, // INTERNAL SERVER ERROR,
-    "bondy.error.timeout": 504, // GATEWAY TIMEOUT
-    "wamp.error.authorization_failed": 500, // INTERNAL SERVER ERROR,
-    "wamp.error.canceled": 400, // BAD REQUEST
-    "wamp.error.close_realm": 500, // INTERNAL SERVER ERROR,
-    "wamp.error.disclose_me_not_allowed": 400, // BAD REQUEST
-    "wamp.error.goodbye_and_out": 500, // INTERNAL SERVER ERROR,
-    "wamp.error.invalid_argument": 400, // BAD REQUEST
-    "wamp.error.invalid_uri": 400, // BAD REQUEST
-    "wamp.error.net_failure": 502, // BAD GATEWAY
-    "wamp.error.not_authorized": 403, // FORBIDDEN
-    "wamp.error.no_eligible_callee": 502, // BAD GATEWAY
-    "wamp.error.no_such_procedure": 501, // NOT IMPLEMENTED
-    "wamp.error.no_such_realm": 502, // BAD GATEWAY
-    "wamp.error.no_such_registration": 502, // BAD GATEWAY
-    "wamp.error.no_such_role": 400, // BAD REQUEST
-    "wamp.error.no_such_session": 500, // INTERNAL SERVER ERROR,
-    "wamp.error.no_such_subscription": 502, // BAD GATEWAY
-    "wamp.error.option_disallowed_disclose_me": 400, // BAD REQUEST
-    "wamp.error.option_not_allowed": 400, // BAD REQUEST
-    "wamp.error.procedure_already_exists": 400, // BAD REQUEST
-    "wamp.error.system_shutdown": 500 // INTERNAL SERVER ERROR
+    "status_codes": {
+        "com.example.error.not_found": 404,
+        "bondy.error.timeout": 503
+    }
 }
 ```
 

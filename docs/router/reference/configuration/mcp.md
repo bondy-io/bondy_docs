@@ -77,8 +77,8 @@ Maximum size of an MCP request body on this listener.
 
 @[config](listeners.$name.mcp.max_inflight,integer,64,v1.0.0)
 
-Maximum number of concurrent in-flight MCP calls per session on this
-listener.
+Has no effect. Bondy accepts the key but does not limit the number of
+concurrent MCP calls per session.
 
 @[config](listeners.$name.mcp.idle_timeout,duration,10m,v1.0.0)
 
@@ -94,13 +94,13 @@ Page size used for MCP list results when the client does not name one.
 
 @[config](listeners.$name.mcp.schema.max_depth,integer,32,v1.0.0)
 
-Maximum nesting depth accepted when validating a JSON Schema carried by an
-MCP request on this listener.
+Has no effect. Bondy accepts the key, but does not validate the arguments
+of an MCP request against a tool's input schema.
 
 @[config](listeners.$name.mcp.schema.max_validation_ms,duration,50ms,v1.0.0)
 
-Time bound on validating a single JSON Schema carried by an MCP request on
-this listener.
+Has no effect, for the same reason as
+[`listeners.$name.mcp.schema.max_depth`](#listeners.$name.mcp.schema.max_depth).
 
 ## Manifest
 

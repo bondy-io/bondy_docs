@@ -2,7 +2,7 @@
 related:
     - type: concepts
       text: Introduction to WAMP
-      link: /wamp/concepts/introduction
+      link: /router/concepts/wamp/introduction
       description: 'Learn the WAMP basics including how to establish a session and use RPC and Publish/Subscribe.'
 ---
 

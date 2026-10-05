@@ -59,7 +59,7 @@ Number of TCP connections to open to the remote router for this bridge.
 
 How long to wait for the initial connection to the remote router before giving up.
 
-@[config](bridge.$name.network_timeout,duration_time_units,60s,v1.0.0)
+@[config](bridge.$name.network_timeout,duration_time_units,30s,v1.0.0)
 
 Drops the connection once the bridge has been waiting this long for the local network to come back up, checked by counting the host's non-loopback IPv4 interfaces. Set to `infinity` to disable — useful for local development with no real network connection, where this check would otherwise fire spuriously.
 
@@ -70,6 +70,16 @@ Drops the connection after this much inactivity. Set to `infinity` to disable.
 @[config](bridge.$name.hibernate,never&#124;idle&#124;always,idle,v1.0.0)
 
 Controls when the bridge connection process hibernates to reclaim memory: `idle` hibernates after a period of inactivity, `always` after every message, `never` disables it.
+
+@[config](bridge.$name.max_frame_size,integer&#124;infinity,4194304,v1.0.0)
+
+The largest frame, in bytes, the bridge is meant to accept. The value must be a positive integer or `infinity`. The default, 4194304 (4 MiB), matches the frame limits of Bondy's other carriers.
+
+`0` is rejected. Use `infinity` for no limit.
+
+::: warning Not enforced in this release
+Bondy validates and stores this value, but the bridge connection does not apply it. The connection reads length-prefixed frames with no size limit taken from this key.
+:::
 
 ## Keepalive
 
@@ -133,20 +143,20 @@ The public key the remote router verifies the challenge signature against.
 
 @[config](bridge.$name.realm.$id.cryptosign.procedure,string,N/A,v1.0.0)
 
-A WAMP procedure, registered locally on the realm by a connected callee, that performs the signing. It's called with two positional arguments — the public key and a base64-encoded challenge — and must return the base64-encoded signature. The callee needs `wamp.register` on this procedure and `bondy.callback.register` on `bondy.auth.crytosign.sign`.
+Not implemented. A bridge configured with this key fails to start. Use `cryptosign.exec` or `cryptosign.privkey_env_var`.
 
 @[config](bridge.$name.realm.$id.cryptosign.exec,string,N/A,v1.0.0)
 
-Alternatively, an external executable that performs the signing, invoked directly (never through a shell) with the public key and challenge as its two arguments, returning the base64-encoded signature on stdout. Because it's executed directly rather than via a shell, there's no argument expansion or `PATH` search to worry about as an injection vector.
+An external executable that performs the signing. Bondy runs it directly, never through a shell, with two arguments: the public key and the raw challenge bytes. It sends the program's standard output, unchanged, as the signature, and the remote router decodes that signature as hexadecimal, so the program must print the hex-encoded Ed25519 signature and nothing else. The program must answer within 10 seconds. Bondy also runs it once when the bridge starts, to check that it works.
 
 @[config](bridge.$name.realm.$id.cryptosign.privkey_env_var,string,N/A,v1.0.0)
 
-Name of an environment variable holding the private key, for the executable (or procedure) to read directly rather than receiving it as an argument.
+Name of an environment variable holding the hex-encoded Ed25519 private key (the 32-byte seed). Bondy reads the variable when the bridge starts and signs with that key; the bridge fails to start if the variable is unset.
 
 @[config](bridge.$name.realm.$id.cryptosign.privkey,string,N/A,v1.0.0)
 
 ::: warning Testing only
-Embeds the private key directly in `bondy.conf`. This exists for local testing only — use `cryptosign.procedure` or `cryptosign.exec` for anything else, so the private key never has to live in a configuration file.
+Embeds the hex-encoded private key directly in `bondy.conf`. This exists for local testing only — use `cryptosign.privkey_env_var` or `cryptosign.exec` for anything else, so the private key never has to live in a configuration file.
 :::
 
 ### Sharing procedures and topics
@@ -166,6 +176,18 @@ Shares a topic URI pattern between the two routers for this realm, using the sam
 ::: warning direction: in is not yet implemented
 Only `out` currently does anything — `in` (and the `in` half of `both`) is accepted by the schema but logs a warning and has no effect; the edge does not yet subscribe on the remote router's side.
 :::
+
+## Forwarding guarantees
+
+These two keys apply to every bridge on the node. They mirror the cluster's [`router.forward.*`](/router/reference/configuration/cluster#cross-node-forwarding) keys.
+
+@[config](bridge.forward.ack,on|off,off,v1.0.0)
+
+Meant to request acknowledged delivery for messages forwarded over bridges. Bondy accepts and stores this value, but no part of Bondy reads it in this release, so it has no effect.
+
+@[config](bridge.forward.retransmission,on|off,off,v1.0.0)
+
+Meant to control retransmission of unacknowledged bridge messages. Accepted and stored, not read: it has no effect in this release.
 
 ## Accepting bridges
 

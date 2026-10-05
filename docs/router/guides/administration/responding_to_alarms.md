@@ -27,7 +27,7 @@ the **master realm**, which is where the alarm API answers.
 
 ## 1. See what is raised
 
-Call [`bondy.alarm.list`](/router/reference/wamp_api/alarm#bondy.alarm.list).
+Call [`bondy.alarm.list`](/router/reference/wamp_api/alarm#bondy-alarm-list-envelope).
 It answers for the whole cluster:
 
 ```json
@@ -60,7 +60,7 @@ been up" even for a condition that re-reports continuously.
 ## 2. Find the catalogue entry
 
 Take `catalogue_id` from the alarm and look it up in
-[`bondy.alarm.catalogue`](/router/reference/wamp_api/alarm#bondy.alarm.catalogue).
+[`bondy.alarm.catalogue`](/router/reference/wamp_api/alarm#bondy-alarm-catalogue-catalogue).
 Match on `id_pattern`.
 
 The entry gives you four things the alarm itself does not: what the condition
@@ -101,7 +101,7 @@ in that position. Fix the underlying cause or escalate — do not improvise
 against the admin API.
 
 Where a task is named, look it up with
-[`bondy.task.describe`](/router/reference/wamp_api/task#bondy.task.describe)
+[`bondy.task.describe`](/router/reference/wamp_api/task#bondy-task-describe-uri-result)
 before running it:
 
 ```json
@@ -155,7 +155,7 @@ Then confirm two things:
 
 1. **The effect**, using the task's `observe_with` procedures.
 2. **The alarm**, using
-   [`bondy.alarm.get`](/router/reference/wamp_api/alarm#bondy.alarm.get) with
+   [`bondy.alarm.get`](/router/reference/wamp_api/alarm#bondy-alarm-get-id-envelope) with
    the wire id from step 1.
 
 An alarm clears when its producer next observes the condition to be false, not
@@ -176,7 +176,7 @@ Publication is demand-gated: with no subscriber, nothing is produced.
 
 ## Reading the transition history
 
-[`bondy.alarm.history`](/router/reference/wamp_api/alarm#bondy.alarm.history)
+[`bondy.alarm.history`](/router/reference/wamp_api/alarm#bondy-alarm-history-page)
 returns alarm transitions across the cluster, newest first, as a page of
 `values`. Each transition names the node that recorded it.
 

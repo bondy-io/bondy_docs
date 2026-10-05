@@ -88,7 +88,7 @@ While the backup is running, the call reports the operation and elapsed time. On
 
 ### 3. Copy the backup file to the new node(s)
 
-Copy the file named in step 1 (e.g. via `scp` or `rsync`) to a location readable by the new deployment. If you're migrating a cluster, you only need to import it once — see step 6 — but you're free to stage the copy on every new node in advance.
+Copy the file named in step 1 (e.g. via `scp` or `rsync`) to a location readable by the new deployment. If you're migrating a cluster, you only need to import it once — see step 7 — but you're free to stage the copy on every new node in advance.
 
 ### 4. Retire the old on-disk data
 
@@ -106,9 +106,84 @@ This step is irreversible. 1.0.0's storage engine writes its own layout under `<
 
 If you're moving to new hosts instead, there's nothing to do here — just point the new nodes at a fresh `platform_data_dir`.
 
-### 5. Install and boot the new 1.0.0 node(s)
+### 5. Install 1.0.0 and check `bondy.conf` against its schema
 
-Install the 1.0.0 release (see [Install from Source](/router/guides/install/source), [Install using Docker](/router/guides/install/docker), or your usual packaging) on each new node, carry over your `bondy.conf` (checking it against the breaking-changes checklist below first), and start it.
+Install the 1.0.0 release (see [Install from Source](/router/guides/install/source), [Install using Docker](/router/guides/install/docker), or your usual packaging) on each new node and carry over your `bondy.conf`. Do not start the node yet.
+
+Check the file before the first start, because a wrong `bondy.conf` does not stop the boot. The release's pre-start hook runs cuttlefish with `--allow_extra --silent`. With `--allow_extra`, cuttlefish skips a key that no schema maps, so an old key is dropped without a message and its subsystem runs on the default. With `--silent`, a value that cuttlefish cannot parse prints nothing; cuttlefish then generates no configuration for the whole file, so none of its settings apply.
+
+The check tool is `scripts/migrate_conf.escript` in the Bondy source tree; the release does not ship it. It needs `escript` (Erlang/OTP) on the `PATH` and finds cuttlefish and the schemas relative to the current directory, so run it from one of two places:
+
+* the root of a 1.0.0 source checkout, after `rebar3 compile`;
+* the root of the unpacked 1.0.0 release, with the script copied there. It reads `bin/cuttlefish` and the schemas under `releases/<vsn>/`.
+
+1. **Check the file.** Nothing is written.
+
+   ```bash
+   ./scripts/migrate_conf.escript check /etc/bondy/bondy.conf
+   ```
+
+   From a source checkout, `just conf-check /etc/bondy/bondy.conf` runs the same command. To check against another schema set, add `--schema-dir DIR` (repeatable).
+
+   The report has one section per kind of finding, and the `RESULT` line comes last:
+
+   ```text
+   /etc/bondy/bondy.conf
+     4 keys, schemas: schema schema/hidden _build/default/lib/riak_sysmon/priv
+
+     KEYS: 3 of 4 are set but this release maps none of them, so each
+     is dropped in silence at boot and the setting does not apply.
+
+     RENAME -- same setting, new key (2)
+       oplog.aae.interval                             = 1m             ->  db.aae.interval
+       oplog.core.shard_count                         = 16             ->  db.main.shard_count
+
+     DROP -- no equivalent on this release (1)
+       store.rocksdb.max_open_files                   = 1000
+           the RocksDB tuning surface; this release has no equivalent
+
+     INVALID VALUE (1) -- this release reads this key, but cannot parse the value.
+     ...
+       db.wal.fsync_mode                              = sometimes
+           not a valid one of per_write, batched. Generation stops at phase
+           transform_datatypes.
+
+     LISTENERS: this file writes no listeners.* key, so the node
+     starts the built-in default inventory and nothing else:
+       admin
+       api_gateway_http
+       wamp_tcp
+
+   RESULT  3 keys not read, 1 invalid value, 0 listener findings -- see above
+   ```
+
+   | Section | Meaning |
+   |---|---|
+   | `KEYS` | Keys that 1.0.0 does not read, grouped by what to do: `RENAME` (same setting, new key), `CONTESTED` (the rename changes behaviour), `ALREADY SET` (the new key is also in the file with another value), `DROP` (no equivalent), `BY HAND` (no mechanical equivalent; the tool names candidates), `NOT ON THIS RELEASE`, and `NO RULE`. `KEYS: all recognised` means none. |
+   | `INVALID VALUE` | Keys that 1.0.0 reads but whose value it cannot parse. One such value discards the whole file, so fix these first. |
+   | `CHANGED MEANING` | Keys still read, but not as before. Confirm each value still says what you meant. These do not affect the exit code. |
+   | `LISTENERS` | The listeners the file will start, and any listener finding. |
+
+   If an `advanced.config` sits next to the file, the tool checks it too and reports stanzas that no longer take effect. The exit code is `0` when `RESULT` reads `clean`, `1` when there are findings, and `2` when the check could not run (for example, the file does not exist or cuttlefish cannot be found).
+
+2. **Write a converted file.** If the check reports findings, let the tool apply the mechanical renames:
+
+   ```bash
+   ./scripts/migrate_conf.escript migrate /etc/bondy/bondy.conf \
+     --out /etc/bondy/bondy.conf.new
+   ```
+
+   `migrate` never edits the input and refuses an `--out` file that already exists (exit `2`). In the new file, renamed keys carry their new names. Dropped keys and keys that need a decision are commented out, each under `## migrate_conf:` lines that say why. Search the new file for `## migrate_conf: needs a decision` and resolve each one by hand. The exit code reports the check of the file just written, not whether the rewrite ran.
+
+3. **Check the result.** Run `check` on the new file until `RESULT` reads `clean -- every key is read, every value parses, every listener is declared` and the exit code is `0`. Then put it in place as the node's `bondy.conf`.
+
+From a source checkout, `./scripts/migrate_conf.escript selftest` checks the tool's own rules against the schemas it runs with and prints `selftest OK` on success. It needs the source tree's shipped configuration files, so it does not run from a release root.
+
+The release also contains `bin/validate-config`. It does not check keys or values: the pre-start hook runs it on every start to confirm that `bondy.conf` (or `bondy.conf.template`) and `vm.extra.args` exist in the `etc` directory. Do not use it as a schema check.
+
+### 6. Boot the new 1.0.0 node(s)
+
+Start each node.
 
 If you're running (or moving to) more than one node, join them into a cluster now, before importing — see [Running a Cluster](/router/guides/deployment/running_a_cluster).
 
@@ -116,7 +191,7 @@ If you're running (or moving to) more than one node, join them into a cluster no
 If `cluster.peer_discovery.enabled = on` and the Partisan peer plane isn't secured (TLS off, or TLS on without peer certificate verification), 1.0.0 **refuses to start** rather than cluster over an unauthenticated connection. Configure `cluster.tls.enabled = on` with `verify_peer` and a private cluster CA, or set `cluster.tls.allow_insecure = on` to acknowledge the risk explicitly. See the [Cluster Configuration Reference](/router/reference/configuration/cluster).
 :::
 
-### 6. Import the backup file
+### 7. Import the backup file
 
 Call `bondy.export.import` on the new deployment with the path to the file you copied over. This is 1.0.0's importer, and it recognises the pre-1.0.0 file format by its header: it transparently translates each old record into a write against the new storage engine as it reads, so you don't need to convert anything yourself.
 
@@ -138,7 +213,7 @@ The import is a set of fresh writes, not a byte-for-byte restore: replication me
 Recreate each realm from your configuration or with `bondy.realm.create` calls, the same way you provisioned it originally — before or after the import, it doesn't matter for the data. It does matter for your clients, though: they can't attach to a realm, and so can't exercise the imported users and grants, until it exists again.
 :::
 
-### 7. Verify and decommission the old deployment
+### 8. Verify and decommission the old deployment
 
 Spot-check that realms, users, and API gateway specs are present on the new deployment before you decommission the old one. Once you're satisfied, take the old nodes out of service.
 
@@ -148,7 +223,7 @@ Review these before you finalise your `bondy.conf` and cutover plan — none of 
 
 ### Storage and AAE key renames
 
-Every storage-related `bondy.conf` key changed name as part of the storage-engine replacement. Bondy refuses to boot if it finds a key it doesn't recognise, so carrying an old key over unchanged is not a silent no-op — it's a startup failure, naming the offending key and suggesting the closest current key by edit distance.
+Every storage-related `bondy.conf` key changed name as part of the storage-engine replacement. Bondy does not refuse to boot on a key it doesn't recognise: the release's pre-start hook runs cuttlefish with `--allow_extra`, so an old key carried over unchanged is dropped without a message and its setting does not apply. The check in [step 5](#_5-install-1-0-0-and-check-bondy-conf-against-its-schema) reports every such key and its replacement.
 
 The `oplog.` prefix is now `db.`, unconditionally. If you didn't customise any of these, there's nothing to do — the defaults are unchanged:
 
@@ -209,7 +284,7 @@ None of these existed at 1.0.0-rc.65 in any form — there's nothing to migrate,
 
 - **Erlang/OTP 28 minimum.** Up from OTP 24. Upgrade the Erlang runtime on every host before installing 1.0.0.
 - **Cowboy 2.17's query-string/form-field cap.** Cowboy was upgraded from 2.13.0 to 2.17.0, which rejects any request carrying more than 100 query-string parameters or `application/x-www-form-urlencoded` form fields — a Cowboy 2.17 default that Bondy does not override. This affects API Gateway routes that read query parameters, the OAuth2 token endpoint, and the OIDC login/callback endpoints. Audit any client that sends unusually wide query strings or large forms before cutting over.
-- **Partisan peer-plane TLS gate.** Covered in step 5 above — an auto-clustering node with an insecure peer plane now refuses to start instead of clustering insecurely. Only relevant if `cluster.peer_discovery.enabled = on`.
+- **Partisan peer-plane TLS gate.** Covered in step 6 above — an auto-clustering node with an insecure peer plane now refuses to start instead of clustering insecurely. Only relevant if `cluster.peer_discovery.enabled = on`.
 - **HTTP/2 on every listener.** All four HTTP listeners now negotiate HTTP/2 automatically (ALPN on the HTTPS listeners, `h2c`/prior-knowledge on the HTTP listeners) — there's no setting to opt out. Nothing to configure, but revisit capacity planning: one HTTP/2 connection can carry up to `max_concurrent_streams` (default 100) requests concurrently, so connection-count-based alarms will now undercount request-level load.
 
 Not a breaking change, but worth considering while you're already re-provisioning nodes: realm private keys can now be encrypted at rest via `security.master_key.*`. See [Security Configuration Reference → Realm Signing Keys](/router/reference/configuration/security#realm-signing-keys).

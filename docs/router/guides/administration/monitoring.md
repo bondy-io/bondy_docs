@@ -29,9 +29,9 @@ Bondy ships a ready-to-run Prometheus and Grafana stack under `monitoring/` in t
 From the repository root, build and start each dev-cluster node you want to observe:
 
 ```bash
-make node1        # and optionally, in separate terminals:
-make node2
-make node3
+just node1        # and optionally, in separate terminals:
+just node2
+just node3
 ```
 
 Each target builds that node's release and starts it attached to your terminal (`bondy console`) &mdash; run each one in its own terminal, or background it. The dev cluster offsets each node's Admin API port by `100`: node1 serves `18081`, node2 `18181`, node3 `18281`.
@@ -43,11 +43,11 @@ cd monitoring
 docker compose up -d
 ```
 
-This starts two containers: Prometheus (`prom/prometheus`, port `9090`) and Grafana (`grafana/grafana`, port `3000`), wired together by `monitoring/docker-compose.yml`. Grafana is provisioned with:
+This starts three containers, wired together by `monitoring/docker-compose.yml`: Prometheus (`prom/prometheus`, port `9090`), Tempo (`grafana/tempo`, ports `3200` for queries and `4318` for OTLP/HTTP trace ingest) and Grafana (`grafana/grafana`, port `3000`). Grafana is provisioned with:
 
 - a **Prometheus** datasource pointing at the `prometheus` container;
 - an **Infinity** datasource (`yesoreyeram-infinity-datasource`, installed automatically) used to shape the cluster topology graph;
-- five dashboards, auto-loaded from `monitoring/grafana/dashboards/` into a **Bondy** folder, refreshed every 30 seconds if you edit the JSON files on disk.
+- nine dashboards, auto-loaded from `monitoring/grafana/dashboards/` into a **Bondy** folder: cluster overview, cluster graph, cluster sync, storage (oplog and MST), router and WAMP, BEAM runtime, HTTP Connector, MCP, and Mail. They are refreshed every 30 seconds if you edit the JSON files on disk.
 
 Prometheus scrapes every `10s` and retains `7d` of data by default (`monitoring/prometheus/prometheus.yml` and the `--storage.tsdb.retention.time` flag in `docker-compose.yml`, respectively) &mdash; enough for local debugging, not a production retention policy.
 

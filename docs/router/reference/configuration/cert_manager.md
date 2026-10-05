@@ -36,13 +36,13 @@ These options can also be updated at runtime via the
 `bondy.cert_manager.set_client_auth`
 [WAMP procedure](/router/reference/wamp_api/cert_manager#set-client-auth).
 
-@[configDeprecated](api_gateway.https.verify,listeners.$name.tls.verify,v1.0.0)
+@[configDeprecated](api_gateway.https.verify,listeners.$name.tls.verify,v1.0.0,/router/reference/configuration/listeners)
 
-@[configDeprecated](admin_api.https.verify,listeners.$name.tls.verify,v1.0.0)
+@[configDeprecated](admin_api.https.verify,listeners.$name.tls.verify,v1.0.0,/router/reference/configuration/listeners)
 
-@[configDeprecated](wamp.tls.verify,listeners.$name.tls.verify,v1.0.0)
+@[configDeprecated](wamp.tls.verify,listeners.$name.tls.verify,v1.0.0,/router/reference/configuration/listeners)
 
-@[configDeprecated](wamp.tls.fail_if_no_peer_cert,listeners.$name.tls.fail_if_no_peer_cert,v1.0.0)
+@[configDeprecated](wamp.tls.fail_if_no_peer_cert,listeners.$name.tls.fail_if_no_peer_cert,v1.0.0,/router/reference/configuration/listeners)
 
 The removed per-scheme spellings (`api_gateway.https.*`,
 `admin_api.https.*`, `wamp.tls.*`) are no longer read — see

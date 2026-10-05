@@ -195,11 +195,11 @@ If secret resolution fails at startup (e.g. AWS is unreachable), the service is 
 | 400 | `wamp.error.invalid_argument` |
 | 401 | `wamp.error.not_authorized` |
 | 403 | `wamp.error.not_authorized` |
-| 404 | `wamp.error.not_found` |
+| 404 | `bondy.error.not_found` |
 | 408 | `wamp.error.timeout` |
 | 422 | `wamp.error.invalid_argument` |
 | 429 | `bondy.error.too_many_requests` |
-| 4xx (other) | `bondy.error.invalid_argument` |
+| 4xx (other) | `wamp.error.invalid_argument` |
 | 502 | `bondy.error.bad_gateway` |
 | 503 | `bondy.error.bad_gateway` |
 | 504 | `wamp.error.timeout` |
@@ -227,14 +227,9 @@ The WAMP error kwargs contain the HTTP status and response body:
 
 ### Retries
 
-HTTP requests are retried on connection failures with exponential backoff:
+Bondy retries a request when it fails at the transport level, for example a refused connection or a timeout. It never retries a request that received an HTTP response, whatever the status, and it does not retry while the service's connection pool is marked down.
 
-| Attempt | Backoff |
-|:---|:---|
-| 1 | 0 ms (immediate) |
-| 2 | 300 ms |
-| 3 | 600 ms |
-| 4 | 1200 ms |
+Before each retry Bondy waits a random time with exponential backoff: a random value up to 50 ms × 2^(attempt − 1), capped at 200 ms, and never less than 30 ms. The wait is kept short because the connector runs inside the caller's dispatch path, so a long sleep would delay other calls queued behind it.
 
 Default: 3 retries, 30 second timeout. Both are configurable per service.
 

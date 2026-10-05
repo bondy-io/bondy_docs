@@ -42,7 +42,7 @@ applied set had no holes:
 Anti-entropy is pull-only: a node integrates a peer's whole tree once it
 holds every page of that tree. Compaction, meanwhile, truncates history that
 every *confirmed* peer has applied — and the confirmation set is
-recency-filtered, so a node silent past `db.aae.peer_timeout` no longer
+recency-filtered, so a node silent past `db.compaction.peer_timeout` no longer
 holds truncation back.
 
 The hazardous interleaving needs three steps. A node falls silent; the live

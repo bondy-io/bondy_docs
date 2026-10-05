@@ -8,7 +8,7 @@ related:
       description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
     - text: HTTP API Gateway
       type: Reference
-      link: /router/reference/api_gateway/specification#api-specification-object
+      link: /router/reference/api_gateway/specification#api-object
       description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics.
     - text: HTTP API Gateway
       type: HTTP API Reference
@@ -24,7 +24,7 @@ In this tutorial we are going to pick up where we left off with the [Marketplace
 
 The idea is to now expose the Marketplace WAMP API to HTTP. The goal is to demonstrate how one can use Bondy's capabilities to integrate HTTP clients into the a Bondy Application Network.
 
-The steps in the following sections will demonstrate how to create an HTTP [API Specification Object](/router/reference/api_gateway/specification#api-specification-object) from scratch, loading it in Bondy and demonstrating how we can call the resulting HTTP/REST API using an HTTP client.
+The steps in the following sections will demonstrate how to create an HTTP [API Specification Object](/router/reference/api_gateway/specification#api-object) from scratch, loading it in Bondy and demonstrating how we can call the resulting HTTP/REST API using an HTTP client.
 
 ::: definition API Gateway Specification
 An API Gateway Specification is a document, a JSON data structure, that _declaratively_ defines an HTTP/REST API and how Bondy should handle each HTTP Request e.g. by converting it into a WAMP operation or forwarding it to an upstream (external) HTTP/REST API.
@@ -32,7 +32,7 @@ An API Gateway Specification is a document, a JSON data structure, that _declara
 
 ## Background
 
-The architecture remains the same as the one discussed in [Marketplace tutorial](/router/tutorials/getting_started/marketplace#demo-architecture) with the exception that we will now have the HTTP API Gateway and an HTTP client which are shown in the updated view below.
+The architecture remains the same as the one discussed in [Marketplace tutorial](/router/tutorials/getting_started/marketplace#marketplace-architecture) with the exception that we will now have the HTTP API Gateway and an HTTP client which are shown in the updated view below.
 
 <ZoomImg src="/assets/tutorials/marketplace_api_gateway/marketplace.png"/>
 
@@ -119,7 +119,7 @@ As you can see in the lines highlighted below we added `oauth2` and `password` a
 ## Steps
 
 ### Run the Marketplace Demo
-If you do not have a local copy of the [Marketplace Demo repository](https://github.com/bondy-io/bondy-demo-marketplace) follow the instructions in the [Marketplace tutorial](/router/tutorials/getting_started/marketplace#_2-build-and-run-the-demo) to download it.
+If you do not have a local copy of the [Marketplace Demo repository](https://github.com/bondy-io/bondy-demo-marketplace) follow the instructions in the [Marketplace tutorial](/router/tutorials/getting_started/marketplace#build-and-run-the-demo) to download it.
 
 Otherwise (assuming the repo it is under your home directory) do:
 

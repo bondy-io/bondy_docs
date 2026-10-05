@@ -76,7 +76,7 @@ This value also divides [load_regulation.router.flow_pool.capacity](#load_regula
 
 The capacity of the router process pool, i.e. the maximum number of
 active erlang processes handling router events.
-Once the maximum has been reached, Bondy will respond with an overload error. This is further limited by [vm.process.limit](/router/reference/configuration/node).
+Once the maximum has been reached, Bondy will respond with an overload error. This is further limited by [vm.process.limit](/router/reference/configuration/node#vm.process.limit).
 
 @[config](load_regulation.router.flow_pool.capacity,integer,100000,v1.0.0)
 
@@ -110,6 +110,29 @@ flight concurrently.
 
 The capacity of the session manager process pool, i.e. the maximum
 number of active erlang processes handling session events (default = 32).
+
+@[config](load_regulation.job_manager.pool.size,pos_integer,16,v1.0.0)
+
+The number of job manager workers. The job manager runs background work off the request path: the WAMP meta events for registrations and subscriptions, the WAMP events Bondy publishes for its own events (realm, session, cluster connection and alarm changes), and the [token and ticket reclamation](/router/reference/configuration/security#token-and-ticket-reclamation) sweeps.
+
+Each worker owns one FIFO queue and runs its jobs one at a time, in queue order. A job goes to the worker chosen by hashing its partition key, so jobs that share a key — the meta events of one session, for example — run in the order they were queued.
+
+@[config](load_regulation.job_manager.queue.size,pos_integer,160000,v1.0.0)
+
+The total capacity of the job queues, split evenly across the workers: each worker's queue holds `queue.size / pool.size` jobs, rounded.
+
+When a worker's queue is full, a new job for it is refused. Jobs already queued are kept. What happens to the refused job depends on its kind:
+
+- A meta event or a Bondy event is dropped. The drop is counted in `bondy_wamp_dropped_total` with `reason="shed"` and logged as a warning at most once per window. Subscribers to those topics miss the event.
+- A reclamation round is logged as a warning and retried after about five minutes.
+
+@[config](load_regulation.job_manager.queue.ttl,duration_time_units,1m,v1.0.0)
+
+Bondy sets this value as the maximum waiting time of each worker queue.
+
+::: warning No effect in this release
+The worker queues are passive queues of the `jobs` library, and that library checks a queue's maximum waiting time only for queues it schedules itself. A job in a passive queue is never evicted for age, so this setting does not remove old jobs.
+:::
 
 
 @[config](registry.partitions,pos_integer,32,v1.0.0)

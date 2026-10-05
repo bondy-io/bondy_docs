@@ -37,7 +37,7 @@ Choosing convergence is not choosing to ignore correctness. Bondy's storage laye
 - **Distributed by design** — a reliable distributed router, continuing to operate through node or network failures via clustering and data replication.
 - **Scalable** — built on Erlang/OTP, which supplies the concurrency substrate for handling from a handful to millions of concurrent connections on a single node; horizontal scaling is adding nodes to the cluster.
 - **Peer-to-peer, masterless clustering** — every node in a Bondy cluster is equal; there is no leader election and no special node.
-- **Low-latency replication** — cluster-wide state (security, realms, the registry, and more) converges via per-table CRDTs over a pull-based anti-entropy protocol, not synchronous replication. See [Clustering](/router/concepts/clustering).
+- **Low-latency replication** — cluster-wide state (security, realms, API specifications, and more) converges via per-table CRDTs over a pull-based anti-entropy protocol, not synchronous replication. Registrations and subscriptions stay on the node that owns them; only per-node routing summaries replicate. See [Clustering](/router/concepts/clustering) and [Registry Routing (RIB)](/router/concepts/registry_routing).
 - **Embedded HTTP API Gateway** — translates HTTP/REST requests to WAMP routed RPC and Pub/Sub, with API specifications themselves replicated cluster-wide in real time.
 - **Embedded identity, authentication, and RBAC** — each realm manages users, groups, sources, and grants natively, replicated across the cluster for always-on, low-latency authentication and authorization.
 - **Embedded Broker Bridge** — republishes WAMP events to an external non-WAMP system, e.g. a message broker like Kafka.
@@ -62,7 +62,7 @@ Because convergence never blocks on a majority round-trip, an isolated node can 
 
 ### Clustering
 
-Nodes connect over [Partisan](https://partisan.dev), a high-performance Distributed Erlang replacement supporting multiple network topologies and larger clusters than standard Distributed Erlang. Partisan carries two kinds of traffic on separate channels: cluster membership and control messages, and the anti-entropy sync sessions described above. See [Clustering](/router/concepts/clustering) for cluster formation, peer discovery, and the security posture of the peer plane (TLS is optional but strongly recommended — an insecure peer plane can leak replicated credentials and signing keys).
+Nodes connect over [Partisan](https://partisan.dev), a high-performance Distributed Erlang replacement supporting multiple network topologies and larger clusters than standard Distributed Erlang. Partisan carries Bondy's traffic on four channels: `control_plane` for cluster membership and control messages, `data` for replicating and synchronising stored state, `wamp_relay` for routing calls and events between nodes, and `default`, used when the others are down. Each has its own connection parallelism and compression settings; see the [Cluster Configuration Reference](/router/reference/configuration/cluster). See [Clustering](/router/concepts/clustering) for cluster formation, peer discovery, and the security of the peer plane: a node with peer discovery enabled refuses to start unless the peer plane uses TLS with certificate verification, because an insecure peer plane can leak replicated credentials and signing keys.
 
 <ZoomImg src="/assets/bondy_architecture.png" alt="Bondy architecture diagram"/>
 

@@ -45,7 +45,7 @@ Each entry names one tool, resource or resource template:
 | `name` | yes | The MCP-facing name: 1–256 bytes, printable ASCII, no whitespace. |
 | `wamp_procedure` | tools & templates | The exact-match WAMP procedure the entry fronts. |
 | `wamp_topic` | resources | The exact-match WAMP topic a `resource` entry fronts; its payload schemas from the interface layer become the resource's output shape. |
-| `description`, `annotations`, `wamp_options`, schemas, `version` | no | MCP-facing detail; an absent field falls through to the interface entry of the WAMP binding (the tool's procedure, or the resource's topic). |
+| `description`, `annotations`, `wamp_options`, `args_schema`, `kwargs_schema`, `result_args_schema`, `result_kwargs_schema`, `version` | no | MCP-facing detail; an absent field falls through to the interface entry of the WAMP binding (the tool's procedure, or the resource's topic). |
 | `redaction` | no | `{"fields": [...]}` — fields removed before audit digests are computed. |
 | `uri_template`, `uri_vars_schema`, `wamp_args`, `wamp_kwargs`, `update_topic` | resource templates | The RFC 6570 template contract — every template variable must appear in `uri_vars_schema` and vice versa. |
 

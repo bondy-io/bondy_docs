@@ -3,8 +3,8 @@
      This host is the home for every Bondy documentation set except the
      language reference, which is generated from Bondy source and deploys
      separately to lang.bondy.io. The portal is the one page that names them
-     all; each set's own landing page lives behind it (/router, /wamp), and
-     those are DocsSet with different props.
+     all; each set's own landing page lives behind it (/router), and is a
+     DocsSet.
 
      The list comes from DOC_SETS in @bondy/site-chrome, so adding a system
      is a change in one file shared by every property rather than here.

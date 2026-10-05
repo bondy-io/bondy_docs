@@ -8,7 +8,7 @@ The Kafka Broker Bridge forwards WAMP events to Kafka topics, using the same [Mo
 
 Enables or disables the Kafka Broker Bridge.
 
-@[config](broker_bridge.config_file,path,'/platform_etc_dir/broker_bridge_config.json',v0.8.8)
+@[config](broker_bridge.config_file,path,none,v0.8.8)
 
 Path to the Broker Bridge's JSON specification file, which declares the actual subscriptions and their Kafka mappings — see the [Broker Bridge Specification Object](/router/reference/configuration/broker_bridge#broker-bridge-specification-object) for its structure.
 
@@ -24,7 +24,7 @@ The Kafka broker endpoints for this client, e.g. `[{"127.0.0.1",9092}]`.
 
 Whether the client starts a producer for a topic automatically the first time an event is published to it, rather than requiring the producer to be started explicitly beforehand.
 
-@[config](broker_bridge.kafka.clients.$name.allow_topic_auto_creation,on|off,on,v0.8.8)
+@[config](broker_bridge.kafka.clients.$name.allow_topic_auto_creation,on|off,off,v0.8.8)
 
 By default, the Kafka client respects what is configured in the broker about topic auto-creation. i.e. whether `auto.create.topics.enable`
 is set in the broker configuration. However, if this parameter is set
@@ -60,7 +60,7 @@ How many acknowledgements the Kafka broker should receive from the clustered rep
 * `1` - The leader will wait the data is written to the local log before sending a response
 * `-1` - The broker will block until the message is committed by all in sync replicas before acknowledging
 
-@[config](broker_bridge.kafka.clients.$name.producer.partition_restart_delay_seconds,time_duration_units,10s,v0.8.8)
+@[config](broker_bridge.kafka.clients.$name.producer.partition_restart_delay_seconds,time_duration_units,2s,v0.8.8)
 
 How long to wait before restarting a partition's producer process after it crashes — the per-partition analogue of `restart_delay_seconds` above.
 
@@ -72,4 +72,4 @@ How long to wait before restarting a topic's producer process after it crashes �
 
 @[config](broker_bridge.kafka.topics.$name,string,-,v0.8.8)
 
-A mapping of a short name to a Kafka topic. The `broker_bridge.config_file` specification references this name (e.g. `broker_bridge.kafka.topics.important_events = "com.myapp.events.important"` lets the spec's Mops expressions read `{{"\{\{kafka.topics.important_events\}\}"}}` rather than hard-coding the Kafka topic string).
+A mapping of a short name to a Kafka topic. The `broker_bridge.config_file` specification references this name (e.g. `broker_bridge.kafka.topics.important_events = "com.myapp.events.important"` lets the spec's Mops expressions read `{{kafka.topics.important_events}}` rather than hard-coding the Kafka topic string).

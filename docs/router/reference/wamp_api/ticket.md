@@ -97,7 +97,9 @@ the WAMP permission required to call the procedures.
 ## Procedures
 
 
-#### bondy.ticket.issue(realm_uri;expiry_time_secs=,...) -> [] {.wamp-procedure}
+#### bondy.ticket.issue(;expiry_time_secs=,...) -> [map()] {.wamp-procedure}
+
+Issues a ticket for the calling session's own identity, in the session's realm. The call takes no positional arguments.
 #### Call
 
 ##### Positional Args
@@ -111,14 +113,22 @@ None.
 #### Result
 
 ##### Positional Args
-The call result is a single positional argument containing the encoded and signed ticket:
+The call result is a single positional argument: a map holding the encoded and signed ticket and its claims.
 <DataTreeView
     :maxDepth="10"
     :data="JSON.stringify({
         0:{
-            'type': 'string',
+            'type': 'map',
             'required': true,
-            'description' : 'The ticket.'
+            'description' : 'The ticket and its claims.',
+            'properties': {
+                'ticket': {'type': 'string', 'description': 'The encoded and signed ticket.'},
+                'id': {'type': 'string', 'description': 'The ticket identifier.'},
+                'issued_at': {'type': 'integer', 'description': 'Issue time, in seconds since the Unix epoch.'},
+                'expires_at': {'type': 'integer', 'description': 'Expiry time, in seconds since the Unix epoch.'},
+                'scope': {'type': 'map', 'description': 'The realm and client scope the ticket is valid for.'},
+                'authroles': {'type': 'array', 'description': 'The roles the ticket carries.'}
+            }
         }
     })"
 />

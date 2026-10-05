@@ -7,7 +7,7 @@ related:
       description: A tutorial that demonstrates how to add an HTTP API to an existing project using the HTTP API Gateway.
     - text: HTTP API Gateway
       type: Reference
-      link: /router/reference/api_gateway/specification.html#api-specification-object
+      link: /router/reference/api_gateway/specification#api-object
       description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics.
 ---
 # Marketplace
@@ -111,7 +111,7 @@ This will result in the following Docker containers:
 <ZoomImg alt="Docker Dashboard showing all containers" src="/assets/tutorials/marketplace/docker_dashboard.png"/>
 
 ::: info Note
-Bondy needs a few seconds to start and be ready to accept connections, this is because Bondy is validating and indexing the internal database. This can actualle be controlled via [configuration](/router/reference/configuration/startup_shutdown).
+Bondy needs a few seconds to start and be ready to accept connections.
 
 From the Docker containers' logs you might notice microservices are trying to reconnect with logs like the following, do not worry, they will keep on retrying to connect to Bondy.
 

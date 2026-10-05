@@ -183,7 +183,7 @@ Creates a resource owner: an RBAC user in the `resource_owners` group, represent
         },
         '1':{
             'type': 'dict',
-            'description' : 'The resource owner data. Beyond `groups` (optional, defaults to `[]` — `resource_owners` is always added regardless of what is passed), this accepts the same fields as [`bondy.user.add`](/router/reference/wamp_api/user#add-a-user), e.g. `username` and `password`.'
+            'description' : 'The resource owner data. Beyond `groups` (optional, defaults to `[]` — `resource_owners` is always added regardless of what is passed), this accepts the same fields as [`bondy.user.add`](/router/reference/wamp_api/user#add-a-user-to-a-realm), e.g. `username` and `password`.'
         }
     })"
 />
@@ -371,12 +371,12 @@ None.
 None documented. The call succeeds even when `authid` has no outstanding tokens.
 
 ## Not implemented
-These reserved `bondy.oauth2.*` URIs currently raise `wamp.error.no_such_procedure`, with the one exception noted:
+These reserved `bondy.oauth2.*` URIs do not perform an operation:
 
-- `bondy.oauth2.client.get`, `bondy.oauth2.client.list` — no lookup or listing procedure for API clients; list them as users filtered by the `api_clients` group instead.
-- `bondy.oauth2.resource_owner.get`, `bondy.oauth2.resource_owners.list` — likewise for resource owners (note the plural `owners` in the list URI).
-- `bondy.oauth2.token.get`, `bondy.oauth2.token.refresh` — registered but unimplemented; both currently raise `wamp.error.no_such_procedure`.
-- `bondy.oauth2.token.lookup` raises `bondy.error.deprecated_procedure` instead — it is deprecated rather than simply unimplemented.
+- `bondy.oauth2.client.get`, `bondy.oauth2.client.list` — deprecated; they raise `bondy.error.deprecated_procedure`. List API clients as users in the `api_clients` group instead.
+- `bondy.oauth2.resource_owner.get`, `bondy.oauth2.resource_owners.list` — deprecated in the same way, for resource owners (note the plural `owners` in the list URI).
+- `bondy.oauth2.token.lookup` — deprecated; raises `bondy.error.deprecated_procedure`.
+- `bondy.oauth2.token.get`, `bondy.oauth2.token.refresh` — not implemented; they raise `wamp.error.no_such_procedure`.
 
 ::: tip Client/resource owner lifecycle topics are reserved, not published
 `bondy.oauth2.client.added`/`.deleted`/`.updated` and `bondy.oauth2.resource_owner.added`/`.deleted`/`.updated` are reserved URIs that Bondy never actually publishes to. Since a client or resource owner is an RBAC user, subscribe to [`bondy.user.added`/`.updated`/`.deleted`](/router/reference/wamp_api/user#topics) instead if you need to observe these changes.

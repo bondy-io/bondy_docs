@@ -3,7 +3,7 @@ outline: [2,3]
 related:
     - text: "What is WAMP"
       type: "Concept"
-      link: "/wamp/concepts/what_is_wamp"
+      link: "/router/concepts/wamp/what_is_wamp"
       description: "The serializations a WAMP session can negotiate."
     - text: "Error Reference"
       type: "Reference"

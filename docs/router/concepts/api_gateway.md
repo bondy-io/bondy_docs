@@ -19,7 +19,7 @@ related:
       description: The HTTP Connector works in the opposite direction — bridging WAMP calls to upstream HTTP services.
     - text: Network Listeners
       type: Configuration Reference
-      link: /router/reference/configuration/listeners#api-gateway-http-listener
+      link: /router/reference/configuration/listeners#identity-and-mount
       description: Configure the network listeners for the HTTP API Gateway.
     - text: Marketplace HTTP API Gateway
       type: Tutorial
@@ -132,8 +132,8 @@ Translates the HTTP request into a WAMP procedure call. The procedure URI, argum
     "type": "wamp_call",
     "procedure": "com.billing.get_invoice",
     "options": {},
-    "args": ["{{"\{\{request.path_params.id\}\}"}}"],
-    "kwargs": "{{"\{\{request.body\}\}"}}"
+    "args": ["{{request.path_params.id}}"],
+    "kwargs": "{{request.body}}"
 }
 ```
 
@@ -155,12 +155,12 @@ Forwards the HTTP request to an external upstream API. Bondy acts as a tradition
 ```json
 {
     "type": "forward",
-    "http_method": "{{"\{\{request.method\}\}"}}",
+    "http_method": "{{request.method}}",
     "host": "billing.internal",
     "port": 8080,
-    "path": "/api{{"\{\{request.path\}\}"}}",
-    "headers": "{{"\{\{request.headers\}\}"}}",
-    "body": "{{"\{\{request.body\}\}"}}"
+    "path": "/api{{request.path}}",
+    "headers": "{{request.headers}}",
+    "body": "{{request.body}}"
 }
 ```
 
@@ -173,11 +173,11 @@ Expressions operate on the [API Context](/router/reference/api_gateway/specifica
 
 | Expression | Evaluates To |
 |:---|:---|
-| `{{"\{\{request.method\}\}"}}` | `POST` |
-| `{{"\{\{request.body.sku\}\}"}}` | `"ZPK1972"` |
-| `{{"\{\{request.body.price \\|> integer\}\}"}}` | `13` |
-| `{{"\{\{request.body.customer.first_name\}\}"}}` | `"John"` |
-| `{{"\{\{variables.foo\}\}"}}` | Value of the `foo` variable |
+| `{{request.method}}` | `POST` |
+| `{{request.body.sku}}` | `"ZPK1972"` |
+| `{{request.body.price \\|> integer}}` | `13` |
+| `{{request.body.customer.first_name}}` | `"John"` |
+| `{{variables.foo}}` | Value of the `foo` variable |
 
 ::: info Learn More
 See the full [Expression Language Reference](/router/reference/api_gateway/expressions) for details on pipes, type conversions, and context manipulation.
@@ -205,7 +205,7 @@ Provides OAuth2 token endpoints (token issuance and revocation) and protects API
 
 ### OIDC
 
-Integrates with external Identity Providers via [OpenID Connect](/router/concepts/oidc_authentication). Automatically registers login, callback, and logout endpoints.
+Integrates with external Identity Providers via [OpenID Connect](/router/concepts/oidc_authentication). It registers login, callback, logout and verify endpoints, and the login flow ends with a ticket cookie that authenticates WAMP sessions over the HTTP transports. It does not protect the version's own paths: Bondy refuses every request to them. To protect an HTTP API, use `oauth2`.
 
 ```json
 {

@@ -19,7 +19,7 @@ related:
 
 Every condition this build of Bondy can raise. The same table is readable at
 runtime through
-[`bondy.alarm.catalogue`](/router/reference/wamp_api/alarm#bondy.alarm.catalogue),
+[`bondy.alarm.catalogue`](/router/reference/wamp_api/alarm#bondy-alarm-catalogue-catalogue),
 which is authoritative for the node you are talking to.
 
 Entries are grouped by **class** — who is expected to act. An alarm id is

@@ -2,7 +2,7 @@
 related:
     - text: Network Listeners
       type: Configuration Reference
-      link: /router/reference/configuration/listeners#api-gateway-http-listener
+      link: /router/reference/configuration/listeners#identity-and-mount
       description: Configure the network listeners for the HTTP API Gateway.
     - text: Security
       type: Configuration Reference

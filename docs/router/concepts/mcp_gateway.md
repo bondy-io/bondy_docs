@@ -58,8 +58,9 @@ The endpoint mounts two paths on that listener, on every virtual host:
 - `/mcp/realm/:realm` — the MCP endpoint itself. The realm is a path
   segment, not a listener property: one listener serves every realm, and
   which realm a request addresses is part of its URL.
-- `/.well-known/oauth-protected-resource/realm/:realm` — the OAuth
-  protected-resource metadata document for that realm.
+- `/.well-known/oauth-protected-resource/realm/:realm` — reserved for the
+  OAuth protected-resource metadata document. It answers `501 Not
+  Implemented` in this release.
 
 A listener may combine `mcp` with other services (`api_gateway`, `wamp_ws`,
 …) — with one exception: `mcp` together with `admin_api` is refused at boot.
@@ -175,8 +176,7 @@ Beyond that, the endpoint applies, in order:
   (`listeners.$name.mcp.allowed_origins`). Requests without an `Origin`
   header are always served: only browsers send one, and the browser is the
   rebinding vector.
-- **Body and concurrency bounds** — a per-listener request size limit and
-  a per-session in-flight call limit.
+- **Body bound** — a per-listener request size limit.
 
 When a tool needs more input mid-call (the specification's multi-round-trip
 mechanism), the continuation state Bondy hands the client is sealed in a

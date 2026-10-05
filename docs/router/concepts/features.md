@@ -29,6 +29,7 @@ Bondy provides a comprehensive set of features for building scalable, real-time 
 - **WebSocket** - For browsers and modern apps
 - **Raw TCP** - For backend services
 - **Unix Domain Sockets** - For local IPC
+- **HTTP long-poll and Server-Sent Events** - For clients that cannot open a WebSocket; JSON only
 - **TLS/SSL** - Secure transport encryption
 
 ### Serialization Options
@@ -189,7 +190,7 @@ Bondy provides a comprehensive set of features for building scalable, real-time 
 - **Defaults** - Sensible out-of-box settings
 
 ### Upgrades
-- **Rolling upgrades** - Zero-downtime updates (minor versions)
+- **Full-restart upgrades** - Upgrade a cluster by restarting every node on the new release; rolling upgrades are not supported
 - **Backward compatible** - Clients don't require updates
 - **Schema evolution** - Config format versioning
 

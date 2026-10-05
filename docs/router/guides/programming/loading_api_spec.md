@@ -2,7 +2,7 @@
 related:
     - text: HTTP API Gateway Specification Reference
       type: Reference
-      link: /router/reference/api_gateway/specification#api-specification-object
+      link: /router/reference/api_gateway/specification#api-object
       description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics.
     - text: HTTP API Gateway
       type: HTTP API Reference
@@ -17,7 +17,7 @@ related:
 # Loading an API Gateway Specification
 Learn how to load an API Gateway Specification using the HTTP Admin API.
 
-Loading an API you have defined using the [API Gateway Specification](#/reference/api_gateway/specification) is very easy you just need to know the location of your file and use the [HTTP Admin API](/router/reference/http_api/api_gateway).
+Loading an API you have defined using the [API Gateway Specification](/router/reference/api_gateway/specification) is very easy you just need to know the location of your file and use the [HTTP Admin API](/router/reference/http_api/api_gateway).
 
 ## Assumptions
 

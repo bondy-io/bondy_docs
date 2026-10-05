@@ -234,11 +234,11 @@ call bondy.realm.update \
 
 ### Delete a realm
 
-#### bondy.realm.delete(uri, [force]) -> result() {.wamp-procedure}
+#### bondy.realm.delete(uri; force=) -> result() {.wamp-procedure}
 
 Deletes the realm and all its associated objects.
 
-This call fails with an error if the realm has associated users. To override this behaviour use the `force` option.
+This call fails with an error if the realm has associated users. To override this behaviour pass `force: true` as a keyword argument.
 
 ::: warning ADMIN AUTHORIZATION
 This call is only available when the session is attached to the Master Realm

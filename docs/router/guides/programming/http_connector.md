@@ -307,7 +307,7 @@ class MyComponent(ApplicationSession):
         except Exception as e:
             # e.error contains the WAMP error URI
             # e.kwargs contains {"status": <http_code>, "body": <response>}
-            if e.error == 'wamp.error.not_found':
+            if e.error == 'bondy.error.not_found':
                 print("Invoice not found")
             elif e.error == 'wamp.error.not_authorized':
                 print("Not authorized")
@@ -325,7 +325,7 @@ session.call('com.billing.get_invoice', [], {id: 'INV-001'})
         // error.error contains the WAMP error URI
         // error.kwargs contains {status: <http_code>, body: <response>}
         switch (error.error) {
-            case 'wamp.error.not_found':
+            case 'bondy.error.not_found':
                 console.log('Invoice not found');
                 break;
             case 'wamp.error.not_authorized':

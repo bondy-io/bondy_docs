@@ -11,7 +11,7 @@ related:
       description: Deep dive into Bondy's distributed architecture.
     - text: What is WAMP
       type: concepts
-      link: /wamp/concepts/what_is_wamp
+      link: /router/concepts/wamp/what_is_wamp
       description: Understanding the Web Application Messaging Protocol.
 ---
 # How Bondy Works
@@ -20,7 +20,7 @@ Bondy creates a distributed application network that connects all your component
 
 ## The Foundation: WAMP Router
 
-At its core, Bondy is an implementation of the [Web Application Messaging Protocol (WAMP)](/wamp/concepts/what_is_wamp): middleware that sits between application components, routing messages and managing connections between them.
+At its core, Bondy is an implementation of the [Web Application Messaging Protocol (WAMP)](/router/concepts/wamp/what_is_wamp): middleware that sits between application components, routing messages and managing connections between them.
 
 When a client connects to Bondy:
 
@@ -334,5 +334,5 @@ The result is a single application network handling routing, security, clusterin
 
 - **Understand the architecture** - Read [Architecture](/router/concepts/architecture) for technical details
 - **Learn about clustering** - See [Clustering](/router/concepts/clustering) for deployment patterns
-- **Explore security** - Review [Security](/wamp/concepts/security) for authentication and authorization
+- **Explore security** - Review [Security](/router/concepts/wamp/security) for authentication and authorization
 - **Try it yourself** - Follow the [Getting Started tutorial](/router/tutorials/getting_started/marketplace)

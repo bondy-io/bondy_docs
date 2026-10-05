@@ -5,7 +5,7 @@ The complete behaviour of Bondy is defined by the combination of 3 types of "con
 
 1. **Bondy node runtime configuration**, which controls things like network listeners, availability of optional services, security defaults, clustering and load regulation. This is mostly **static configuration** done by modifying the `bondy.conf` file and a set of environment variables.
 1. **Multi-tenancy security configuration**, which controls the definition of realms and its security including user identities, authentication and authorization policies, Same Sign-on and Single Sign-on. This is done dynamically via the [Admin API](/router/reference/wamp_api/index). However, it can also be configured via the `bondy.conf` file.
-1. **RPC and Pub/Sub configuration**, a.k.a **Control Plane**, which defines the available RPC procedures–their invocation policies e.g. load balancing–and PubSub subscriptions and their respective routing information. This is dynamic configured by clients and maintained in the Registry via [WAMP](/wamp/concepts/what_is_wamp).
+1. **RPC and Pub/Sub configuration**, a.k.a **Control Plane**, which defines the available RPC procedures–their invocation policies e.g. load balancing–and PubSub subscriptions and their respective routing information. This is dynamic configured by clients and maintained in the Registry via [WAMP](/router/concepts/wamp/what_is_wamp).
 
 
 The following diagram shows the scopes and mechanism for managing each configuration type:
@@ -18,7 +18,7 @@ This reference documentation covers only the **Bondy node runtime configuration*
 
 To learn more about **Multi-tenancy security configuration** check the [WAMP](/router/reference/wamp_api/index) and [HTTP](/router/reference/http_api/index) references.
 
-As opposed to other application networking options i.e. Service Mesh, in which services are configured using a proprietary API e.g. Istio APIs and YAML for Kubernetes resources, Bondy **RPC and Pub/Sub configuration** is entirely managed by [WAMP](/wamp/concepts/what_is_wamp).
+As opposed to other application networking options i.e. Service Mesh, in which services are configured using a proprietary API e.g. Istio APIs and YAML for Kubernetes resources, Bondy **RPC and Pub/Sub configuration** is entirely managed by [WAMP](/router/concepts/wamp/what_is_wamp).
 
 
 ## Bondy environment variables
@@ -104,11 +104,11 @@ For every option not provided by your configuration, Bondy might define a defaul
 
 :::info How options and their defaults are documented
 
-Take the following snippet of the [Node section](/router/reference/configuration/node.html#node-identity) as an example.
+Take the following snippet of the [Cluster section](/router/reference/configuration/cluster) as an example.
 
-@[config](nodename,string,'bondy@127.0.0.1',v0.1.0)
+@[config](cluster.peer_port,integer,18086,v0.8.8)
 
-<br>It defines the token `nodename` which takes a `string` value and defaults to `bondy@127.0.0.1`. Notice the documentation will further specify which strings are acceptable.
+<br>It defines the key `cluster.peer_port`, which takes an `integer` value and defaults to `18086`. The entry's description then states which values are acceptable.
 :::
 
 :::tip

@@ -2,9 +2,18 @@
 
 ## General
 
-@[config](security.allow_anonymous_user,on|off,on,v0.8.8)
+@[config](security.allow_anonymous_user,off|local|on,local,v0.8.8)
 
-Defines whether Bondy allows the `anonymous` user.
+Controls anonymous authentication, the `anonymous` user and role.
+
+- `off` — anonymous is disabled everywhere.
+- `local` — anonymous is allowed only from the loopback interface. Local
+  development works out of the box, while exposing anonymous access to the
+  network is an explicit opt-in.
+- `on` — anonymous is allowed from any network location a realm's own sources
+  permit.
+
+The master realm never accepts anonymous connections, whatever this setting is.
 
 ::: warning
 We strongly recommend disabling anonymous for production use or at least restrict the network locations from which an anonymous connection can be established. See [Source](/router/reference/wamp_api/source) API documentation reference.
@@ -18,6 +27,18 @@ Defines whether Bondy creates a new realm when a session wants to attach to a no
 
 ::: warning
 We strongly recommend to disable this option and only enable it for development or testing purposes.
+:::
+
+@[config](security.admin_user.password,string,none,v1.0.0)
+
+The initial password of the `admin` user in the master realm (`com.leapsight.bondy`). Bondy ships no default credential for this user.
+
+Bondy reads this key only when it creates the master realm, which happens when the node does not find the realm in its store — on the first boot of a fresh install. After that the stored password is the one that counts: changing this key has no effect. Change the password through the user API instead.
+
+If the key is unset (or empty), Bondy generates a random password and logs it once, at `notice` level, as `generated_password`. Record it from the log when it appears; Bondy does not show it again.
+
+::: warning Clusters
+Each node that creates the master realm resolves the password on its own, and a generated password differs from node to node. In a multi-node cluster, set the same value on every node so that the replicated `admin` user converges to one password.
 :::
 
 
@@ -49,20 +70,22 @@ protocol of an existing password to the protocol defined by the
 the `security.password.{SelectedProtocol}.{Option}` options.
 
 
-@[config](security.password.min_length,6..254,6,v0.9.0)
+@[config](security.password.min_length,3..256,6,v0.9.0)
 
-Defines the minimum length for newly created passwords. The value
-should be at least 6 and at most 254.
-
-
-@[config](security.password.max_length,6..254,6,v0.9.0)
-
-Defines the maximum length for newly created passwords. The value should be at least 6 and at most 254.
+Defines the minimum length for newly created passwords. The value must be an
+integer in the range 3..256.
 
 
-@[config](security.password.scram.kdf,pbkdf2|argon2id13,pbkdf2,v0.9.0)
+@[config](security.password.max_length,min_length..256,254,v0.9.0)
 
-Defines the default key derivation function (KDF) to be used with SCRAM.
+Defines the maximum length for newly created passwords. The value must be an
+integer no smaller than `security.password.min_length` and no larger than 256.
+
+
+@[config](security.password.scram.kdf,pbkdf2,pbkdf2,v0.9.0)
+
+Defines the default key derivation function (KDF) to be used with SCRAM. The
+only option is `pbkdf2`.
 
 
 @[config](security.password.cra.kdf,pbkdf2,pbkdf2,v0.9.0)
@@ -70,36 +93,12 @@ Defines the default key derivation function (KDF) to be used with SCRAM.
 Defines the default key derivation function (KDF) to be used with CRA. The only option is pbkdf2.
 
 
-@[config](security.password.pbkdf2.iterations,4096..65536,1000,v0.9.0)
+@[config](security.password.pbkdf2.iterations,4096..10000000,600000,v0.9.0)
 
 Defines the default number of iterations to be used with the pbkdf2 key
-derivation function. It should be an integer in the range 4096..65536.
-
-@[config](security.password.argon2id13.iterations,alias|4096..4294967295,moderate,v0.9.0)
-
-Defines the default iterations to be used with the argon2id13 key
-derivation function. It should be an integer in the range 4096..4294967295
-or one of the following named alias configuration:
-- `interactive` (2)
-- `moderate` (3)
-- `sensitive` (4)
-
-
-@[config](security.password.argon2id13.memory,alias|8192..1073741824,interactive,v0.9.0)
-
-Defines the default memory to be used with the argon2id13 key
-derivation function. It should be an integer in the range 8192..1073741824
-or a named alias configuration:
-- `interactive` (64MB)
-- `moderate` (256MB)
-- `sensitive` (1GB)
-
-::: info Notice
-The underlying library allows up to 4398046510080 (3.9 TB), but Bondy
-restricts this value so that a configuration error cannot itself become a
-DoS vector.
-:::
-
+derivation function. The value must be an integer in the range 4096..10000000.
+The default follows OWASP guidance for PBKDF2-HMAC-SHA256. Higher values raise
+the CPU cost of every password login.
 
 ## Authentication: OAuth2
 
@@ -201,6 +200,54 @@ Controls whether client-SSO scope tickets are persistent. If enabled the
 ticket will be stored in Bondy's database. Otherwise the ticket is not
 stored.
 
+## Authentication: OIDC
+
+OIDC providers are configured per realm, in the realm's `oidc_providers` property, and the login, callback and logout routes come from an `oidc` security scheme in an API Gateway specification. Those routes are served by every listener that exposes the `api_gateway` service. See [OIDC Authentication](/router/concepts/oidc_authentication) for both.
+
+The `security.oidc.providers.*` keys below are accepted by the configuration schema, but this release does not read them. Setting them registers no provider and mounts no route.
+
+@[config](security.oidc.providers.enabled,on|off,off,v1.0.0)
+
+Accepted and stored in the node configuration. Nothing reads it.
+
+@[config](security.oidc.providers.$provider_id.issuer,string,none,v1.0.0)
+
+The provider's issuer URL. Do not set this key: the schema translation for `security.oidc.providers` has no case for `issuer`, so setting it makes configuration generation fail. The realm-level `issuer` property is the one that works.
+
+@[config](security.oidc.providers.$provider_id.client_id,string,none,v1.0.0)
+
+The OAuth2 client ID registered with the provider. Accepted and stored, not read.
+
+@[config](security.oidc.providers.$provider_id.client_secret,string,none,v1.0.0)
+
+The OAuth2 client secret. Accepted and stored, not read.
+
+@[config](security.oidc.providers.$provider_id.login_path,string,none,v1.0.0)
+
+A login path for the provider, for example `/oidc/aws_cognito/login`. Accepted and stored, not read. The login route that works is `<base_path>/oidc/login`, built from the API Gateway specification.
+
+@[config](security.oidc.providers.$provider_id.redirect_path,string,none,v1.0.0)
+
+A callback path for the provider, for example `/oidc/aws_cognito/callback`. Accepted and stored, not read. The callback route that works is `<base_path>/oidc/<provider>/callback`, built from the API Gateway specification.
+
+## Token and Ticket Reclamation
+
+Each node periodically deletes security state that can no longer be used: expired OAuth2 tokens and tickets, tokens and tickets of users that were deleted or disabled, and a user's OAuth2 tokens beyond [`oauth2.refresh_token.limit`](#oauth2.refresh_token.limit). Nothing else removes this state. It is bounded per user but never shrinks, so a user who never returns leaves it behind for good.
+
+Each node sweeps only the realms it owns under Rendezvous hashing. The work spreads across the cluster with no coordination, and each realm has exactly one node deleting from it. The sweeps run as jobs on the [job manager](/router/reference/configuration/overload_protection#load_regulation.job_manager.pool.size), off the request path. If the job queue is full, the round is logged as a warning and retried after about five minutes, or after `security.reclamation.interval` if that is shorter.
+
+This is not the same as [`db.reclaim`](/router/reference/configuration/reclamation). This sweep decides which tokens and tickets are dead and deletes them. `db.reclaim` later frees the storage the deleted entries occupy, once every node has seen the deletion.
+
+@[config](security.reclamation.enabled,on|off,on,v1.0.0)
+
+Whether the node runs the sweeps. Turn it off only if you would rather keep dead tokens and tickets than spend the periodic scan.
+
+@[config](security.reclamation.interval,duration_time_units,6h,v1.0.0)
+
+How often each node sweeps the realms it owns. Nothing waits on a sweep, so the value can be generous; the cost of a sweep grows with the number of tokens and tickets in the owned realms.
+
+Each delay is brought forward by a random amount of up to 25% of this value. Every node schedules from the same value, and without that jitter a cluster restarted together would sweep in lockstep.
+
 ## Realm Static Configuration
 
 @[config](security.config_file,path,'&#123;&#123;platform_etc_dir&#125;&#125;/security_config.json',v0.8.8)
@@ -276,7 +323,7 @@ Token-bucket refill rate, in tokens per second, for `CALL`/`PUBLISH`/`SUBSCRIBE`
 Burst size (bucket capacity) for the same per-session message limit.
 
 ::: warning Topology-aware tuning
-A source IP behind a shared NAT or reverse proxy is throttled collectively with every other client behind it. Keep limits generous unless you can confirm clients present distinct source IPs to Bondy — see [Trusted Proxies](/router/reference/configuration/listeners#trusted-proxies-x-forwarded-for) for how the source IP itself is determined behind a proxy.
+A source IP behind a shared NAT or reverse proxy is throttled collectively with every other client behind it. Keep limits generous unless you can confirm clients present distinct source IPs to Bondy — see [Trusted Proxies](/router/reference/configuration/listeners#trusted-proxies) for how the source IP itself is determined behind a proxy.
 :::
 
 ## Realm Signing Keys
@@ -287,19 +334,19 @@ Realm private keys can be encrypted at rest (AES-256-GCM) using a master key res
 
 Enables encryption at rest and selects where the master key material comes from. `none` disables the feature (the default, matching pre-1.0.0 behaviour). `env` reads it from an environment variable; `aws_sm` reads it from AWS Secrets Manager.
 
-@[config](security.master_key.env.var,string,BONDY_SECRET_KEY,v1.0.0)
+@[config](security.master_key.env.var,string,none,v1.0.0)
 
-Name of the environment variable holding the master key, when `provider = env`. A base64-encoded 32-byte key can be generated with `openssl rand -base64 32`.
+Name of the environment variable holding the master key. Required when `provider = env`: there is no default, and an unset name leaves the key unresolvable, so Bondy refuses to encrypt or decrypt rather than fall back to plaintext. A base64-encoded 32-byte key can be generated with `openssl rand -base64 32`, for example into `BONDY_SECRET_KEY`.
 
-@[config](security.master_key.aws_sm.secret_id,string,bondy/master_key,v1.0.0)
+@[config](security.master_key.aws_sm.secret_id,string,none,v1.0.0)
 
 Secret identifier used to fetch the master key from AWS Secrets Manager, when `provider = aws_sm`.
 
-@[config](security.master_key.aws_sm.region,string,us-east-1,v1.0.0)
+@[config](security.master_key.aws_sm.region,string,none,v1.0.0)
 
 AWS region of that secret.
 
-@[config](security.master_key.aws_sm.field,string,master_key,v1.0.0)
+@[config](security.master_key.aws_sm.field,string,none,v1.0.0)
 
 Field name within the secret holding the key material.
 
@@ -309,7 +356,11 @@ How the resolved master key material is encoded. `base64` decodes it to raw byte
 
 @[config](security.master_key.id,integer,1,v1.0.0)
 
-The key id baked into new encryption envelopes. Bump this on rotation.
+The key id written into every new encryption envelope.
+
+::: danger Do not change this on a node with encrypted data
+Bondy resolves only the current key id. Envelopes written under any other id cannot be decrypted, so changing this value makes every realm key encrypted before the change unreadable. Master key rotation is not supported yet.
+:::
 
 ::: warning Cluster-wide requirement
 In a cluster, every node must resolve the **same** master key, or replicated realm keys will not decrypt on peers. Back the master key up out of band — losing it makes all encrypted realm keys permanently unrecoverable.

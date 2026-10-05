@@ -12,7 +12,7 @@ Read more about Bondy in the [What is Bondy](/router/concepts/what_is_bondy) sec
 
 The Web Application Messaging Protocol (WAMP) is an open, routed protocol for polyglot distributed applications with all application agents connecting to a WAMP Router that performs message routing between them. WAMP unifies the two most important communication patterns under a single protocol: Publish-Subscribe and Routed Remote Procedure Calls.
 
-Read more about Bondy in the [What is WAMP](/wamp/concepts/what_is_wamp) section.
+Read more about WAMP in the [What is WAMP](/router/concepts/wamp/what_is_wamp) section.
 
 ### How is WAMP different than other messaging technologies?
 
@@ -42,7 +42,7 @@ In the near future, Bondy will incorporate additional protocols and communicatio
 
 ### How compliant is Bondy to WAMP?
 
-Please find the answers to this question in the [WAMP Compliance](/wamp/concepts/compliance.md) page.
+Please find the answers to this question in the [WAMP Compliance](/router/reference/protocols/wamp.md) page.
 
 
 ## Architecture

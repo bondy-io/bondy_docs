@@ -1,5 +1,4 @@
 ---
-draft: true
 related:
     - type: concepts
       text: Realms
@@ -19,8 +18,17 @@ Creating, retrieving and managing realms and also enabling, disabling and checki
 
 ## API
 
-Realm management has no built-in HTTP endpoint today — creating, retrieving, updating, and deleting a realm, and enabling or disabling its security, are only available through the [Realm WAMP API](/router/reference/wamp_api/realm).
+Real## API
 
-::: tip Exposing realm management over HTTP
-If you need an HTTP surface for realm management, the [HTTP API Gateway](/router/reference/http_api/api_gateway) lets you define your own endpoints that call the `bondy.realm.*` WAMP procedures — the same mechanism used to expose any other WAMP procedure as REST. See the [HTTP API Gateway Specification Reference](/router/reference/api_gateway/specification) for the `wamp_call` action type that does this.
-:::
+Realm management is available over HTTP through the [Admin HTTP API](/router/reference/http_api/index#realms). Each route calls the matching [Realm WAMP API](/router/reference/wamp_api/realm) procedure, which documents the arguments, results and errors.
+
+| Method | Path | WAMP procedure |
+|---|---|---|
+| `GET` | `/realms` | `bondy.realm.list` |
+| `POST` | `/realms` | `bondy.realm.create` |
+| `GET` | `/realms/:realm_uri` | `bondy.realm.get` |
+| `PUT` | `/realms/:realm_uri` | `bondy.realm.update` |
+| `DELETE` | `/realms/:realm_uri` | `bondy.realm.delete` |
+| `GET` | `/realms/:realm_uri/security_enabled` | `bondy.realm.security.is_enabled` |
+| `PUT` | `/realms/:realm_uri/security_enabled` | `bondy.realm.security.enable` |
+| `DELETE` | `/realms/:realm_uri/security_enabled` | `bondy.realm.security.disable` |

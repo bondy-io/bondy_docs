@@ -102,7 +102,7 @@ Raises `wamp.error.no_such_session` if no session with the given identifier exis
 
 ## Topics
 
-Bondy publishes these two events to `wamp.session.<session_id>` and to every realm-wide session-lifecycle subscriber; they are the basis for the "Registry RIB — routing summaries, retry & presence" observability described in [Registry Routing (RIB)](/router/concepts/registry_routing).
+Bondy publishes these two events in the session's realm, on the topics `wamp.session.on_join` and `wamp.session.on_leave`.
 
 ##### wamp.session.on_join{.wamp-topic}
 Published when a session opens.
@@ -119,7 +119,15 @@ Published when a session opens.
 />
 
 ##### Keyword Results
-None.
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        'session_guid':{
+            'type': 'string',
+            'description' : 'The internal, node-hash-qualified session identifier Bondy uses for cluster-wide routing.'
+        }
+    })"
+/>
 
 ### wamp.session.on_leave{.wamp-topic}
 Published when a session closes, whether by client disconnect, explicit `GOODBYE`, or the router terminating it.
@@ -144,7 +152,15 @@ Published when a session closes, whether by client disconnect, explicit `GOODBYE
 />
 
 ##### Keyword Results
-None.
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        'session_guid':{
+            'type': 'string',
+            'description' : 'The internal, node-hash-qualified session identifier Bondy uses for cluster-wide routing.'
+        }
+    })"
+/>
 
 ## See also
 

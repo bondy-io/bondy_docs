@@ -4,14 +4,14 @@ related:
     - text: Realm
       type: WAMP API Reference
       link: /router/reference/wamp_api/realm
-      description: Realms are not restored from an export — recreate them from configuration first, then import their data.
+      description: Realm records and their keys are part of an export, and are restored on import.
 ---
 
 # Export & Backup
-Bondy can write a logical export of its durable data — security (users, groups, grants, sources), API Gateway specs, tokens, tickets, bridge relay definitions, and retained messages — to a file, and later import that file back in. This is a **logical** export: each record is dumped as a decoded domain term and re-applied as a fresh write on import, not a byte-level copy of the storage engine. Storage-level metadata (Hybrid Logical Clocks, CRDT lineage) is intentionally not preserved; an import always produces fresh writes, which is the correct behaviour for moving data between nodes or deployments. The ephemeral registry (routing) state — live registrations and subscriptions — is never exported.
+Bondy can write a logical export of its durable data — realms and their keys, security (users, groups, grants, sources), API Gateway specs, tokens, tickets, bridge relay definitions, and retained messages — to a file, and later import that file back in. This is a **logical** export: each record is dumped as a decoded domain term and re-applied as a fresh write on import, not a byte-level copy of the storage engine. Storage-level metadata (Hybrid Logical Clocks, CRDT lineage) is intentionally not preserved; an import always produces fresh writes, which is the correct behaviour for moving data between nodes or deployments. The ephemeral registry (routing) state — live registrations and subscriptions — is never exported.
 
-::: tip Realms are not exported
-The realm record itself is not written to (or restored from) an export file — recreate realms from configuration, then import to repopulate their users, groups, grants, sources, tickets, and tokens. Per-realm data imports independently of the realm record, since it's keyed by realm URI rather than nested inside it.
+::: warning An export contains secrets
+An export includes realm records and their key material, along with users, credentials, tickets and tokens. Store and transfer the file as you would the secrets themselves. Only the legacy pre-1.0.0 format skips realm records on import.
 :::
 
 `bondy.export.*` is the current API. The older `bondy.backup.*` procedures (`create`, `status`, `restore`) still work — they are deprecated aliases dispatching to the exact same operations — but new integrations should use `bondy.export.*`. An import also transparently reads the legacy file format written by the former `bondy_backup` module, translating what it can (users, groups, grants, sources, API Gateway specs, OAuth refresh tokens) and skipping the rest (realm records, the long-dead `security_status` flag) without misapplying it.
@@ -149,7 +149,7 @@ None.
 None.
 
 #### Errors
-Raises `bondy.error.export_in_progress` or `bondy.error.import_in_progress` if another export or import is already running. Raises `bondy.error.missing_required_value` if `filename` is absent, or `bondy.error.not_found` if it doesn't exist.
+Raises `bondy.error.export_in_progress` or `bondy.error.import_in_progress` if another export or import is already running. Raises `bondy.error.missing_required_value` if `filename` is absent. Bondy replies before it opens the file, so a file that does not exist or cannot be read is not reported by this call: the import fails afterwards, and [`bondy.export.import_failed`](#topics) is published.
 
 ## Topics
 Bondy publishes these on the Master Realm as an export or import runs. Each carries only the filename — no elapsed time, record counts, or failure reason — so treat them as a notification to go check [`bondy.export.status`](#check-status) or the node's logs, not as the source of that detail.

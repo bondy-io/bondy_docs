@@ -16,7 +16,7 @@ The shard count for the durable `main` database, applied when the catalogue firs
 
 @[config](db.registry.shard_count,integer,16,v1.0.0)
 
-The shard count for the ephemeral `registry` database (registrations and subscriptions), independent of `db.main.shard_count`. The registry has no on-disk topology manifest, so this is the only registry-specific tuning knob — it carries no partition strategy, realm-prefix depth, or topology-mismatch setting, since those all concern durable, on-disk keying.
+The shard count for the ephemeral `registry` database (registrations and subscriptions), independent of `db.main.shard_count`. The registry has no on-disk topology manifest, so it carries no partition strategy, realm-prefix depth, or topology-mismatch setting, since those all concern durable, on-disk keying. Its only other settings are the history retention bounds under [Instance Memory Management](#instance-memory-management).
 
 @[config](db.main.partition_strategy,aggregate&#124;realm&#124;entity,aggregate,v1.0.0)
 
@@ -53,6 +53,16 @@ Byte threshold at which a durable shard's pack-store MST seals its incoming pack
 
 Seal driver for the durable shard pack-store MST. `async` rolls the incoming pack aside at the commit barrier and rewrites it into a sealed pack on a monitored worker, keeping the (multi-hundred-millisecond) rewrite off the write path entirely — measured roughly 44% lower p99 apply latency versus the inline alternative. It does not change durable write throughput, which is bounded by disk fsync bandwidth regardless of where the seal runs. `sync` restores the historical inline behaviour (the store seals on `put` at the threshold). Affects only durable shards — ephemeral instances never seal. Global, like `db.pack_auto_seal_bytes`.
 
+@[config](db.journal_trim_interval,duration_time_units,1h,v1.0.0)
+
+Interval at which Bondy trims each durable leveled store's journal back to the files still needed to recover the ledger. Bondy opens every durable store in leveled's `head_only` mode. In that mode each write lands twice: the whole cell in the ledger, and the same object specs, payload included, in the journal. The journal exists only to recover the ledger after an unclean stop; no read path reads it. Leveled never reclaims this journal on its own in `head_only` mode.
+
+A trim drops the journal files strictly older than the one holding the ledger's persisted sequence number. A clean restart would not replay that history, so trimming it costs no durability. Leveled deletes a dropped file only once no snapshot can still read it, so disk space returns a few seconds after each pass. The pass scans the journal manifest and rewrites nothing, so it is cheap; the interval only sets how promptly disk space returns. Global — applies to every durable store node-wide.
+
+::: warning Setting 0 lets the journal grow without bound
+`0` disables the trim. The journal then keeps every version of every cell ever written, while the ledger holds only the live set, so disk use grows with cumulative writes for as long as the node runs.
+:::
+
 ## Instance Memory Management
 
 @[config](db.gc_interval,duration_time_units,2s,v1.0.0)
@@ -62,6 +72,18 @@ Interval at which each oplog instance checks its own heap and fullsweep-hibernat
 @[config](db.gc_heap_delta,bytesize,16MB,v1.0.0)
 
 Heap-growth threshold above an instance's post-GC baseline that triggers the periodic monitor above. Keying on growth over the live baseline, rather than absolute heap size, avoids GC-thrashing an instance with a large live MST: it fires once per roughly this many bytes of accumulated garbage, capping the transient peak at approximately `live + this`. Lower trades a touch more fullsweep work for a tighter memory ceiling. Global, like `db.gc_interval`.
+
+### Registry History Retention
+
+Each shard of the ephemeral `registry` database keeps an op-log history: the Merkle Search Tree events that anti-entropy compares and exchanges. Normally peer-confirmed compaction bounds that history. Compaction truncates only events every peer already holds, so it never strands a lagging peer. The two keys below are an overload backstop. They truncate history locally whether peers have confirmed it or not, and both are off by default. They apply only to `registry`; durable databases are never retention-bounded.
+
+@[config](db.registry.retention.max_age_ms,integer,0,v1.0.0)
+
+Retention window for `registry` history, in milliseconds. When peer-confirmed compaction has nothing to truncate, a shard truncates history older than this window. A peer that lags past the window can no longer catch up from history and must re-bootstrap from the catalogue. `0` disables the age bound. Enable it only when sustained overload demonstrably outruns peer-confirmed compaction.
+
+@[config](db.registry.retention.max_events,integer,0,v1.0.0)
+
+Event-count bound, per shard, for `registry` history. When a shard's live history exceeds this many events, the shard truncates its whole applied history at the next compaction tick (every second), independent of `db.registry.retention.max_age_ms`. This keeps a write burst from outrunning the age window. Peers within one anti-entropy round keep their own copies; a peer that lags further must re-bootstrap from the catalogue. `0` disables the size bound. With both keys at `0`, peer-confirmed compaction alone bounds history.
 
 ## Write-Ahead Log
 
@@ -84,6 +106,24 @@ Batched-mode fsync size trigger: the writer fsyncs once accumulated un-fsynced b
 @[config](db.drain.stall_alarm,duration_time_units,1m,v1.0.0)
 
 How long a per-shard WAL drain may actively process frames without committing any new consumer position before Bondy raises a `bondy_oplog_drain_stalled` alarm (visible via `/metrics` and cleared automatically once the drain progresses again). This guards against a wedged or endlessly-re-reading log consumer on a node that anti-entropy would otherwise still report as converged. `0` disables the detector.
+
+@[config](db.frontier.hole_alarm,duration_time_units,5m,v1.0.0)
+
+How long a shard may carry a hole in its applied frontier before Bondy raises a `bondy_oplog_frontier_hole` alarm. A hole is a run of one origin's sequence numbers that this replica never received, while later sequences from the same origin are already applied. The replica holds its reported frontier below the hole. Peers therefore keep re-offering that origin, and the shard's Merkle Search Tree cannot truncate past the hole.
+
+Short-lived holes are routine: a local WAL commit lands out of sequence order, or a missing sequence is one anti-entropy round away. The alarm therefore fires on the age of a hole, not on its occurrence. Keep this value well above `db.aae.interval`. The `bondy_oplog_instance_frontier_holes` gauge shows current holes without waiting for the alarm. `0` disables the detector and clears any alarm it raised.
+
+The detector runs whether `db.aae` is on or off. A node with anti-entropy off is more likely to carry a standing hole, not less.
+
+## Index Reads
+
+@[config](db.primary_scan_limit,integer,1000000,v1.0.0)
+
+Maximum number of primary cells one stale-index fallback read may enumerate. When a secondary index is stale, Bondy answers the query by scanning every primary cell in the realm and recomputing each value's index terms. This limit stops that scan from running unbounded. Size it to the number of cells in your largest realm. Global — applies to every database node-wide.
+
+::: warning A scan that reaches the limit returns incomplete results
+When the scan reaches the limit, Bondy returns the cells it has read so far and logs a warning naming the realm and the limit. The caller is not told that the result may be incomplete. If a realm holds more cells than this limit, raise it.
+:::
 
 ## Active Anti-entropy
 
@@ -139,9 +179,11 @@ Number of peers the sync scheduler samples from the Partisan cluster membership 
 
 Because Bondy's storage layer has no consensus round, a partitioned node could otherwise authenticate against a stale view of the security tables. The freshness fence closes that gap.
 
-@[config](db.aae.fence.max_lag,duration_time_units,1s,v1.0.0)
+@[config](db.aae.fence.max_lag,duration_time_units,60s,v1.0.0)
 
 The freshness bound for the fence. A node refuses new authentication when its view of the security tables (users/grants) has not been confirmed by a local commit or a successful anti-entropy round within this window — bounding how stale a credential or permission change a node may authenticate against. Lower is tighter security (a lagging node refuses sooner); higher favours availability under partition or lag. Only relevant when `db.aae` is on — the fence is otherwise a no-op, since local writes are synchronous.
+
+Do not set this near the anti-entropy tick period. The anti-entropy rounds that confirm freshness are background work, and their completion stretches whenever the node is busy. A bound of about 1s therefore refuses authentication in bulk during a burst of session opens, with no actual staleness involved. Revocation of a single user's credentials does not depend on this bound: it is handled separately, by the per-user token version and by invalidating cached RBAC state when replicated changes arrive.
 
 @[config](db.aae.fence.on_isolation,refuse&#124;proceed&#124;quorum,refuse,v1.0.0)
 
@@ -150,6 +192,120 @@ What the fence does on a node in a multi-node cluster that currently cannot conf
 - **`refuse`** (secure default) — fail closed: refuse all new authentication until a peer round confirms freshness. A node restarting into an established cluster refuses only until its first sync round, typically sub-second.
 - **`proceed`** — treat unreachable peers as vacuously fresh and keep authenticating. Most available, but during a partition a stale minority node could accept a token revoked elsewhere until it heals. Not recommended for a security fence.
 - **`quorum`** — certify freshness, and so authenticate, only while connected to a majority of the expected cluster membership; a minority partition refuses even if it can still sync internally. Secure and available for the majority side. Requires a Partisan cluster.
+
+## Storage Engine (leveled)
+
+The `db.leveled.*` keys are passed to every durable leveled store this node starts. They are advanced tuning keys, and most deployments leave them at their defaults. Each default is leveled's own, except `db.leveled.cache_size`, which keeps the 2000 Bondy has always used. The keys are global, like `db.wal.*`. The ephemeral `registry` database keeps its projection in memory and starts no leveled store, so none of them apply to it.
+
+A leveled store has two parts. The **ledger** is an LSM tree of keys and their current values, maintained by the **penciller**. The **journal** is an append-only log of writes, used only to recover the ledger after an unclean stop. Bondy opens every store in leveled's `head_only` mode, in which leveled never compacts the journal; `db.journal_trim_interval` is what bounds it.
+
+### Caches
+
+@[config](db.leveled.cache_size,integer,2000,v1.0.0)
+
+Size, in objects, of the ledger cache: the in-memory buffer of recent ledger additions, flushed to the penciller when full. Larger values reduce pressure on the penciller and use more memory. Leveled ignores values below 100, and adds random jitter to the configured value so that stores do not flush in lockstep.
+
+@[config](db.leveled.cache_multiple,integer,2,v1.0.0)
+
+Multiple of `db.leveled.cache_size` beyond which the ledger cache does not grow, even while the penciller is busy. On reaching it, every write returns a pause. This applies back-pressure to the writer instead of letting memory grow without bound.
+
+@[config](db.leveled.penciller_cache_size,integer,28000,v1.0.0)
+
+Maximum number of keys the penciller holds in memory before it writes a new level-zero file to disk. Larger values mean fewer, bigger level-zero writes and more memory held.
+
+@[config](db.leveled.ledger_preload_pagecache_level,integer,4,v1.0.0)
+
+Ledger level at and above which leveled preloads files into the OS page cache when it opens them. Higher values preload more of the tree, trading memory and startup work for lower first-read latency.
+
+@[config](db.leveled.max_merge_below,integer&#124;infinity,24,v1.0.0)
+
+Maximum number of ledger files a single file may be merged into. With fewer overlapping files than this in the level below, the merge runs in full; at or above it, the merge is partial. `infinity` never bounds the merge. Leveled is tested at the default. Change it only when tuning under measurement.
+
+### Journal
+
+@[config](db.leveled.max_journal_size,bytesize,1000000000,v1.0.0)
+
+Maximum size of one journal file, in bytes (the default is 10^9 bytes). Leveled starts a new file when the current one reaches this size or `db.leveled.max_journal_objects`, whichever comes first. The absolute ceiling is 4GB, set by leveled's 4-byte file pointers. The value applies only to files started after a change; existing files are not rewritten.
+
+This key bounds the size of each file, not the number of files. In `head_only` mode the journal records the payload of every write, so it holds every version ever written. `db.journal_trim_interval` bounds the total.
+
+@[config](db.leveled.max_journal_objects,integer,200000,v1.0.0)
+
+Maximum number of objects in one journal file. This is the companion bound to `db.leveled.max_journal_size`; each file stays within both.
+
+@[config](db.leveled.sync_strategy,none&#124;sync,none,v1.0.0)
+
+Whether leveled flushes to disk after every write. `none` lets the operating system schedule the flush. `sync` forces a flush per write, which is markedly slower unless the hardware absorbs it (a battery-backed write cache).
+
+This key governs the durable projection, not the write-ahead log. A write is already durable in the WAL before it reaches leveled; `db.wal.fsync_mode` governs that. With `none`, Bondy fsyncs the leveled journal itself before it truncates the log or checkpoints anything a write was claimed to cover.
+
+#### Journal Compaction
+
+The following four keys are accepted but have **no effect**. Journal compaction never runs: leveled accepts compaction only for stores not in `head_only` mode, and Bondy opens every store in `head_only` mode. The descriptions state what each key would control if compaction ran.
+
+@[config](db.leveled.waste_retention_period,off&#124;duration_secs,off,v1.0.0)
+
+How long leveled would keep journal files after compacting them. `off` keeps no such files. A period would keep them, so the store could be restored to an earlier point in time, at the cost of the disk they occupy.
+
+@[config](db.leveled.max_run_length,default&#124;integer,default,v1.0.0)
+
+How many journal files one compaction run could include. `default` uses leveled's built-in run length of 8.
+
+@[config](db.leveled.singlefile_compaction_percentage,float,30.0,v1.0.0)
+
+Compaction score at or below which a single journal file would be eligible for compaction on its own. Lower values make single-file compactions rarer, favouring longer runs.
+
+@[config](db.leveled.maxrunlength_compaction_percentage,float,70.0,v1.0.0)
+
+Compaction score a full-length run would need to be eligible. Raising it, or lowering `db.leveled.singlefile_compaction_percentage`, makes leveled prefer a long run over a short one.
+
+@[config](db.leveled.journal_compaction_score_one_in,integer,1,v1.0.0)
+
+How often a journal file would be scored. `1` scores every file on every run. A value of `n` scores a given file on roughly one run in `n` and uses a cached score otherwise.
+
+### Compression
+
+@[config](db.leveled.compression_method,lz4&#124;native&#124;zstd&#124;none,lz4,v1.0.0)
+
+Compression algorithm for stored values. `none` disables compression. `native` uses the Erlang term compressor. `lz4` and `zstd` trade CPU for space, `zstd` more aggressively than `lz4`.
+
+@[config](db.leveled.compression_level,integer,1,v1.0.0)
+
+Compression level, used when `db.leveled.compression_method` is `zstd`. Higher values compress harder and cost more CPU.
+
+@[config](db.leveled.compression_point,on_receipt&#124;on_compact,on_receipt,v1.0.0)
+
+When leveled compresses journal records. `on_receipt` compresses each record as it arrives, spending CPU on the write path to keep the journal small. `on_compact` defers compression to journal compaction, which never runs in Bondy. With `on_compact`, journal records therefore stay uncompressed. This key governs the journal only; the ledger uses `db.leveled.ledger_compression`.
+
+@[config](db.leveled.ledger_compression,as_store&#124;native&#124;lz4&#124;zstd&#124;none,as_store,v1.0.0)
+
+Compression for the ledger. `as_store` follows `db.leveled.compression_method`. The other values override it for the ledger alone, for when the ledger and the journal need different trade-offs.
+
+### Snapshots
+
+A snapshot pins the files it was opened against. A snapshot that is never released holds disk space that would otherwise be reclaimed; these timeouts bound that.
+
+@[config](db.leveled.snapshot_timeout_short,duration_secs,15m,v1.0.0)
+
+How long a short-lived snapshot may stay open before leveled releases it.
+
+@[config](db.leveled.snapshot_timeout_long,duration_secs,12h,v1.0.0)
+
+The same bound for snapshots registered as long-running, such as full-store folds.
+
+### Logging and Statistics
+
+@[config](db.leveled.log_level,debug&#124;info&#124;warning&#124;error&#124;critical,info,v1.0.0)
+
+Minimum severity at which leveled logs. It is independent of Bondy's own log level, because leveled is verbose at `debug`.
+
+@[config](db.leveled.stats_percentage,integer,10,v1.0.0)
+
+Percentage of operations leveled samples for its internal timing statistics. Sampling keeps the cost of statistics off the hot path. Raising it gives more precise numbers at more cost.
+
+@[config](db.leveled.stats_log_frequency,duration_secs,30s,v1.0.0)
+
+How often leveled logs its accumulated timing statistics.
 
 ## Deprecated and Removed Keys
 
@@ -209,7 +365,7 @@ These keys have no replacement. Setting them in a pre-1.0.0-rc.65 `bondy.conf` d
 
 @[configRemoved](store.*,RocksDB tuning; RocksDB was replaced by leveled,v1.0.0)
 
-The `leveled` backend that replaced RocksDB has no equivalent `bondy.conf` tuning surface yet — if you relied on `store.*` for capacity planning, there is currently nothing to replace it with.
+The `leveled` backend that replaced RocksDB has its own tuning keys, `db.leveled.*` (see [Storage Engine (leveled)](#storage-engine-leveled)), which are not one-to-one replacements for `store.*`.
 
 ## See also
 

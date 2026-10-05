@@ -1,24 +1,17 @@
-# Startup/Shutdown Configuration Reference
-Configure options controlling several aspects of what happens during startup and shutdown.
-
-## Startup
-
-@[config](startup.wait_for_store_partitions,on|off,on,v0.8.8)
-
-Defines whether Bondy will wait for the db partitions to be initialised before continuing with initialisation. This is automatically turned on in case the property **startup.wait_for_store_hashtrees** is enabled.
-
-
-@[config](startup.wait_for_store_hashtrees,on|off,on,v0.8.8 )
-
-Defines whether Bondy will wait for the db hashtrees to be built before continuing with initialisation. In order for the hashtrees to be build the property aae_enabled needs to be on. This is automatically turned on in case the property **startup.wait_for_store_aae_exchange** is enabled.
-
-@[config](startup.wait_for_store_aae_exchange,on|off,on,0.8.8)
-
-Defines whether Bondy will wait for the first active anti-entropy (AAE) exchange to be finished before continuing with initialisation. In order for the AAE exchange to be executed the property **aae_enabled** needs to be set to on.
+# Shutdown Configuration Reference
+Configure what happens when a node shuts down.
 
 ## Shutdown
 
-@[config](shutdown_grace_period,time_duration_units,30s,v0.8.8)
+A node shuts down in this order:
 
-The period in seconds that Bondy will wait for clients to gracefully terminate their connections when the router is shutting down.
+1. It stops accepting new connections on its listeners. The listeners that serve liveness, readiness and metrics keep answering until the end.
+2. It sends a `GOODBYE` to every client session.
+3. It waits for `shutdown.grace_period`, so clients can close their sessions cleanly.
+4. It leaves the cluster, if [cluster.automatic_leave](/router/reference/configuration/cluster#cluster.automatic_leave) is on.
+5. It closes its client-facing listeners, which terminates every connection still open. As each connection closes, Bondy removes its session along with the session's registrations and subscriptions.
+6. It closes the listeners that serve liveness, readiness and metrics.
 
+@[config](shutdown.grace_period,time_duration_units,30s,v0.8.8)
+
+How long a shutting-down node waits, after sending `GOODBYE` to every session, before it closes the connections that remain. The node waits for the full period even when every client has already left, so a process supervisor must allow longer than this before it kills the node. On Kubernetes, set the pod's `terminationGracePeriodSeconds` above this value.

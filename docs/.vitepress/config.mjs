@@ -165,6 +165,9 @@ export default withThemeDefaults(
               let oldKey = args.shift();
               let newKey = args.shift();
               let since = args.shift();
+              // Optional: the page that defines the replacement key, when it
+              // is not the current page.
+              let page = args.shift() || '';
               return `
     <div id="${oldKey}" tabindex="-1" class="config-param-deprecated">
         <span class="config-param-badge-deprecated">Deprecated</span>
@@ -173,7 +176,11 @@ export default withThemeDefaults(
             ${wrappable(oldKey)}
         </span>
         <span class="config-param-arrow">renamed to</span>
-        <a class="config-param-new" href="#${newKey}"><code>${wrappable(newKey)}</code></a>
+        ${newKey.includes('*')
+          // A wildcard names a family of keys, not one entry, so there is no
+          // anchor to link to.
+          ? `<span class="config-param-new"><code>${wrappable(newKey)}</code></span>`
+          : `<a class="config-param-new" href="${page}#${newKey}"><code>${wrappable(newKey)}</code></a>`}
         ${since ? `<span class="config-param-meta">since&nbsp;${since}</span>` : ''}
     </div>`;
             },
@@ -328,13 +335,17 @@ export default withThemeDefaults(
 // ---------------------------------------------------------------------------
 // NAVIGATION
 //
-// Two documentation sets are published here, and each is navigated the same
-// way:
+// One documentation set is published here:
 //
-//   Bondy Connect  /router   the platform — tutorials, how-to guides,
-//                            concepts and reference for operating a router.
-//   WAMP           /wamp     the protocol — for someone writing a component,
-//                            who does not need to know how the router is run.
+//   Bondy Connect  /router   tutorials, how-to guides, concepts and reference
+//                            for building on, running and operating Bondy
+//                            Connect.
+//
+// The interfaces Bondy Connect offers — WAMP, the HTTP/REST API Gateway, MCP,
+// and BAMP when it ships — are not sets of their own. Each is a group inside
+// every Diataxis section, because realms, URIs, authentication and RBAC are
+// shared by all of them. A protocol *specification* would be a set of its own;
+// using a protocol with Bondy is not.
 //
 // Three surfaces are configured below.
 //
@@ -356,7 +367,7 @@ export default withThemeDefaults(
 //
 // Group names are controlled vocabulary. A group is named with the same words
 // the breadcrumb (theme/Breadcrumb.vue, SECTIONS and SUBSECTIONS) and the set
-// landing pages (docs/router.md, docs/wamp.md) use for the same thing. Change
+// landing page (docs/router.md) use for the same thing. Change
 // one, change all three.
 // ---------------------------------------------------------------------------
 
@@ -387,17 +398,6 @@ function nav() {
         { text: 'Reference', link: '/router/reference/index' }
       ]
     },
-    {
-      text: 'WAMP',
-      activeMatch: '^/wamp/',
-      items: [
-        { text: 'Overview', link: '/wamp' },
-        { text: 'Concepts', link: '/wamp/concepts/index' },
-        { text: 'Programming Guides', link: '/wamp/guides/index' },
-        { text: 'Tutorials', link: '/wamp/tutorials/index' },
-        { text: 'Reference', link: '/wamp/reference/index' }
-      ]
-    },
     // Reference gets its own menu as well as a place under Bondy Connect: it
     // is the set readers arrive at directly and return to most often, and the
     // eight manuals are not otherwise visible without two clicks.
@@ -409,6 +409,8 @@ function nav() {
         { text: 'WAMP API', link: '/router/reference/wamp_api/index' },
         { text: 'HTTP API', link: '/router/reference/http_api/index' },
         { text: 'HTTP API Gateway', link: '/router/reference/api_gateway/index' },
+        { text: 'Client Libraries', link: '/router/reference/clients/index' },
+        { text: 'WAMP Compliance', link: '/router/reference/protocols/wamp' },
         { text: 'Serialization', link: '/router/reference/serialization' },
         { text: 'Metrics', link: '/router/reference/metrics' },
         { text: 'Alarms', link: '/router/reference/alarms' },
@@ -455,12 +457,8 @@ function nav() {
  */
 function sidebars() {
   return {
-    // The protocol set. One sidebar, grouped by Diataxis mode, because it is
-    // small enough to hold in one column.
-    '/wamp/': wampSidebar(),
-
-    // The platform set. One sidebar per Diataxis section, because each is too
-    // large to share a column with the others.
+    // One sidebar per Diataxis section, because each is too large to share a
+    // column with the others.
     '/router/tutorials/': tutorialsSidebar(),
     '/router/guides/': guidesSidebar(),
     '/router/concepts/': conceptsSidebar(),
@@ -474,104 +472,6 @@ function sidebars() {
     '/router/reference/api_gateway': apiGatewaySidebar(),
     '/router/reference': referenceSidebar()
   }
-}
-
-
-/* ===========================================================================
- * WAMP — the protocol set
- *
- * This is documentation for someone writing a WAMP component, who does not
- * need to know how Bondy is configured or operated — that is the platform set.
- * The examples still run against Bondy, because that is the router we ship;
- * what makes a page belong here is what the reader is learning.
- *
- * Grouped by Diataxis mode, matching docs/wamp.md. The platform set's own
- * sidebars still link into these pages where a Bondy reader needs them as
- * prerequisites: the split separates the sets, it does not sever them.
- *
- * No page renders cards from this sidebar, so items carry no `isFeature`.
- * Every group opens with the section's own index page, which is where a
- * reader arriving from the set landing page lands.
- * ======================================================================== */
-function wampSidebar() {
-  return [
-    {
-      text: 'Concepts',
-      description: 'What WAMP is and how its two communication patterns work.',
-      items: [
-        { text: 'Overview', link: '/wamp/concepts/index',
-          description: 'Every concept page, in reading order.' },
-        { text: 'What is WAMP?', link: '/wamp/concepts/what_is_wamp',
-          description: 'The protocol in one page: what it gives you and what it replaces.' },
-        { text: 'Introduction', link: '/wamp/concepts/introduction',
-          description: 'Roles, peers and the router, and how a session is established.' },
-        { text: 'Communication Patterns', link: '/wamp/concepts/communication_patterns',
-          description: 'The two patterns — RPC and Pub/Sub — that together cover request-response and event distribution.' },
-        { text: 'Routed RPC', link: '/wamp/concepts/rpc',
-          description: 'The Caller/Callee request-response pattern: registering, calling and routing a procedure.' },
-        { text: 'Publish/Subscribe', link: '/wamp/concepts/pubsub',
-          description: 'The Publisher/Subscriber event pattern: topics, subscriptions and publications.' },
-        { text: 'Connections and Sessions', link: '/wamp/concepts/sessions',
-          description: 'What a WAMP session is and how it relates to transports, realms and authentication.' },
-        { text: 'Security', link: '/wamp/concepts/security',
-          description: 'How a session authenticates and what it is then authorized to do.' },
-        { text: 'Naming', link: '/wamp/concepts/naming',
-          description: 'Designing procedure and topic URIs, beyond the bare syntax rules.' }
-      ]
-    },
-    {
-      text: 'Beyond the Basics',
-      description: 'The protocol-level mechanics behind the advanced features.',
-      items: [
-        { text: 'Beyond the Basics', link: '/wamp/concepts/beyond_the_basics',
-          description: 'What the advanced profile adds once the two patterns are working.' },
-        { text: 'Advanced RPC', link: '/wamp/concepts/advanced/rpc',
-          description: 'Progressive results, call cancellation, shared registrations and invocation policies.' },
-        { text: 'Advanced Pub/Sub', link: '/wamp/concepts/advanced/pubsub',
-          description: 'Pattern-based subscriptions, event retention and subscriber allow/deny lists.' },
-        { text: 'Compliance', link: '/wamp/concepts/compliance',
-          description: 'Which parts of the specification are implemented.' }
-      ]
-    },
-    {
-      text: 'Programming Guides',
-      description: 'Getting a specific job done from a WAMP component.',
-      items: [
-        { text: 'Overview', link: '/wamp/guides/index',
-          description: 'Every programming guide, by the job it does.' },
-        { text: 'General', link: '/wamp/guides/programming/general',
-          description: 'The conventions every component follows, whatever the pattern.' },
-        { text: 'Calling and Registering Procedures', link: '/wamp/guides/programming/rpc',
-          description: 'Register a procedure, call one, and choose an invocation policy.' },
-        { text: 'Publishing and Subscribing', link: '/wamp/guides/programming/pub_sub',
-          description: 'Publish to a topic and subscribe to one, including pattern matching.' }
-      ]
-    },
-    {
-      text: 'Tutorials',
-      description: 'End-to-end walkthroughs against a running Bondy.',
-      items: [
-        { text: 'Overview', link: '/wamp/tutorials/index',
-          description: 'Every tutorial, and what each one builds.' },
-        { text: 'Wampy (Python)', link: '/wamp/tutorials/wampy',
-          description: 'Connect, call and subscribe from Python.' },
-        { text: 'Bondy Connect SDK (BEAM)', link: '/wamp/tutorials/bondy_connect_sdk',
-          description: 'Connect, call and subscribe from Erlang or Elixir.' }
-      ]
-    },
-    {
-      text: 'Reference',
-      description: 'What to use to speak WAMP from your language, and its API.',
-      items: [
-        { text: 'Overview', link: '/wamp/reference/index',
-          description: 'What this set documents, and what lives in the platform set instead.' },
-        { text: 'WAMP Client Libraries', link: '/wamp/reference/clients/index',
-          description: 'The libraries available per language, and which Bondy ships itself.' },
-        { text: 'Bondy Connect SDK', link: '/wamp/reference/clients/bondy_connect_sdk',
-          description: 'The complete API reference for bondy_connect: every function, option and error shape.' }
-      ]
-    }
-  ]
 }
 
 
@@ -614,6 +514,36 @@ function tutorialsSidebar() {
       ]
     },
     {
+      text: 'WAMP',
+      description: 'Write your first WAMP component against a local Bondy, from the language you use.',
+      items: [
+        {
+          text: 'Wampy (Python)',
+          link: '/router/tutorials/wamp/wampy',
+          isFeature: true,
+          description: 'Connect, call and subscribe from Python.'
+        },
+        {
+          text: 'Bondy Connect SDK (Erlang/Elixir)',
+          link: '/router/tutorials/wamp/bondy_connect_sdk',
+          isFeature: true,
+          description: 'Connect, call and subscribe from Erlang or Elixir.'
+        }
+      ]
+    },
+    {
+      text: 'Edge',
+      description: 'Link a Bondy node to a remote router over a bridge relay.',
+      items: [
+        {
+          text: 'Connecting an Edge Node',
+          link: '/router/tutorials/edge/connecting_an_edge_node',
+          isFeature: true,
+          description: 'Run a core and an edge node locally, then send an event and a call across the bridge.'
+        }
+      ]
+    },
+    {
       text: 'Integrations',
       description: 'Forwarding WAMP events out to systems that do not speak WAMP.',
       items: [
@@ -650,8 +580,9 @@ function tutorialsSidebar() {
 /* ===========================================================================
  * Bondy Connect — How-to Guides
  *
- * Task-oriented, ordered along the operational lifecycle: install it,
- * configure it, deploy it, run it, then build against it.
+ * Task-oriented, in three parts: develop (programming guides, grouped by the
+ * interface the component uses), secure (who may connect and what they may
+ * reach), then operate (install, configure, deploy, administer).
  *
  * Groups are the job, not the directory. Three pages sit in a directory that
  * disagrees with the group they belong to (guides/security/configuring_cors,
@@ -662,6 +593,84 @@ function tutorialsSidebar() {
  * ======================================================================== */
 function guidesSidebar() {
   return [
+    {
+      text: 'Programming with WAMP',
+      description: 'Write the components that register, call, publish and subscribe on a realm.',
+      items: [
+        {
+          text: 'General Conventions',
+          link: '/router/guides/programming/wamp/general',
+          isFeature: true,
+          description: 'The conventions every WAMP component follows, whatever the pattern.'
+        },
+        {
+          text: 'Calling and Registering Procedures',
+          link: '/router/guides/programming/wamp/rpc',
+          isFeature: true,
+          description: 'Register a procedure, call one, and choose an invocation policy.'
+        },
+        {
+          text: 'Publishing and Subscribing',
+          link: '/router/guides/programming/wamp/pub_sub',
+          isFeature: true,
+          description: 'Publish to a topic and subscribe to one, including pattern matching.'
+        }
+      ]
+    },
+    {
+      text: 'Programming with HTTP and Mail',
+      description: 'Expose HTTP APIs, call out to HTTP services, and send mail.',
+      items: [
+        {
+          text: 'Loading an API Gateway Specification',
+          link: '/router/guides/programming/loading_api_spec',
+          isFeature: true,
+          description: 'Load an API Gateway specification using the HTTP Admin API.'
+        },
+        {
+          text: 'Using the HTTP Connector',
+          link: '/router/guides/programming/http_connector',
+          isFeature: true,
+          description: 'Bridge WAMP RPC calls to upstream HTTP/REST services with step-by-step examples.'
+        },
+        {
+          text: 'Sending Email',
+          link: '/router/guides/programming/sending_email',
+          isFeature: true,
+          description: 'Send email from a WAMP client, or on a published event, with idempotency and error handling.'
+        }
+      ]
+    },
+    {
+      text: 'Security',
+      description: 'Decide who may connect, how they authenticate, and what an HTTP API or an agent may reach.',
+      items: [
+        {
+          text: 'Authenticating Clients',
+          link: '/router/guides/security/authenticating_clients',
+          isFeature: true,
+          description: 'Set up a realm so clients authenticate with cryptosign, wampcra or wamp-scram, or a ticket.'
+        },
+        {
+          text: 'Protecting an HTTP API with OAuth2',
+          link: '/router/guides/security/protecting_an_http_api',
+          isFeature: true,
+          description: 'Require a Bondy OAuth2 access token on API Gateway routes; issue, use and revoke tokens.'
+        },
+        {
+          text: 'Configuring CORS & HTTP Security Headers',
+          link: '/router/guides/security/configuring_cors',
+          isFeature: true,
+          description: 'Common CORS and HTTP security header configurations for different deployment scenarios.'
+        },
+        {
+          text: 'Giving an Agent Read-Only Access',
+          link: '/router/guides/administration/giving_an_agent_read_only_access',
+          isFeature: true,
+          description: 'Adopt the shipped MCP read overlay and scope an agent with a role-restricted ticket.'
+        }
+      ]
+    },
     {
       text: 'Installation',
       description: 'Bondy can be deployed anywhere from resource-constrained AMD64/ARM64 edge devices to private, hybrid and public clouds running bare metal, virtual machines and containers. Choose the option best suited to your needs.',
@@ -688,7 +697,7 @@ function guidesSidebar() {
     },
     {
       text: 'Configuration',
-      description: 'Set up the configuration file first, then the listeners, headers and relays a particular deployment needs.',
+      description: 'Set up the configuration file first, then the listeners and relays a particular deployment needs.',
       items: [
         {
           text: 'Configuration Basics',
@@ -701,12 +710,6 @@ function guidesSidebar() {
           link: '/router/guides/administration/configuring_listeners',
           isFeature: true,
           description: 'Declare the socket inventory: terminate TLS, split audiences, budget an exposed listener, drain a node.'
-        },
-        {
-          text: 'Configuring CORS & HTTP Security Headers',
-          link: '/router/guides/security/configuring_cors',
-          isFeature: true,
-          description: 'Common CORS and HTTP security header configurations for different deployment scenarios.'
         },
         {
           text: 'Configuring Mail Relays',
@@ -731,6 +734,12 @@ function guidesSidebar() {
           link: '/router/guides/deployment/upgrading_to_1_0_0',
           isFeature: true,
           description: 'Migrate an existing deployment to the new storage and replication stack.'
+        },
+        {
+          text: 'Linking an Edge Node to a Remote Router',
+          link: '/router/guides/deployment/linking_an_edge_node',
+          isFeature: true,
+          description: 'Accept bridges on the remote router, configure the bridge on the edge with its own key and TLS, verify it, and remove it.'
         }
       ]
     },
@@ -742,7 +751,7 @@ function guidesSidebar() {
           text: 'Backup and Restore',
           link: '/router/guides/administration/backup_and_restore',
           isFeature: true,
-          description: 'Back up and restore the write-ahead log and Merkle Search Tree pack store.'
+          description: 'Export and import realms and security data, or take a cold copy of the storage tree.'
         },
         {
           text: 'Monitoring with Prometheus & Grafana',
@@ -769,12 +778,6 @@ function guidesSidebar() {
           description: 'From a raised alarm to its signals, its sanctioned remediation, and a confirmed clear.'
         },
         {
-          text: 'Giving an Agent Read-Only Access',
-          link: '/router/guides/administration/giving_an_agent_read_only_access',
-          isFeature: true,
-          description: 'Adopt the shipped MCP read overlay and scope an agent with a role-restricted ticket.'
-        },
-        {
           text: 'Load Regulation and Rate Limiting',
           link: '/router/guides/administration/load_regulation_and_rate_limiting',
           isFeature: true,
@@ -799,30 +802,6 @@ function guidesSidebar() {
           description: 'Serve a realm to AI agents: declare the listener, publish interface metadata, connect a client.'
         }
       ]
-    },
-    {
-      text: 'Programming',
-      description: 'Build against a running node: expose HTTP APIs, call out to HTTP services, and send mail.',
-      items: [
-        {
-          text: 'Loading an API Gateway Specification',
-          link: '/router/guides/programming/loading_api_spec',
-          isFeature: true,
-          description: 'Load an API Gateway specification using the HTTP Admin API.'
-        },
-        {
-          text: 'Using the HTTP Connector',
-          link: '/router/guides/programming/http_connector',
-          isFeature: true,
-          description: 'Bridge WAMP RPC calls to upstream HTTP/REST services with step-by-step examples.'
-        },
-        {
-          text: 'Sending Email',
-          link: '/router/guides/programming/sending_email',
-          isFeature: true,
-          description: 'Send email from a WAMP client, or on a published event, with idempotency and error handling.'
-        }
-      ]
     }
   ]
 }
@@ -831,13 +810,97 @@ function guidesSidebar() {
 /* ===========================================================================
  * Bondy Connect — Concepts
  *
- * Understanding-oriented, ordered as a reading path: the domain a session
- * attaches to, then what a node serves, then what happens across nodes, then
+ * Understanding-oriented, ordered as a reading path: the WAMP model, the
+ * domain a session attaches to, then what a node serves, then what happens across nodes, then
  * what it does with data and reports about itself. Background is last on
  * purpose — it is the "why", and none of it is needed to build.
  * ======================================================================== */
 function conceptsSidebar() {
   return [
+    {
+      text: 'WAMP',
+      description: 'The protocol most components use to talk to Bondy Connect: routed RPC and Publish/Subscribe over one session.',
+      items: [
+        {
+          text: 'WAMP Overview',
+          link: '/router/concepts/wamp/index',
+          isFeature: true,
+          description: 'Every WAMP concept page, in reading order.'
+        },
+        {
+          text: 'What is WAMP?',
+          link: '/router/concepts/wamp/what_is_wamp',
+          isFeature: true,
+          description: 'The protocol in one page: what it gives you and what it replaces.'
+        },
+        {
+          text: 'Introduction',
+          link: '/router/concepts/wamp/introduction',
+          isFeature: true,
+          description: 'Roles, peers and the router, and how a session is established.'
+        },
+        {
+          text: 'Communication Patterns',
+          link: '/router/concepts/wamp/communication_patterns',
+          isFeature: true,
+          description: 'The two patterns, RPC and Pub/Sub, that together cover request-response and event distribution.'
+        },
+        {
+          text: 'Routed RPC',
+          link: '/router/concepts/wamp/rpc',
+          isFeature: true,
+          description: 'The Caller/Callee request-response pattern: registering, calling and routing a procedure.'
+        },
+        {
+          text: 'Publish/Subscribe',
+          link: '/router/concepts/wamp/pubsub',
+          isFeature: true,
+          description: 'The Publisher/Subscriber event pattern: topics, subscriptions and publications.'
+        },
+        {
+          text: 'Connections and Sessions',
+          link: '/router/concepts/wamp/sessions',
+          isFeature: true,
+          description: 'What a WAMP session is and how it relates to transports, realms and authentication.'
+        },
+        {
+          text: 'Security',
+          link: '/router/concepts/wamp/security',
+          isFeature: true,
+          description: 'How a session authenticates and what it is then authorized to do.'
+        },
+        {
+          text: 'Naming',
+          link: '/router/concepts/wamp/naming',
+          isFeature: true,
+          description: 'Designing procedure and topic URIs, beyond the bare syntax rules.'
+        },
+        {
+          text: 'Beyond the Basics',
+          link: '/router/concepts/wamp/beyond_the_basics',
+          isFeature: true,
+          description: 'What the advanced profile adds once the two patterns are working.'
+        },
+        {
+          text: 'Advanced RPC',
+          link: '/router/concepts/wamp/advanced/rpc',
+          isFeature: true,
+          description: 'Progressive results, call cancellation, shared registrations and invocation policies.'
+        },
+        {
+          text: 'Advanced Pub/Sub',
+          link: '/router/concepts/wamp/advanced/pubsub',
+          isFeature: true,
+          description: 'Pattern-based subscriptions, event retention and subscriber allow/deny lists.'
+        },
+        {
+          text: 'The Bondy Connect SDK',
+          link: '/router/concepts/bondy_connect_sdk',
+          isFeature: true,
+          description: "How Bondy's Erlang/Elixir client is built: a supervised connection, one API across transports, reconnect and replay, isolated handlers, and errors that say whether to retry."
+        }
+      ]
+    },
     {
       text: 'Realms & Security',
       description: 'Once RPC and Pub/Sub are working, the next thing to understand: the domain your sessions attach to, and how they authenticate.',
@@ -951,6 +1014,12 @@ function conceptsSidebar() {
       description: 'What a node does with data it no longer needs, and what it reports about itself while it runs.',
       items: [
         {
+          text: 'Node Lifecycle and Durability',
+          link: '/router/concepts/node_lifecycle',
+          isFeature: true,
+          description: 'What a node does from boot to shutdown, what "ready" means, and why an acknowledged write survives a crash.'
+        },
+        {
           text: 'Deletion and Reclamation',
           link: '/router/concepts/deletion_and_reclamation',
           isFeature: true,
@@ -1048,6 +1117,16 @@ function referenceSidebar() {
         { text: 'WAMP API', link: '/router/reference/wamp_api/index' },
         { text: 'HTTP API', link: '/router/reference/http_api/index' },
         { text: 'HTTP API Gateway', link: '/router/reference/api_gateway/index' },
+        { text: 'Client Libraries', link: '/router/reference/clients/index' },
+        { text: 'Bondy Connect SDK', link: '/router/reference/clients/bondy_connect_sdk' }
+      ]
+    },
+    {
+      text: 'Protocols',
+      description: 'What Bondy Connect implements of each protocol it speaks, and how it encodes payloads.',
+      items: [
+        { text: 'WAMP Compliance', link: '/router/reference/protocols/wamp' },
+        { text: 'MCP Compliance', link: '/router/reference/protocols/mcp' },
         { text: 'Serialization', link: '/router/reference/serialization' }
       ]
     },
@@ -1107,10 +1186,10 @@ function configurationSidebar() {
           description: 'Configure the nodename, platform paths and Erlang VM parameters.'
         },
         {
-          text: 'Startup/Shutdown',
+          text: 'Shutdown',
           link: '/router/reference/configuration/startup_shutdown',
           isFeature: true,
-          description: 'Configure options controlling several aspects of what happens during startup and shutdown.'
+          description: 'The shutdown sequence, and how long a node waits for clients to leave.'
         },
         {
           text: 'Data Storage & Active Anti-entropy',
@@ -1455,7 +1534,7 @@ function httpAPISidebar() {
         {
           // Pointed at /router/reference/index until now, which sent readers
           // out of this manual and into the reference hub.
-          text: 'Overview',
+          text: 'Admin HTTP API',
           link: '/router/reference/http_api/index'
         },
         {

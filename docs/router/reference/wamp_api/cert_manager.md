@@ -163,7 +163,7 @@ None.
 None.
 
 #### Errors
-- `wamp.error.no_such_resource` -- no certificate is loaded for the given listener.
+- [`bondy.error.not_found`](/router/reference/wamp_api/errors/not_found) -- no certificate is loaded for the given listener.
 
 
 ---
@@ -223,7 +223,7 @@ None.
 None.
 
 #### Errors
-- `wamp.error.no_such_resource` -- no mTLS configuration exists for the given listener.
+- [`bondy.error.not_found`](/router/reference/wamp_api/errors/not_found) -- no mTLS configuration exists for the given listener.
 
 
 <script>

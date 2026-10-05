@@ -29,6 +29,12 @@ Upstream HTTP request timeout.
 
 Number of retry attempts on connection failures, using exponential backoff.
 
+@[config](http_connector.services.$service.tls_verify,verify_peer&#124;verify_none,verify_peer,v1.0.0)
+
+Whether Bondy verifies the upstream service's TLS certificate when `base_url` uses `https`. With `verify_peer`, Bondy checks the certificate against the trust store managed by the [certificate manager](/router/reference/configuration/cert_manager). With `verify_none`, Bondy skips verification for this service only: the connection is still encrypted, but the upstream is not authenticated. Use `verify_none` only for development or testing.
+
+The setting applies to the service's connection pool, so it covers every procedure mapped to the service.
+
 
 ## Connection Pool
 

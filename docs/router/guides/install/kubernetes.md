@@ -110,7 +110,6 @@ In the `bondy.conf` you put in the `bondy-config` ConfigMap, point discovery at 
 
 ```text
 cluster.peer_discovery.enabled = on
-cluster.peer_discovery.automatic_join = on
 cluster.peer_discovery.type = dns
 cluster.peer_discovery.config.record_type = a
 cluster.peer_discovery.config.query = bondy-peers.default.svc.cluster.local

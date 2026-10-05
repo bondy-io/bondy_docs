@@ -29,10 +29,9 @@ const path = computed(() => {
 
 // The first segment is the documentation set. Each has a landing page, and
 // naming it is what tells a reader arriving from search which manual they
-// are in — the router's and the protocol's overlap in vocabulary.
+// are in.
 const SETS = {
   router: { text: 'Bondy Connect', link: '/router' },
-  wamp: { text: 'WAMP', link: '/wamp' },
   about: { text: 'About', link: null }
 }
 
@@ -55,15 +54,20 @@ const SUBSECTIONS = {
   'reference/http_api': { text: 'HTTP API', link: true },
   'reference/api_gateway': { text: 'HTTP API Gateway', link: true },
   'reference/clients': { text: 'Client Libraries', link: true },
+  'reference/protocols': { text: 'Protocols' },
+  'tutorials/wamp': { text: 'WAMP' },
+  'tutorials/edge': { text: 'Edge' },
   'tutorials/getting_started': { text: 'Getting Started' },
   'tutorials/security': { text: 'Security' },
   'guides/install': { text: 'Installation' },
   'guides/configuration': { text: 'Configuration' },
   'guides/security': { text: 'Security' },
   'guides/programming': { text: 'Programming' },
+  'guides/programming/wamp': { text: 'WAMP' },
   'guides/deployment': { text: 'Deployment' },
   'guides/administration': { text: 'Administration' },
-  'concepts/advanced': { text: 'Advanced' }
+  'concepts/wamp': { text: 'WAMP', link: true },
+  'concepts/wamp/advanced': { text: 'Advanced' }
 }
 
 const humanize = (seg) =>

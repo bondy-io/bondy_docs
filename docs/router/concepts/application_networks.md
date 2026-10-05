@@ -31,7 +31,7 @@ Bondy offers a unified application networking platform that can serve the needs 
 
 ## How is an application network implemented
 
-Bondy uses a distributed and decentralized implementation of the [Web Application Messaging Protocol (WAMP)](/wamp/concepts/what_is_wamp) as its underlying application networking protocol.
+Bondy uses a distributed and decentralized implementation of the [Web Application Messaging Protocol (WAMP)](/router/concepts/wamp/what_is_wamp) as its underlying application networking protocol.
 
 WAMP an open protocol that unifies the *core services required by every distributed application*:
 - **Authentication**, providing multiple authentication methods

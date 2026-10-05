@@ -11,7 +11,7 @@ related:
       description: The subscription-side introspection procedures — the same two families, the same shapes.
     - text: RPC Programming Guide
       type: Guide
-      link: /wamp/guides/programming/rpc
+      link: /router/guides/programming/wamp/rpc
       description: Registering procedures, shared registrations, and invocation policies from a client's perspective.
 ---
 
@@ -562,7 +562,7 @@ Published when a procedure URI's last registration is removed.
 ## See also
 - [Subscription](/router/reference/wamp_api/subscription) — the same two families of introspection, for subscriptions instead of registrations.
 - [Registry Routing (RIB)](/router/concepts/registry_routing) — why registration introspection is a cluster-wide query rather than a local one.
-- [RPC Programming Guide](/wamp/guides/programming/rpc) — registering procedures, shared registrations, and invocation policies.
+- [RPC Programming Guide](/router/guides/programming/wamp/rpc) — registering procedures, shared registrations, and invocation policies.
 
 <script>
 export default {
@@ -594,7 +594,7 @@ export default {
                     "mutable": false
                 },
                 "invoke" : {
-                    "description": "The invocation policy applied when more than one callee shares this registration: \`single\`, \`roundrobin\`, \`random\`, \`first\`, or \`last\`. See [Shared Registrations](/wamp/concepts/advanced/rpc#shared-registrations).",
+                    "description": "The invocation policy applied when more than one callee shares this registration: \`single\`, \`roundrobin\`, \`random\`, \`first\`, or \`last\`. See [Shared Registrations](/router/concepts/wamp/advanced/rpc#shared-registrations).",
                     "type": "string",
                     "required": true,
                     "mutable": false

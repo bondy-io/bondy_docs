@@ -140,7 +140,7 @@ call bondy.router.bridge.add \
 
 
 ### Remove a bridge
-##### bondy.router.bridge.remove() {.wamp-procedure}
+##### bondy.router.bridge.remove(name) {.wamp-procedure}
 Removes the definition of a bridge from the bridge manager.
 
 Returns an error if undefined or if the bridge is running, but no errors if the bridge doesn't exist or it is removed successfully.

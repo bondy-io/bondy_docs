@@ -120,7 +120,7 @@ When a new node starts:
 5. **Join Complete** - Node begins accepting client connections and routing messages
 
 ::: warning Version Compatibility
-All nodes in a cluster must run compatible Bondy versions. Rolling upgrades are supported within minor versions (e.g., 1.1.x → 1.2.x), but major version upgrades typically require cluster downtime — see [Upgrading to 1.0.0](/router/guides/deployment/upgrading_to_1_0_0) for the current major upgrade.
+All nodes in a cluster must run the same Bondy release. Rolling upgrades are not supported: upgrade a cluster by stopping every node and starting them all on the new release. See [Upgrading to 1.0.0](/router/guides/deployment/upgrading_to_1_0_0).
 :::
 
 ::: warning Peer plane security
@@ -179,12 +179,7 @@ procedure for telling the two cases apart on a running cluster.
 
 ### Horizontal Scaling
 
-Add capacity by adding nodes:
-
-```bash
-# Start new node pointing to existing cluster
-bondy start -name bondy4@host4 -cluster_seeds "bondy1@host1,bondy2@host2"
-```
+Add capacity by adding nodes. A new node configured with the same peer discovery settings as the rest of the cluster finds the existing nodes and joins them; there is no join command to run. See [Running a Cluster](/router/guides/deployment/running_a_cluster).
 
 Benefits:
 - **More client connections** - Each node can handle millions of connections

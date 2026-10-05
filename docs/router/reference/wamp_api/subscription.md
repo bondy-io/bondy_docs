@@ -11,7 +11,7 @@ related:
       description: The registration-side introspection procedures — the same two families, the same shapes.
     - text: Pub/Sub Programming Guide
       type: Guide
-      link: /wamp/guides/programming/pub_sub
+      link: /router/guides/programming/wamp/pub_sub
       description: Subscribing to topics and pattern-based subscriptions from a client's perspective.
 ---
 
@@ -519,7 +519,7 @@ Published when a topic URI's last subscription is removed.
 ## See also
 - [Registration](/router/reference/wamp_api/registration) — the same two families of introspection, for registrations instead of subscriptions.
 - [Registry Routing (RIB)](/router/concepts/registry_routing) — why subscription introspection is a cluster-wide query rather than a local one.
-- [Pub/Sub Programming Guide](/wamp/guides/programming/pub_sub) — subscribing to topics and pattern-based subscriptions.
+- [Pub/Sub Programming Guide](/router/guides/programming/wamp/pub_sub) — subscribing to topics and pattern-based subscriptions.
 
 <script>
 export default {

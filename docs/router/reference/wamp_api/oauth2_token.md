@@ -29,11 +29,11 @@ OAuth2-based authentication allows clients to present an authentication token wh
 OAuth2 tokens are obtained and used exclusively through Bondy's HTTP API Gateway. If you are primarily using WAMP for communication, consider using [Ticket](/router/reference/wamp_api/ticket) authentication instead, which works natively with WAMP.
 
 ### Requires Base Authentication Method
-Bondy's OAuth2-based authentication does not work independently. It requires a user to be authenticated using either `wampcra` or `cryptosign` (base authentication method) before the user can obtain an OAuth2 token.
+A token request authenticates the resource owner, and the API client, with the `password` method. When defining [Sources](/router/reference/wamp_api/source) for a user who obtains tokens, add two rules:
+1. One for `oauth2`, used when the token is presented
+2. One for `password`, used when the token is requested
 
-When defining [Sources](/router/reference/wamp_api/source) for a user, you need to add two rules:
-1. One for `oauth2`
-2. Another for the base method (`wampcra` or `cryptosign`)
+Every token, refresh and revoke request also carries the API client's credentials as `Authorization: Basic`, and a revoke request must name the token type in `token_type_hint`. See [Protecting an HTTP API with OAuth2](/router/guides/security/protecting_an_http_api) for complete requests.
 
 ## HTTP Endpoints
 

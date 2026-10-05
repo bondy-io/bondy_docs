@@ -651,9 +651,9 @@ None.
 
 #### Errors
 
-* [wamp.error.bad_signature](/router/reference/wamp_api/errors/bad_signature): when the provided old password doesn't match.
+* [bondy.error.bad_signature](/router/reference/wamp_api/errors/bad_signature): when the provided old password doesn't match.
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
-* [wamp.error.not_found](/router/reference/wamp_api/errors/not_found): when the provided username does not exist.
+* [bondy.error.not_found](/router/reference/wamp_api/errors/not_found): when the provided username does not exist.
 
 #### Examples
 

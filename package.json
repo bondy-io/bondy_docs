@@ -18,6 +18,7 @@
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
+    "check:anchors": "node scripts/check-anchors.mjs",
     "docs:preview": "vitepress preview docs",
     "docs:serve": "vitepress preview docs",
     "format": "prettier --write \"docs/**/*.md\" \"*.md\"",
@@ -32,7 +33,7 @@
     "docs:release": "npm run docs:build && npm run docs:index"
   },
   "dependencies": {
-    "@bondy/site-chrome": "git+https://github.com/bondy-io/bondy_site_chrome.git#v0.9.13",
+    "@bondy/site-chrome": "github:bondy-io/bondy_site_chrome#v0.9.14",
     "@leapsight/vitepress-template": "git+https://github.com/Leapsight/vitepress-template.git#v0.1.19",
     "@sindresorhus/slugify": "^2.1.1",
     "@types/markdown-it": "^14.1.2",

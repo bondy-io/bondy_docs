@@ -166,13 +166,16 @@ To expose the OIDC endpoints, add an `oidc` security scheme to your [API Gateway
 }
 ```
 
-This automatically registers three HTTP routes under the version's `base_path`:
+This automatically registers four HTTP routes under the version's `base_path`:
 
 | Route | Method | Description |
 |:---|:---|:---|
 | `<base_path>/oidc/login` | GET | Initiates the OIDC flow |
 | `<base_path>/oidc/<provider>/callback` | GET | Receives the IdP callback |
 | `<base_path>/oidc/logout` | GET, POST | Terminates the session |
+| `<base_path>/oidc/verify` | GET, HEAD | Tells a reverse proxy whether a request carries a valid ticket. See [Verify route](/router/reference/api_gateway/specification#verify-route). |
+
+The scheme does not protect the version's own paths: Bondy refuses every request to them. Use it for the login flow, and declare the HTTP API you want to protect in a version with the `oauth2` scheme.
 
 
 ## Cookies

@@ -11,7 +11,7 @@ related:
       description: Step-by-step guide to implementing Same Sign-on.
     - text: Security
       type: concepts
-      link: /wamp/concepts/security
+      link: /router/concepts/wamp/security
       description: Authentication and authorization in WAMP.
 ---
 # Single Sign-On
