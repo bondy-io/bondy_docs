@@ -1,58 +1,31 @@
 ---
-draft: true
 features:
-  - text: Install from Source
-    link: '#install-from-source'
-    description: Build and install Bondy from source.
   - text: Install using Docker
-    link: '#install-using-docker'
-    description: Use the official docker image
+    link: /router/guides/install/docker
+    description: Run the official image. The fastest way to get a single node.
+  - text: Install from Source
+    link: /router/guides/install/source
+    description: Build a release yourself, to contribute or to target a platform without an image.
   - text: Install using Kubernetes
-    link: '#install-using-kubernetes'
-    description: See a starter manifest recipe and taylor it based on your needs.
-
+    link: /router/guides/install/kubernetes
+    description: Run a cluster as a StatefulSet that forms itself through peer discovery.
 ---
 
 # Get Bondy
-There are several ways to get Bondy up and running. The fastest one is using the official Docker images,  but you can also compile Bondy from source depending on your deployment scenarios and needs.
-
-## Installation options
-Choose what is the best installation option for you.
+The tutorials need a running Bondy node. Pick the installation that fits how you work, follow it, and come back with a node listening on the default ports below.
 
 <Features class="VPHomeFeatures" :features="$frontmatter.features"/>
 
+## Default listeners
 
-## Install from Source
+A node whose `bondy.conf` declares no `listeners.*` key starts these listeners. The tutorials assume them.
 
-Building from source gives you full control over the build — useful if you're contributing to Bondy, need a platform without a Docker image, or want to customize the build. See [Install from Source](/router/guides/install/source) for the full prerequisites and build steps.
+|Listener|Port|Serves|
+|:---|---|:---|
+|`api_gateway_http`|`18080`|API Gateway specifications, and WAMP over WebSocket (`/ws`), Server-Sent Events and long-poll.|
+|`wamp_tcp`|`18082`|WAMP over RawSocket.|
+|`admin`|`18081`|The Admin HTTP API, WAMP over WebSocket, the `/ping` and `/ready` health endpoints, and `/metrics`. Bound to loopback.|
 
-## Install using Docker
+The node also opens port `18086` for connections from other nodes in its cluster; see [`cluster.peer_port`](/router/reference/configuration/cluster#cluster.peer_port).
 
-The fastest way to get a single node running: pull the official image, mount a config directory, and start it. See [Install using Docker](/router/guides/install/docker) for the full walkthrough.
-
-## Install using Kubernetes
-
-For a production, orchestrated deployment: run the same Docker image as a `StatefulSet` behind a headless `Service`, using DNS-based peer discovery to form a cluster automatically as pods come up. See [Install using Kubernetes](/router/guides/install/kubernetes) for a worked example, and [Running a Cluster](/router/guides/deployment/running_a_cluster) for peer discovery in depth.
-
-
-## Default Port Numbers
-
-Regardless of the installation method, Bondy exposes the following ports by default:
-
-|Listener|Port|
-|:---|---|
-|WAMP WS|`18080`|
-|WAMP WSS|`18083`|
-|WAMP RAW SOCKET TCP|`18082`|
-|WAMP RAW SOCKET TLS|`18085`|
-|API GATEWAY HTTP|`18080`|
-|API GATEWAY HTTPS|`18083`|
-|ADMIN API HTTP|`18081`|
-|ADMIN API HTTPS|`18084`|
-|CLUSTER PEER SERVICE|`18086`|
-
-If you want to change those port numbers checkout the [Configuration Reference](/router/reference/configuration/index).
-
-::: warning Notice
-The Websocket (WS) listeners at the moment are the same used for HTTP traffic. This will change in future versions.
-:::
+None of the default listeners uses TLS. To add TLS listeners or change ports, declare your own listeners; see [Network Listeners](/router/reference/configuration/listeners). Declaring any listener replaces this set, except `admin`, which a node always has.

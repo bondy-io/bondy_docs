@@ -1,96 +1,64 @@
 ---
-draft: true
 related:
+    - text: API Gateway WAMP API
+      type: Reference
+      link: /router/reference/wamp_api/api_gateway
+      description: The procedures these routes call, with their arguments, results and errors.
     - text: HTTP API Gateway Specification Reference
       type: Reference
       link: /router/reference/api_gateway/specification
-      description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics.
-    - text: Marketplace HTTP API Gateway
-      type: Tutorial
-      link: /router/tutorials/getting_started/marketplace_api_gateway
-      description: A tutorial that demonstrates a simple marketplace with Python microservices and a VueJS Web App.
+      description: The format of an API specification, which these routes load, return and delete.
 ---
-# HTTP API Gateway
-Bondy API Gateway is a reverse proxy that lets you manage, configure, and route requests to your WAMP APIs and also to external HTTP/REST APIs. It allows Bondy to be integrated into an existing HTTP/REST API ecosystem.
+# API Gateway
+The Admin HTTP API routes that load, inspect and remove [API Gateway specifications](/router/reference/api_gateway/specification).
 
-## API
-The following http api is used to configure and manage the [Gateway Specification](../api_gateway/specification):
+Each route calls one procedure of the [API Gateway WAMP API](/router/reference/wamp_api/api_gateway). That page is the contract for what each operation does and how it fails. This page gives the routes and what is particular to HTTP. The request and error mapping that every Admin HTTP API route shares is in [Admin HTTP API](/router/reference/http_api/index#request-and-response-mapping).
 
-|Name|HTTP Method|URL|
-|:---|:---|:---|
-|[Get an API Spec](#api-get)|GET|`/api_specs/:id`|
-|[Get info an API Spec](#api-get-info)|GET|`/api_specs/:id/info`|
-|[List all API Specs](#api-list)|GET|`/api_specs`|
-|[Load an API Spec](#api-load)|POST|`/api_specs`|
-|[Load an API Spec](#api-load)|POST|`/services/load_api_spec`|
+## Routes
 
-### API Get
+| Method | Path | WAMP procedure |
+|---|---|---|
+| `POST` | `/api_specs` | [`bondy.http_gateway.api.load`](/router/reference/wamp_api/api_gateway#load-an-api-spec) |
+| `POST` | `/services/load_api_spec` | [`bondy.http_gateway.api.load`](/router/reference/wamp_api/api_gateway#load-an-api-spec) |
+| `GET` | `/api_specs` | [`bondy.http_gateway.api.list`](/router/reference/wamp_api/api_gateway#list-all-api-specs) |
+| `GET` | `/api_specs/:id` | [`bondy.http_gateway.api.get`](/router/reference/wamp_api/api_gateway#get-an-api-spec) |
+| `GET` | `/api_specs/:id/info` | [`bondy.http_gateway.api.get`](/router/reference/wamp_api/api_gateway#get-an-api-spec) |
+| `DELETE` | `/api_specs/:id` | [`bondy.http_gateway.api.delete`](/router/reference/wamp_api/api_gateway#delete-an-api-spec) |
 
-Retrieves the full API spec with the given `id`.
+The two `POST` routes are equivalent.
 
-Useful for confirming that an API spec definition was loaded and activated exactly as submitted.
+## Loading a specification
 
-::: code-group
-```bash [Request]
-curl -X "GET" "http://localhost:18081/api_specs/com.market.demo" \
--H 'Content-Type: application/json; charset=utf-8' | jq
+The request body is the specification, as JSON. A successful load answers with an empty body.
+
+```bash
+curl -X POST "http://localhost:18081/api_specs" \
+  -H 'Content-Type: application/json; charset=utf-8' \
+  --data-binary "@my_api.json"
 ```
 
-```json [Response]
-{
-  "defaults": {
-    "connect_timeout": 5000.00000000000000000,
-    "headers": "{{variables.cors_headers}}",
-    "retries": 0E-20,
-    "schemes": "{{variables.schemes}}",
-    "security": "{{variables.oauth2}}",
-    "timeout": 15000.0000000000000000
-  },
-  "host": "_",
-  "id": "com.market.demo",
-  "meta": {},
-  "name": "Marketplace Demo API",
-  "realm_uri": "com.market.demo",
-  "status_codes": {
-    "com.example.error.internal_error": 500.000000000000000000,
-    "com.example.error.not_found": 404.000000000000000000,
-    "com.example.error.unknown_error": 500.000000000000000000
-  },
-  "ts": -576459578303,
-  "variables": {},
-  "versions": {}
-}
-```
-:::
+A specification that fails validation answers with the error as the JSON body, with `code` set to the error URI. The status follows from the URI:
 
+| Error | Status |
+|---|---|
+| `bondy.error.missing_required_value` | `400` |
+| `bondy.error.invalid_value` | `400` |
+| `bondy.error.http_gateway.invalid_expression` | `500` |
+| `bondy.error.internal_error` | `500` |
 
-#### Errors
+The [load errors](/router/reference/wamp_api/api_gateway#load-an-api-spec) say when each one occurs.
 
-* `bondy.error.not_found`: when the provided api spec id is not found.
+## Reading specifications
 
+`GET /api_specs/:id` answers with the stored specification. `GET /api_specs` answers with an array of every stored specification.
 
-::: code-group
-```json [bondy.error.not_found]
-{
-  "code": "bondy.error.not_found",
-  "description": "The requested API spec does not exist.",
-  "message": "No API spec found with id 'com.market.demo'"
-}
-```
-:::
+`GET /api_specs/:id/info` answers with a summary of the stored specification: the properties `id`, `name`, `host`, `realm_uri`, `meta` and `ts`, without the versions and paths.
 
-
-### API Get Info
-
-Retrieves a summary of attributes (host, id, name, realm, timestamp) for the API spec with the given `id`, without the full specification body.
-
-::: code-group
-```bash [Request]
-curl -X "GET" "http://localhost:18081/api_specs/com.market.demo/info" \
--H 'Content-Type: application/json; charset=utf-8' | jq
+```bash
+curl "http://localhost:18081/api_specs/com.market.demo/info"
 ```
 
-```json [Response]
+```json
 {
   "host": "_",
   "id": "com.market.demo",
@@ -100,208 +68,13 @@ curl -X "GET" "http://localhost:18081/api_specs/com.market.demo/info" \
   "ts": -576459578303
 }
 ```
-:::
 
-#### Errors
+A `GET` for an `id` that is not stored answers `404`, with `code` set to `bondy.error.not_found`.
 
-* `bondy.error.not_found`: when the provided api spec id is not found.
+## Deleting a specification
 
+`DELETE /api_specs/:id` deletes the specification and stops serving its paths. It succeeds whether or not the `id` is stored.
 
-::: code-group
-```json [bondy.error.not_found]
-{
-  "code": "bondy.error.not_found",
-  "description": "The requested API spec does not exist.",
-  "message": "No API spec found with id 'com.market.demo'"
-}
+```bash
+curl -X DELETE "http://localhost:18081/api_specs/com.market.demo"
 ```
-:::
-
-
-### API List
-
-Retrieves every API spec currently loaded and activated on the node.
-
-
-::: code-group
-```bash [Request]
-curl -X "GET" "http://localhost:18081/api_specs" \
--H 'Content-Type: application/json; charset=utf-8' | jq
-```
-
-```json [Response]
-[
-  {
-    "defaults": {
-      "connect_timeout": 5000,
-      "headers": "{{variables.headers}}",
-      "retries": 0,
-      "schemes": "{{variables.schemes}}",
-      "security": "{{variables.oauth2}}",
-      "timeout": 5000
-    },
-    "host": "_",
-    "id": "com.leapsight.test",
-    "name": "Test API",
-    "realm_uri": "com.leapsight.test",
-    "status_codes": {
-      "bondy.error.already_exists": 400,
-      "wamp.error.invalid_argument": 400,
-      "wamp.error.no_such_principal": 400,
-      "bondy.error.not_found": 404
-    },
-    "ts": -576460749718,
-    "variables": {
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "access-control-allow-headers": "origin,x-requested-with,content-type,accept",
-        "access-control-allow-methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-        "access-control-allow-origin": "*",
-        "access-control-max-age": "86400"
-      },
-      "oauth2": {
-        "flow": "resource_owner_password_credentials",
-        "revoke_token_path": "/oauth/revoke",
-        "schemes": "{{variables.schemes}}",
-        "token_path": "/oauth/token",
-        "type": "oauth2"
-      },
-      "schemes": [
-        "http",
-        "https"
-      ],
-      "wamp_error_body": "{{action.error.kwargs |> put(code, {{action.error.error_uri}})}}"
-    },
-    "versions": {
-      "1.0.0": {
-        "base_path": "/[v1.0]",
-        "defaults": {
-          "timeout": 20000
-        },
-        "languages": [
-          "en"
-        ],
-        "paths": {
-          "/services/call": {
-            "description": "",
-            "is_collection": false,
-            "options": {
-              "action": {},
-              "response": {
-                "on_error": {
-                  "body": ""
-                },
-                "on_result": {
-                  "body": ""
-                }
-              }
-            },
-            "post": {
-              "action": {
-                "args": "{{request.body.args}}",
-                "kwargs": "{{request.body.kwargs}}",
-                "options": "{{request.body.options}}",
-                "procedure": "{{request.body.procedure}}",
-                "type": "wamp_call"
-              },
-              "response": {
-                "on_error": {
-                  "body": {
-                    "args": "{{action.error.args}}",
-                    "details": "{{action.error.details}}",
-                    "error_uri": "{{action.error.error_uri}}",
-                    "kwargs": "{{action.error.kwargs}}"
-                  },
-                  "status_code": "{{status_codes |> get({{action.error.error_uri}}, 500) |> integer}}"
-                },
-                "on_result": {
-                  "body": {
-                    "args": "{{action.result.args}}",
-                    "details": "{{action.result.details}}",
-                    "kwargs": "{{action.result.kwargs}}"
-                  }
-                }
-              }
-            },
-            "summary": "Allows to perform an arbitrary WAMP call."
-          }
-        },
-        "variables": {}
-      }
-    }
-  },
-  {
-    "defaults": {
-      "connect_timeout": 5000.00000000000000000,
-      "headers": "{{variables.cors_headers}}",
-      "retries": 0E-20,
-      "schemes": "{{variables.schemes}}",
-      "security": "{{variables.oauth2}}",
-      "timeout": 15000.0000000000000000
-    },
-    "host": "_",
-    "id": "com.market.demo",
-    "meta": {},
-    "name": "Marketplace Demo API",
-    "realm_uri": "com.market.demo",
-    "status_codes": {
-      "com.example.error.internal_error": 500.000000000000000000,
-      "com.example.error.not_found": 404.000000000000000000,
-      "com.example.error.unknown_error": 500.000000000000000000
-    },
-    "ts": -576459578303,
-    "variables": {},
-    "versions": {}
-  }
-]
-```
-:::
-
-
-#### Errors
-
-This endpoint takes no arguments and raises no documented error.
-
-
-### API Load
-
-The following command will load the API Specification, validate it and if successful it will be compiled and activate it.
-
-::: info Note
-There are two endpoints you can use to load the api spec definition with the same behaviour:
-- **/services/load_api_spec**
-- **/api_specs**
-:::
-
-
-::: code-group
-```bash [Request-1]
-curl -X "POST" "http://localhost:18081/api_specs" \
--H 'Content-Type: application/json; charset=utf-8' \
--H 'Accept: application/json; charset=utf-8' \
---data-binary "@my_api.json"
-```
-
-```bash [Request-2]
-curl -X "POST" "http://localhost:18081/services/load_api_spec" \
--H 'Content-Type: application/json; charset=utf-8' \
--H 'Accept: application/json; charset=utf-8' \
---data-binary "@my_api.json"
-```
-:::
-
-
-#### Errors
-
-* `wamp.error.invalid_argument`: when there is an invalid number of positional arguments. 
-
-
-::: code-group
-```json [wamp.error.invalid_argument]
-{
-  "code": "wamp.error.invalid_argument",
-  "description": "The API spec definition failed validation.",
-  "message": "There is no realm named 'com.example.my_api'"
-}
-```
-:::

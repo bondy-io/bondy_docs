@@ -1,6 +1,3 @@
----
-draft: true
----
 # API Gateway Expressions Reference
 Bondy API Specification use a logic-less, dynamically-typed interpolation domain-specific language embedded in Erlang (internally called _"Mops"_) for data transformation and dynamic configuration.
 

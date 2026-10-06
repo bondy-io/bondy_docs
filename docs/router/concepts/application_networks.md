@@ -1,79 +1,63 @@
 ---
-draft: true
 outline: [2,3]
 ---
 # Application Networks
-An application network is a dynamic overlay network formed by a set of Bondy nodes that interconnects different types of applications and devices, ranging from web and mobile apps to IoT devices and backend microservices.
-
-
-## Overview
+Bondy Connect builds an application network: one network that connects every part of a distributed application by what each part does, not by where it runs.
 
 ::: definition Application network
-An application network is a dynamic [overlay network](https://en.wikipedia.org/wiki/Overlay_network) formed by a set of Bondy nodes that interconnects different types of applications and devices, ranging from web and mobile apps to IoT devices and backend microservices.
+An [overlay network](https://en.wikipedia.org/wiki/Overlay_network), formed by one or more Bondy nodes, in which application components address each other by named procedures and topics rather than by host and port.
 :::
 
-An application network helps ensure efficient and secure communication between Internet-connected devices such as browsers, phones, servers and IoT (Internet of Things) devices in realtime.
- 
-In a typical distributed application, there are two main flows of traffic:
+## Two kinds of traffic
 
-- **North-South** traffic represents the communication coming in and going out of a data center from/to external components of the application. For example, front-end components such as web apps and mobile apps, embedded apps (IoT) and/or external API clients that need to communicate with backend components inside the data center.
-- **East-West** traffic represents the communication within the data center. For example, the case of inter-service communication in a microservice architecture.
+A distributed application carries two kinds of traffic.
+
+- **North-South** traffic crosses the boundary of the system: web apps, mobile apps, devices and external API clients talking to the services inside.
+- **East-West** traffic stays inside: services talking to each other.
 
 <ZoomImg
   src="/assets/application_network_traffic.png"
-  caption="Bondy application network"
+  caption="An application network carries both kinds of traffic"
   width="600"/>
 
-It is common to use different protocols and infrastructure components for each type of traffic, but this practice is often based on commercial, political, cultural, or historical reasons.
+Most systems use different machinery for each. North-South traffic goes through an API gateway over HTTP. East-West traffic goes through a service mesh, a message broker, or direct gRPC calls. Each piece has its own protocol, its own client libraries, its own security model and its own place to look when something fails. The split usually comes from history and tooling, not from a difference in what the traffic needs: in both directions, one component wants to ask another to do something, or tell others that something happened.
 
-Bondy offers a unified application networking platform that can serve the needs of both North-South and East-West traffic, greatly simplifying the development of distributed applications.
+An application network carries both kinds of traffic with one mechanism.
 
+## Addressing by name
 
-## How is an application network implemented
+In an IP network, a component reaches another by its address and port, so it must know where the other runs. In an application network, a component reaches another through a name: the URI of a procedure to call or a topic to publish on. Bondy keeps track of which sessions registered each procedure and subscribed to each topic, and routes each message to them.
 
-Bondy uses a distributed and decentralized implementation of the [Web Application Messaging Protocol (WAMP)](/router/concepts/wamp/what_is_wamp) as its underlying application networking protocol.
+Naming instead of locating has consequences:
 
-WAMP an open protocol that unifies the *core services required by every distributed application*:
-- **Authentication**, providing multiple authentication methods
-- **Authorization**, providing a fine-grained Role-based Access Control system
-- **Inter-component communication**, implementing both
-    - **(Routed) Remote Procedure Calls** (RPC) including Service Discovery, Routing and Traffic management; and
-    - **Publish/Subscribe** routing
-- **Message routing**, where Bondy nodes relay messages from a source to a destination within a network, as well as bridging messages between components connected to different networks, such as cloud-to-cloud or edge-to-cloud cases.
+- **Components are independent.** A component can move, restart or be replaced without the others noticing, because they never knew its location.
+- **Capacity scales per procedure.** Starting more instances of a service that register the same procedure adds capacity for that procedure. Callers change nothing. See [shared registrations](/router/concepts/wamp/advanced/rpc).
+- **Every connection goes out.** Each component connects to Bondy; nothing connects to a component. A component behind a firewall or NAT can still register procedures that others call.
 
-By supporting multiple transports and combining the two main application communication patterns (Remote Procedure Calls and Publish/Subscribe) into a single protocol, WAMP can be used for all messaging requirements of a distributed application, including North-South and East-West traffic, in place of separate protocols such as HTTP, GraphQL, and gRPC for each.
+The last point removes a common problem with devices. For a remote system to send commands to a device over HTTP, the device must accept inbound connections. That means an open port, or a reverse VPN to reach it from outside. Both are hard to configure and easy to get wrong, and a small device may be unable to run a VPN client at all. On an application network, the device opens one outbound connection to Bondy and registers the procedures it offers. A remote caller calls those procedures through Bondy, over the device's own connection.
 
-This reduces the number of protocols, client libraries, and infrastructure components a distributed application needs to integrate.
+## How Bondy implements it
 
-### Key Characteristics
+The core of the network is [WAMP](/router/concepts/wamp/what_is_wamp), which combines routed RPC and publish/subscribe in one session-based protocol. Bondy is a WAMP router. Components that use a WAMP client library connect to it directly.
 
-- Session-oriented
-- Multiple transports and serialization formats
-- Multiple communication patterns
-- Peer-to-peer programming model
-- Secured and multi-tenant
-- Polyglot<br>Use any programming language and framework
-- Decoupled - participants in the network do not know each other or their locations, they interact using named resources like remote procedures and topics.
-- Connections are always initiated by clients - this removes the need for clients to open ports while still allowing other clients to call them (RPC).
+Not every component speaks WAMP, so Bondy Connect also exposes the network through other interfaces:
 
-::: tip Solving the Reverse VPN problem
+- The [API Gateway](/router/concepts/api_gateway) turns HTTP requests into WAMP calls and publications, for clients that only speak HTTP.
+- The [HTTP Connector](/router/concepts/http_connector) registers an external HTTP API as WAMP procedures, so WAMP components can call it.
+- The [MCP Gateway](/router/concepts/mcp_gateway) exposes a realm's procedures and topics to AI agents as an MCP server.
 
-Most HTTP-based IoT protocols require devices, or software running on devices, to open connection ports so that an external system can send commands and/or retrieve information. This introduces a security risk. A way to mitigate this risk is to use a reverse VPN (Virtual Private Network).
+Three mechanisms shape the network itself:
 
-A reverse VPN is used to expose devices and software from your edge network to the public. This is a common use case in IoT, where a user wants to remotely control home or office devices.
+- **Realms** divide it into isolated tenants. See [Realms](/router/concepts/realms).
+- **Clustering** spreads it over several Bondy nodes. A component connected to any node reaches procedures and topics registered on every node. See [Clustering](/router/concepts/clustering).
+- **Bridge relays** link a Bondy node at the edge, such as one in a factory or a vehicle, to a remote router. Callers on the remote router reach procedures registered at the edge, and the edge forwards events on chosen topics to the remote router. See [Bondy Edge (Bridge Relay)](/router/concepts/bridge_relay).
 
-However, this is a complicated setup that is prone to errors and misconfiguration. It also requires your device to run a VPN client, which is sometimes not possible.
-:::
+## What one network gives you
 
-## Consequences of a single protocol
+Because every call and event passes through Bondy, some concerns move out of the components and into the network:
 
-- **Fewer components to integrate.** One protocol, over multiple transports and encodings, connects web apps, backend services, and tools, rather than a different protocol per platform.
-- **Independent deployability.** Because participants are decoupled and addressed by named resource (a procedure or topic URI) rather than by network location, one component can be updated or redeployed without the others needing to know.
-- **Scaling per component.** Adding capacity for one service (more instances registering the same procedure, or subscribing to the same topic) doesn't require re-architecting how other services reach it.
-- **Centralized security.** Authentication, authorization, and encryption are enforced at the router rather than reimplemented per component.
-- **One place to observe.** Because every call and event passes through the router, it is also the one place to monitor traffic, latency, and error rates across the whole network — see [Prometheus Metrics Reference](/router/reference/metrics).
-- **Less accidental complexity.** An application network replaces the combination of a service mesh, event mesh, authentication/authorization service, and API gateway with the single router, rather than integrating each separately.
+- **Security in one place.** Bondy authenticates every session and authorizes every message against the realm's permissions. Components do not each implement their own access control. See [WAMP Security](/router/concepts/wamp/security).
+- **Observability in one place.** Bondy measures the traffic it routes, so one set of [metrics](/router/reference/metrics) covers calls, events and errors across the application.
+- **Fewer moving parts.** One protocol, one set of client libraries and one routing layer replace a separate gateway, broker and mesh.
 
-## How is an application network different
-
-A traditional network routes traffic by IP address and port: two components communicate once one knows the other's network location. An application network routes by named resource instead — a procedure URI or a topic URI — so a component reaches another by what it does, not where it runs. This is what lets Bondy relocate, scale, or replace a component behind a stable name, and what lets the same overlay carry both North-South and East-West traffic through one addressing scheme instead of two.
+The cost is that Bondy is in the path of every message. Its availability is the application's availability, which is why Bondy runs as a cluster with no single leader; see [Clustering](/router/concepts/clustering).

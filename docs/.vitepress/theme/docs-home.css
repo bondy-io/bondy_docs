@@ -67,75 +67,49 @@
 .docs-home-page .VPPage { padding-top: 0; }
 
 /* ── the documentation portal (theme/DocsPortal.vue) ──────
-   developer.bondy.io's index: one row per documentation set. It reuses the
-   home's header rhythm (.dh-head, .eyebrow, .stand) and adds only the set
-   list, which is a hairline table in the same idiom as the card table on
-   bondy.io rather than a second grid vocabulary. */
-.docs-portal .dp-grid {
+   developer.bondy.io's index: a gallery with one card per product. It reuses
+   the home's header rhythm (.dh-head, .eyebrow, .stand) and the type scale of
+   the Diataxis home, so a card title reads like a section title there. */
+.docs-portal .dp-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 24px;
+  margin-top: 72px;
+}
+.docs-portal .dp-card {
   display: flex; flex-direction: column;
-  margin-top: 72px; border-top: 1px solid var(--line);
+  min-height: 260px; padding: 32px 32px 28px;
+  border: 1px solid var(--line); border-radius: 12px;
+  color: inherit; transition: background 0.16s, border-color 0.16s;
 }
-.docs-portal .dp-set {
-  display: grid; grid-template-columns: 80px 1fr 200px;
-  gap: 40px; align-items: baseline;
-  padding: 40px 6px; border-bottom: 1px solid var(--line-2);
-  color: inherit; transition: background 0.16s;
-}
-.docs-portal .dp-set:last-child { border-bottom: 1px solid var(--line); }
-.docs-portal .dp-set:hover { background: var(--paper-2); }
-.docs-portal .dp-num {
-  font-family: var(--m); font-size: 13px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--ink-2);
-}
-.docs-portal .dp-set h2 {
-  font-size: clamp(30px, 3.6vw, 44px); font-weight: 500;
-  letter-spacing: -0.04em; line-height: 1; margin: 0 0 14px;
-  grid-column: 2;
-}
-.docs-portal .dp-set p {
-  grid-column: 2; grid-row: 2;
-  font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 52ch;
-}
-.docs-portal .dp-go {
-  grid-column: 3; grid-row: 1; justify-self: end;
-  font-size: 13.5px; font-weight: 500; color: var(--blue); white-space: nowrap;
-}
-.docs-portal .dp-set:hover .dp-go { color: var(--ink); }
-
-@media (max-width: 860px) {
-  .docs-portal .dp-grid { margin-top: 48px; }
-  .docs-portal .dp-set { grid-template-columns: 1fr; gap: 10px; padding: 30px 0; }
-  .docs-portal .dp-set h2,
-  .docs-portal .dp-set p,
-  .docs-portal .dp-go { grid-column: 1; grid-row: auto; justify-self: start; }
-}
-
-/* Sets are grouped by product line. The line label replaces the numeral the
-   flat list used, so a reader sees "Platform / Bondy Connect" rather than an
-   index that means nothing once there are several lines. */
-.docs-portal .dp-group { margin-top: 64px; }
-.docs-portal .dp-group + .dp-group { margin-top: 56px; }
+.docs-portal a.dp-card:hover { background: var(--paper-2); border-color: var(--ink-2); }
 .docs-portal .dp-line {
   font-family: var(--m); font-size: 13px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--ink-2); margin-bottom: 14px;
+  text-transform: uppercase; color: var(--ink-2); margin: 0 0 18px;
 }
-.docs-portal .dp-group .dp-grid { margin-top: 0; }
-/* The flat list used `gap: 40px` for the column between the numeral and the
-   title. Without that column the same value lands between a set's title and
-   its blurb, which pushed them apart; the columns keep the gap, the rows do
-   not. */
-.docs-portal .dp-set {
-  grid-template-columns: 1fr 200px;
-  column-gap: 40px;
-  row-gap: 0;
-  padding: 30px 6px;
+.docs-portal .dp-card h2 {
+  font-size: clamp(28px, 3vw, 38px); font-weight: 500;
+  letter-spacing: -0.04em; line-height: 1; margin: 0 0 14px;
+  border: 0; padding: 0;
 }
-.docs-portal .dp-set h2 { grid-column: 1; margin-bottom: 10px; }
-.docs-portal .dp-set p { grid-column: 1; grid-row: 2; }
-.docs-portal .dp-go { grid-column: 2; grid-row: 1; }
+.docs-portal .dp-blurb {
+  font-size: 15px; line-height: 1.55; color: var(--ink-2); margin: 0;
+}
+/* Pinned to the foot of the card, so cards with blurbs of different length
+   still line their calls to action up across a row. */
+.docs-portal .dp-go,
+.docs-portal .dp-soon { margin-top: auto; padding-top: 28px; font-size: 13.5px; font-weight: 500; }
+.docs-portal .dp-go { color: var(--blue); }
+.docs-portal a.dp-card:hover .dp-go { color: var(--ink); }
+.docs-portal .dp-soon {
+  font-family: var(--m); font-size: 12px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink-2);
+}
+.docs-portal .dp-card.is-upcoming { border-style: dashed; }
+.docs-portal .dp-card.is-upcoming h2,
+.docs-portal .dp-card.is-upcoming .dp-blurb { color: var(--ink-2); }
+
 @media (max-width: 860px) {
-  .docs-portal .dp-set { grid-template-columns: 1fr; }
-  .docs-portal .dp-set h2,
-  .docs-portal .dp-set p,
-  .docs-portal .dp-go { grid-column: 1; grid-row: auto; }
+  .docs-portal .dp-gallery { margin-top: 48px; gap: 16px; }
+  .docs-portal .dp-card { min-height: 0; padding: 26px 22px 22px; }
 }
