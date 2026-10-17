@@ -31,7 +31,7 @@ Starting a 1.0.0 node against a pre-1.0.0 data directory does not migrate it and
 :::
 
 ::: info Upgrading from a 1.0.0 pre-release
-None of the migration below applies to a cluster already running a 1.0.0 pre-release that carries `bondy_db` (for example `1.0.0-rc.olive` or `1.0.0-rc.pear`). Upgrade it with a **full cluster restart**: stop every node, then start them all on the new release. Rolling upgrades are not supported. The registry is held in memory, so the restart loses nothing; clients reconnect and register again.
+None of the migration below applies to a cluster already running a 1.0.0 pre-release that carries `bondy_db` (for example `1.0.0-rc.olive` or `1.0.0-rc.pear`). Upgrade it with a **full cluster restart**: stop every node, then start them all on the new release. Rolling upgrades are not supported. The registry is held in memory, so the restart loses nothing; clients reconnect and register again. A deployment that runs a single node must also set `cluster.enabled = off` before the restart (see step 6).
 :::
 
 ## Prerequisites
@@ -187,6 +187,10 @@ Start each node.
 
 If you're running (or moving to) more than one node, join them into a cluster now, before importing — see [Running a Cluster](/router/guides/deployment/running_a_cluster).
 
+::: warning A single node must set `cluster.enabled = off`
+`cluster.enabled` defaults to `on`. A node that runs alone with clustering on refuses every authentication, anonymous included, and never compacts its history. Set `cluster.enabled = off` in the `bondy.conf` of a node meant to run alone, and keep the default `on` on every member of a cluster. See [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering), which also explains why a node that ran with `off` can later join only nodes with empty data directories.
+:::
+
 ::: warning Auto-clustering nodes with an insecure Partisan peer plane
 If `cluster.peer_discovery.enabled = on` and the Partisan peer plane isn't secured (TLS off, or TLS on without peer certificate verification), 1.0.0 **refuses to start** rather than cluster over an unauthenticated connection. Configure `cluster.tls.enabled = on` with `verify_peer` and a private cluster CA, or set `cluster.tls.allow_insecure = on` to acknowledge the risk explicitly. See the [Cluster Configuration Reference](/router/reference/configuration/cluster).
 :::
@@ -278,7 +282,7 @@ Two application identifiers changed. Both are silently inert under the old name 
 
 ### New optional keys
 
-None of these existed at 1.0.0-rc.65 in any form — there's nothing to migrate, and the defaults are safe to run with unchanged, but they're worth knowing about: `db.registry.shard_count` (the ephemeral registry's shard count); `db.wal.fsync_mode`, `db.wal.max_segment_bytes`, `db.wal.batched_fsync_interval`, `db.wal.batched_fsync_bytes` (write-ahead log durability and batching); `db.reclaim`, `db.reclaim.interval`, `db.reclaim.batch_cells`, `db.origin_retirement`, `db.origin_retirement.interval`, `db.gc_max_concurrency`, `db.compaction.peer_timeout` (previously internal-only reclamation/retirement tuning, now real `bondy.conf` keys — see the [Reclamation Configuration Reference](/router/reference/configuration/reclamation)); `cluster.max_message_size` (Partisan inter-node frame size cap); and `load_regulation.aae_reactor.pool.size`, `load_regulation.router.flow_pool.capacity` (see the [Overload Protection](/router/reference/configuration/overload_protection) reference).
+None of these existed at 1.0.0-rc.65 in any form — there's nothing to migrate, and the defaults are safe to run with unchanged, but they're worth knowing about: `db.registry.shard_count` (the ephemeral registry's shard count); `db.wal.fsync_mode`, `db.wal.max_segment_bytes`, `db.wal.batched_fsync_interval`, `db.wal.batched_fsync_bytes` (write-ahead log durability and batching); `db.reclaim`, `db.reclaim.interval`, `db.reclaim.batch_cells`, `db.origin_retirement`, `db.origin_retirement.interval`, `db.gc_max_concurrency` (previously internal-only reclamation/retirement tuning, now real `bondy.conf` keys — see the [Reclamation Configuration Reference](/router/reference/configuration/reclamation)); `cluster.max_message_size` (Partisan inter-node frame size cap); and `load_regulation.aae_reactor.pool.size`, `load_regulation.router.flow_pool.capacity` (see the [Overload Protection](/router/reference/configuration/overload_protection) reference).
 
 ### Other changes
 

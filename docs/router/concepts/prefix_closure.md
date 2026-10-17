@@ -40,13 +40,15 @@ applied set had no holes:
 ## How a hole forms
 
 Anti-entropy is pull-only: a node integrates a peer's whole tree once it
-holds every page of that tree. Compaction, meanwhile, truncates history that
-every *confirmed* peer has applied — and the confirmation set is
-recency-filtered, so a node silent past `db.compaction.peer_timeout` no longer
-holds truncation back.
+holds every page of that tree. Compaction truncates only history every
+cluster member has confirmed, however long a member has been silent, so it
+opens no hole. Registry retention (`db.registry.retention.*`, off by default)
+can: it truncates the in-memory registry's history by local policy, without
+waiting for a silent node.
 
 The hazardous interleaving needs three steps. A node falls silent; the live
-peers write and then truncate past operations the silent node never pulled;
+peers write and then truncate, through registry retention, past operations the
+silent node never pulled;
 the peers keep writing, so their trees retain those origins' later
 operations. When the silent node rejoins and integrates a peer's tree, it
 receives the later operations with the earlier ones gone from every live

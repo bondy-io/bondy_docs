@@ -366,9 +366,8 @@ export default withThemeDefaults(
 //     so a page reachable only through the sidebar is half-published.
 //
 // Group names are controlled vocabulary. A group is named with the same words
-// the breadcrumb (theme/Breadcrumb.vue, SECTIONS and SUBSECTIONS) and the set
-// landing page (docs/router.md) use for the same thing. Change
-// one, change all three.
+// the context row (theme/docsContext.js, SECTIONS) and the set landing page
+// (docs/router.md) use for the same thing. Change one, change all three.
 // ---------------------------------------------------------------------------
 
 /**

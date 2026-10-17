@@ -88,9 +88,13 @@ holds these events" into "no replica can ever mint an event below this
 point": a freshly bootstrapped replica's first write is guaranteed to sort
 after everything it received in its snapshot.
 
-A node with no cluster peers is the degenerate case: nothing can contradict
-it, so everything it holds is stable, and a solo node reclaims against a
-fresh tick of its own clock.
+Which nodes count is decided by [`cluster.enabled`](/router/reference/configuration/cluster#cluster.enabled).
+With clustering off, nothing can contradict the node, so everything it holds
+is stable and it reclaims against a fresh tick of its own clock. With
+clustering on, a membership that lists no other node licenses nothing: a
+member that has just restarted lists only itself until it rejoins, and
+reclaiming then could resurrect data the other members deleted. Reclamation
+reports `no_members` instead.
 
 ## The sweep
 

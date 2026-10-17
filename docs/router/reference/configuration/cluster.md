@@ -1,6 +1,53 @@
 # Cluster Configuration Reference
 Bondy configuration options controlling cluster formation including automatic peer discovery and performance options.
 
+## Enabling clustering
+
+@[config](cluster.enabled,on|off,on,v1.0.0)
+
+Whether the node clusters. Every part of Bondy that needs to know whether other members exist (compaction, reclamation, origin retirement and the authentication freshness fence) reads this setting rather than counting the members it can currently see.
+
+With `on`, the node starts the cluster peer service and replicates its data to the other members through anti-entropy ([`db.aae`](/router/reference/configuration/data_storage)).
+
+With `off`, the node runs on its own:
+
+* it opens no cluster port and runs no [peer discovery](#peer-discovery);
+* [`bondy.cluster.members`](/router/reference/wamp_api/cluster) returns this node only, and `bondy.cluster.leave` answers `bondy.error.cluster_disabled`;
+* the authentication freshness fence always certifies the node;
+* compaction and reclamation run on the node's own history, since no other member can contradict it.
+
+::: warning A single-node deployment must set `cluster.enabled = off`
+A node left on the default `on` with no other member does **not** behave as a single node. Bondy does not persist the cluster membership, so a member that has just restarted lists only itself until it rejoins; with clustering on, a membership of one is treated exactly like that restarted member, and it licenses nothing:
+
+* **authentication is refused.** Under the default [`db.aae.fence.on_isolation = refuse`](/router/reference/configuration/data_storage), a node with no reachable peer is never certified fresh, so every authentication attempt, anonymous included, fails with `temporarily_unavailable`;
+* **history is never compacted and deleted data is never reclaimed.** Compaction, reclamation and origin retirement hold, and the node logs a rate-limited "GC stalled" warning with reason `no_members`.
+
+Set `cluster.enabled = off` on every node meant to run alone.
+:::
+
+::: warning A node that ran with clustering off joins only empty nodes
+Two nodes may be joined only while at most one of them has truncated its history, and a node that ran with `off` has. To turn clustering on for it:
+
+1. Restart it with `cluster.enabled = on`. It becomes the first node of the cluster.
+2. Join it only with nodes whose data directories are empty, and start those nodes with `cluster.enabled = on` from their very first boot: a node writes at first boot, and with `off` it would truncate those writes.
+
+If two nodes that have each truncated are joined, neither can install the other's data. Both keep serving their own data but never converge, and each logs on every retry:
+
+```text
+Refused to install the peer's snapshot: the peer has not seen events this node
+truncated. If this persists, the two nodes truncated history separately before
+they were joined (for example, each ran with cluster.enabled = off). Empty one
+of them and rejoin it.
+```
+
+To recover, choose the node whose data to keep, stop the other, empty its `platform_data_dir`, and start it with `cluster.enabled = on` so that it joins empty. **The writes the emptied node accepted on its own are lost.**
+:::
+
+::: warning Remove a member from the cluster before turning clustering off
+Before restarting a member with `cluster.enabled = off`, remove it with [`bondy.cluster.leave`](/router/reference/wamp_api/cluster), calling it first with `dry_run`: it refuses unless every remaining member is reachable and ready. Otherwise the remaining members keep counting the node, and the node and the cluster each truncate history the other lacks, so they can never converge again.
+
+[`cluster.automatic_leave`](#cluster.automatic_leave) is read when the node starts, so turning it on just before a shutdown does nothing. To bring the node back into the cluster later, follow the rule above: it has truncated on its own, so it rejoins a cluster with data only after it has been emptied.
+:::
 
 ## Listener options
 
@@ -310,3 +357,7 @@ At the moment the only option is `fullmesh`.
 
 Defines whether a Bondy node should perform a cluster leave operation
 automatically when it is being shutdown.
+
+::: warning
+A node started with `automatic_leave = on` leaves the cluster on **every** graceful shutdown, including a routine restart, and it does so without the safety check that [`bondy.cluster.leave`](/router/reference/wamp_api/cluster) performs (that every remaining member is reachable and ready). A node that has left must rejoin, and if it truncated history while it was out it must first be emptied (see [Enabling clustering](#enabling-clustering)). The value is read when the node starts.
+:::

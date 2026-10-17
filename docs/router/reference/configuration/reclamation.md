@@ -142,12 +142,11 @@ is a distinct subsystem from `db.gc_interval`/`db.gc_heap_delta`, the
 per-instance BEAM heap monitor that happens to share the "gc" name; see
 [Instance Memory Management](/router/reference/configuration/data_storage#instance-memory-management).
 
-@[config](db.compaction.peer_timeout,duration_time_units,30s,v1.0.0)
-
-This recency filter applies to **compaction**'s reading of peer state only.
-Reclamation (`db.reclaim`) uses a strict, membership-based reading with no
-recency filter — a silent member holds reclamation down until retired by a
-membership act, and no timeout changes that.
+Compaction and reclamation both wait for every cluster member, on every
+database, the in-memory registry included: a silent member holds them down
+until it leaves the cluster through `bondy.cluster.leave`, and no timeout
+changes that. With [`cluster.enabled = off`](/router/reference/configuration/cluster#cluster.enabled)
+there are no members to wait for, and both run on the node's own history.
 
 ## Telemetry
 
@@ -157,7 +156,7 @@ is part of the contract.
 | Event | Emitted | Measurements | Metadata |
 |---|---|---|---|
 | `[bondy_oplog, applier, cells_swept]` | Per sweep batch | `scanned`, `discarded`, `reduction_skipped`, `skipped` | `instance_id`, `stable_hlc` |
-| `[bondy_oplog, reclamation, stalled]` | Every attempt that reclaims nothing | `count` | `instance_id`, `reason` (`idle`, `unconfirmed`, `membership_unavailable`, `no_frontier`, `non_event_frontier`, `no_applier`), `missing_members` |
+| `[bondy_oplog, reclamation, stalled]` | Every attempt that reclaims nothing | `count` | `instance_id`, `reason` (`idle`, `unconfirmed`, `no_members`, `membership_unavailable`, `no_frontier`, `non_event_frontier`, `no_applier`), `missing_members` |
 | `[bondy_oplog, scheduler, gc, trigger_outcome]` | Per trigger run, every scheduler instance | `count` | `scheduler`, `instance_id`, `outcome` |
 | `[bondy_oplog, retirement, completed]` | Per successful retirement pass | `dead_origins`, `origins_reaped`, `origins_scanned`, `retirements_learned`, `frontiers_reaped` | `forgotten_peers` |
 | `[bondy_oplog, retirement, skipped]` | Per pass whose reap-by-complement aborted; replication runs either way | `retirements_learned`, `frontiers_reaped` | `reason` |

@@ -7,12 +7,6 @@
    site has.
    ============================================================ */
 
-/* ── page head band (Layout.vue, page-layout pages) ─────────
-   The portal and set pages have no doc column, so the page head sits in a
-   band aligned with their `.wrap`. Its own styles are in PageHead.vue. */
-.page-head-band { padding-top: 28px; }
-.page-head-band + .docs-home, .page-head-band ~ * .docs-home { padding-top: 40px; }
-
 /* ── the Diataxis home (theme/DocsSet.vue) ───────────────
    Type follows bondy.io's base.css: the eyebrow and kicker label voices and
    the shared hero h1 scale used by its Language/Platform/Support pages. */
@@ -53,6 +47,13 @@
 }
 .docs-home .dh-grid li a::before { content: '→'; color: var(--blue); font-size: 13px; }
 .docs-home .dh-grid li a:hover { color: var(--ink); }
+
+/* The same grid as the bar (see SiteNav's docs layout in @bondy/site-chrome),
+   so a landing page's heading starts under the wordmark, as a doc page's
+   sidebar does. */
+@media (min-width: 960px) {
+  .docs-home .wrap { max-width: var(--vp-layout-max-width); padding: 0 32px; }
+}
 
 @media (max-width: 860px) {
   .docs-home { padding: 48px 0 64px; }

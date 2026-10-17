@@ -130,7 +130,12 @@ Again using your text editor create a file name `bondy.conf` in the `${BONDY_HOM
 
 ```text
 security.config_file = /bondy/etc/security.config.json
+cluster.enabled = off
 ```
+
+::: warning `cluster.enabled = off` is required for a single node
+This guide runs one node, so it turns clustering off. A node left on the default `cluster.enabled = on` with no other member refuses every authentication, anonymous included, and never compacts its history. To run a cluster instead, follow [Running a Cluster](/router/guides/deployment/running_a_cluster) and see [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering).
+:::
 
 ### 4. Verify your setup
 

@@ -98,6 +98,16 @@ Unlike control plane state, **WAMP messages are routed in real-time** without re
 
 Bondy tracks which node hosts each client session and routes messages accordingly. If a node fails, clients on that node disconnect, but other clients continue operating normally.
 
+## Clustering on or off
+
+Whether a node clusters is decided by one setting, [`cluster.enabled`](/router/reference/configuration/cluster#cluster.enabled), `on` by default. A node with `off` runs on its own: it opens no cluster port, and it compacts its history and reclaims deleted data without waiting for anyone.
+
+A node with `on` waits for its members before it forgets anything, and it cannot tell "I am alone" from "I have just restarted and not yet rejoined", because Bondy does not persist the cluster membership. It therefore treats a membership of one as a member that has not rejoined yet.
+
+::: warning Run a single node with `cluster.enabled = off`
+A single node left on the default `on` refuses every authentication under the default fence policy and never compacts its history. See [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering) for this and for the rules on turning clustering on or off for a node that already holds data.
+:::
+
 ## Cluster Formation
 
 ### Automatic Discovery
@@ -221,7 +231,7 @@ Key metrics to monitor:
 
 ### Common Topologies
 
-**Development** (1-node cluster)
+**Development** (a single node, `cluster.enabled = off`)
 ```
 bondy@localhost
 ```

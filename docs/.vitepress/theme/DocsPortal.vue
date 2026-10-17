@@ -31,11 +31,10 @@ const products = [
   <div class="bondy-chrome docs-home docs-portal">
     <div class="wrap">
       <header class="dh-head">
-        <p class="eyebrow">Documentation</p>
-        <h1>Bondy</h1>
+        <h1>Documentation</h1>
         <p class="stand">
-          A language and a platform for distributed, multi-agent systems.
-          Pick the product you are working with.
+          Tutorials, guides, concepts and reference for every product. Pick the
+          one you are working with.
         </p>
       </header>
 

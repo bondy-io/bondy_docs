@@ -133,7 +133,7 @@ Bondy's storage layer converges leaderlessly: peers compare Merkle Search Tree r
 
 @[config](db.aae,on|off,on,v1.0.0)
 
-Master switch for active anti-entropy. The sync scheduler process always runs, but with this off, no Partisan peer source is wired in, so the scheduler has no peers and stays inert. A single-node deployment is unaffected either way — it has no peer to sync with, and the authentication freshness fence (below) treats a lone node as vacuously fresh.
+Master switch for active anti-entropy. The sync scheduler process always runs, but with this off, no Partisan peer source is wired in, so the scheduler has no peers and stays inert. A node with [`cluster.enabled = off`](/router/reference/configuration/cluster#cluster.enabled) never wires a peer source, and the authentication freshness fence (below) always certifies it.
 
 @[config](db.aae.interval,duration_time_units,500ms,v1.0.0)
 
@@ -187,7 +187,11 @@ Do not set this near the anti-entropy tick period. The anti-entropy rounds that 
 
 @[config](db.aae.fence.on_isolation,refuse&#124;proceed&#124;quorum,refuse,v1.0.0)
 
-What the fence does on a node in a multi-node cluster that currently cannot confirm freshness with any peer — partitioned into a minority, or cold-started before its first anti-entropy round completes. A genuine single-node deployment (membership is just this node) is **not** governed by this policy: with no peer to lag, its view is vacuously fresh and it always authenticates, so turning `db.aae` on never locks out a lone node.
+What the fence does on a node with clustering enabled that currently cannot confirm freshness with any peer — partitioned into a minority, cold-started before its first anti-entropy round completes, or running with no other member at all. A node with [`cluster.enabled = off`](/router/reference/configuration/cluster#cluster.enabled) is **not** governed by this policy: it has no peer to lag, so it always authenticates.
+
+::: warning A lone node with clustering enabled is refused under `refuse`
+A single node that keeps the default `cluster.enabled = on` has no peer to confirm its freshness, so under `refuse` it refuses every authentication. Set `cluster.enabled = off` on a node meant to run alone; see [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering).
+:::
 
 - **`refuse`** (secure default) — fail closed: refuse all new authentication until a peer round confirms freshness. A node restarting into an established cluster refuses only until its first sync round, typically sub-second.
 - **`proceed`** — treat unreachable peers as vacuously fresh and keep authenticating. Most available, but during a partition a stale minority node could accept a token revoked elsewhere until it heals. Not recommended for a security fence.

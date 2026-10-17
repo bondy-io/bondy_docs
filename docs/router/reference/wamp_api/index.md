@@ -14,7 +14,7 @@ const { theme } = useData()
 </script>
 
 
-# Introduction
+# WAMP API
 Bondy can be configured, managed and monitored via WAMP Procedures and Events. These events and procedures include the ones defined by the WAMP Meta API specification.
 
 In Bondy, a Realm and all its entities are dynamically configured using the WAMP Admin API, these are procedures and events URIs that start with the reserved `bondy.` prefix e.g. `bondy.user.add`.

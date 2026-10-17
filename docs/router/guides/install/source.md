@@ -38,6 +38,11 @@ tar -zxvf _build/prod/rel/bondy-1.0.0.tar.gz -C ~/tmp/bondy
 ```
 
 ### 2. Running
+
+::: warning Set `cluster.enabled = off` to run a single node
+Before starting a node meant to run alone, set `cluster.enabled = off` in the release's `etc/bondy.conf`. A node left on the default `cluster.enabled = on` with no other member refuses every authentication and never compacts its history. See [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering).
+:::
+
 To run Bondy, cd to the location where you installed it e.g. ~/tmp/bondy and run the following command which will print all the options.
 
 ```bash

@@ -27,6 +27,10 @@ Bondy forms a cluster through Partisan's automatic peer discovery, configured en
 Bondy refuses to start a node with automatic peer discovery enabled unless its Partisan peer plane is secured with TLS, or the risk is explicitly acknowledged — an insecure peer plane lets an on-path attacker read or modify replicated credentials and realm signing keys. Read [Cluster Configuration Reference](/router/reference/configuration/cluster) for `cluster.tls.*` before continuing, and decide now whether you're enabling TLS or acknowledging the risk with `cluster.tls.allow_insecure = on`.
 :::
 
+::: warning Start every node with clustering on and an empty data directory
+Every node of a cluster runs with [`cluster.enabled = on`](/router/reference/configuration/cluster#cluster.enabled), the default. A node that has ever run with `cluster.enabled = off` has compacted its history on its own: it can be the first node of a new cluster, but any node joining it, or any cluster it joins, must start with an empty data directory. Otherwise the nodes refuse each other's data and never converge. See [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering).
+:::
+
 ::: tip Just want to try this locally?
 For a local, single-host dev cluster with no DNS setup at all, use the `just node1` / `just node2` / `just node3` targets described in [How to Monitor a Bondy Cluster](/router/guides/administration/monitoring#steps) — they start three pre-configured nodes that discover each other automatically. The rest of this guide is for a real, multi-host deployment.
 :::

@@ -244,6 +244,7 @@ Bondy would be guessing at.
 |---|---|
 | `bondy.error.not_a_member` | `node` is not in the current membership. The name is resolved without creating an atom, so an unknown name is refused rather than interned. |
 | `bondy.error.unsafe_to_leave` | The survey found a silent or not-ready member. The payload names which. |
+| `bondy.error.cluster_disabled` | The node runs with [`cluster.enabled = off`](/router/reference/configuration/cluster#cluster.enabled), so it has no cluster to change. Nothing is changed. |
 | `wamp.error.not_authorized` | Called from a realm other than the master realm. |
 
 ## Not implemented
