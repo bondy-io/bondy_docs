@@ -84,6 +84,6 @@ const BLURB =
     layout="docs"
     :columns="footerColumns"
     :blurb="BLURB"
-    note="Content CC-BY-SA-4.0 · Bondy Apache-2.0"
+    note="Content CC-BY-SA-4.0 · Bondy Connect Apache-2.0"
   />
 </template>

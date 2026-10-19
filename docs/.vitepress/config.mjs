@@ -249,13 +249,6 @@ export default withThemeDefaults(
             }
         ],
 
-        // The footer will displayed only when the page doesn't contain sidebar
-        // due to design reason.
-        footer: {
-            message: 'Except where otherwise noted, content on this site is licensed under a Creative Commons Attribution-ShareAlike (CC-BY-SA) 4.0 International license.<br> Bondy and Leapsight are registered trademarks of Leapsight Technologies Ltd.',
-            copyright: 'Copyright © 2025 Leapsight'
-        },
-
         editLink: {
             pattern: 'https://github.com/bondy-io/bondy_docs/edit/main/docs/:path',
             text: 'Edit this page on GitHub'
