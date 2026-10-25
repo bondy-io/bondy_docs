@@ -289,6 +289,7 @@ None.
 #### Errors
 
 * [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
+* [bondy.error.conflict](/router/reference/wamp_api/errors/conflict): when the realm is an SSO realm and other realms hold a local user of the same name that links to this realm as its SSO realm. The error's `details.realms` lists the URIs of those realms. The router removes nothing. Delete the user from the listed realms first.
 
 #### Examples
 

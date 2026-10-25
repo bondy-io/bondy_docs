@@ -136,7 +136,50 @@ The call result is a single positional argument: a map holding the encoded and s
 ##### Keyword Args
 None.
 
+#### bondy.ticket.revoke(realm_uri, ticket) -> [] {.wamp-procedure}
+
+Revokes a ticket. The caller does not need to be the ticket's owner. Any caller that holds the ticket can already use it, so the router also lets that caller revoke it.
+
+Revocation applies to the ticket's scope. The router replaces the claims stored under that scope with a revocation marker. The call therefore also revokes any other ticket issued to the same user in the same scope. The marker replicates to the other nodes of the cluster and stays until the ticket expires. A node that has received the marker rejects the ticket, whatever the value of [`security.ticket.allow_not_found`](/router/reference/configuration/security#security.ticket.allow_not_found).
+
+::: warning Revocation needs persistence
+A node checks for the marker only when persistence is on for the ticket's scope type, which is the default. See `security.ticket.scope.*.persistence` in the [Security Configuration Reference](/router/reference/configuration/security). When persistence is off for a scope type, a revoked ticket of that type stays valid until it expires.
+:::
+
+The router verifies the ticket before it revokes it. When the ticket fails verification, for example because it has expired or was already revoked, the router does not revoke it and the call returns an error.
+
+#### Call
+##### Positional Args
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        0:{
+            'type': 'string',
+            'required': false,
+            'description' : 'The URI of the calling session\'s realm. When you omit it, the router uses the session\'s realm. A session attached to a realm other than the Master Realm cannot name a different realm.'
+        },
+        1:{
+            'type': 'string',
+            'required': true,
+            'description' : 'The encoded ticket to revoke.'
+        }
+    })"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+##### Positional Args
+None.
+
+##### Keyword Args
+None.
+
 #### bondy.ticket.revoke_all(realm_uri, authid) -> [] {.wamp-procedure}
+
+Revokes every ticket issued to the user `authid` in the realm, including the tickets that grant access to other realms through Single Sign-on. Like `bondy.ticket.revoke`, it writes revocation markers that replicate to the other nodes of the cluster.
+
 #### Call
 ##### Positional Args
 <DataTreeView

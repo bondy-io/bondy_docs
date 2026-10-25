@@ -61,8 +61,16 @@ await self._session.publish(
     "com.example.broadcast", announcement,
     options=PublishOptions(exclude=[session_id_3])
 )
+
+# Only sessions holding the operator role receive it
+await self._session.publish(
+    "com.example.ops.alert", alert,
+    options=PublishOptions(eligible_authrole=["operator"])
+)
 ```
 :::
+
+An empty `eligible` list delivers the event to no subscriber.
 
 See [Subscriber Black- and White-listing](/router/concepts/wamp/advanced/pubsub#subscriber-black-and-whitelisting) for combining this with excluding the publisher itself.
 
@@ -165,10 +173,10 @@ Bondy publishes a subscription's lifecycle as WAMP meta-events, and lets a sessi
 ```Python
 # Watch subscribe/unsubscribe on this realm
 await self._session.subscribe(
-    on_subscription_created, "wamp.subscription.on_create"
+    on_subscribed, "wamp.subscription.on_subscribe"
 )
 await self._session.subscribe(
-    on_subscription_gone, "wamp.subscription.on_delete"
+    on_unsubscribed, "wamp.subscription.on_unsubscribe"
 )
 
 # Look up who is currently subscribed to a topic
@@ -176,7 +184,7 @@ info = await self._session.call("wamp.subscription.match", "com.example.users.cr
 ```
 :::
 
-Use this for operational visibility — knowing when a topic gains or loses subscribers — rather than as part of your application's own event path.
+Use this for operational visibility — knowing when a topic gains or loses subscribers — rather than as part of your application's own event path. Bondy does not publish [`wamp.subscription.on_create` or `wamp.subscription.on_delete`](/router/reference/wamp_api/subscription#topics). To learn whether a topic still has subscribers, call `wamp.subscription.lookup` or `wamp.subscription.match`.
 
 ## See also
 

@@ -27,11 +27,10 @@ and **no global block to fall back to** — see
 [Network Listeners](/router/reference/configuration/listeners).
 
 ::: warning The pre-1.0 keys are gone
-These settings used to live per fixed listener
+Bondy does not read the pre-1.0 per-scheme keys
 (`api_gateway.http.cors.*`, `api_gateway.https.security_headers.*`, …).
-Those keys have been removed and nothing reads them — restate any
-deliberate policy under `listeners.<name>.*`, or the listener runs on the
-defaults below.
+A listener that does not restate its policy under `listeners.<name>.*`
+runs on the defaults below.
 :::
 
 A listener that sets none of these does **not** come up closed: the
@@ -196,10 +195,18 @@ value" spelling — `security_headers.hsts =` with nothing after it is a
 
 @[config](listeners.$name.server_header,string,bondy,v1.0.0)
 
-Controls the `Server` response header, usable to suppress infrastructure
-information disclosure: `bondy` emits `bondy/<version>` (the default), an
-empty value suppresses the header entirely, and any other value is
-emitted verbatim.
+Controls the `Server` response header. For `bondy`, the default, the
+listener sends `bondy/<version>`. The listener sends any other value
+verbatim, so a neutral value keeps the Bondy version out of responses:
+
+```
+listeners.public_http.server_header = api
+```
+
+`bondy.conf` has no spelling for an empty value: `server_header =` with
+nothing after it is a syntax error, and `server_header = ""` sends the two
+quote characters. A `bondy.conf` file can therefore replace the header but
+cannot suppress it.
 
 ## Migrating from the pre-1.0 keys
 
@@ -210,8 +217,8 @@ emitted verbatim.
 @[configDeprecated](api_gateway.$scheme.server_header,listeners.$name.server_header,v1.0.0)
 
 The same applies to the `admin_api.{http,https}.*` spellings of these
-blocks. An HTTPS listener whose CORS previously restricted origins to an
-allowlist needs that allowlist restated under its `listeners.<name>.*`
+blocks. An HTTPS listener that has to restrict CORS origins to an
+allowlist needs that allowlist stated under its `listeners.<name>.*`
 block; without it the listener is not "closed by default", it is open to
 any origin. See
 [Migrating from the pre-1.0 keys](/router/reference/configuration/listeners#migrating-from-the-pre-1-0-keys)

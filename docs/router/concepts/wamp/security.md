@@ -46,6 +46,18 @@ A previously issued ticket, presented alongside a username, in place of a passwo
 
 Bondy also supports `password` (clear-text, TLS-dependent), `trust` (accepts an existing username with no credential check, meant to be paired with a network-restricted [source](/router/reference/wamp_api/source)), and `oauth2` (token-based, via the HTTP Gateway). See the glossary's [Authentication Method](/router/reference/glossary#authentication-method-authmethod) entry for the full list in one place, and [Security Configuration Reference](/router/reference/configuration/security) for configuring which methods a realm allows.
 
+### Refusing an unknown user
+
+Bondy's answer to a `HELLO` does not tell a client whether a user exists. Some refusals depend on the user:
+
+- the user is unknown or disabled;
+- the user does not hold the requested role;
+- no source allows the requested methods for the user.
+
+For these, Bondy answers as it does for a real user. When the client asks for `wampcra` or `wamp-scram` and the realm enables that method, Bondy sends a challenge that no response can satisfy. Every node sends the same salt for the same `authid`, as it does for a stored user. When the client asks only for other methods the realm enables, Bondy sends the `ABORT` it sends for a wrong credential: `wamp.error.authentication_failed`. Bondy logs the actual reason.
+
+A `HELLO` that names no method the realm enables gets the same refusal for every user, so that refusal keeps its specific error.
+
 ## Authorization
 
 Authentication answers who; authorization answers what they can do. Bondy's authorization model is Role-Based Access Control (RBAC): permissions are granted to a role — a user or a group — not to a session directly, and a session inherits whatever its authenticated user (and that user's groups, transitively) has been granted.

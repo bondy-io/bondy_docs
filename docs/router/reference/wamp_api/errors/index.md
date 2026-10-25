@@ -8,10 +8,10 @@ cluster &mdash; see the [Error Reference](/router/reference/errors).
 
 ## Bondy Error URIs
 
-* [bondy.error.active_users](/router/reference/wamp_api/errors/active_users): when the provided resource has associated users.
 * [bondy.error.already_exists](/router/reference/wamp_api/errors/already_exists): when the provided resource identifier already exists.
 * [bondy.error.bad_gateway](/router/reference/wamp_api/errors/bad_gateway): when the HTTP API Gateway cannot reach a forward action's upstream host.
 * [bondy.error.bad_signature](/router/reference/wamp_api/errors/bad_signature): when the provided password doesn't match with the previous one.
+* [bondy.error.conflict](/router/reference/wamp_api/errors/conflict): when the request conflicts with the current state of the resource, for example deleting a realm other realms depend on.
 * [bondy.error.deprecated_procedure](/router/reference/wamp_api/errors/deprecated_procedure): when the called procedure has been deprecated.
 * [bondy.error.export_in_progress](/router/reference/wamp_api/errors/export_in_progress): when an export or import is requested while an export is already running.
 * [bondy.error.http_gateway.invalid_expression](/router/reference/wamp_api/errors/invalid_expression): when a Mops expression in an API Gateway Specification fails to evaluate.

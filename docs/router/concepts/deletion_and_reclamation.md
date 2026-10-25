@@ -65,21 +65,28 @@ construction, and the tombstone is pure overhead.
 Bondy derives stability from three ingredients, all of which run on the
 ordinary anti-entropy machinery (see [Clustering](/router/concepts/clustering)):
 
-**The confirmed-root swap.** When a node completes a pull from a peer, both
-sides record the *same* root — the peer's advertised Merkle Search Tree
-root, every page of which the puller now demonstrably holds. A root recorded
-this way is evidence about what *both* replicas hold, which is what a
-stability computation needs; a node's own root would only measure its own
-sync recency.
+**Every member's durable frontier.** A node's applied frontier records, per
+origin, how far it has applied; its **durable frontier** is the applied
+frontier a restart would restore — the one in its last checkpoint, or the live
+one on an in-memory database. Each sync round records it on both sides: the
+initiator records the durable frontier the peer reports, and then reports its
+own, which the peer records. A recorded durable frontier is evidence about what
+that member has folded *and* checkpointed. Receipt alone is not enough: a
+member that applied an event and crashed before its checkpoint no longer holds
+its effect.
 
 **The strict membership frontier.** The stability point is computed against
 **every** member of the cluster — including currently unreachable ones — and
 a member leaves that set only by a deliberate membership act, never by
-timeout. Each member must have a confirmed root; the frontier is the newest
-local event covered by all of them, and its HLC is the stability point. One
-silent member holds stability down for the whole cluster. That is the
-correct trade: an unreclaimed tombstone costs disk, while a wrongly
-reclaimed one costs data, permanently and silently.
+timeout. Each member needs a recorded durable frontier; until one is recorded,
+the member is **unconfirmed** and the node certifies nothing. The node walks
+its tree in key order and finds the first event that some member's durable
+frontier, or its own, does not cover; that event's HLC is the stability point.
+When every event in the tree is covered, an empty tree included, the stability
+point is a fresh tick of the local clock, which is newer than every event the
+node holds. One silent member holds stability down for the whole cluster.
+That is the correct trade: an unreclaimed tombstone costs disk, while a
+wrongly reclaimed one costs data, permanently and silently.
 
 **Absorbing clocks.** Every path that delivers remote events — live sync,
 direct append, and bootstrap from a peer's snapshot — advances the local HLC
@@ -117,12 +124,7 @@ reclaim the bytes.
 A tombstone is kept — never discarded — while any operation is still pending
 for its key, and while its HLC is not strictly older than the stability
 point (a tombstone exactly at the boundary is kept, since a concurrent write
-at the same HLC may still be unconfirmed). One visible consequence: a
-tombstone that happens to be the newest event on its shard stays in place
-until any later write lands on that shard. Under ordinary traffic this is
-momentary; on an idle shard the last tombstone persists, bounded to one
-cell. It is retained because the proof requires it, not because the sweep
-missed it.
+at the same HLC may still be unconfirmed).
 
 The sweep is bounded and resumable: each pass runs in small batches, so
 concurrent writes interleave between batches rather than waiting out a
@@ -132,9 +134,12 @@ separate from — and much slower than — the compaction scheduler.
 ## Origins, retirement, and departed nodes
 
 Because one silent member freezes reclamation, a *permanently* departed node
-must be retired, and retirement is a deliberate membership act: removing the
-node from the cluster's membership. The moment membership no longer contains
-the node, stability computes without it. Nothing ages out on a timer — a
+must leave the membership, and leaving is a deliberate act: the operator's
+[`bondy.cluster.leave`](/router/reference/wamp_api/cluster), or the node's own
+graceful shutdown under
+[`cluster.automatic_leave`](/router/reference/configuration/cluster#cluster.automatic_leave).
+The moment membership no longer contains the node, stability computes without
+it. Nothing ages out on a timer — a
 node that is merely partitioned keeps its seat, and keeps reclamation
 honest, until an operator decides otherwise.
 
@@ -166,27 +171,38 @@ stability reports why it didn't, naming the member holding it back when
 that's the cause. Two states are worth understanding, because both exist to
 keep a converged, quiescent cluster *quiet*:
 
-- **Sync recency is not confirmation.** A steady-state shard nobody writes
-  to converges to an *empty* tree on every replica, and a sync round
-  between two empty trees completes with no root to swap. Such a round
-  still refreshes peer recency, but it confirms nothing: only a concrete
-  root is evidence about what both replicas hold.
-- **An empty tree has nothing to certify.** When a replica's own tree is
-  empty, no event needs a stability proof, and reporting that as a stall
-  would be worse than noise — it would recommend reviving or retiring
-  members that are alive and converged. This state is counted in
-  telemetry but never raised as an operator warning, and it ends the
-  moment a local event lands.
+- **Sync recency is not confirmation.** A sync round in which the peer
+  reports no durable frontier, or an empty one, refreshes the peer's recency
+  but confirms nothing new: the node keeps the durable frontier it recorded
+  before. A member that has never reported a non-empty durable frontier stays
+  unconfirmed, however recently it synced. A durable frontier survives the
+  member's own compaction, so a peer that compacts never moves the stability
+  point back.
+- **A replica that has applied nothing has nothing to certify.** When a
+  replica's applied frontier for a shard is empty, it holds no cell to
+  reclaim, and reporting that as a stall would be worse than noise — it would
+  recommend reviving or retiring members that are alive and converged. This
+  `idle` state is counted in telemetry but never raised as an operator
+  warning. A tree that compaction has emptied is not idle: its frontier
+  stands, and once every member covers it, the node reclaims against a fresh
+  tick.
 
-One narrow state is left unresolved by design: if cells become reclaimable
-on a shard and the whole cluster then goes quiet on that shard before
-stability was ever certified past them, those cells sit unreclaimed —
-correct, hidden from reads, but still occupying space — until the shard's
-next write. This is tolerated because the asymmetry that governs this whole
-design holds here too: an unreclaimed cell costs bytes; a wrongly reclaimed
-one costs data, permanently and silently. The state is bounded and
-self-healing — the first write to the shard regrows a root, the next sync
-round confirms it, and one sweep discards the backlog.
+## When history may be removed
+
+Compaction removes events from a shard's history. It reads the same evidence
+as reclamation: every member's durable frontier. Compaction removes an event
+only once every cluster member, this node included, has applied it and written
+it to its frontier checkpoint. An in-memory registry shard writes no
+checkpoint, so its applied frontier stands in for one.
+
+Each compaction tick writes the shard's frontier checkpoint when the applied
+frontier has moved since the last one, including on a tick that truncates
+nothing. A member whose compaction ticks do not run stops advancing the durable
+frontier its peers record. That member therefore holds compaction and
+reclamation on every replica. A checkpoint write that fails stops the shard,
+and Bondy starts it again after a backoff. See
+[Convergence](/router/concepts/convergence#the-compaction-witnesses-and-the-truncation-cap)
+for the members that count and the cap below events this node has not applied.
 
 ## Consequences
 
@@ -194,8 +210,10 @@ round confirms it, and one sweep discards the backlog.
   when stability licenses it. The two are decoupled by design.
 - Reclamation is quiet when healthy and loud when stalled: a member that
   cannot confirm surfaces within one scheduler interval as telemetry naming
-  the missing member. An *actionable* stall is always a fact about
-  membership, and the remedy is always a membership decision.
+  the missing member. An *actionable* stall is usually a fact about
+  membership, and its remedy a membership decision; the reasons
+  `unservable`, `membership_unavailable` and `no_applier` point at this node
+  instead.
 - Everything here is on by default. Every option, including how to disable
   reclamation or retirement, is covered in the
   [reclamation configuration reference](/router/reference/configuration/reclamation).

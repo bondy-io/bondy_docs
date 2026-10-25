@@ -250,13 +250,23 @@ metrics onto a listener of your own, carry the phase over:
 listeners.probes.transport   = tcp
 listeners.probes.protocol    = http
 listeners.probes.port        = 9090
+listeners.probes.ip          = 0.0.0.0
 listeners.probes.start_phase = early
 listeners.probes.services    = admin, metrics
 ```
 
+Set `ip` when the prober is on another host or in another network
+namespace. A listener that serves `admin` or `metrics` and sets no `ip`
+binds loopback only.
+
+Declare the `admin` service on the early listener. An early listener
+without it answers `404` to every path until the node's services start.
+
 Point a liveness probe at `/ping` and a readiness probe at `/ready`. `/ready`
-answering `200` means the normal phase finished binding — use it, not `/ping`,
-as the signal to route traffic to the node.
+answering `204` means the normal phase finished binding — use it, not `/ping`,
+as the signal to route traffic to the node. Do not use `/ready` for
+liveness: it answers `503` while the node opens its storage, so the
+orchestrator restarts a node that is only starting.
 
 ## Take the node out of rotation without a restart
 
@@ -272,6 +282,14 @@ Suspending stops a listener accepting *new* connections and leaves
 established ones running — which is what makes it a drain: suspend
 `normal`, let in-flight sessions finish, and the node has left rotation
 without dropping work.
+
+To see which listeners a phase covers before you act, call either
+procedure with `dry_run = true`. A dry run changes nothing. Its result
+lists the names of those listeners under `listeners`:
+
+```
+bondy.listener.suspend("normal", dry_run=true)
+```
 
 ::: warning Suspending `all` includes your probes
 The `early` phase carries `/ping`, `/ready` and `/metrics`. Suspend `all`

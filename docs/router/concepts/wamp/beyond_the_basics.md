@@ -540,11 +540,11 @@ Use WAMP meta events to build monitoring:
 
 ```javascript
 // Subscribe to registration changes
-wampy.subscribe('wamp.registration.on_create', function(args, kwargs) {
+wampy.subscribe('wamp.registration.on_register', function(args, kwargs) {
     console.log('New registration:', kwargs);
 });
 
-wampy.subscribe('wamp.registration.on_delete', function(args, kwargs) {
+wampy.subscribe('wamp.registration.on_unregister', function(args, kwargs) {
     console.log('Registration removed:', kwargs);
 });
 ```

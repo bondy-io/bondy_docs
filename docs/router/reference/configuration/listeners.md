@@ -31,11 +31,20 @@ of services it exposes on that socket. Every listener an operator declares
 lives under `listeners.$name.*` in `bondy.conf`, where `$name` is a name of
 the operator's choosing, e.g. `listeners.public_http.transport = tcp`.
 
-A node with no `listeners.*` key at all starts three built-in listeners
-(`admin`, `api_gateway_http`, `wamp_tcp`) at their historical ports —
-declaring even one `listeners.*` key switches the node onto this
-configuration surface for every listener, so a template being converted
-needs every listener it wants restated here, not just the one being changed.
+A node with no `listeners.*` key at all starts three listeners, all
+plaintext:
+
+| Name | Transport | Protocol | Port | Services |
+|------|-----------|----------|------|----------|
+| `admin` | `tcp` | `http` | 18081 | `admin_api, wamp_ws, admin, metrics` (`start_phase = early`) |
+| `api_gateway_http` | `tcp` | `http` | 18080 | `api_gateway, wamp_ws, wamp_sse, wamp_longpoll` |
+| `wamp_tcp` | `tcp` | `wamp_rawsocket` | 18082 | — |
+
+Declaring even one `listeners.*` key replaces that set: the node then
+starts the declared listeners and the reserved
+[`admin` listener](#the-reserved-admin-listener), and nothing else. A
+template being converted needs every listener it wants restated here, not
+just the one being changed.
 
 ::: warning The pre-1.0 keys are gone
 The per-scheme keys that configured Bondy's fixed listeners —
@@ -94,9 +103,8 @@ A comma-separated list of the services this listener exposes. Required when
 `protocol = http` and rejected for every other protocol: a raw socket
 carries one thing by construction, so a list of services on one would be
 ambiguous. `services` is what lets an HTTP listener multiplex several
-things onto one socket — the historical public listener served the API
-Gateway, WAMP-over-WebSocket, SSE and long-poll all on port 18080 for
-exactly this reason.
+things onto one socket — the default `api_gateway_http` listener serves the
+API Gateway, WAMP-over-WebSocket, SSE and long-poll all on port 18080.
 
 | Service        | Carrier    | Protocol | Notes |
 |----------------|------------|----------|-------|
@@ -108,7 +116,7 @@ exactly this reason.
 | `bamp_ws`      | WebSocket  | BAMP     | Mounts `/ws` restricted to the `bamp` subprotocol. BAMP's wire implementation has not shipped, so a session cannot yet be carried over it. |
 | `wamp_sse`     | SSE        | WAMP     | |
 | `wamp_longpoll`| Long-poll  | WAMP     | |
-| `mcp`          | MCP        | MCP      | The [MCP Gateway](/router/concepts/mcp_gateway) endpoint. Cannot share a listener with `admin_api`. |
+| `mcp`          | MCP        | MCP      | The [MCP Gateway](/router/concepts/mcp_gateway) endpoint. Mounts `/mcp/realm/:realm` and `/.well-known/oauth-protected-resource/realm/:realm`. Cannot share a listener with `admin_api`. |
 
 **An HTTP listener must declare at least one service.** Both a missing
 `services` key and an empty one are refused at boot, naming the listener.
@@ -150,17 +158,25 @@ included) that were deferred while it was off.
 
 @[config](listeners.$name.start_phase,early|normal,normal,v1.0.0)
 
-`early` binds the listener before the storage layer opens, serving only the
-liveness (`/ping`) and readiness (`/ready`) routes: `/ping` answers while
-storage opens, which can take minutes on a node with enough data, and `/ready`
-answers `503` until the node is ready. Every other route on an early listener,
-`/metrics` and `/ws` among them, answers `404` until the node's services
-start, when the full route set is mounted. That is still before any `normal`
-listener binds, so the metrics scrape answers before the node serves WAMP
-sessions. Reaching
-`ready` means the normal phase finished binding, not that no client has
-connected yet — nothing gates connection acceptance on the node's readiness
-status.
+`early` binds the listener as soon as configuration is loaded, before the
+storage layer opens. Until the node's services start, an early listener
+mounts only the liveness (`/ping`) and readiness (`/ready`) routes, and only
+when it declares the `admin` service. Every other route on it, `/metrics`
+and `/ws` among them, answers `404` until the node's services start, when
+the full route set is mounted. An early listener without the `admin`
+service answers `404` to every path until then. The full route set is
+mounted before any `normal` listener binds, so the metrics scrape answers
+before the node serves WAMP sessions. Reaching `ready` means the normal
+phase finished binding, not that no client has connected yet — nothing
+gates connection acceptance on the node's readiness status.
+
+| Path | Answers |
+|------|---------|
+| `/ping` | `204` whenever the listener is bound, including while storage is opening. |
+| `/ready` | `204` when the node is ready, `503` otherwise. `GET` only; any other method answers `405`. |
+
+[Answer probes before the node is ready](/router/guides/administration/configuring_listeners#answer-probes-before-the-node-is-ready)
+shows which probe uses each path.
 
 ### Virtual hosts
 
@@ -203,6 +219,17 @@ Suspending `all` includes the `early` phase, which carries `/ping`,
 `/ready` and `/metrics` — an orchestrator watching those will see the node
 as dead and may kill it. That is why the shutdown path suspends `normal`
 only. Resuming a phase that is already accepting is not an error.
+
+Both procedures take a `dry_run` keyword argument. With `dry_run = true`,
+the procedure validates the phase and suspends or resumes nothing. The
+result carries `dry_run: true`, the `phase`, the `listeners` that the phase
+names, and a `would` sentence that describes the effect. No other procedure
+reports listener state, so a dry run is the way to see which listeners a
+phase covers before you act on it.
+
+```
+bondy.listener.suspend("normal", dry_run=true)
+```
 
 ### The reserved `admin` listener
 
@@ -256,16 +283,21 @@ listener.
 
 Narrows the listener to one interface. Takes an address **literal**, v4 or
 v6 — it is parsed while the file is read, so a hostname is refused there
-and then, unlike the historical `*.ip` keys, which accept any name that
-resolves.
+and then.
+
+A listener that sets no `ip` and serves the `admin` or `metrics` service
+binds loopback, `127.0.0.1`. Every other listener without an `ip` binds the
+wildcard of its family. An explicit `ip` overrides the loopback rule, on
+any listener.
 
 @[config](listeners.$name.ip_version,string,,v1.0.0)
 
 `4` or `6`; selects the socket family — the thing that decides whether
 Bondy opens an IPv4 or an IPv6 socket.
 
-Neither key has a default, so a disagreement between them is always two
-explicit statements rather than one of them being supplied for you.
+Apart from that loopback rule, neither key has a default, so a
+disagreement between them is always two explicit statements rather than one
+of them being supplied for you.
 
 **An address, where one is given, determines the family by itself.** An
 address carries its own version and cannot be bound on a socket of the
@@ -350,32 +382,61 @@ Overrides the value of the `server` header an HTTP listener sends.
 `bridge_relay` listeners only: how long a connected peer router has to
 authenticate before the connection is dropped. Other protocols ignore it.
 
-### Trusted proxies
+### Proxy protocol and forwarded headers {#trusted-proxies}
+
+These keys decide the source IP that Bondy logs, rate-limits by and matches
+against RBAC Source rules. When `proxy_protocol` is off, the source IP is
+the socket peer.
+
+```
+listeners.public_http.proxy_protocol                 = on
+listeners.public_http.proxy_protocol.mode            = strict
+listeners.public_http.proxy_protocol.trusted_proxies = 10.0.0.0/8, 192.168.1.10/32
+```
 
 @[config](listeners.$name.proxy_protocol,on|off,off,v1.0.0)
 
-Enables checking the `X-Forwarded-For`/`X-Real-IP`/`Forwarded` headers to
-determine a request's source IP, used for matching against RBAC Source
-assignments.
+The meaning depends on the listener's protocol:
+
+- On a `wamp_rawsocket` or `bridge_relay` listener, Bondy reads a PROXY
+  protocol header from each connection and takes the source address from
+  it. Bondy waits up to 15 seconds for the header. `trusted_proxies` is not
+  consulted.
+- On an `http` listener, Bondy reads the forwarding headers instead, and
+  believes them only when the socket peer is inside one of the
+  `trusted_proxies` ranges.
 
 @[config](listeners.$name.proxy_protocol.mode,strict|relaxed,relaxed,v1.0.0)
 
-When proxy protocol checking is enabled: `strict` drops a connection that
-does not send a forwarding header or sends an invalid one; `relaxed` always
-accepts the connection and logs when the header is missing or invalid.
+The mode decides what Bondy does when it cannot establish a source
+address. On an HTTP listener, that happens when the headers of a trusted
+peer yield no address. On a raw socket, it happens when the PROXY header is
+missing or malformed. `relaxed` falls back to the socket peer. `strict`
+refuses the connection or the request. The API Gateway
+answers a refused request with `403` and `bondy.error.proxy_protocol_error`.
 
 @[config](listeners.$name.proxy_protocol.trusted_proxies,string,,v1.0.0)
 
-Comma-separated CIDR list of trusted reverse proxies, e.g.
-`10.0.0.0/8 172.16.0.0/12`. The forwarding headers are only believed when
-the immediate socket peer's address is within one of these ranges;
-otherwise the socket peer's own address is used as the source IP. The
-default is **empty**, meaning no proxy is trusted, so a spoofed forwarding
-header can never influence source-IP-based authorization. When more than
-one hop is present, Bondy walks the `X-Forwarded-For` chain from the right
-and takes the first address that is *not* inside a trusted range, so a
-client behind a trusted proxy cannot shift its apparent source IP by
-prepending spoofed hops of its own.
+A comma-separated list of CIDR ranges, e.g. `10.0.0.0/8, 172.16.0.0/12`.
+It applies to `http` listeners only. The default is **empty**: no proxy is trusted, so
+with `proxy_protocol = on` and no `trusted_proxies` every peer is untrusted
+and the source IP is the socket peer. When an untrusted peer sends
+forwarding headers, Bondy ignores them and logs a warning. An IPv4 range
+never matches an IPv6 peer. When an entry is not a valid CIDR range, the
+node does not start and reports `{invalid_trusted_proxies, Entries}`, so a
+typo cannot leave a proxy untrusted without notice.
+
+From a trusted peer, Bondy tries the headers in this order, and the first
+that yields an address wins:
+
+1. `Forwarded` — the `for=` values.
+2. `X-Forwarded-For`.
+3. `X-Real-IP`.
+
+For the first two, Bondy reads the chain from the right and takes the first
+address that is *not* inside a trusted range. A client behind a trusted
+proxy therefore cannot shift its apparent source IP by prepending hops of
+its own. Bondy skips a chain entry that is not an IP address.
 
 ### Keepalive and idle timeouts (raw-socket protocols)
 
@@ -388,7 +449,8 @@ a plain request.
 @[config](listeners.$name.idle_timeout,duration|infinity,8h,v1.0.0)
 
 The reap deadline: how long a connection may be silent before Bondy closes
-it.
+it. Only data from the peer restarts this timer, and a pong counts as data,
+so Bondy never reaps a peer that answers probes.
 
 @[config](listeners.$name.ping.enabled,on|off,on,v1.0.0)
 
@@ -487,7 +549,19 @@ The number of packets requested from the socket at once.
 
 @[config](listeners.$name.http.buffer.max,bytesize,,v1.0.0)
 
-The bounds of Cowboy's dynamic receive buffer.
+The bounds between which Cowboy resizes a connection's socket receive
+buffer. Bondy checks these rules at boot:
+
+- Set both keys or neither. One without the other refuses the boot.
+- Each value is within 1KB..128KB, and `min` is at most `max`.
+- Either key set to `0` disables dynamic buffering for the listener,
+  whatever the other key is.
+
+Unset, Cowboy's own default applies: an adaptive buffer between 512 bytes
+and 128KB, unless the socket [`buffer`](#listeners.$name.buffer) size is
+set, in which case there is no dynamic buffering. A WebSocket connection
+uses the buffer of the listener it arrived on; there is no
+WebSocket-specific buffer setting.
 
 @[config](listeners.$name.http.linger.timeout,duration,,v1.0.0)
 
@@ -497,10 +571,23 @@ raw-socket [`linger.timeout`](#listeners.$name.linger.timeout).
 @[config](listeners.$name.http.max_concurrent_streams,integer,,v1.0.0)
 
 Maximum number of concurrent streams (in-flight requests) a single HTTP/2
-client connection may have open. Unbounded concurrency lets one connection
-exhaust the node; note that one HTTP/2 connection can carry this many
-in-flight requests, so `max_connections`-based alarms undercount
-request-level load.
+client connection may have open. Bondy sets no default: unset, Cowboy
+advertises `100`.
+
+One HTTP/2 connection carries many requests. Anything that counts
+connections — `max_connections`, a connection-count alarm, a load
+balancer's connection metric — therefore undercounts the request load of an
+HTTP/2 client by up to a factor of `max_concurrent_streams`.
+
+Cowboy also caps, per connection, the rate of received frames, of stream
+resets and of cancelled streams. Bondy neither sets nor exposes these caps,
+so Cowboy's defaults apply:
+
+| Cap | Cowboy default |
+|-----|----------------|
+| Received frames | 10000 per 10s |
+| Stream resets | 10 per 10s |
+| Cancelled streams | 500 per 10s |
 
 @[config](listeners.$name.http.initial_stream_flow_size,bytesize,,v1.0.0)
 
@@ -508,20 +595,23 @@ The amount of HTTP/2 flow-control credit a new stream starts with.
 
 @[config](listeners.$name.http.max_authority_length,integer,,v1.0.0)
 
-Maximum length of the authority component of the request URI (the
-`host[:port]` part), in bytes.
+Maximum length, in bytes, of the request authority (`Host` or
+`:authority`). Unset, Cowboy applies `255`. Over the limit, HTTP/1.1
+answers `414` and HTTP/2 resets the stream.
 
 @[config](listeners.$name.http.max_authorization_header_value_length,integer,,v1.0.0)
 
 Maximum length of the `Authorization` header value, in bytes, independent
 of the general header-value limit — Authorization headers routinely carry
-bearer tokens (JWTs) larger than typical header values.
+bearer tokens (JWTs) larger than typical header values. Unset,
+`max_header_value_length` applies to it. Cowboy enforces it on HTTP/1.1 and
+answers `431`.
 
 @[config](listeners.$name.http.max_cookie_header_value_length,integer,,v1.0.0)
 
 Maximum **size**, in bytes, of the `Cookie` header value, independent of
 the general header-value limit. Unset, `max_header_value_length` applies to
-it.
+it. Cowboy enforces it on HTTP/1.1 and answers `431`.
 
 @[config](listeners.$name.http.max_cookies,integer,100,v1.0.0)
 
@@ -530,7 +620,14 @@ cookie limits are not interchangeable: a single header of legal length can
 still hold thousands of tiny cookies, and it is the count that decides how
 much parsing one request can cost. Both matter on the endpoints that read
 cookies — the OIDC flow, the ticket and CSRF cookies, and the SSE and
-long-poll carriers. A request exceeding either is answered with a 400.
+long-poll carriers. A request over `max_cookies` is answered with a 400.
+
+One endpoint is an exception to the count limit. An API Gateway
+`/oidc/verify` endpoint treats a request over `max_cookies` as carrying no
+cookies at all, the same as a malformed `Cookie` header, and does not refuse
+it. Its credential can then come only from a bearer token or the
+`x-bondy-ticket` header, so an over-limit request without one is
+unauthenticated rather than rejected.
 
 @[config](listeners.$name.http.max_empty_lines,integer,,v1.0.0)
 
@@ -552,15 +649,33 @@ The maximum number of requests served on one keep-alive connection.
 
 @[config](listeners.$name.http.invalid_response_headers,error_terminate|ignore,error_terminate,v1.0.0)
 
-What to do when a response contains invalid header names or values (e.g.
-control characters). `error_terminate` replies with a 500 and terminates
-the stream, preventing header injection and response splitting; `ignore`
-relays the response unchanged. Keep the default unless a legacy upstream
-behind the API gateway requires relaying such headers.
+What to do with a response whose header values contain a CR or LF.
+`error_terminate` terminates the stream instead of sending the response,
+which prevents header injection and response splitting. `ignore` sends the
+response unchanged. Keep the default unless a legacy upstream behind the
+API Gateway requires relaying such headers.
 
 @[config](listeners.$name.http.sendfile,on|off,,v1.0.0)
 
 Whether the `sendfile` syscall may be used.
+
+### Fixed request limits and validation
+
+A query string or an `application/x-www-form-urlencoded` body carries at
+most 100 fields. A request with more is refused. The limit is Cowboy's
+default and Bondy does not expose it.
+
+Bondy inherits these checks from Cowboy. They are not configurable:
+
+- **Fragments.** An HTTP/1.1 request-target that contains a fragment
+  (`#…`) is rejected with `400` (RFC 9110 §4.1).
+- **Authority and `Host` agree.** An HTTP/1.1 request whose absolute-form
+  authority differs from its `Host` header is rejected with `400`. An
+  HTTP/2 request whose `host` header differs from its `:authority` has its
+  stream reset (RFC 9113 §8.3.1).
+- **Pipelining.** Cowboy reads pipelined HTTP/1.1 requests one at a time:
+  it does not parse the next request on a connection until the current
+  stream has finished.
 
 ### Held streams and the connection idle timeout
 
@@ -585,8 +700,9 @@ closed: the settings it did not state are taken from Bondy's own defaults —
 `cors.*` emits **wildcard CORS**, not none. The defaults fill in per key:
 restricting `allowed_origins` leaves `allowed_methods` and
 `allowed_headers` at their defaults unless those are stated too. There is
-no global block to inherit from, so an HTTPS listener whose CORS previously
-restricted origins to an allowlist needs that allowlist restated here.
+no global block to inherit from, so an HTTPS listener that has to restrict
+CORS origins to an allowlist needs that allowlist stated here; without it
+the listener is open to any origin.
 
 @[config](listeners.$name.cors.enabled,on|off,on,v1.0.0)
 
@@ -797,6 +913,9 @@ Whether the SSE stream carries periodic keepalive comments.
 
 @[config](listeners.$name.sse.ping.interval,duration,20s,v1.0.0)
 
+How often the stream sends a `: keepalive` comment while
+`sse.ping.enabled` is on.
+
 @[config](listeners.$name.sse.idle_timeout,duration,10m,v1.0.0)
 
 How long a fully quiet SSE stream is kept. Feeds the listener's
@@ -861,6 +980,43 @@ listeners.public_wamp_tls.tls.fail_if_no_peer_cert = on
 ```
 
 @[config](listeners.$name.tls.fail_if_no_peer_cert,on|off,off,v1.0.0)
+
+Bondy sets neither `supported_groups` nor `signature_algs` on a listener, so
+the key-exchange groups and signature algorithms on offer are the OTP `ssl`
+defaults for the negotiated TLS version.
+
+## Boot-time validation
+
+Bondy resolves the listener inventory as a unit at boot. It logs the first
+invalid entry as `Invalid listener configuration`, with reason
+`{invalid_listener, Name, Reason}`, and the node does not start: one bad
+listener refuses the whole node, not just itself. `Reason` is one of:
+
+| Reason | Cause |
+|--------|-------|
+| `{missing, transport}`, `{missing, protocol}` | The key is absent. |
+| `{unknown_transport, T}` | `transport` is not `tcp`, `tls` or `uds`. |
+| `{unknown_protocol, P}` | `protocol` is not `http`, `wamp_rawsocket` or `bridge_relay`. |
+| `{unsupported_combination, uds, bridge_relay}` | A bridge relay over a Unix domain socket. |
+| `{missing, port}`, `{missing, path}` | No bind target: `path` for `uds`, `port` otherwise. |
+| `duplicate_name` | Two listeners share a name. |
+| `{port_in_use_by, Other}`, `{path_in_use_by, Other}` | The bind target overlaps the bind target of listener `Other`. See [Bind address and IP version](#bind-address-and-ip-version). |
+| `{invalid_ip, Ip}`, `{unresolvable_ip, Ip, Reason}` | `ip` is not a valid address. Only an inventory in `sys.config`, which can name a host, reaches the second. |
+| `{invalid_trusted_proxies, Entries}` | `proxy_protocol.trusted_proxies` holds entries that are not valid CIDR ranges. |
+| `{missing, services}` | An `http` listener with no `services`, or an empty list. |
+| `{services_not_supported, P}` | `services` on a `wamp_rawsocket` or `bridge_relay` listener. |
+| `{unknown_service, S}` | `S` is not a service this node knows. |
+| `{unknown_carrier, Carrier, Service}` | An extension registered `Service` with a carrier that no module serves. |
+| `{incompatible_services, mcp, admin_api}` | One listener declares both. |
+| `{missing, [tls, certfile]}`, `{missing, [tls, keyfile]}` | A `tls` listener without its certificate or key. |
+| `{tls_not_supported, T}` | A `tls.*` key on a `tcp` or `uds` listener. |
+| `reserved_name` | The name is `admin_local`, which the node injects itself. |
+| `reserved_cannot_be_disabled` | `listeners.admin.enabled = off`. |
+| `{invalid_ping_enabled, Label, V}`, `{incomplete_ping, Label, Keys}` | A malformed `ping` block. Only `sys.config` can express one; `bondy.conf` cannot. |
+
+A listener with `enabled = off` skips the TLS checks, as
+[TLS material](#tls-material) describes. Every other check applies to a
+disabled listener too.
 
 ## Migrating from the pre-1.0 keys
 
@@ -930,7 +1086,23 @@ Two keys have no destination: `bridge.listener.{tcp,tls}.max_frame_size`
 was never read by anything, and `admin_api.*.dynamic_buffer.*` was the
 internal name of `buffer.min`/`buffer.max`.
 
-One capability is narrower than before: the removed `*.ip` keys accepted
-any resolvable hostname, while `listeners.$name.ip` takes a literal
-address. An inventory supplied through `sys.config` is still resolved by
-name.
+Some keys change name as they move, and some have no destination.
+`scripts/migrate_conf.escript` applies the same table:
+
+| Key | Destination |
+|-----|-------------|
+| `wamp.websocket.ping.interval` | `listeners.<name>.websocket.ping.idle_timeout` |
+| `wamp.websocket.ping.max_retries` | `listeners.<name>.websocket.ping.max_attempts` |
+| `wamp.websocket.buffer.min`, `.max` | None. A WebSocket connection uses the buffer of its listener; set `listeners.<name>.http.buffer.min` and `.max`. |
+| `wamp.sse.reset_idle_timeout_on_send`, `wamp.longpoll.reset_idle_timeout_on_send` | None. The working control is `listeners.<name>.http.reset_idle_timeout_on_send`, which covers every service on the listener. |
+| `wamp.transport_queue.transport_ttl` | [`wamp.http_transport.idle_timeout`](/router/reference/configuration/wamp#wamp.http_transport.idle_timeout) |
+| `wamp.transport_queue.overflow_strategy` | None. Eviction of the oldest entry is the only policy. |
+| `wamp.transport_queue.*` (the rest) | `wamp.http_transport.queue.*` |
+
+On the keys of a raw-socket or bridge-relay listener, `ping.interval`
+becomes `ping.idle_timeout` and `ping.max_retries` becomes
+`ping.max_attempts`.
+
+`listeners.$name.ip` takes a literal address, while the removed `*.ip`
+keys accepted any resolvable hostname. An inventory supplied through
+`sys.config` is still resolved by name.

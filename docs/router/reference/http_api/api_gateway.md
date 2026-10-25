@@ -52,7 +52,7 @@ The [load errors](/router/reference/wamp_api/api_gateway#load-an-api-spec) say w
 
 `GET /api_specs/:id` answers with the stored specification. `GET /api_specs` answers with an array of every stored specification.
 
-`GET /api_specs/:id/info` answers with a summary of the stored specification: the properties `id`, `name`, `host`, `realm_uri`, `meta` and `ts`, without the versions and paths.
+`GET /api_specs/:id/info` answers with a summary of the stored specification: the properties `id`, `name`, `host` and `realm_uri`, and `meta` when the specification has it, without the versions and paths.
 
 ```bash
 curl "http://localhost:18081/api_specs/com.market.demo/info"
@@ -64,8 +64,7 @@ curl "http://localhost:18081/api_specs/com.market.demo/info"
   "id": "com.market.demo",
   "meta": {},
   "name": "Marketplace Demo API",
-  "realm_uri": "com.market.demo",
-  "ts": -576459578303
+  "realm_uri": "com.market.demo"
 }
 ```
 

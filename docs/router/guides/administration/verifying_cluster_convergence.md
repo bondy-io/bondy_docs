@@ -92,7 +92,7 @@ configuration (`db.aae`), and a node with it off will never converge.
 ## 3. Decide whether it is repairing itself
 
 A cluster that is behind but repairing looks different from one that is stuck.
-Three counters separate them.
+These signals separate them.
 
 **Is a gap being detected?**
 
@@ -133,6 +133,29 @@ max by (instance_id) (bondy_oplog_wal_consumer_lag_bytes)
 A growing backlog alongside the holds points at a starved or wedged applier
 rather than at replication.
 
+**Is a member holding compaction?**
+
+```
+sum by (scheduler, event) (
+  rate(bondy_oplog_gc_scheduler_events_total{event=~"trigger_.+", event!="trigger_ok"}[5m])
+)
+```
+
+A sustained `trigger_unconfirmed` or `trigger_no_frontier` rate means a member
+is holding compaction and reclamation. Find that member in the `member_status`
+field of the "GC stalled" warning in the log. Bring the member back, or remove
+it with [`bondy.cluster.leave`](/router/reference/wamp_api/cluster). While a
+member holds, disk and memory grow, but convergence is not at risk. See
+[Convergence](/router/concepts/convergence#the-compaction-witnesses-and-the-truncation-cap)
+for why a silent member holds them.
+
+**Is a re-bootstrap refused?**
+
+A node that logs `Refused to install the peer's snapshot` on every retry, with
+reason `source_behind_truncation`, never converges with that peer. The message means that both nodes truncated history
+on their own before they were joined. To recover, follow
+[Enabling clustering](/router/reference/configuration/cluster#enabling-clustering).
+
 ## 4. Check for page loss
 
 The counters above describe a cluster that is merely behind. Two others describe
@@ -149,8 +172,9 @@ declined to run. The `classification` label says which layer lost the page —
 `transient` is benign (readable on re-probe), `deleted` and `tombstoned` are
 not.
 
-`bondy_oplog_mst_rebuilt_total` means a node dropped its own tree and started
-over. It is a self-heal and it is safe, but any occurrence is worth
+`bondy_oplog_mst_rebuilt_total` means that a node's own tree had lost pages.
+Its compaction truncated the tree past them once every member covered what the
+node had applied. It is a self-heal and it is safe, but any occurrence is worth
 investigating: the question is why pages went missing, not whether the heal
 worked.
 

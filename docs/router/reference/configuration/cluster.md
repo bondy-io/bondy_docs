@@ -275,7 +275,7 @@ Cross-node call and event routing is unconditional — there is nothing to enabl
 
 @[config](registry.rib.check_interval,duration_time_units,5m,v1.0.0)
 
-How often each node compares its summary cells against the registry ground truth per realm, logging a warning naming any divergence found. `0` disables the sweep.
+How often each node compares its summary cells against the registry ground truth per realm, logging a warning naming any divergence found. `0` disables the sweep. Before it compares, the sweep deletes each stub of a departed node whose summary cell is gone. With `0`, a departed node's stubs are never removed. See [When a node leaves](/router/concepts/registry_routing#when-a-node-leaves).
 
 The summary machinery is instrumented on the Admin API `/metrics` endpoint (`bondy_registry_rib_members`, `bondy_registry_rib_stub_cells`, `bondy_registry_rib_divergences`, `bondy_rpc_rib_completions_total`, `bondy_rpc_rib_retries_total`), and covered by a dedicated **Registry RIB** section in the bundled Grafana dashboard.
 

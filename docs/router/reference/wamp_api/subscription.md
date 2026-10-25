@@ -400,37 +400,10 @@ Raises `wamp.error.no_such_subscription` or `bondy.error.unavailable` — same d
 ## Topics
 Bondy publishes these meta events on a subscription's lifecycle, subject to the `wamp.meta_events` setting (`demand` by default: an event is only produced when a matching subscriber exists). Because delivery isn't guaranteed, a consumer should snapshot current state via [`wamp.subscription.list`](#list-subscriptions) (or the paginated family) after subscribing, which also covers the gap between subscribing and the next emitted event.
 
-##### wamp.subscription.on_create{.wamp-topic}
-Published when a topic URI receives its first subscription.
-
-##### Positional Results
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        '0':{
-            'type': 'id',
-            'description' : 'The session id of the subscribing client.'
-        },
-        '1':{
-            'type': 'subscription',
-            'description' : 'The new subscription (see the `subscription` type above).'
-        }
-    })"
-/>
-
-##### Keyword Results
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        'topic':{
-            'type': 'uri',
-            'description' : 'The subscribed topic URI.'
-        }
-    })"
-/>
+Bondy does not publish `wamp.subscription.on_create` or `wamp.subscription.on_delete`. The WAMP specification has the router publish them when a topic URI gains its first subscription and loses its last. A cluster cannot decide which subscription is the first or the last without coordinating its nodes. Each node would announce its own, and a subscriber would see a URI deleted while other nodes still serve it. To learn whether a topic URI has subscriptions, call [`wamp.subscription.lookup`](#look-up-a-subscription) or [`wamp.subscription.list`](#list-subscriptions).
 
 ### wamp.subscription.on_subscribe{.wamp-topic}
-Published when a client subscribes to a topic URI that already has at least one subscriber.
+Published for every new subscription, whether or not the topic URI already has other subscriptions.
 
 ##### Positional Results
 <DataTreeView
@@ -459,7 +432,7 @@ Published when a client subscribes to a topic URI that already has at least one 
 />
 
 ### wamp.subscription.on_unsubscribe{.wamp-topic}
-Published when a client unsubscribes from a topic URI that still has other subscribers remaining.
+Published for every removed subscription: the client unsubscribes, or its session ends. Bondy publishes it whether or not other subscriptions of the topic URI remain.
 
 ##### Positional Results
 <DataTreeView
@@ -483,35 +456,6 @@ Published when a client unsubscribes from a topic URI that still has other subsc
         'topic':{
             'type': 'uri',
             'description' : 'The topic URI that was unsubscribed from.'
-        }
-    })"
-/>
-
-### wamp.subscription.on_delete{.wamp-topic}
-Published when a topic URI's last subscription is removed.
-
-##### Positional Results
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        '0':{
-            'type': 'id',
-            'description' : 'The session id of the unsubscribing client.'
-        },
-        '1':{
-            'type': 'id',
-            'description' : 'The removed subscription\'s id.'
-        }
-    })"
-/>
-
-##### Keyword Results
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        'topic':{
-            'type': 'uri',
-            'description' : 'The topic URI whose last subscription was just removed.'
         }
     })"
 />

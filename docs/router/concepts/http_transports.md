@@ -121,7 +121,7 @@ curl -X POST "https://api.example.com/wamp/longpoll/<transport_id>/send" \
 ```
 :::
 
-Returns `202 Accepted` on success, `404` if the transport is not found.
+Returns `202 Accepted` on success, `404` if the transport is not found. Bondy refuses a body larger than 4 MiB with `413`.
 
 #### Receive
 
@@ -130,7 +130,7 @@ Blocks until a WAMP message is available or the timeout expires.
 Returns `200` with the JSON-encoded WAMP message, or `204 No Content` on timeout.
 
 ::: info
-The receive timeout is configured by `wamp_longpoll.idle_timeout` and defaults to 30 seconds. The client should immediately issue a new receive request after each response to maintain the long-polling loop.
+The listener's [`longpoll.poll_timeout`](/router/reference/configuration/listeners#listeners.$name.longpoll.poll_timeout) sets how long Bondy holds a receive request, and defaults to 30 seconds. A client sends a new receive request immediately after each response, which keeps the long-polling loop running.
 :::
 
 #### Close
@@ -239,7 +239,7 @@ data: [36, 1234, 5678, {}, ["Hello, world!"]]
 
 Special events:
 - `event: transport_error` with `data: session_terminated` is sent when the transport session ends.
-- Keepalive comments (`: keepalive`) are sent every 15 seconds to prevent connection timeout.
+- Keepalive comments (`: keepalive`) are sent at the listener's [`sse.ping.interval`](/router/reference/configuration/listeners#listeners.$name.sse.ping.interval), 20 seconds by default, to prevent connection timeout.
 
 #### Close
 
@@ -322,17 +322,24 @@ All transport endpoints return JSON error bodies:
 |:---|:---|:---|
 | 400 | `no_supported_protocol` | The `protocols` array in `/open` doesn't contain a supported protocol |
 | 400 | `invalid_json` | The request body is not valid JSON |
+| 400 | `method_not_allowed` | The request uses a method the endpoint does not accept |
+| 400 | `message_error` | The body of a `/send` request is not a valid WAMP message |
 | 401 | `unauthorized` | The ticket cookie is missing, invalid, or doesn't match the session |
 | 403 | `csrf_validation_failed` | The `X-CSRF-Token` header is missing or doesn't match the CSRF cookie |
-| 404 | — | The `transport_id` doesn't correspond to an active session |
+| 404 | `transport_not_found` | The `transport_id` doesn't correspond to an active session |
+| 413 | `payload_too_large` | Long-poll only: the request body is larger than 4 MiB |
+
+The two refusals of `/open`, `no_supported_protocol` and `invalid_json`, carry only the `error` key:
 
 ::: code-group
 ```json [Error Response]
 {
-    "error": "csrf_validation_failed"
+    "error": "invalid_json"
 }
 ```
 :::
+
+Every other error carries the standard [error payload](/router/reference/errors) plus an `error` key that holds the short name above. A client can branch on the status or on the `error` key.
 
 
 ## Transport Session Lifecycle
@@ -345,5 +352,15 @@ Each HTTP transport session is backed by a persistent server-side process that:
 - Cleans up the WAMP session when the transport process terminates
 
 ::: info Inactivity Timeout
-If no client requests arrive within the configured inactivity timeout, the transport session is terminated along with its WAMP session. The timeout is reset on each request. For SSE, an active SSE stream connection prevents the inactivity timeout from firing.
+If no client requests arrive within [`wamp.http_transport.idle_timeout`](/router/reference/configuration/wamp#wamp.http_transport.idle_timeout), Bondy terminates the transport session and its WAMP session, and discards the queued messages of that transport. Each request resets the timeout. For SSE, an active SSE stream connection prevents the inactivity timeout from firing.
 :::
+
+### The outbound queue
+
+A long-poll client is not connected at all between polls, and an SSE stream can drop and reconnect while the session survives. Messages for such a session therefore wait in a bounded queue per transport. The node-wide [`wamp.http_transport.queue.*`](/router/reference/configuration/wamp#wamp.http_transport.queue.max_messages) keys bound it; WebSocket and RawSocket sessions never use it.
+
+- When a new message would exceed `max_messages` or `max_bytes`, Bondy evicts the oldest entry of that transport to make room. Bondy applies no other eviction policy.
+- A message older than `message_ttl` is not delivered: a poll skips it and the periodic sweep removes it.
+- The router's messages and the synchronous replies to the client's own messages, such as an inline `ERROR`, share one queue, in the order they were produced.
+
+When the router ends a session with `ABORT` or `GOODBYE`, Bondy queues the terminal message, hands it to a long-poll request that is waiting at that moment, and then closes the session. A long-poll client that is between polls at that moment does not receive the terminal message: its next poll answers `404` with `transport_not_found`. A poll that is waiting when the session dies gets the same answer.

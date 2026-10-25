@@ -443,37 +443,10 @@ Raises `wamp.error.no_such_registration` or `bondy.error.unavailable` — same d
 ## Topics
 Bondy publishes these meta events on a registration's lifecycle, subject to the `wamp.meta_events` setting (`demand` by default: an event is only produced when a matching subscriber exists). Because delivery isn't guaranteed, a consumer should snapshot current state via [`wamp.registration.list`](#list-registrations) (or the paginated family) after subscribing, which also covers the gap between subscribing and the next emitted event.
 
-##### wamp.registration.on_create{.wamp-topic}
-Published when a procedure URI receives its first registration.
-
-##### Positional Results
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        '0':{
-            'type': 'id',
-            'description' : 'The session id of the registering callee.'
-        },
-        '1':{
-            'type': 'registration',
-            'description' : 'The new registration (see the `registration` type above).'
-        }
-    })"
-/>
-
-##### Keyword Results
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        'procedure':{
-            'type': 'uri',
-            'description' : 'The registered procedure URI.'
-        }
-    })"
-/>
+Bondy does not publish `wamp.registration.on_create` or `wamp.registration.on_delete`. The WAMP specification has the router publish them when a procedure URI gains its first registration and loses its last. A cluster cannot decide which registration is the first or the last without coordinating its nodes. Each node would announce its own, and a subscriber would see a URI deleted while other nodes still serve it. To learn whether a procedure URI has registrations, call [`wamp.registration.lookup`](#look-up-a-registration) or [`wamp.registration.list`](#list-registrations).
 
 ### wamp.registration.on_register{.wamp-topic}
-Published when a callee registers a procedure URI that already has at least one registration (a shared registration joining an existing group).
+Published for every new registration, whether or not the procedure URI already has other registrations.
 
 ##### Positional Results
 <DataTreeView
@@ -502,7 +475,7 @@ Published when a callee registers a procedure URI that already has at least one 
 />
 
 ### wamp.registration.on_unregister{.wamp-topic}
-Published when a callee unregisters from a procedure URI that still has other registrations remaining.
+Published for every removed registration: the callee unregisters, or its session ends. Bondy publishes it whether or not other registrations of the procedure URI remain.
 
 ##### Positional Results
 <DataTreeView
@@ -526,35 +499,6 @@ Published when a callee unregisters from a procedure URI that still has other re
         'procedure':{
             'type': 'uri',
             'description' : 'The procedure URI that was unregistered from.'
-        }
-    })"
-/>
-
-### wamp.registration.on_delete{.wamp-topic}
-Published when a procedure URI's last registration is removed.
-
-##### Positional Results
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        '0':{
-            'type': 'id',
-            'description' : 'The session id of the unregistering callee.'
-        },
-        '1':{
-            'type': 'id',
-            'description' : 'The removed registration\'s id.'
-        }
-    })"
-/>
-
-##### Keyword Results
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        'procedure':{
-            'type': 'uri',
-            'description' : 'The procedure URI whose last registration was just removed.'
         }
     })"
 />

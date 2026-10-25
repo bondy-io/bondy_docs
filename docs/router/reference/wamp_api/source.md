@@ -94,7 +94,7 @@ The representation of the source returned by the read or write operations e.g. `
 |:---|:---|
 |[Add a source to a realm](#add-a-source-to-a-realm)|`bondy.source.add`|
 |[Remove a source from a realm](#remove-a-source-from-a-realm)|`bondy.source.delete`|
-|[Retrieve a source from a realm](#retrieve-a-source-from-a-realm)|`bondy.source.get`|
+|[Retrieve a source from a realm](#retrieve-a-source-from-a-realm) (deprecated)|`bondy.source.get`|
 |[List all sources from a realm](#list-all-sources-from-a-realm)|`bondy.source.list`|
 |[Find sources from a realm](#find-sources-from-a-realm)|`bondy.source.match`|
 
@@ -225,10 +225,10 @@ call bondy.source.delete \
 ### Retrieve a source from a realm
 #### bondy.source.get(realm_uri, username, cidr) -> source() {.wamp-procedure}
 
-::: warning Not Yet Implemented
-This procedure is not currently implemented. Calling this procedure will return `wamp.error.no_such_procedure`.
+::: warning Deprecated
+Bondy does not serve this procedure. A call to it, or to its legacy alias `bondy.security.find_source`, fails with [`bondy.error.deprecated_procedure`](/router/reference/wamp_api/errors/deprecated_procedure).
 
-For now, use [bondy.source.list](#list-all-sources-from-a-realm) to retrieve all sources and filter on the client side.
+Use [bondy.source.match](#find-sources-from-a-realm) to get the sources that apply to a user, or [bondy.source.list](#list-all-sources-from-a-realm) to get every source of a realm.
 :::
 
 ### List all sources from a realm

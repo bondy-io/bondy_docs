@@ -65,7 +65,9 @@ Drops the connection once the bridge has been waiting this long for the local ne
 
 @[config](bridge.$name.idle_timeout,duration_time_units,24h,v1.0.0)
 
-Drops the connection after this much inactivity. Set to `infinity` to disable.
+Drops the connection once it has carried no message, in either direction, for this long. PING and PONG messages do not count. The bridge client logs "Shutting down client due to inactivity." with reason `idle_timeout`, and its supervisor starts a new client. Set to `infinity` to keep a silent connection open.
+
+When this value is not longer than [`bridge.$name.ping.idle_timeout`](#bridge.$name.ping.idle_timeout), the connection is dropped this long after it becomes idle, so `ping.idle_timeout` plus this value after the last message.
 
 @[config](bridge.$name.hibernate,never&#124;idle&#124;always,idle,v1.0.0)
 
@@ -89,7 +91,7 @@ Whether the edge probes a silent connection with PING control messages. This aff
 
 @[config](bridge.$name.ping.idle_timeout,duration_time_units,20s,v1.0.0)
 
-How long the connection may be silent before the edge probes it. This is not the same as `bridge.$name.idle_timeout`, which is the reap deadline.
+How long the connection may carry no message before it becomes idle. An idle connection is probed with PING when `bridge.$name.ping` is on. It is dropped at `bridge.$name.idle_timeout`, whether `ping` is on or off.
 
 @[config](bridge.$name.ping.timeout,duration_time_units,10s,v1.0.0)
 
@@ -97,7 +99,7 @@ How long a probe waits for its answer before counting as a failed attempt.
 
 @[config](bridge.$name.ping.max_attempts,integer,3,v1.0.0)
 
-How many unanswered probes mean a dead connection — after this many the edge drops it (and reconnects, when reconnection is on).
+How many unanswered probes mean a dead connection. After this many, the bridge client closes the connection and stops. Its supervisor then starts a new client, which dials again with a fresh retry budget. The supervisor restarts the client whether or not `bridge.$name.reconnect` is on.
 
 ## Reconnection
 
@@ -107,7 +109,14 @@ Whether the bridge automatically retries the connection after it fails — eithe
 
 @[config](bridge.$name.reconnect.max_retries,integer,100,v1.0.0)
 
-Maximum number of reconnection attempts before the bridge gives up.
+The retry budget: the number of failed attempts after which the bridge client stops. The budget has no time limit.
+
+These events count against the budget:
+
+* A connection attempt that fails with `timeout`, `econnrefused`, `econnreset`, `ehostdown`, `enotconn`, `etimedout`, `enetdown`, `ehostunreach` or `enetunreach`. Any other connect error stops the client at once.
+* A connection that is lost before a session opens on it.
+
+When a connection that had an open session is lost, the client closes the socket and dials again at once, with a fresh budget. When the budget is spent, or when `bridge.$name.reconnect` is `off`, the client stops. Each bridge client is a permanent child of its supervisor, so the supervisor starts a new client with a new connection and a new budget. When its clients restart more than 20 times within 60 seconds, the supervisor itself stops, together with every bridge client on the node.
 
 @[config](bridge.$name.reconnect.backoff.type,jitter&#124;normal,jitter,v1.0.0)
 

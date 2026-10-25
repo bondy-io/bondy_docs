@@ -60,3 +60,17 @@ If the previous command didn't fail the API has been loaded and activated. Howev
 curl -X "GET" "http://localhost:18081/api_specs/com.example.my_api"
 ```
 :::
+
+A stored specification is not always served. To check that a node serves it, call the WAMP procedure [`bondy.http_gateway.api.status`](/router/reference/wamp_api/api_gateway#get-the-status-of-the-api-specs) on that node:
+
+::: code-group
+```bash [WAMP]
+wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.http_gateway.api.status
+```
+:::
+
+Find the element whose `id` is your specification's `id`. The status `active` means that the node serves the specification.
+
+If the status is `pending_realm`, the specification's realm does not exist on the node. Create the realm, then load the specification again.

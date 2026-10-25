@@ -18,8 +18,6 @@ Creating, retrieving and managing realms and also enabling, disabling and checki
 
 ## API
 
-Real## API
-
 Realm management is available over HTTP through the [Admin HTTP API](/router/reference/http_api/index#realms). Each route calls the matching [Realm WAMP API](/router/reference/wamp_api/realm) procedure, which documents the arguments, results and errors.
 
 | Method | Path | WAMP procedure |

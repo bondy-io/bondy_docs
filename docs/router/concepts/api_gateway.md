@@ -79,7 +79,9 @@ An API Gateway Specification is a JSON document that describes:
 1. **An API** — Identified by a unique ID and bound to a single [Realm](/router/concepts/realms).
 2. **Versions** — Each version has a `base_path` and a set of path definitions.
 3. **Paths** — Each path maps HTTP methods to operations.
-4. **Operations** — Each operation defines an action (WAMP call, HTTP forward, or static response) and a response transformation.
+4. **Operations** — Each operation defines an action (WAMP call, WAMP publish, HTTP forward, or static response) and a response transformation.
+
+The parser accepts only the keys that each object declares. It refuses a specification with a misspelt or unsupported key, rather than ignoring the key and applying a default. See [Validation](/router/reference/api_gateway/specification#validation).
 
 ::: definition A Declarative Finite State Machine
 An API Gateway Specification is effectively a declarative Finite State Machine (FSM) definition. It exposes an HTTP/REST API and converts HTTP nouns and verbs into WAMP or HTTP actions. The FSM state — the [API Context](/router/reference/api_gateway/specification#api-context) — is incrementally and recursively constructed as the specification is evaluated.
@@ -93,7 +95,7 @@ API Object
       └── Path Object(s)
            └── HTTP Method (GET, POST, PUT, ...)
                 └── Operation Object
-                     ├── Action Object (wamp_call | static | http_forward)
+                     ├── Action Object (wamp_call | wamp_publish | forward | static)
                      └── Response Object
 ```
 
@@ -150,15 +152,13 @@ Returns a static response without making any backend call. Useful for health che
 
 ### HTTP Forward Action
 
-Forwards the HTTP request to an external upstream API. Bondy acts as a traditional reverse proxy.
+Forwards the HTTP request to an external upstream API. Bondy acts as a traditional reverse proxy. When the response body is the upstream body, Bondy returns the upstream bytes and content type as it received them. When the upstream sends no response, Bondy sends the request again only if its method is idempotent, because a request that got no response may still have reached the upstream. See [Forward Action](/router/reference/api_gateway/specification#forward-action).
 
 ```json
 {
     "type": "forward",
-    "http_method": "{{request.method}}",
-    "host": "billing.internal",
-    "port": 8080,
-    "path": "/api{{request.path}}",
+    "host": "http://billing.internal:8080",
+    "path": "\"/api{{request.path}}\"",
     "headers": "{{request.headers}}",
     "body": "{{request.body}}"
 }
@@ -173,7 +173,7 @@ Expressions operate on the [API Context](/router/reference/api_gateway/specifica
 
 | Expression | Evaluates To |
 |:---|:---|
-| `{{request.method}}` | `POST` |
+| `{{request.method}}` | `post` |
 | `{{request.body.sku}}` | `"ZPK1972"` |
 | `{{request.body.price \\|> integer}}` | `13` |
 | `{{request.body.customer.first_name}}` | `"John"` |

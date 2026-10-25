@@ -172,6 +172,14 @@ stopped on purpose (its table was closed). Like `bondy_db_main_unavailable`,
 the readiness signal is recorded outside the alarm subsystem and only mirrored
 as an alarm.
 
+A durable shard that crashes while it seals its tree leaves an
+`incoming-sealing-NNNN.pack` file in its directory. The next start of the shard
+seals that file. When the file cannot be read, the start fails with
+`{recover_seal, Reason}` and keeps the file. This alarm then stays raised while
+the keeper retries. The root of the current tree can reference pages in that
+file, so deleting the file can lose them. Once the file is readable again, the
+next start of the keeper recovers it.
+
 ### `bondy_memory_high`
 
 The node's memory use is above the high watermark of its limit, and admission

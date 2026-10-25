@@ -155,6 +155,7 @@ None.
 * [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the data value is invalid
 * [bondy.error.invalid_data](/router/reference/wamp_api/errors/invalid_data): when the data values are invalid
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): for example when the provided `sso_realm_uri` property value doesn't exist or there are some inconsistent property values.
+* [bondy.error.inconsistency_error](/router/reference/wamp_api/errors/inconsistency_error): when the update changes the realm's SSO realm while the realm holds users linked to the current SSO realm. The same check applies to each realm that inherits its `sso_realm_uri` from this realm as a prototype. The error description lists the realms that hold linked users. Remove those users first.
 * [bondy.error.not_found](/router/reference/wamp_api/errors/not_found): when the provided uri is not found.
 
 #### Examples
@@ -238,7 +239,10 @@ call bondy.realm.update \
 
 Deletes the realm and all its associated objects.
 
-This call fails with an error if the realm has associated users. To override this behaviour pass `force: true` as a keyword argument.
+The call fails in these cases:
+
+* Another realm uses this realm as its prototype (`prototype_uri`) or as its SSO realm (`sso_realm_uri`). The `force` option does not override this check. Delete or update the dependent realms first.
+* The realm has users and `force` is `false`. To delete the realm and its users, pass `force: true` as a keyword argument.
 
 ::: warning ADMIN AUTHORIZATION
 This call is only available when the session is attached to the Master Realm
@@ -283,7 +287,8 @@ None.
 #### Errors
 
 * [bondy.error.not_found](/router/reference/wamp_api/errors/not_found): when the provided uri is not found.
-* [bondy.error.active_users](/router/reference/wamp_api/errors/active_users): when there are associated users and the `force` option is false.
+* [bondy.error.conflict](/router/reference/wamp_api/errors/conflict): when other realms use the realm as their prototype or SSO realm. The error's `details.realms` lists the URIs of those realms. The `force` option has no effect on this error.
+* [bondy.error.conflict](/router/reference/wamp_api/errors/conflict): when the realm has users and the `force` option is `false`.
 
 #### Examples
 

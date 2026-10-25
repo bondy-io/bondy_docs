@@ -113,8 +113,8 @@ const realmPublic = {
     "sso_realm_uri": {
         "type": "uri",
         "required": false,
-        "mutable": false,
-        "description": "If present, this it the URI of the SSO Realm this realm is connected to. Once a realm has been associated with an SSO realm it cannot be changed.",
+        "mutable": true,
+        "description": "If present, this is the URI of the SSO Realm this realm is connected to. An update can change it only while the realm holds no users linked to its current SSO realm. When the realm is a prototype, the same check applies to each realm that inherits this property from it.",
         "default": "The realm's prototype value if the realm inherits from a prototype (see prototype_uri), otherwise undefined."
     },
     "allow_connections": {

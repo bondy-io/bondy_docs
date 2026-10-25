@@ -150,19 +150,21 @@ listeners.public_https.security_headers.content_type_options = nosniff
 listeners.public_https.security_headers.content_security_policy = default-src 'self'; frame-ancestors 'none'
 
 ## Suppress server version disclosure
-listeners.public_https.server_header =
+listeners.public_https.server_header = server
 ```
+
+The default `server_header` value, `bondy`, sends `bondy/<version>`. Bondy sends any other value as written, so a value without a version keeps the Bondy version out of responses. Do not leave the value empty. `bondy.conf` treats a key with no value as a syntax error, and the node does not start.
 
 ### Disabling individual headers
 
-Set any header value to an empty string to suppress it:
+Set a header to `off` to suppress it. The listener still sends the other security headers:
 
 ```
 ## No CSP (too complex for this deployment)
-listeners.public_https.security_headers.content_security_policy =
+listeners.public_https.security_headers.content_security_policy = off
 
 ## No HSTS (TLS terminated at load balancer)
-listeners.public_https.security_headers.hsts =
+listeners.public_https.security_headers.hsts = off
 ```
 
 ### Disabling all security headers

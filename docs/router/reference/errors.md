@@ -73,8 +73,20 @@ as `bondy.error.internal_error` with a `trace_id` and nothing else. The same
 operator can join the two without the peer ever seeing it.
 
 Every value in the payload is JSON-encodable by construction. A term with no
-JSON representation is rendered as text, and both nesting depth and total size
-are bounded.
+JSON representation is rendered as text. Within `details`, a value nested deeper
+than 8 levels is rendered as text, and each string is truncated to about 4096
+bytes, ending in `...`. Bondy does not truncate `message` or `description`, and
+does not bound the total size of the payload.
+
+### Correlating requests and errors
+
+Bondy generates the `trace_id` of an internal error from a UUIDv7, so trace
+IDs sort by creation time. The HTTP API Gateway gives every request an ID of
+the same kind when the request arrives. An API specification reads that ID as
+`{{request.id}}`. When an action fails, Bondy logs the error against the same
+ID, and the specification can return it to the client as `{{action.error.id}}`.
+The log record carries the value that the client receives, so either ID
+locates the record of a failure.
 
 ## Retry semantics
 
@@ -99,8 +111,9 @@ the operation is permitted, and is transient.
 
 `HTTP` is the status an API Gateway response uses. An API specification can
 override it per host or version through its
-[`status_codes` map](/router/reference/api_gateway/specification). A `†` marks a type
-that shares another's URI.
+[`status_codes` map](/router/reference/api_gateway/specification). An error URI
+with no HTTP mapping answers `500` unless the specification maps it. A `†` marks
+a type that shares another's URI.
 
 The administrative WAMP API raises a further set of errors specific to its own
 resources &mdash; stale pagination cursors, unknown group names, an export
@@ -211,6 +224,7 @@ already running. Those have a page each under
 | `node_down` | `bondy.error.node_down` | `node_down` | transient | 503 | K001 |
 | `cluster_not_formed` | `bondy.error.cluster_not_formed` | `cluster_not_formed` | transient | 503 | K002 |
 | `partition_detected` | `bondy.error.partition_detected` | `partition_detected` | transient | 503 | K003 |
+| `cluster_disabled` | `bondy.error.cluster_disabled` | `cluster_disabled` | permanent | 501 | K004 |
 
 ### Mail
 
@@ -250,7 +264,7 @@ that cannot succeed.
 | `unavailable` | `bondy.error.unavailable` | `unavailable` | transient | 503 | S004 |
 | `temporarily_unavailable` | `bondy.error.temporarily_unavailable` | `temporarily_unavailable` | transient | 503 | S005 |
 | `gateway_timeout` | `bondy.error.gateway_timeout` | `gateway_timeout` | transient | 504 | S006 |
-| `bad_gateway` | `bondy.error.bad_gateway` | `bad_gateway` | transient | 503 | S007 |
+| `bad_gateway` | `bondy.error.bad_gateway` | `bad_gateway` | transient | 502 | S007 |
 | `disk_full` | `bondy.error.disk_full` | `disk_full` | transient | 500 | S008 |
 | `out_of_memory` | `bondy.error.out_of_memory` | `out_of_memory` | transient | 500 | S009 |
 | `too_many_connections` | `bondy.error.too_many_connections` | `too_many_connections` | transient | 503 | S010 |

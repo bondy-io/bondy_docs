@@ -123,12 +123,15 @@ Every configured node reports the full set of cluster peers from `bondy.cluster.
 
 Adding a node is the same as forming the cluster: configure peer discovery on the new node and start it — it discovers and joins the existing cluster the same way the first nodes discovered each other.
 
-To retire a node permanently, remove it from the membership with [`bondy.cluster.leave`](/router/reference/wamp_api/cluster#bondy-cluster-leave-node-map), called on the master realm with the node's name as `bondy.cluster.members` lists it. Leaving is a decommission, not a pause: it cannot be undone, and a node that later rejoins under the same name starts with a new history.
+To retire a node permanently, remove it from the membership with [`bondy.cluster.leave`](/router/reference/wamp_api/cluster#bondy-cluster-leave-node-map), called on the master realm with the node's name as `bondy.cluster.members` lists it. Leaving is a decommission, not a pause. To bring a node that has left back into the cluster, follow the joining rules in [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering).
 
 1. Call it first with the node's name as the only positional argument and `dry_run: true` in the keyword arguments, for example `Args = ["bondy3@10.0.0.3"]`, `KwArgs = {"dry_run": true}`. Bondy asks every remaining member whether it is ready and reports the result without removing anything.
 
 2. If every remaining member answered and is ready, run the same call without `dry_run`. Bondy refuses the removal with an error when any remaining member is silent or not ready; resolve that member first.
 3. Stop the node, and remove it from your discovery source (the DNS record or the static `addresses` list) so the remaining nodes stop looking it up.
+4. When the remaining nodes have converged, retire the node's origins to release the bookkeeping they hold. See [Retiring a Decommissioned Node](/router/reference/configuration/reclamation#retiring-a-decommissioned-node).
+
+The remaining nodes reclaim the node's registrations and subscriptions on their own after the leave; see [When a node leaves](/router/concepts/registry_routing#when-a-node-leaves).
 
 ## See also
 

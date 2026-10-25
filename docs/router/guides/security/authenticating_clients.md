@@ -273,14 +273,24 @@ Verify as in step 6. `bondy.session.self` now reports `"authmethod": "ticket"`.
 
 ## If authentication fails
 
-The router answers a failed `HELLO` with `ABORT`:
+The router answers a failed authentication with `ABORT`:
 
-- **`wamp.error.not_auth_method`** — no requested method is available to this user from this address. Check that the realm lists the method (step 1), that a source permits it for the user and the client's address (step 5), and that the user has the credential it needs: `authorized_keys` for `cryptosign`, a password of the matching protocol for `wampcra` or `wamp-scram`.
-- **`wamp.error.authentication_failed`** with the message `Authentication failed.` — the method was available but the credential was refused. Bondy returns the same message for an unknown user, a disabled user and a wrong credential, and logs the actual reason on the node.
+- **`wamp.error.not_auth_method`** — the realm enables none of the methods in the `HELLO`. Check that the realm lists the method (step 1) and that the client requests it.
+- **`wamp.error.authentication_failed`** with the message `Authentication failed.` — the router refused the user or the credential.
+
+The router answers an unknown user in the same way as an existing user that it refuses, so that the reply does not tell a client whether the user exists. These causes all end in `wamp.error.authentication_failed`:
+
+- The user does not exist or is disabled.
+- The user does not hold the role that the `HELLO` requests.
+- No source permits the requested method for the user from the client's address (step 5).
+- The user lacks the credential the method needs: `authorized_keys` for `cryptosign`, or a password of the matching protocol for `wampcra` or `wamp-scram`.
+- The credential is wrong.
+
+When the client requests `wampcra` or `wamp-scram` and the realm enables that method, the router sends a `CHALLENGE` in every case, and the `ABORT` follows the client's `AUTHENTICATE`. For other methods, the `ABORT` answers the `HELLO`. The node logs the actual reason in both cases.
 
 ## See also
 
 - [Security](/router/concepts/wamp/security) — how authentication, sources and authorization fit together.
 - [Source](/router/reference/wamp_api/source), [User](/router/reference/wamp_api/user), [Grant](/router/reference/wamp_api/grant) — the procedures used above.
-- [Ticket](/router/reference/wamp_api/ticket) — ticket scopes and `bondy.ticket.revoke_all`.
+- [Ticket](/router/reference/wamp_api/ticket) — ticket scopes, `bondy.ticket.revoke` and `bondy.ticket.revoke_all`.
 - [Security Configuration Reference](/router/reference/configuration/security) — password, ticket and anonymous settings.

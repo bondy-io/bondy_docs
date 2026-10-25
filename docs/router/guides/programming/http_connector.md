@@ -287,13 +287,22 @@ http_connector.services.billing.auth.secrets.vars.client_secret.transform = basi
 :::
 
 ::: warning
-If secret resolution fails at startup, the service starts but returns `bondy.error.bad_gateway` (503) for all calls until the secrets are resolved. Resolution is retried automatically with exponential backoff.
+If secret resolution fails at startup, the service starts but returns `bondy.error.unavailable` (status 503) for all calls until the secrets are resolved. Resolution is retried automatically with exponential backoff.
 :::
 
 
 ## Error Handling in Client Code
 
-The HTTP Connector maps HTTP errors to standard WAMP error URIs. Your client code should handle these errors based on the URI and the kwargs payload:
+The HTTP Connector maps HTTP errors to standard WAMP error URIs. Your client code should handle these errors based on the URI and the kwargs payload.
+
+A call that gets no upstream response fails with an error whose kwargs carry `status` and `message` instead of `body`:
+
+- `bondy.error.gateway_timeout` (504) when the upstream does not answer within the procedure's `timeout`.
+- `wamp.error.unavailable` (503) while the service's connection pool is down.
+- `bondy.error.unavailable` (503) while the service's credentials are not available.
+- `bondy.error.bad_gateway` (502) on any other transport failure.
+
+See [Failures without an upstream response](/router/concepts/http_connector#failures-without-an-upstream-response).
 
 ::: code-group
 ```python [Python (autobahn)]

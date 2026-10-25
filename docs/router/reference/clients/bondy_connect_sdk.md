@@ -203,7 +203,7 @@ call(Conn, Uri, Args, KWArgs) -> {ok, map()} | {error, term()}.
 call(Conn, Uri, Args, KWArgs, Opts) -> {ok, map()} | {error, term()}.
 ```
 
-Blocks the calling process until the `RESULT` or `ERROR` for the call arrives, or until `Opts`' `timeout` (in ms, default 30000) elapses. On success, returns `{ok, #{args := list(), kwargs := map(), details := map()}}` — exactly the positional and keyword results the callee produced. The three shorter arities fill in `Args = []`, `KWArgs = #{}`, and `Opts = #{}` in that order.
+Blocks the calling process until the `RESULT` or `ERROR` for the call arrives, or until `Opts`' `timeout` (in ms, default 30000) elapses. When `Opts` sets `'_retries'` to a positive integer, the call waits for the router's retries: until `'_deadline'` when it is set, and otherwise for `'_retries' + 1` timeouts. On success, returns `{ok, #{args := list(), kwargs := map(), details := map()}}` — exactly the positional and keyword results the callee produced. The three shorter arities fill in `Args = []`, `KWArgs = #{}`, and `Opts = #{}` in that order.
 
 **Fails** with:
 
@@ -305,6 +305,7 @@ Registers `Handler` (see [Handlers](#handlers)) against `Uri`. On success return
 | `invoke` | Invocation policy for a shared registration: `single` (the default), `roundrobin`, `random`, `first`, or `last`. |
 | `concurrency` | For a shared registration, how many concurrent invocations this specific registration accepts. |
 | `disclose_caller` | Request that the router disclose the caller's identity in `Details`. |
+| `_idempotent` | Bondy extension. `true` tells the router that running an invocation twice is safe, so it can retry a call that set `_retries`. See [Call Retries](/router/concepts/wamp/advanced/rpc#call-retries). |
 | `force_reregister` | Accepted and passed to the router, which ignores it. A second `single` registration of the same URI still fails with `wamp.error.procedure_already_exists`. |
 
 **Fails** with `{error, {invalid_handler, _}}` for a malformed handler (see [Handlers](#handlers)), or with the router's `ERROR` response — most commonly `{error, #{uri := <<"wamp.error.procedure_already_exists">>}}`.
@@ -342,7 +343,7 @@ publish_ack(Conn, Topic, Args, KWArgs, Opts) -> {ok, pos_integer()} | {error, te
 | `exclude` | Exclude the listed session ids from receiving this event. |
 | `exclude_me` | Whether to exclude this connection's own session, if it is also subscribed. Bondy's default is `true`. |
 | `eligible` | Restrict delivery to the listed session ids. |
-| `exclude_authid` / `exclude_authrole` / `eligible_authid` / `eligible_authrole` | Passed to the router, which accepts and ignores them. See [WAMP Compliance](/router/reference/protocols/wamp#publish-subscribe-1). |
+| `exclude_authid` / `exclude_authrole` / `eligible_authid` / `eligible_authrole` | Exclude, or restrict delivery to, the sessions authenticated with the listed `authid`s or holding the listed roles. See [WAMP Compliance](/router/reference/protocols/wamp#publish-subscribe-1). |
 | `disclose_me` | Whether the router discloses this publisher's identity to subscribers. Bondy's default is `true`. |
 | `retain` | Ask the router to retain this event for delivery to future subscribers, if the realm's broker supports event retention. |
 

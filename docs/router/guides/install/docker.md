@@ -15,6 +15,8 @@ If you want to build and use your own Docker image, make sure you check the offi
 These are located at the Bondy's Github repository under the ["deployment" directory](https://github.com/bondy-io/bondy/tree/develop/deployment).
 :::
 
+The images include the Erlang runtime they were built with, so the host needs no Erlang. `deployment/Dockerfile` builds on Erlang/OTP 29.1.2 and runs on Debian trixie (slim); `deployment/alpine.Dockerfile` builds on Erlang/OTP 29.1.2 and runs on Alpine 3.24.2.
+
 ## Prerequisites
 * A Docker-enabled system with proper Docker access
 
@@ -134,7 +136,7 @@ cluster.enabled = off
 ```
 
 ::: warning `cluster.enabled = off` is required for a single node
-This guide runs one node, so it turns clustering off. A node left on the default `cluster.enabled = on` with no other member refuses every authentication, anonymous included, and never compacts its history. To run a cluster instead, follow [Running a Cluster](/router/guides/deployment/running_a_cluster) and see [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering).
+This guide runs one node, so it turns clustering off. A node left on the default `cluster.enabled = on` with no other member never compacts its history. Under the default fence policy it also refuses every authentication, anonymous included. To run a cluster instead, follow [Running a Cluster](/router/guides/deployment/running_a_cluster) and see [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering).
 :::
 
 ### 4. Verify your setup

@@ -123,6 +123,10 @@ Allows users with previously obtained tokens from an [HTTP API Gateway](/router/
 This authentication method is primarily designed for clients to share a token between HTTP and WAMP sessions. If you are only using WAMP, we recommend using the Ticket method instead.
 :::
 
+Bondy accepts a token issued by the realm itself or by the realm's SSO realm. It refuses a token from any other issuer, even when the token's signature is valid.
+
+The access token is a bearer token ([RFC 6750](https://datatracker.ietf.org/doc/html/rfc6750)). Any client that presents a valid token can use it. Bondy records the client and device that the token was issued to, but it does not compare them with the client that presents the token. A leaked token therefore grants the same access as a leaked password until the token expires. For that reason tokens belong on TLS connections only.
+
 ### Authorization
 WAMP enables authenticated users perform various actions, including:
 
@@ -174,6 +178,7 @@ Key characteristics:
 * Prototypical inheritance is a form of *single inheritance* i.e. realms can only inherit from a single prototype.
 * A realm cannot inherit from itself (*irreflexive* relationship).
 * In addition *a prototype cannot inherit from another prototype*. This means the inheritance chain is bounded to one level.
+* A prototype cannot be deleted while other realms inherit from it.
 
 
 To enable prototypical inheritance on a realm, you must set the prototype realm's URI on the child's `prototype_uri` property.
@@ -198,6 +203,12 @@ Bondy SSO (Same Sign-on) is a feature that allows users to access multiple realm
 To use SSO, you first need to create a realm (A) as an SSO realm. This can be done by setting its `is_sso_realm` property to `true`.
 
 Subsequently one or more realms can use realm A as their SSO Realm by respectively setting their property `sso_realm_uri` to the URI of realm A.
+
+The links between these realms protect the users that depend on them:
+
+* An SSO realm cannot be deleted while other realms use it as their SSO realm.
+* A user cannot be deleted from an SSO realm while other realms hold a local user that links to it.
+* A realm cannot change its SSO realm while it holds users linked to the current one.
 
 To learn more about this topic review the [Same Sign-on section](/router/concepts/same_sign_on).
 

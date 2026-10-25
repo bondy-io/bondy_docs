@@ -95,7 +95,8 @@
 /reference/wamp_api/bridge_relay  /router/reference/wamp_api/bridge_relay  301!
 /reference/wamp_api/cert_manager  /router/reference/wamp_api/cert_manager  301!
 /reference/wamp_api/cluster  /router/reference/wamp_api/cluster  301!
-/reference/wamp_api/errors/active_users  /router/reference/wamp_api/errors/active_users  301!
+/reference/wamp_api/errors/active_users  /router/reference/wamp_api/errors/conflict  301!
+/router/reference/wamp_api/errors/active_users  /router/reference/wamp_api/errors/conflict  301!
 /reference/wamp_api/errors/already_exists  /router/reference/wamp_api/errors/already_exists  301!
 /reference/wamp_api/errors/bad_gateway  /router/reference/wamp_api/errors/bad_gateway  301!
 /reference/wamp_api/errors/bad_signature  /router/reference/wamp_api/errors/bad_signature  301!

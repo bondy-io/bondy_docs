@@ -2,7 +2,7 @@
 When the called procedure has been deprecated.
 
 ## Description
-Raised instead of `wamp.error.no_such_procedure` for a URI that once worked and has since been retired in favour of a replacement — for example [`bondy.oauth2.token.lookup`](/router/reference/wamp_api/oauth2#not-implemented). The error message names the deprecated URI; check the corresponding reference page for its replacement.
+Bondy raises this error instead of `wamp.error.no_such_procedure` for a reserved URI that it does not serve because another procedure does the same job. Examples are [`bondy.oauth2.token.lookup`](/router/reference/wamp_api/oauth2#not-implemented), and [`bondy.source.get`](/router/reference/wamp_api/source#retrieve-a-source-from-a-realm) with its legacy alias `bondy.security.find_source`. The error message names the deprecated URI; check the corresponding reference page for its replacement.
 
 ##### Positional Results
 <DataTreeView

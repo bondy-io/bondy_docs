@@ -58,11 +58,11 @@ wampy.subscribe('com.myapp.service.status', {
 });
 ```
 
-When the subscription is created, Bondy sends the retained event at once, followed by new events as they are published. A retained event carries `retained: true` in its details, so the subscriber can tell it apart from a live event.
+When Bondy creates the subscription, it sends the retained event at once, followed by new events as they are published. A repeated `SUBSCRIBE` that returns the existing subscription does not send the retained event again. A retained event carries `retained: true` in its details, so the subscriber can tell it apart from a live event.
 
 The subscription's matching policy applies to retained events too. A `prefix` or `wildcard` subscription receives the retained event of every matching topic, not just one.
 
-The publisher's delivery constraints travel with the retained event. If the publication excluded a session, or listed eligible sessions, Bondy applies those lists when a later subscriber asks for the retained event. Because `exclude_me` defaults to `true`, a publisher does not receive its own retained event unless it published with `exclude_me: false`.
+The publisher's delivery constraints travel with the retained event. Bondy applies the publication's session ID, `authid` and `authrole` lists when a later subscriber asks for the retained event. Because `exclude_me` defaults to `true`, a publisher does not receive its own retained event unless it published with `exclude_me: false`.
 
 ### Use Cases
 
@@ -221,12 +221,18 @@ wampy.publish('com.myapp.events', [data], {}, {
 
 ## Subscriber Black- and Whitelisting
 
-A publisher can restrict which subscribers receive an event by listing session IDs. Bondy honours two options:
+A publisher can restrict which subscribers receive an event. It lists session IDs, authentication IDs or authentication roles:
 
 - `eligible`: only the listed sessions receive the event.
 - `exclude`: the listed sessions do not receive the event.
+- `eligible_authid`: only sessions authenticated as one of the listed `authid`s receive the event.
+- `exclude_authid`: sessions authenticated as one of the listed `authid`s do not receive the event.
+- `eligible_authrole`: only sessions that hold one of the listed roles receive the event.
+- `exclude_authrole`: sessions that hold one of the listed roles do not receive the event.
 
-WAMP also defines `eligible_authid`, `exclude_authid`, `eligible_authrole` and `exclude_authrole`. Bondy accepts these options and ignores them: filtering by authentication ID or role has no effect.
+A subscriber receives the event only when every list the publisher sent admits it. A session with several roles is eligible when any of its roles is in `eligible_authrole`, and excluded when any of them is in `exclude_authrole`. An empty `eligible` list admits no subscriber.
+
+The lists apply to every subscription, whatever its match policy. Bondy applies the session ID lists when it matches subscriptions. Each node applies the `authid` and `authrole` lists to its own subscribers when it delivers the event, because only that node holds the subscriber's session.
 
 ### Eligible List (Whitelist)
 
@@ -256,9 +262,15 @@ wampy.publish('com.myapp.updates', [data], {}, {
 });
 ```
 
+```javascript
+wampy.publish('com.myapp.ops.alert', [alert], {}, {
+    eligible_authrole: ['operator']  // Only sessions holding the operator role
+});
+```
+
 ### Use Cases
 
-- **Targeted notifications**: send an event to specific sessions.
+- **Targeted notifications**: send an event to specific sessions, users or roles.
 - **Testing**: keep canary subscribers out of a publication.
 
 ## Subscription Revocation
@@ -362,7 +374,7 @@ Disclosure is on by default. Set `disclose_me: false` when subscribers have no r
 - **Pattern-based subscriptions**: `exact`, `prefix` and `wildcard` topic matching.
 - **Publisher exclusion**: `exclude_me`, on by default.
 - **Publisher identification**: `disclose_me`, on by default.
-- **Subscriber black- and whitelisting**: `eligible` and `exclude` by session ID.
+- **Subscriber black- and whitelisting**: `eligible` and `exclude` by session ID, `authid` or `authrole`.
 - **Payload Passthru Mode**: opaque payloads described by `ppt_*` options.
 - **Topic reflection**: `wamp.reflection.topic.*`.
 

@@ -46,6 +46,21 @@ step says otherwise.
 
 ## 1. Start the core node
 
+The core node runs alone, so it must not cluster. Open
+`config/test/node_1_bondy.conf.template` and add this line at the end of the
+file:
+
+```
+cluster.enabled = off
+```
+
+With the default `on` and no other member, the node refuses every
+authentication, the edge's included. See
+[`cluster.enabled`](/router/reference/configuration/cluster#enabling-clustering).
+
+If you have run the `node1` target before, delete `_build/node1/rel/bondy/data`
+now.
+
 In the first terminal, set the environment variables that the core node's
 configuration template expects, then build and start the node:
 
@@ -82,7 +97,7 @@ example security configuration. Three users in that realm matter here:
 | User | Credential | Role in this tutorial |
 |:---|:---|:---|
 | `device1` | an Ed25519 public key | The identity the edge uses to connect |
-| `peer1` | password `changethispassword` | Your client on the edge |
+| `peer1` | password `changethispassword`, and an Ed25519 public key | Your client on the edge |
 | `peer2` | password `changethispassword` | Your client on the core |
 
 ## 2. Configure the edge node
@@ -167,8 +182,7 @@ bridge:
 
 The first line is the bridge starting. The second is the TLS connection to
 the core. The third means the edge authenticated as `device1` and copied the
-realm's users, groups and grants from the core. That copy is why `peer1` can
-log in to the edge in the next steps, although you never created it there.
+realm's users, groups and grants from the core.
 
 Leave this terminal running.
 
@@ -242,8 +256,14 @@ publish on the **edge** as `peer1`:
 cd ~/bondy-edge-tutorial
 npx wampy publish com.example.temperature --args 21.5 \
   --url ws://localhost:19080/ws --realm com.leapsight.test \
-  --authid peer1 --secret changethispassword
+  --authid peer1 \
+  --privateKey 0040b3bd868adc0effb8c6ac69109223fb943206cfeb11a2663afb2edce7c83f
 ```
+
+On the edge, `peer1` signs in with its private key, not its password. The
+core removes every user's password before it sends the realm to the edge, so a
+password login on the edge fails. See
+[Bondy Edge](/router/concepts/bridge_relay#what-happens-when-a-realm-mapping-connects).
 
 The publisher reports `Successfully published to topic`. Back in the third
 terminal, the subscriber on the core prints the event:
@@ -275,7 +295,8 @@ In the third terminal, register a procedure on the **edge** as `peer1`. The
 ```bash
 npx wampy register com.example.echo --mirror \
   --url ws://localhost:19080/ws --realm com.leapsight.test \
-  --authid peer1 --secret changethispassword
+  --authid peer1 \
+  --privateKey 0040b3bd868adc0effb8c6ac69109223fb943206cfeb11a2663afb2edce7c83f
 ```
 
 You should see:
@@ -291,23 +312,9 @@ Successfully registered procedure:
 
 Leave it running.
 
-The bridge tells the core about the registrations it finds on the edge when
-it connects. Your procedure did not exist when the bridge connected in
-step 3, so in the fourth terminal, restart the bridge:
-
-```bash
-npx wampy call bondy.router.bridge.stop --args edge \
-  --url ws://localhost:19080/ws --realm com.leapsight.bondy \
-  --authid admin --secret edge-admin-secret
-
-npx wampy call bondy.router.bridge.start --args edge \
-  --url ws://localhost:19080/ws --realm com.leapsight.bondy \
-  --authid admin --secret edge-admin-secret
-```
-
-Each call answers with an empty result, `{ "details": {} }`. In the edge
-node's console you see the bridge connect again, ending with
-`AAE sync finished`.
+Your procedure did not exist when the bridge connected in step 3. That is
+not a problem: the bridge tells the core about each registration that a
+client adds on the edge while the bridge is connected.
 
 Now call the procedure on the **core** as `peer2`:
 
@@ -383,6 +390,10 @@ step 4, and it reports `"status": "stopped"`.
 
 To finish, stop the callee with <kbd>Ctrl</kbd>+<kbd>C</kbd>. Then stop each
 node: type `q().` in its console and press <kbd>Enter</kbd>.
+
+Before you use `node1` in a cluster again, remove the `cluster.enabled = off`
+line you added in step 1 and delete `_build/node1/rel/bondy/data`. A node that
+ran with clustering off joins only nodes that hold no data.
 
 ## What you built
 

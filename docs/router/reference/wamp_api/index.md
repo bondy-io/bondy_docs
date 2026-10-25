@@ -48,5 +48,6 @@ A small number of procedures don't belong to any single entity or feature.
 ##### bondy.ping() -> "pong" {.wamp-procedure}
 A liveness check: always succeeds and returns the string `"pong"`, regardless of the caller's realm, authentication, or permissions — there is nothing to configure and no error it can raise.
 
-##### bondy.telemetry.metrics {.wamp-procedure}
-Reserved, not implemented — calling it raises `wamp.error.no_such_procedure`. Bondy's actual metrics are exposed over Prometheus's own protocol, not WAMP; see the [Prometheus Metrics Reference](/router/reference/metrics) for the full catalogue and the `/metrics` endpoint it's served from.
+::: tip Metrics are not part of the WAMP API
+Bondy exposes its metrics over the Prometheus protocol, not over WAMP. See the [Prometheus Metrics Reference](/router/reference/metrics) for the catalogue and the `/metrics` endpoint.
+:::

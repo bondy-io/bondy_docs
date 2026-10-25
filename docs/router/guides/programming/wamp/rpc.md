@@ -271,10 +271,10 @@ Bondy publishes a registration's lifecycle as WAMP meta-events, and lets a sessi
 ```Python
 # Watch registration/unregistration on this realm
 await self._session.subscribe(
-    on_registration_created, "wamp.registration.on_create"
+    on_registered, "wamp.registration.on_register"
 )
 await self._session.subscribe(
-    on_registration_gone, "wamp.registration.on_delete"
+    on_unregistered, "wamp.registration.on_unregister"
 )
 
 # Look up who currently serves a procedure
@@ -282,5 +282,5 @@ info = await self._session.call("wamp.registration.match", "com.example.users.ge
 ```
 :::
 
-Use this for operational visibility — knowing when a shared registration gains or loses a callee — rather than as part of your application's own call path.
+Use this for operational visibility — knowing when a shared registration gains or loses a callee — rather than as part of your application's own call path. Bondy does not publish [`wamp.registration.on_create` or `wamp.registration.on_delete`](/router/reference/wamp_api/registration#topics). To learn whether a procedure still has a callee, call `wamp.registration.lookup` or `wamp.registration.match`.
 

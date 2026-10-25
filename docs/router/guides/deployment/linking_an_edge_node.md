@@ -81,6 +81,11 @@ belongs to no group. A client on the edge therefore has only the grants made
 to its user directly. Grant the permissions that edge clients need to their
 users, not to a group they belong to.
 
+The copy does not include passwords either. A copied user cannot log in to the
+edge with a password-based method. On the remote router, add a public key to
+the `authorized_keys` of each user that connects to the edge. That user then
+authenticates on the edge with `cryptosign`.
+
 ## 3. Accept bridges on the remote router
 
 Declare a [listener](/router/reference/configuration/listeners) whose protocol
@@ -199,8 +204,7 @@ The settings that need a decision:
 | Traffic | Crosses? |
 |:---|:---|
 | Events published on the edge to a topic matched by a `topic.$tid … out` entry | Yes, to subscribers on the remote router |
-| Calls on the remote router to procedures registered on the edge when the bridge connected | Yes |
-| Calls to procedures registered on the edge after the bridge connected | No, until the bridge reconnects; restart it with `bondy.router.bridge.stop` and `bondy.router.bridge.start` |
+| Calls on the remote router to procedures registered on the edge | Yes, for registrations that exist when the bridge connects and for registrations added later |
 | Events published on the remote router, to subscribers on the edge | No |
 | Calls made on the edge to procedures registered on the remote router | No |
 

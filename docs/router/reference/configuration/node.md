@@ -45,6 +45,8 @@ the node reports NOT READY with the
 alarm.
 :::
 
+A shard of the durable database that re-bootstraps from a peer stages the peer's snapshot in `<platform_data_dir>/bondy_db/wal/<instance id>/catalogue_install.spool` before it changes anything. The file grows to the encoded size of the peer's snapshot of that shard, and several shards can re-bootstrap at once, each with its own file. The shard deletes the file when the install is written or abandoned. See [Re-bootstrap](/router/concepts/convergence#re-bootstrap).
+
 @[config](platform_log_dir,path,'./log',v0.1.0)
 
 The directory Bondy writes its log files to. The default is `./log` relative to the release root, and `/bondy/log` in the Docker image.
@@ -59,9 +61,11 @@ The directory holding `bondy.conf` and the other configuration files is fixed wh
 Use environment variable `BONDY_DATA_TMP` instead
 :::
 
+A shard of the in-memory registry that re-bootstraps from a peer stages the peer's snapshot in `<platform_tmp_dir>/bondy_db/registry/wal/<instance id>/catalogue_install.spool`. The file grows to the encoded size of the peer's snapshot of that shard, so the filesystem that holds this directory needs room for it.
+
 @[config](platform_runtime_dir,path,'./run',v1.0.0)
 
-The directory for runtime objects that need a filesystem with Unix domain socket support. Today it holds one file: the internal admin socket, `bondy_admin.sock` (see [The reserved `admin` listener](/router/reference/configuration/listeners#the-reserved-admin-listener)). The default is `./run` relative to the release root, and `/bondy/run` in the Docker image.
+The directory for runtime objects that need a filesystem with Unix domain socket support. It holds one file: the internal admin socket, `bondy_admin.sock` (see [The reserved `admin` listener](/router/reference/configuration/listeners#the-reserved-admin-listener)). The default is `./run` relative to the release root, and `/bondy/run` in the Docker image.
 
 This is deliberately not `platform_tmp_dir`. You may relocate scratch space, and several filesystems you might move it onto reject a Unix socket bind: NFS, SMB/CIFS, 9p, some FUSE-backed CSI drivers and gVisor. The node does not boot when the admin socket cannot bind. Keep this directory on the container's own filesystem and do not declare it as a volume. Under a read-only root filesystem, mount an `emptyDir` (Kubernetes) or a `tmpfs` (Docker) here. Give every node its own directory: two nodes sharing one collide on the socket path.
 

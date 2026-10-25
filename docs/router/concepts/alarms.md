@@ -87,9 +87,9 @@ Severity does not decide whether a node leaves the load balancer.
 `affects_ready` is its own per-alarm flag, and the reason is that the two
 judgements genuinely differ: an unreachable upstream connector is `major` and
 must *not* drain the node, because the whole WAMP data plane is unaffected. A
-failed durable store is also `major` and must.
+node whose durable store failed to open must leave the load balancer.
 
-Today every catalogue entry declares `affects_ready => false`. That is a
+Every catalogue entry declares `affects_ready => false`. That is a
 finding rather than an oversight — of the fourteen conditions, only
 `bondy_db_main_unavailable` and `bondy_oplog_instance_down` stop the node
 serving its tables, and their readiness signals deliberately do not travel
@@ -185,7 +185,8 @@ overwriting the first.
 
 Most alarms will not have one, and that is a property of what Bondy raises
 rather than an omission. Bondy has no ambient trace context: a trace rides in a
-message's options, and seven of the nine producers are background probes,
+message's options, and only the two retained-message ceilings are raised on a
+request path. The other twelve entries are raised by background probes,
 appliers and sweepers with no request to inherit from. The field is absent
 there rather than filled with a freshly minted id, which would correlate with
 nothing.
@@ -223,5 +224,5 @@ clearing one without fixing the condition would make the surface lie.
 | [`bondy.alarm.{raised,updated,cleared}` topics](/router/reference/wamp_api/alarm#events) | The same alarm shape, pushed on transition, in the master realm. |
 | [Prometheus](/router/reference/metrics) | `bondy_alarms`, `bondy_alarm_active` and `bondy_node_ready`, with the alarm family as a bounded label. |
 | Logs | Every transition, at `warning` for a raise or update and `notice` for a clear. |
-| `/ready` | 503 while any raised alarm declares `affects_ready`. |
+| `/ready` | 503 while the node is not ready: boot has not finished, the durable `main` database did not open, a kept shard instance is not running, or a raised alarm declares `affects_ready`. |
 | MCP | The read procedures and the three topics, through the shipped `bondy_sre_read` overlay — see [MCP Gateway](/router/concepts/mcp_gateway). |

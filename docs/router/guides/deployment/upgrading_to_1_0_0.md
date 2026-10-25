@@ -31,12 +31,12 @@ Starting a 1.0.0 node against a pre-1.0.0 data directory does not migrate it and
 :::
 
 ::: info Upgrading from a 1.0.0 pre-release
-None of the migration below applies to a cluster already running a 1.0.0 pre-release that carries `bondy_db` (for example `1.0.0-rc.olive` or `1.0.0-rc.pear`). Upgrade it with a **full cluster restart**: stop every node, then start them all on the new release. Rolling upgrades are not supported. The registry is held in memory, so the restart loses nothing; clients reconnect and register again. A deployment that runs a single node must also set `cluster.enabled = off` before the restart (see step 6).
+None of the migration below applies to a cluster already running a 1.0.0 pre-release that carries `bondy_db` (for example `1.0.0-rc.olive`, `1.0.0-rc.pear` or `1.0.0-rc.pistachio`). Follow [Upgrade from a `bondy_db` pre-release](#upgrade-from-a-bondy-db-pre-release) instead.
 :::
 
 ## Prerequisites
 
-- **Erlang/OTP 28 or later** on every host that will run 1.0.0 (see [Install from Source](/router/guides/install/source) for the full toolchain). This is a hard requirement, up from OTP 24.
+- **Erlang/OTP 28 or later** on every host that builds or runs 1.0.0 from source (see [Install from Source](/router/guides/install/source) for the full toolchain). This is a hard requirement. The Docker images include their own Erlang runtime, OTP 29.1.2.
 - A WAMP session on the old deployment's master realm (`com.leapsight.bondy`) with `wamp.call` permission, to invoke the backup procedures. The examples below use [`wick`](/router/reference/wamp_api/index), the WAMP CLI client used throughout the WAMP API reference.
 - Filesystem access to copy a file from the old node(s) to the new node(s) — the backup is a single file, not a WAMP-transported payload.
 - Enough free disk space on the old node for the backup file (proportional to your security, realm, API gateway, bridge, ticket, token, and retained-message data — not your live routing state, which the new deployment rebuilds as clients reconnect and re-register).
@@ -188,7 +188,7 @@ Start each node.
 If you're running (or moving to) more than one node, join them into a cluster now, before importing — see [Running a Cluster](/router/guides/deployment/running_a_cluster).
 
 ::: warning A single node must set `cluster.enabled = off`
-`cluster.enabled` defaults to `on`. A node that runs alone with clustering on refuses every authentication, anonymous included, and never compacts its history. Set `cluster.enabled = off` in the `bondy.conf` of a node meant to run alone, and keep the default `on` on every member of a cluster. See [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering), which also explains why a node that ran with `off` can later join only nodes with empty data directories.
+`cluster.enabled` defaults to `on`. A node that runs alone with clustering on never compacts its history. Under the default fence policy it also refuses every authentication, anonymous included. Set `cluster.enabled = off` in the `bondy.conf` of a node meant to run alone, and keep the default `on` on every member of a cluster. See [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering), which also explains why a node that ran with `off` can later join only nodes with empty data directories.
 :::
 
 ::: warning Auto-clustering nodes with an insecure Partisan peer plane
@@ -286,14 +286,51 @@ None of these existed at 1.0.0-rc.65 in any form — there's nothing to migrate,
 
 ### Other changes
 
-- **Erlang/OTP 28 minimum.** Up from OTP 24. Upgrade the Erlang runtime on every host before installing 1.0.0.
-- **Cowboy 2.17's query-string/form-field cap.** Cowboy was upgraded from 2.13.0 to 2.17.0, which rejects any request carrying more than 100 query-string parameters or `application/x-www-form-urlencoded` form fields — a Cowboy 2.17 default that Bondy does not override. This affects API Gateway routes that read query parameters, the OAuth2 token endpoint, and the OIDC login/callback endpoints. Audit any client that sends unusually wide query strings or large forms before cutting over.
+- **Erlang/OTP 28 minimum.** 1.0.0-rc.65 built on OTP 27.3.4. Upgrade the Erlang runtime on every host that builds or runs a release from source before installing 1.0.0.
+- **The query-string/form-field cap.** Cowboy is upgraded from 2.13.0 to 2.18.0. Cowboy rejects any request that carries more than 100 query-string parameters or `application/x-www-form-urlencoded` form fields, and Bondy does not override that limit. This affects API Gateway routes that read query parameters, the OAuth2 token endpoint, and the OIDC login/callback endpoints. Audit any client that sends unusually wide query strings or large forms before cutting over.
 - **Partisan peer-plane TLS gate.** Covered in step 6 above — an auto-clustering node with an insecure peer plane now refuses to start instead of clustering insecurely. Only relevant if `cluster.peer_discovery.enabled = on`.
 - **HTTP/2 on every listener.** All four HTTP listeners now negotiate HTTP/2 automatically (ALPN on the HTTPS listeners, `h2c`/prior-knowledge on the HTTP listeners) — there's no setting to opt out. Nothing to configure, but revisit capacity planning: one HTTP/2 connection can carry up to `max_concurrent_streams` (default 100) requests concurrently, so connection-count-based alarms will now undercount request-level load.
 
 Not a breaking change, but worth considering while you're already re-provisioning nodes: realm private keys can now be encrypted at rest via `security.master_key.*`. See [Security Configuration Reference → Realm Signing Keys](/router/reference/configuration/security#realm-signing-keys).
 
-If you're building from source rather than installing a packaged release, `config/bondy.conf.defaults` (regenerate it with `make conf`) lists every current key and its default, and is a useful diff target against your existing `bondy.conf`.
+If you're building from source rather than installing a packaged release, `config/bondy.conf.defaults` (regenerate it with `just conf`) lists every current key and its default, and is a useful diff target against your existing `bondy.conf`.
+
+## Upgrade from a `bondy_db` pre-release
+
+Follow these steps for a cluster that runs a 1.0.0 pre-release that already carries `bondy_db`, such as `1.0.0-rc.olive`, `1.0.0-rc.pear` or `1.0.0-rc.pistachio`. The data directories stay in place, and nothing is exported or imported.
+
+1. **Check `bondy.conf`.** Run the check in [step 5](#_5-install-1-0-0-and-check-bondy-conf-against-its-schema) against each node's file, and fix every finding.
+
+2. **Remove `db.compaction.peer_timeout`.** The key does not exist in 1.0.0. Compaction on every database, the in-memory registry included, waits for every cluster member however long it stays silent. A member stops holding compaction only when it leaves the cluster. A `bondy.conf` that still sets the key boots, because the release ignores keys that no schema maps, and the key has no effect. See [Convergence](/router/concepts/convergence#the-compaction-witnesses-and-the-truncation-cap).
+
+3. **Set `cluster.enabled = off` on a node that runs alone.** The key is new in 1.0.0 and defaults to `on`. A single node left on `on` never compacts its history, and it logs a ["GC stalled"](/router/reference/logging#gc-stalled) warning with reason `no_members`. With the defaults `db.aae = on` and `db.aae.fence.on_isolation = refuse`, the node also refuses every authentication with `temporarily_unavailable` once its security tables have gone uncertified for longer than `db.aae.fence.max_lag` (default `60s`). Keep the default on every member of a cluster. See [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering).
+
+4. **Stop every node, then start them all on 1.0.0.** Rolling upgrades are not supported. The registry is held in memory, so it starts empty on every node; clients reconnect, and register and subscribe again.
+
+5. **Update dashboards and alerts.**
+   - `bondy_oplog_peer_exclusions_total` is not exported. Remove the queries and alerts that use it.
+   - `bondy_oplog_gc_scheduler_events_total` carries a `scheduler` label as well as `event`. A query that selects by `event` without aggregating over `scheduler` returns one series per scheduler.
+   - `bondy_cluster_channel_connections` is labelled by `peer` and `channel`. Aggregate over `peer` for a per-channel total.
+
+   See the [Metrics Reference](/router/reference/metrics).
+
+6. **Update remote-console calls to renamed modules.** If you call Bondy modules from a remote console or a script, use these names:
+
+   | Pre-release module | Module in 1.0.0 |
+   |---|---|
+   | `bondy` | `bondy_router_peer` |
+   | `bondy_app` | `bondy_router_app` |
+   | `bondy_sup` | `bondy_router_sup` |
+   | `bondy_utils` | `bondy_router_utils` |
+   | `bondy_stdlib` | `bondy_connect_lib` |
+   | `bondy_consult`, `bondy_error`, `bondy_humanized`, `bondy_interval_set`, `bondy_itc`, `bondy_retry`, `bondy_secret_resolver`, `bondy_table_manager`, `bondy_uuidv7` | The same name with `bondy_connect_` in place of `bondy_`, in the `bondy_connect_lib` application (`bondy_stdlib` in the pre-release) |
+   | `bondy_secret_resolver_aws_sm` | `bondy_connect_secret_resolver_aws_sm`, in the `bondy_http_connector` application |
+   | `bondy_oplog_hlc` | `bondy_connect_hlc` |
+   | `bondy_oplog_wal_codec`, `_frame`, `_idx`, `_key_registry`, `_manifest`, `_reader`, `_recovery`, `_scrubber`, `_segment`, `_state` | `bondy_log_codec`, `bondy_log_frame`, and so on, in the `bondy_log` application |
+
+   `bondy_oplog_wal`, `bondy_oplog_wal_mem` and `bondy_oplog_wal_mem_reader` keep their names.
+
+You now have the cluster running 1.0.0 on its existing data.
 
 ## Result
 

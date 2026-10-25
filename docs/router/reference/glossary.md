@@ -41,7 +41,7 @@ The authentication method a session used, or is permitted to use, to establish i
 
 ## Causal stability
 
-Causal stability is the property that licenses Bondy to physically reclaim deleted data: a timestamp becomes causally stable once every operation that could still be delivered is provably newer than it, so the concurrent write its tombstone exists to reject can no longer arrive. Bondy computes stability from cluster membership and confirmed anti-entropy rounds rather than from a timeout, so a single unreachable node holds reclamation back until it is retired. See [Deletion and Reclamation](/router/concepts/deletion_and_reclamation) for the full mechanism.
+Causal stability is the property that licenses Bondy to physically reclaim deleted data: a timestamp becomes causally stable once every operation that could still be delivered is provably newer than it, so the concurrent write its tombstone exists to reject can no longer arrive. Bondy computes stability from the durable frontier every cluster member last reported rather than from a timeout, so a single unreachable node holds reclamation back until it leaves the cluster. See [Deletion and Reclamation](/router/concepts/deletion_and_reclamation) for the full mechanism.
 
 ## Cell
 
@@ -69,7 +69,7 @@ These conflicts occur when objects are either:
 
 ## Frontier
 
-The frontier is the version vector summarising which operations an oplog instance has applied. Anti-entropy and monitoring compare two instances' frontier hashes to judge whether they have converged, without walking the full [Merkle Search Tree](#merkle-search-tree-mst). See the "Sync / AAE — frontier convergence" panel described in [How to Monitor a Bondy Cluster](/router/guides/administration/monitoring).
+The frontier (applied frontier) is the version vector summarising which operations an oplog instance has applied. Each entry is a prefix bound: the largest sequence number of that origin below which nothing is missing. The durable frontier is the applied frontier as the instance last checkpointed it; compaction and reclamation read every member's durable frontier. Anti-entropy and monitoring compare two instances' frontier hashes to judge whether they have converged, without walking the full [Merkle Search Tree](#merkle-search-tree-mst). See the "Sync / AAE — frontier convergence" panel described in [How to Monitor a Bondy Cluster](/router/guides/administration/monitoring).
 
 ## Hybrid Logical Clock (HLC)
 
@@ -108,7 +108,7 @@ A node is a single running Bondy instance, identified by a `name@host` nodename,
 
 ## Origin
 
-The origin of a replicated operation is the node that authored it. Origin retirement reaps the bookkeeping for origins whose node has permanently left the cluster — a distinct concern from [causal stability](#causal-stability), which is about whether an operation's *data* can still be superseded, not about who wrote it. See [Reclamation Configuration Reference](/router/reference/configuration/reclamation).
+The origin of a replicated operation is the identity of the replica that authored it: an opaque identity created with the replica's storage and destroyed with it, not the node name. Origin retirement reaps the bookkeeping for origins whose node has permanently left the cluster — a distinct concern from [causal stability](#causal-stability), which is about whether an operation's *data* can still be superseded, not about who wrote it. See [Reclamation Configuration Reference](/router/reference/configuration/reclamation).
 
 ## Peer
 

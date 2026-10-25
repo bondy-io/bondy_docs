@@ -77,7 +77,21 @@ Enables the Kafka bridge.
 
 An action's `options.encoding` chooses how the record value is serialized:
 `json`, `msgpack` (with the [text and bytes rule](/router/reference/serialization#text-and-bytes)),
-`erl` (the Erlang External Term Format) or `bert`.
+`erl` (the Erlang External Term Format) or `bert`. With `json`, a value that
+is a string holding valid JSON text is sent unchanged. Any other value is
+encoded as JSON.
+
+An action's `options.client_id` names the Kafka client that produces the
+record, one of the `broker_bridge.kafka.clients.$name` blocks. When the action
+omits `client_id`, or sets it to `null`, the bridge uses the first configured
+client. When no client is configured, the bridge rejects the action.
+
+An action's `options.required_acks` sets how many acknowledgements the Kafka
+broker collects before it answers:
+
+- `"all"` or `-1`: every in-sync replica.
+- `"leader"` or `1`: the partition leader only.
+- `"none"` or `0`: none, so the broker does not answer.
 
 ## AWS SNS (SMS)
 Sends SMS messages via AWS SNS (`erlcloud_sns:publish_to_phone/2`) — not general SNS pub/sub, specifically the SMS delivery path. An action needs only `phone_number` (E.164 format) and `text_message`.

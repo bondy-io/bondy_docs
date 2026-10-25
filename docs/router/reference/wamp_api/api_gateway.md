@@ -25,6 +25,7 @@ Only a session attached to the master realm (`com.leapsight.bondy`) can call the
 |[Load an API spec](#load-an-api-spec)|`bondy.http_gateway.api.load`|
 |[Get an API spec](#get-an-api-spec)|`bondy.http_gateway.api.get`|
 |[List all API specs](#list-all-api-specs)|`bondy.http_gateway.api.list`|
+|[Get the status of the API specs](#get-the-status-of-the-api-specs)|`bondy.http_gateway.api.status`|
 |[Delete an API spec](#delete-an-api-spec)|`bondy.http_gateway.api.delete`|
 
 Bondy also reserves `bondy.http_gateway.api.add`, but does not implement it. A call to it fails with `wamp.error.no_such_procedure`. Use `bondy.http_gateway.api.load`.
@@ -39,7 +40,7 @@ Validates an API specification, stores it, and rebuilds the HTTP routes so that 
 
 Bondy validates the specification by parsing it and compiling its routes. If either step fails, Bondy stores nothing and the routes do not change.
 
-A specification is identified by its `id`. Loading a specification whose `id` is already stored replaces the stored one. Bondy stores the specification as submitted, and sets its `ts` property to the load time.
+A specification is identified by its `id`. Loading a specification whose `id` is already stored replaces the stored one. Bondy stores the specification as submitted.
 
 Loading a specification also creates two groups in the specification's realm, `resource_owners` and `api_clients`, if they do not exist. [OAuth2 clients and resource owners](/router/reference/wamp_api/oauth2) are users in these groups. The token endpoint checks that a client is in `api_clients` and a resource owner is in `resource_owners`.
 
@@ -64,7 +65,7 @@ None.
 * `bondy.error.missing_required_value`: the specification omits a required property.
 * `bondy.error.invalid_value`: a property has a value of the wrong type or outside its allowed values.
 * `bondy.error.http_gateway.invalid_expression`: an [expression](/router/reference/api_gateway/expressions) in the specification cannot be parsed.
-* `bondy.error.internal_error`: any other validation failure. This includes an action with no `type` or an unsupported `type`, a path that is not valid, and the reserved path `/ws`. The node log records the actual reason under "Error while loading API specification".
+* `bondy.error.internal_error`: any other validation failure. This includes an action with no `type` or an unsupported `type`, a path that is not valid, the reserved path `/ws`, and a key the parser does not know at any level of the specification. The node log records the actual reason under "Error while loading API specification".
 * `wamp.error.invalid_argument`: the call does not have exactly one positional argument.
 * `wamp.error.not_authorized`: the session is not attached to the master realm.
 
@@ -113,7 +114,7 @@ The result carries no arguments.
 
 bondy.http_gateway.api.get(api_spec_id) -> result(api_spec){.wamp-procedure}
 
-Returns the stored specification with the given `id`, as it was loaded, including the `ts` that Bondy set.
+Returns the stored specification with the given `id`, as it was loaded.
 
 Use it to confirm that a specification was stored as you submitted it.
 
@@ -179,7 +180,6 @@ call bondy.http_gateway.api.get \
     "com.example.error.not_found": 404,
     "com.example.error.unknown_error": 500
   },
-  "ts": -576459578303,
   "variables": {},
   "versions": {}
 }
@@ -230,9 +230,63 @@ call bondy.http_gateway.api.list
     "id": "com.market.demo",
     "name": "Marketplace Demo API",
     "realm_uri": "com.market.demo",
-    "ts": -576459578303,
     "...": "the remaining properties, as for bondy.http_gateway.api.get"
   }
+]
+```
+:::
+
+### Get the status of the API specs
+
+bondy.http_gateway.api.status() -> result([spec_status]){.wamp-procedure}
+
+Returns, for every stored specification, whether the node that answers the call serves it. Each node builds its own HTTP routes, so the answer describes that node only.
+
+Each element is an object with the specification's `id` and a `status`:
+
+| `status` | Meaning |
+|---|---|
+| `active` | The specification parsed and its routes are installed. |
+| `pending_realm` | The specification parsed, but its realm does not exist on this node. The element also carries `realm_uri`. The next rebuild after the realm appears installs the routes. |
+| `rejected` | The specification failed to parse and is not served. The element also carries `reason`, a text description of the failure. The specification stays stored until a call to [`bondy.http_gateway.api.delete`](#delete-an-api-spec) deletes it. |
+| `not_built` | No route build has run on this node since the specification was stored. |
+
+A specification's routes are installed only while its realm exists. Deleting a realm takes down the routes of its specifications. The specifications stay stored as `pending_realm`. After the realm is created again, the next rebuild on the node installs their routes. Loading or deleting any specification triggers a rebuild.
+
+#### Call
+
+##### Positional Args
+None.
+
+##### Keyword Args
+None.
+
+#### Result
+
+##### Positional Results
+An array with one element per stored specification.
+
+##### Keyword Results
+None.
+
+#### Errors
+
+* `wamp.error.invalid_argument`: the call has positional arguments.
+* `wamp.error.not_authorized`: the session is not attached to the master realm.
+
+#### Examples
+
+::: code-group
+
+```bash [Request]
+wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.http_gateway.api.status
+```
+
+```json [Response]
+[
+  {"id": "com.market.demo", "status": "active"}
 ]
 ```
 :::

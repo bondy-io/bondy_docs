@@ -28,7 +28,7 @@ See [Serialization](/router/reference/serialization) for how each serializer map
 |Feature|Implemented|Notes|
 |---|---|---|
 |One session per transport connection|Yes|`wamp.connection_lifetime` accepts only `session`.|
-|Closing the session and connection on a protocol error|Yes||
+|Closing the session and connection on a protocol error|Yes|See [Protocol errors](#protocol-errors).|
 |Validation of URIs and custom attribute keys|Yes||
 |Agent identification|Yes||
 
@@ -66,14 +66,14 @@ See [Serialization](/router/reference/serialization) for how each serializer map
 
 |Feature|Announced|Implemented|Notes|
 |---|---|---|---|
-|Subscriber black- and whitelisting|Yes|Partial|Bondy filters on `exclude` and `eligible` (session IDs) only. `exclude_authid`, `exclude_authrole`, `eligible_authid` and `eligible_authrole` are accepted and ignored.|
+|Subscriber black- and whitelisting|Yes|Yes|Bondy filters on `exclude` and `eligible` (session IDs), and on `exclude_authid`, `exclude_authrole`, `eligible_authid` and `eligible_authrole`, for every subscription match policy and for retained events. An empty `eligible` list delivers the event to no subscriber.|
 |Publisher exclusion|Yes|Yes|`exclude_me` defaults to `true`.|
 |Publisher identification|Yes|Yes|`disclose_me` defaults to `true`, so the publisher's session ID is disclosed unless it opts out.|
 |Pattern-based subscription|Yes|Yes||
 |Event retention|Yes|Yes|See [message retention](/router/reference/configuration/wamp).|
 |Payload passthru mode|Yes|Yes||
 |Session meta API|Yes|Partial|See [Session meta API](#session-meta-api).|
-|Subscription meta API|No|Yes|Bondy implements the `wamp.subscription.*` procedures and events but does not announce the feature, so a client library that checks `WELCOME` will not use them.|
+|Subscription meta API|No|Partial|Bondy implements the `wamp.subscription.*` procedures and the `on_subscribe` and `on_unsubscribe` events, but does not announce the feature, so a client library that checks `WELCOME` does not use them. Bondy does not publish `on_create` or `on_delete`; see [NC4](#nc4).|
 |Topic reflection|Yes|Yes|The `wamp.reflection.topic.*` procedures.|
 |Publication trust levels|No|No||
 |Sharded subscription|No|No||
@@ -85,14 +85,14 @@ See [Serialization](/router/reference/serialization) for how each serializer map
 |Feature|Announced|Implemented|Notes|
 |---|---|---|---|
 |Call timeout|Yes|Yes||
-|Call canceling|Yes|Yes||
+|Call canceling|Yes|Yes|Granted only to a session that announces it. Bondy sends `INTERRUPT` only to a callee that announced `call_canceling`; for any other callee, `kill` and `killnowait` act as `skip`.|
 |Caller identification|Yes|Yes|The caller's session ID is disclosed unless both the callee's `disclose_caller` and the caller's `disclose_me` are `false`.|
 |Pattern-based registration|Yes|Yes||
-|Shared registration|Yes|Yes|Invocation policies `single`, `roundrobin`, `random`, `first` and `last`.|
+|Shared registration|Yes|Yes|Invocation policies `single`, `roundrobin`, `random`, `first` and `last`. When sessions on one node register a procedure with `single` concurrently, exactly one registration succeeds.|
 |Progressive call results|Yes|Yes|Granted only to a session that announces it. See [Dealer](/router/reference/configuration/wamp#dealer).|
 |Progressive calls|Yes|Yes|Granted only to a session that announces it together with `call_canceling`.|
 |Payload passthru mode|Yes|Yes||
-|Registration meta API|Yes|Yes||
+|Registration meta API|Yes|Partial|Bondy publishes `on_register` and `on_unregister`, but not `on_create` or `on_delete`. See [NC4](#nc4).|
 |Session meta API|Yes|Partial|See [Session meta API](#session-meta-api).|
 |Procedure reflection|Yes|Yes|The `wamp.reflection.procedure.*` and `wamp.reflection.error.*` procedures.|
 |Call trust levels|No|No||
@@ -108,6 +108,23 @@ Bondy announces the session meta API on both the broker and dealer roles, and im
 - `wamp.session.get` is implemented.
 - The `wamp.session.on_join` and `wamp.session.on_leave` events are published.
 - `wamp.session.count`, `wamp.session.list`, `wamp.session.kill`, `wamp.session.kill_all`, `wamp.session.kill_by_authid` and `wamp.session.kill_by_authrole` are not implemented, and fail with `wamp.error.no_such_procedure`.
+
+## Protocol errors
+
+The table lists how the router replies to a message that it cannot accept. An `ABORT` closes the session and the connection.
+
+|Message|Reply|
+|---|---|
+|A frame that does not decode: invalid JSON, malformed CBOR or MessagePack, a truncated frame, or bytes after the end of the message|`ABORT` with reason `wamp.error.protocol_violation`|
+|A frame whose payload (`Arguments` or `ArgumentsKw`) does not decode, or does not complete the message|`ABORT` with reason `wamp.error.protocol_violation`|
+|A frame that is not a WAMP array, or whose shape matches no WAMP message|`ABORT` with reason `wamp.error.protocol_violation`|
+|A request or session ID that is not an integer from 0 to 2^53|`ABORT` with reason `wamp.error.protocol_violation`|
+|A field of the wrong WAMP type, such as a `Details` or `Options` that is not a dictionary, or a URI that is not a string|`ABORT` with reason `wamp.error.protocol_violation`|
+|An option or detail with an invalid value, such as a `HELLO` with no roles, or with `progressive_calls` but no `call_canceling`|`ABORT` with reason `wamp.error.protocol_violation`|
+|Over the `erl` serialization, a term outside the WAMP data model, such as a tuple or an improper list|`ABORT` with reason `wamp.error.protocol_violation`|
+|A URI that is not valid under [`wamp.uri.strictness`](/router/reference/configuration/wamp#wamp.uri.strictness)|`ERROR` with `wamp.error.invalid_uri`. The session stays open.|
+
+Bondy checks that the payload of every JSON and CBOR message decodes when the message arrives. A malformed payload therefore aborts the sender's session and never reaches a receiver.
 
 ## Non-compliance cases
 
@@ -130,3 +147,9 @@ Bondy Connect is a distributed router built for continuous availability. Its nod
 **Requirement — shared registrations.** A registration is created when the first callee registers a procedure, and every later callee of the same procedure receives the **same** registration ID.
 
 **Behaviour.** Each callee gets its own registration, with its own ID, even for the same procedure. The reason is the same as for NC2.
+
+### NC4
+
+**Requirement — creation and deletion meta events.** The router publishes `wamp.registration.on_create` when a procedure gets its first registration, and `wamp.registration.on_delete` when it loses its last. The subscription meta API defines `wamp.subscription.on_create` and `wamp.subscription.on_delete` in the same way.
+
+**Behaviour.** Bondy does not publish these four events. A cluster cannot decide which registration or subscription is the first or the last for a URI without coordinating its nodes. Each node would announce its own, and a subscriber would see a URI deleted while other nodes still serve it. Bondy publishes `on_register`, `on_unregister`, `on_subscribe` and `on_unsubscribe` for each registration and subscription instead. A client that needs to know whether a URI has registrations or subscriptions calls the `wamp.registration.*` or `wamp.subscription.*` meta procedures.

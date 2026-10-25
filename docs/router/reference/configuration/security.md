@@ -164,6 +164,8 @@ authentication when a local copy of the ticket has not been found in
 storage. This might happen if the ticket data has not yet been synchronised
 to the node handling the authentication request.
 
+This setting does not apply to a revoked ticket. A node that holds the revocation marker for a ticket rejects the ticket, whatever this setting says.
+
 
 @[config](security.ticket.expiry_time,time_duration_units,30d,v0.9.0)
 
@@ -328,7 +330,7 @@ A source IP behind a shared NAT or reverse proxy is throttled collectively with 
 
 ## Realm Signing Keys
 
-Realm private keys can be encrypted at rest (AES-256-GCM) using a master key resolved at boot. The keyring **fails closed**: if the master key is unavailable at boot, encrypted keys are not served.
+Realm private keys can be encrypted at rest (AES-256-GCM) using a master key. Bondy resolves the master key when it first needs it and caches it until the node restarts. The keyring **fails closed**: while the master key cannot be resolved, Bondy neither encrypts nor decrypts realm keys, and it never falls back to plaintext.
 
 @[config](security.master_key.provider,none&#124;env&#124;aws_sm,none,v1.0.0)
 
@@ -356,7 +358,7 @@ How the resolved master key material is encoded. `base64` decodes it to raw byte
 
 @[config](security.master_key.id,integer,1,v1.0.0)
 
-The key id written into every new encryption envelope.
+The key id written into every new encryption envelope. The value must be an integer from 0 to 65535, because the envelope stores the id in 16 bits. Bondy refuses to start with a value outside that range.
 
 ::: danger Do not change this on a node with encrypted data
 Bondy resolves only the current key id. Envelopes written under any other id cannot be decrypted, so changing this value makes every realm key encrypted before the change unreadable. Master key rotation is not supported yet.

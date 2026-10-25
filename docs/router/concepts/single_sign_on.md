@@ -391,7 +391,7 @@ Bondy's approach prioritizes security isolation while reducing credential manage
 1. **Consistent usernames** - Use email addresses as usernames for clarity
 2. **Document SSO links** - Track which realms share which SSO realm
 3. **Test credential updates** - Verify password changes propagate correctly
-4. **Handle user deletion** - Understand that deleting from SSO realm affects all linked realms
+4. **Handle user deletion** - Delete a user from each linked realm before you delete it from the SSO realm. Bondy refuses to delete an SSO user while other realms link to it.
 
 ### Operations
 

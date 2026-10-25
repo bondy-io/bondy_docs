@@ -55,7 +55,7 @@ never retires an origin on its own — see
 Where this node stores its retirement set, relative to `platform_data_dir`
 unless absolute. A retirement is permanent, so it must survive a restart: a
 node that forgot one would re-learn the origin's frontier entry from a peer
-and then read its own absence as a deficit, paying a catalogue rebootstrap
+and then read its own absence as a deficit, paying a catalogue re-bootstrap
 for data it already holds. A node that cannot write this file refuses to
 retire and refuses to reap — retirement is disabled there and nothing else
 is affected.
@@ -130,9 +130,7 @@ retired are named in a notice log, but retirement cannot be undone.
 ## Shared Scheduler Machinery
 
 The reclamation scheduler is an instance of the same scheduler that drives
-compaction. One option is shared between them; the other governs compaction
-only and is listed here just to state that it does **not** affect
-reclamation.
+compaction. One option is shared between them.
 
 @[config](db.gc_max_concurrency,integer,4,v1.0.0)
 
@@ -156,7 +154,7 @@ is part of the contract.
 | Event | Emitted | Measurements | Metadata |
 |---|---|---|---|
 | `[bondy_oplog, applier, cells_swept]` | Per sweep batch | `scanned`, `discarded`, `reduction_skipped`, `skipped` | `instance_id`, `stable_hlc` |
-| `[bondy_oplog, reclamation, stalled]` | Every attempt that reclaims nothing | `count` | `instance_id`, `reason` (`idle`, `unconfirmed`, `no_members`, `membership_unavailable`, `no_frontier`, `non_event_frontier`, `no_applier`), `missing_members` |
+| `[bondy_oplog, reclamation, stalled]` | Every attempt that reclaims nothing | `count` | `instance_id`, `reason` (`idle`, `unconfirmed`, `no_members`, `membership_unavailable`, `no_frontier`, `unservable`, `non_event_frontier`, `no_applier`), `missing_members` |
 | `[bondy_oplog, scheduler, gc, trigger_outcome]` | Per trigger run, every scheduler instance | `count` | `scheduler`, `instance_id`, `outcome` |
 | `[bondy_oplog, retirement, completed]` | Per successful retirement pass | `dead_origins`, `origins_reaped`, `origins_scanned`, `retirements_learned`, `frontiers_reaped` | `forgotten_peers` |
 | `[bondy_oplog, retirement, skipped]` | Per pass whose reap-by-complement aborted; replication runs either way | `retirements_learned`, `frontiers_reaped` | `reason` |
@@ -164,15 +162,16 @@ is part of the contract.
 | `[bondy_oplog, applier, origins_reaped]` | When a reap pass rewrites cells | `cells`, `origins` | `instance_id` |
 | `[bondy_oplog, applier, retired_pairs_dropped]` | A page merge carried events authored by a retired origin | `count` | `instance_id` |
 
-`idle` is the benign steady state of a converged quiescent shard — nothing
-is stalled, there is simply nothing to certify. It is the only reason that
-never produces a warning log; see
+`idle` means that this node has applied nothing on the shard, so it holds no cell to reclaim. Nothing is stalled. A shard whose tree compaction has emptied is not `idle`. `idle` is the only reason that never produces a warning log; see
 [Deletion and Reclamation](/router/concepts/deletion_and_reclamation) for the full
 reasoning behind that distinction.
 
 Alongside the telemetry, a scheduler-driven reclamation stall also produces
-a warning log naming the instance and the missing members, rate-limited to
-one line per instance per 60 seconds.
+the "GC stalled" warning log. The warning names the instance, the reason, the
+missing members and each member's sync recency (`member_status`). Each
+scheduler writes at most one line per instance per 60 seconds. The compaction
+scheduler writes the same warning for a held compaction, and the `scheduler`
+field names the scheduler. The telemetry is not rate-limited.
 
 ## See also
 

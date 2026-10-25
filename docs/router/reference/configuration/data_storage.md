@@ -181,7 +181,7 @@ Because Bondy's storage layer has no consensus round, a partitioned node could o
 
 @[config](db.aae.fence.max_lag,duration_time_units,60s,v1.0.0)
 
-The freshness bound for the fence. A node refuses new authentication when its view of the security tables (users/grants) has not been confirmed by a local commit or a successful anti-entropy round within this window — bounding how stale a credential or permission change a node may authenticate against. Lower is tighter security (a lagging node refuses sooner); higher favours availability under partition or lag. Only relevant when `db.aae` is on — the fence is otherwise a no-op, since local writes are synchronous.
+The freshness bound for the fence. A node refuses new authentication when its view of the security tables (users/grants) has not been confirmed within this window — bounding how stale a credential or permission change a node may authenticate against. A completed anti-entropy round confirms freshness. A local write does not, so a node cut off from its peers stops authenticating under `db.aae.fence.on_isolation = refuse`, however much it writes. Lower is tighter security (a lagging node refuses sooner); higher favours availability under partition or lag. Only relevant when `db.aae` is on — the fence is otherwise a no-op, since local writes are synchronous.
 
 Do not set this near the anti-entropy tick period. The anti-entropy rounds that confirm freshness are background work, and their completion stretches whenever the node is busy. A bound of about 1s therefore refuses authentication in bulk during a burst of session opens, with no actual staleness involved. Revocation of a single user's credentials does not depend on this bound: it is handled separately, by the per-user token version and by invalidating cached RBAC state when replicated changes arrive.
 
@@ -371,9 +371,15 @@ These keys have no replacement. Setting them in a pre-1.0.0-rc.65 `bondy.conf` d
 
 The `leveled` backend that replaced RocksDB has its own tuning keys, `db.leveled.*` (see [Storage Engine (leveled)](#storage-engine-leveled)), which are not one-to-one replacements for `store.*`.
 
+One removed key differs from those above: it took effect in the 1.0.0 pre-releases that carry `bondy_db`.
+
+@[configRemoved](db.compaction.peer_timeout,Compaction waits for every cluster member and has no timeout,v1.0.0)
+
+Compaction on every database waits for every cluster member, however long the member stays silent, so there is no timeout to set. See [Convergence](/router/concepts/convergence#the-compaction-witnesses-and-the-truncation-cap). A `bondy.conf` that still sets `db.compaction.peer_timeout` boots, and the key has no effect.
+
 ## See also
 
-- [Reclamation Configuration Reference](/router/reference/configuration/reclamation) — how anti-entropy's confirmed roots license space reclamation.
+- [Reclamation Configuration Reference](/router/reference/configuration/reclamation) — how every member's durable frontier licenses space reclamation.
 - [Deletion and Reclamation](/router/concepts/deletion_and_reclamation) — the concept behind reclamation.
 - [Convergence](/router/concepts/convergence) — what these options converge, and how a lagging replica is detected and repaired.
 - [Verifying Cluster Convergence](/router/guides/administration/verifying_cluster_convergence) — checking the result on a running cluster.

@@ -26,6 +26,6 @@ A node whose `bondy.conf` declares no `listeners.*` key starts these listeners. 
 |`wamp_tcp`|`18082`|WAMP over RawSocket.|
 |`admin`|`18081`|The Admin HTTP API, WAMP over WebSocket, the `/ping` and `/ready` health endpoints, and `/metrics`. Bound to loopback.|
 
-The node also opens port `18086` for connections from other nodes in its cluster; see [`cluster.peer_port`](/router/reference/configuration/cluster#cluster.peer_port).
+The tutorials run a single node, so set [`cluster.enabled = off`](/router/reference/configuration/cluster#cluster.enabled) in its `bondy.conf`, as the Docker and source guides do. A node left on the default `on` with no other member refuses every authentication under the default fence policy. A node that clusters also opens port `18086` for connections from other nodes in its cluster; see [`cluster.peer_port`](/router/reference/configuration/cluster#cluster.peer_port).
 
 None of the default listeners uses TLS. To add TLS listeners or change ports, declare your own listeners; see [Network Listeners](/router/reference/configuration/listeners). Declaring any listener replaces this set, except `admin`, which a node always has.

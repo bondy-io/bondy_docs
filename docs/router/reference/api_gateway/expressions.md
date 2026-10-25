@@ -44,7 +44,7 @@ Tags are indicated by the double mustaches. `{{request}}` is a tag, as is `{{def
 
 A tag holds a key path, optionally followed by a [function pipeline](#function-pipelines). The path walks into the [API Context](/router/reference/api_gateway/specification#api-context) one dot-separated key at a time, so `{{request.body.sku}}` reads the `sku` key of the incoming request body, and `{{action.result}}` reads the result of the specification's most recently evaluated action.
 
-Spaces and tabs inside a tag are ignored. `{{ request.body.sku }}` and `{{request.body.sku}}` are the same tag.
+Spaces and tabs inside a tag are ignored, except inside a [single-quoted argument](#arguments). `{{ request.body.sku }}` and `{{request.body.sku}}` are the same tag.
 
 ### Value Expressions
 
@@ -99,10 +99,10 @@ A tag can pass its value through one or more functions with the `|>` operator. F
 Some functions take arguments in parentheses, separated by commas. Each argument is one of:
 
 - **A bare word**, such as `email` or `500`. It is a literal string. Numbers are not parsed, so `500` is the string `"500"`; pipe the result through [`integer`](#integer) when you need a number.
-- **A single-quoted word**, such as `'email'`. It is the same literal string with the quotes removed. Use `''` for the empty string.
+- **A single-quoted literal**, such as `'email'` or `'first name'`. It is the literal string between the quotes. Use `''` for the empty string.
 - **A tag**, such as `{{variables.field}}`. It is replaced by the value at that path.
 
-Because all spaces and tabs inside a tag are removed, a literal argument cannot contain a space: `'first name'` becomes `firstname`. An argument cannot contain a comma, and a tag used as an argument cannot contain a `|>` pipeline.
+Outside a single-quoted literal, spaces and tabs are removed, so a bare word cannot contain a space. Inside a single-quoted literal, every character is part of the string, including spaces, tabs, commas, closing brackets and `|>`. So `get('a,b')` reads the key `a,b`, and `get('first name')` reads the key `first name`. An expression with a single-quoted literal that is not closed fails. A tag used as an argument cannot contain a `|>` pipeline.
 
 ### Failure
 
@@ -342,10 +342,6 @@ Returns the map with the listed keys removed. Listed keys that the map does not 
 {{request.body.customer |> without([email])}}
     →  {"first_name": "John", "last_name": "Doe"}
 ```
-
-::: warning Request-time keys
-When a key in the list is a tag that reads `request`, `action` or `security`, `without` currently returns the map restricted to the listed keys, as `with` does, instead of removing them. List literal keys, or keys from `variables` and `defaults`, until this is fixed.
-:::
 
 ### `size`
 

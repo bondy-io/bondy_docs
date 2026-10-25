@@ -369,6 +369,155 @@ See [`log.handlers.$id.formatter.time_offset`](#log.handlers.$id.formatter.time_
 
 See [`log.handlers.$id.formatter.time_designator`](#log.handlers.$id.formatter.time_designator).
 
+## Log messages
+
+Bondy logs structured reports. The `description` field of each record below is fixed text, so an alert can match on it exactly. Where two records share a `description`, the alert also matches on `reason`. Each entry lists the record's other fields, its level, and when Bondy emits it.
+
+### Replication and compaction
+
+#### GC stalled
+
+```text
+description => "GC stalled: the trigger returned an error for this instance. For reason unconfirmed or no_frontier, a member is holding it: see member_status (highest last_sync_age_ms, or never_synced). Bring them back online, or retire them with a deliberate cluster membership removal — a stalled member never ages out. For reason no_members, clustering is enabled and no other member is listed: a member that has just restarted holds until it rejoins, and a node meant to run alone needs cluster.enabled = off."
+```
+
+| Field | Value |
+|---|---|
+| `scheduler` | `bondy_oplog_gc_scheduler` (compaction) or `bondy_oplog_reclaim_scheduler` (reclamation). |
+| `instance` | The oplog instance that did not compact or reclaim. |
+| `reason` | The stall reason, for example `unconfirmed`, `no_frontier` or `no_members`. |
+| `missing_members` | For `unconfirmed`, the members with no recorded frontier. Otherwise `[]`. |
+| `member_status` | One entry per cluster member. The entry carries the member's `last_sync_age_ms`, or `never_synced` when the member has no sync record for this instance. The value is `unavailable` when the membership cannot be read. |
+
+**Level:** warning.
+
+**Emitted:** when a compaction or reclamation run stalls, at most once every 60 seconds for each instance and scheduler. The limit applies to the log only. `bondy_oplog_gc_scheduler_events_total` counts every trigger outcome, and `bondy_oplog_reclamation_stalled_total` counts every reclamation stall (see [Metrics](/router/reference/metrics)). Bondy never logs the reason `idle`. On a node that runs alone, `no_members` means that [`cluster.enabled`](/router/reference/configuration/cluster#cluster.enabled) is still `on`.
+
+#### Bootstrap refused: peer behind truncation
+
+```text
+description => "Refused to install the peer's snapshot: the peer has not seen events this node truncated. If this persists, the two nodes truncated history separately before they were joined (for example, each ran with cluster.enabled = off). Empty one of them and rejoin it."
+```
+
+| Field | Value |
+|---|---|
+| `instance` | The oplog instance. |
+| `peer` | The peer whose snapshot this node refused. |
+| `reason` | `{source_behind_truncation, Uncovered}`. `Uncovered` maps each origin that the peer's frontier does not cover to the sequence number through which this node truncated it. |
+
+**Level:** warning.
+
+**Emitted:** each time this node refuses a re-bootstrap from `peer`. The refused install writes nothing, and the instance keeps compacting and serving. See [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering) for the recovery. A re-bootstrap that fails for any other reason logs `bootstrap_catalogue session failed` at warning, with the same fields.
+
+#### Causal hold
+
+```text
+description => "Causal hold: this replay batch carries remote-origin events beyond a per-origin contiguity gap, or events whose context observed one; they are excluded from the fold and the applied-frontier merge, and the caller keeps its replay cursor so they re-present until the gap fills or a rebootstrap repairs it."
+```
+
+| Field | Value |
+|---|---|
+| `instance_id` | The oplog instance. |
+| `held` | The held events, as origins and sequence numbers. |
+
+**Level:** info.
+
+**Emitted:** each time a replay holds events back. `bondy_oplog_events_held_total` counts the same events. A burst of records is normal while a node rejoins after a long absence. A record that repeats for the same `held` events on a healthy cluster means a gap that does not fill. See [Per-Origin Prefix Closure](/router/concepts/prefix_closure).
+
+#### MST root lost pages
+
+```text
+description => "The MST root has lost pages. Anti-entropy advertises it as empty, so peers pull nothing from it. Compaction rebuilds the tree once every member covers what this replica applied."
+```
+
+| Field | Value |
+|---|---|
+| `instance_id` | The oplog instance. |
+| `root` | The root hash that references pages missing from the store. |
+
+**Level:** warning.
+
+**Emitted:** the first time the instance finds that a root references a page the store lacks.
+
+#### MST rebuilt
+
+```text
+description => "Rebuilt an MST whose own root lost pages: every member covers what this replica applied, so the tree was truncated past every lost page and anti-entropy resumes on it."
+```
+
+| Field | Value |
+|---|---|
+| `instance_id` | The oplog instance. |
+| `dropped_events` | The number of events that the truncation removed from the tree. |
+
+**Level:** notice.
+
+**Emitted:** when compaction rebuilds an MST whose root lost pages. `bondy_oplog_mst_rebuilt_total` counts each record, with reason `unservable_root`. Each record means that pages went missing from the store. See [Convergence](/router/concepts/convergence#healing-an-unservable-own-root).
+
+### Cluster membership
+
+#### Node removed from the cluster
+
+```text
+description => "Node removed from the cluster"
+```
+
+| Field | Value |
+|---|---|
+| `node` | The removed node. |
+| `survey` | The pre-removal survey of the remaining members. |
+
+**Level:** notice.
+
+**Emitted:** by the node that serves [`bondy.cluster.leave`](/router/reference/wamp_api/cluster), after the survey finds every remaining member answering and ready. When the survey refuses a removal, Bondy does not log this record.
+
+### Listeners and connections
+
+#### Connection threshold exceeded
+
+```text
+description => "Connection threshold exceeded"
+```
+
+| Field | Value |
+|---|---|
+| `threshold_percent` | `75` or `90`. |
+| `listener` | The listener name. |
+| `alarm_name` | `num_connections_75` or `num_connections_90`. |
+| `connections` | The number of connections on the listener. |
+
+**Level:** warning at 75 %, alert at 90 %.
+
+**Emitted:** when the connections of a listener reach 75 % or 90 % of its `max_connections`. Each threshold logs at most once every 5 seconds. A listener whose `max_connections` is `infinity` never logs this record.
+
+#### WebSocket closed on idle timeout
+
+```text
+description => "Connection closed"
+reason => idle_timeout
+```
+
+| Field | Value |
+|---|---|
+| `reason` | `idle_timeout`. |
+| `idle_timeout` | The timeout in force, in milliseconds. |
+
+**Level:** error.
+
+**Emitted:** when Bondy closes a WebSocket connection that stayed idle for [`listeners.$name.websocket.idle_timeout`](/router/reference/configuration/listeners#listeners.$name.websocket.idle_timeout). Other WebSocket closures also use the description `Connection closed`, with a different `reason`.
+
+### Shutdown
+
+#### Drain: listeners suspended
+
+```text
+description => "Suspending the normal-phase listeners. No new connections will be accepted from now on; the readiness and metrics endpoints stay up for the duration of the drain."
+```
+
+**Level:** notice.
+
+**Emitted:** when a node starts to shut down. From this record on, the node accepts no new client connections, and existing connections stay open. The next record, `Terminating all client connections.`, marks the point where client connections close. See [Node Lifecycle](/router/concepts/node_lifecycle).
+
 ## See also
 
 - [Node Configuration Reference](/router/reference/configuration/node#logging) — `vm.W`, the separate VM-level warning-message classification, not to be confused with this application-level logging configuration.

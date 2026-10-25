@@ -65,7 +65,7 @@ Bondy handles each mode as follows:
 - **`kill`**: Bondy sends `INTERRUPT` to the callee and does not answer the caller itself. The callee's response settles the call. That response is normally an `ERROR`, but it can be a `RESULT` if the callee finished first.
 - **`killnowait`**: Bondy answers the caller at once with `wamp.error.canceled` and sends `INTERRUPT` to the callee. Bondy discards any later response from the callee.
 
-The caller must be authorized for the `wamp.cancel` action on the procedure. When the callee runs on another cluster node, Bondy sends `INTERRUPT` only if the callee announced `call_canceling` in `HELLO`.
+The caller must be authorized for the `wamp.cancel` action on the procedure. Bondy sends `INTERRUPT` only to a callee that announced `call_canceling` in `HELLO`. For any other callee, `kill` and `killnowait` act as `skip`, whether the callee runs on the caller's node or on another. A session obtains `call_canceling` only when its `HELLO` announces it.
 
 ### Handling Cancellation in Callee
 
@@ -487,7 +487,7 @@ Multiple callees can register the same procedure URI, enabling built-in load bal
 
 The `invoke` option of `REGISTER` sets the invocation policy. Bondy accepts the five policies of the WAMP specification: `single`, `roundrobin`, `random`, `first` and `last`. When `invoke` is absent, the policy is `single`.
 
-A registration with a policy other than `single` requires the callee to announce `shared_registration` in `HELLO`. The first registration of a URI fixes its policy. Bondy refuses a later registration of the same URI with `wamp.error.procedure_already_exists` when the existing policy is `single`, or when the later registration asks for a different policy.
+A registration with a policy other than `single` requires the callee to announce `shared_registration` in `HELLO`. The first registration of a URI fixes its policy. Bondy refuses a later registration of the same URI with `wamp.error.procedure_already_exists` when the existing policy is `single`, or when the later registration asks for a different policy. A node checks and records each registration in one step, so when two callees on the same node register a URI with `single` at the same time, exactly one succeeds.
 
 ```javascript
 // Round robin - distribute evenly
@@ -663,7 +663,7 @@ See [Payload Passthru Mode](/router/reference/serialization#payload-passthru-mod
 
 Stream results from procedures back to callers incrementally, so a long-running operation can report partial output before its final result — paging a large result set, streaming file chunks, or reporting progress on a long computation.
 
-Bondy always offers the feature; it has no configuration setting. It negotiates end to end: it activates only when the caller announced `progressive_call_results` in `HELLO` (paired with `call_canceling`, as the specification requires) and the callee did too. If either side didn't opt in, the option is silently removed — the callee sees a plain invocation, replies once, and the caller gets a single final result. Degradation is silent by design; the call still succeeds.
+Bondy always offers the feature; it has no configuration setting. It negotiates end to end: it activates only when the caller announced `progressive_call_results` in `HELLO` and the callee announced both `progressive_call_results` and `call_canceling`. The specification requires a callee that supports progressive results to support call canceling, so that Bondy can interrupt it when its caller leaves. If either side didn't opt in, the option is silently removed — the callee sees a plain invocation, replies once, and the caller gets a single final result. Degradation is silent by design; the call still succeeds.
 
 Callees send partial results:
 
@@ -790,6 +790,32 @@ wampy.call('com.myapp.large_query', [query], {
     receive_progress: true,
     timeout: 5000,     // at most 5 s between results
     _deadline: 60000   // at most 60 s in total
+});
+```
+
+### Call Retries
+
+`CALL.Options._retries` asks Bondy to try a call again when it got no answer. Its value is a positive integer: the number of attempts Bondy can add after the first. Any other value is ignored, and Bondy does not retry the call.
+
+Bondy retries a call in two cases:
+
+- The callee did not answer before the call timeout, or its session ended while it held the invocation. Bondy retries only when the registration set `REGISTER.Options._idempotent` to `true`, because the callee might have run the call already.
+- No callee was registered for the procedure. No callee ran the call, so the registration need not be idempotent. Bondy waits for a registration, and backs off between attempts.
+
+Each attempt counts against `_retries`. Bondy starts no attempt after the call's `_deadline`. Without a `_deadline`, a call can last `_retries + 1` call timeouts. Bondy does not retry a progressive call, in either direction, because the caller may already hold part of its results.
+
+```javascript
+// Callee: running this procedure twice is safe
+wampy.register('com.myapp.inventory.get', {
+    rpc: getInventory,
+    _idempotent: true
+});
+
+// Caller: at most two more attempts, within 10 s in total
+wampy.call('com.myapp.inventory.get', [sku], {
+    timeout: 3000,
+    _retries: 2,
+    _deadline: 10000
 });
 ```
 

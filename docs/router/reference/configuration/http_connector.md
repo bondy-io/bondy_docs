@@ -23,11 +23,11 @@ The authentication module to use. Currently only `generic` is supported, which p
 
 @[config](http_connector.services.$service.timeout,duration,30s,v1.0.0-rc.50)
 
-Upstream HTTP request timeout.
+Deadline for a whole call to a procedure of this service, measured from its start and including every retry. Each attempt gets only the time left before the deadline. The connector skips a retry whose backoff wait would end past the deadline. A call that reaches the deadline without an upstream response fails with `bondy.error.gateway_timeout` (status 504).
 
 @[config](http_connector.services.$service.retries,integer,3,v1.0.0-rc.50)
 
-Number of retry attempts on connection failures, using exponential backoff.
+Number of retry attempts on transport failures, using jittered exponential backoff. After an HTTP response, the connector retries only a `401` or `403`, once, with a fresh token. It never retries while the service's pool is down.
 
 @[config](http_connector.services.$service.tls_verify,verify_peer&#124;verify_none,verify_peer,v1.0.0)
 
@@ -50,7 +50,7 @@ Timeout for acquiring a connection from the pool.
 
 @[config](http_connector.services.$service.pool.connect_timeout,duration,8s,v1.0.0-rc.50)
 
-TCP connection timeout.
+TCP connection timeout. On a call to a procedure, the connector replaces it with the time left before the service's `timeout`.
 
 @[config](http_connector.services.$service.pool.idle_timeout,duration,5m,v1.0.0-rc.50)
 
@@ -58,7 +58,7 @@ How long idle connections are kept in the pool.
 
 @[config](http_connector.services.$service.pool.recv_timeout,duration,60s,v1.0.0-rc.50)
 
-Timeout for receiving a response from the upstream.
+Timeout for receiving a response from the upstream. On a call to a procedure, the connector replaces it with the time left before the service's `timeout`.
 
 @[config](http_connector.services.$service.pool.follow_redirect,on|off,off,v1.0.0-rc.50)
 
@@ -95,7 +95,7 @@ Connect/receive timeout for a single probe request.
 
 @[config](http_connector.services.$service.liveness.failure_threshold,integer,3,v1.0.0)
 
-Consecutive probe failures required before the pool is marked down and the service-down alarm is raised. Guards against flapping on a single transient blip.
+Consecutive probe failures required before the pool is marked down and the service-down alarm is raised. Guards against flapping on a single transient blip. A probe succeeds on any HTTP response, whatever its status, and fails when the request itself fails. While the pool is down, calls to the service fail at once with `wamp.error.unavailable` (status 503).
 
 @[config](http_connector.services.$service.liveness.success_threshold,integer,1,v1.0.0)
 

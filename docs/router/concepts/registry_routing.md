@@ -77,6 +77,41 @@ ones, and a peer may keep routing to callees the node no longer has. Keep node
 clocks synchronised (NTP or equivalent) and never step a clock backwards
 across a restart.
 
+## When a node leaves
+
+Only a node writes its own summary cells, so a node that is gone cannot remove
+them. The surviving nodes reclaim them, and the stubs built from them, after
+the node leaves the cluster membership: through
+[`bondy.cluster.leave`](/router/reference/wamp_api/cluster), or the node's own
+graceful shutdown under
+[`cluster.automatic_leave`](/router/reference/configuration/cluster#cluster.automatic_leave).
+A node that has crashed or is partitioned, and has not left, stays in the
+membership and keeps its cells and stubs. It can come back, and it needs its
+routing when it does. Bondy therefore never deletes a stub on membership loss
+alone; it deletes a stub only once the cell behind it is gone.
+
+Reclamation on each surviving node runs in three stages, each on its own
+schedule:
+
+1. The origin-retirement pass removes the departed node's entries from its
+   summary cells, so each cell reads a count of `0`. The pass runs on every
+   membership change and every
+   [`db.origin_retirement.interval`](/router/reference/configuration/reclamation#db.origin_retirement.interval).
+2. The reclamation sweep discards the emptied cells once they are
+   [causally stable](/router/reference/glossary#causal-stability). It runs every
+   [`db.reclaim.interval`](/router/reference/configuration/reclamation#db.reclaim.interval).
+   See [Deletion and Reclamation](/router/concepts/deletion_and_reclamation).
+3. The RIB consistency sweep deletes each stub whose cell is gone. It runs every
+   [`registry.rib.check_interval`](/router/reference/configuration/cluster#registry.rib.check_interval).
+   With that interval set to `0`, the sweep never runs, so a departed node's
+   stubs are never removed.
+
+Until its stubs are gone, a departed node still counts as a subscriber node:
+a `PUBLISH` that matches its subscriptions is relayed to it, and the meta API
+walks it. When the dealer chooses a node for a call, it prefers reachable
+nodes, so a departed node's registrations do not take calls while a reachable
+callee exists.
+
 ## Configuration
 
 Routing on the RIB is unconditional; there is nothing to enable. One optional

@@ -14,9 +14,10 @@ related:
 # Serialization
 
 How Bondy encodes and decodes values on the binary serializations, where a
-format distinguishes things that Bondy's internal representation does not.
-A client choosing MessagePack or CBOR needs these rules; a JSON client does
-not.
+format distinguishes things that Bondy's internal representation does not,
+and what Bondy does with a message that does not decode. A client choosing
+MessagePack or CBOR needs every rule; a JSON client needs only the
+[JSON](#json) and [Payload Passthru Mode](#payload-passthru-mode) sections.
 
 ## Text and bytes
 
@@ -48,10 +49,31 @@ Base64) inside a string.
 - **A map that repeats a key** keeps the first value.
 - **Extension types** (`fixext`, `ext`, including the timestamp extension)
   have no meaning in WAMP and are rejected. So is the reserved type `0xC1`,
-  and so is a truncated message or one with bytes after its end. A message
-  Bondy cannot decode closes the session.
+  and so is a truncated message or one with bytes after its end. When a
+  message does not decode, Bondy aborts the session with
+  `wamp.error.protocol_violation`.
 - **Integers** use the smallest MessagePack type that holds the value.
   **Floats** are written as 64-bit; a 32-bit float is accepted on decode.
+
+## CBOR
+
+- **`null` and `undefined`** both decode to Bondy's absent value. Bondy
+  writes an absent value as `null`.
+- **A message that does not decode**, such as a truncated message, one with
+  bytes after its end, or an array whose declared length does not match its
+  items, aborts the session with `wamp.error.protocol_violation`. Bondy checks
+  that the payload of each message decodes when the message arrives, so a
+  malformed payload aborts the sender and never reaches a receiver.
+
+## JSON
+
+- **A message that is not one JSON value**, such as truncated text or text
+  after the end of the value, aborts the session with
+  `wamp.error.protocol_violation`. As for CBOR, Bondy checks that the payload
+  of each message decodes when the message arrives.
+
+[WAMP Compliance](/router/reference/protocols/wamp#protocol-errors) lists the
+other messages Bondy refuses, whatever the serialization.
 
 ## Payload Passthru Mode
 
