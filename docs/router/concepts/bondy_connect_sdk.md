@@ -164,7 +164,7 @@ On the caller side, `call` blocks only the process that calls it. The connection
 A synchronous `call` returns one result. Progressive results are a sequence, so they need a mailbox:
 
 - **Progressive results.** A caller requests them with `receive_progress => true` on `call_async`. Each partial result arrives as a `progress` message, and the single terminal reply comes last. `call` rejects the option. On the callee side, a handler receives a `progress` fun in its details only when the caller asked for progressive results, so a handler must check for it before it uses it.
-- **Progressive calls.** A caller streams the arguments of a call in chunks with `call_stream`, `send_input` and `finish_input`. The callee's handler receives an `input` fun in its details and pulls each chunk from it until the last one. Both the router and the callee must announce the `progressive_calls` feature.
+- **Progressive calls.** A caller streams the arguments of a call in chunks with `call_stream`, `send_input` and `finish_input`. The callee's handler receives an `input` fun in its details and pulls each chunk from it until the last one. Both the router and the callee must announce the `progressive_call_invocations` feature.
 
 ## Errors say whether retrying can help
 

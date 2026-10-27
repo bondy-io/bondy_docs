@@ -120,7 +120,7 @@ The table lists how the router replies to a message that it cannot accept. An `A
 |A frame that is not a WAMP array, or whose shape matches no WAMP message|`ABORT` with reason `wamp.error.protocol_violation`|
 |A request or session ID that is not an integer from 0 to 2^53|`ABORT` with reason `wamp.error.protocol_violation`|
 |A field of the wrong WAMP type, such as a `Details` or `Options` that is not a dictionary, or a URI that is not a string|`ABORT` with reason `wamp.error.protocol_violation`|
-|An option or detail with an invalid value, such as a `HELLO` with no roles, or with `progressive_calls` but no `call_canceling`|`ABORT` with reason `wamp.error.protocol_violation`|
+|An option or detail with an invalid value, such as a `HELLO` with no roles|`ABORT` with reason `wamp.error.protocol_violation`|
 |Over the `erl` serialization, a term outside the WAMP data model, such as a tuple or an improper list|`ABORT` with reason `wamp.error.protocol_violation`|
 |A URI that is not valid under [`wamp.uri.strictness`](/router/reference/configuration/wamp#wamp.uri.strictness)|`ERROR` with `wamp.error.invalid_uri`. The session stays open.|
 

@@ -613,7 +613,7 @@ When a callee disconnects, Bondy automatically removes its registration:
 // Bondy includes Instance 4 in distribution
 ```
 
-No manual intervention required—the router adapts automatically.
+No manual intervention required—the router adapts automatically. A call the departing instance was still handling fails with `wamp.error.canceled`, unless Bondy routes it again because it set `CALL.Options._retries` and the registration is idempotent.
 
 ### Use Cases
 
@@ -711,11 +711,11 @@ This holds across the cluster too: when caller and callee are on different nodes
 - **Real-time processing** - Display results as they're computed
 - **Incremental rendering** - Show partial data while loading
 
-## Progressive Calls
+## Progressive Call Invocations
 
 The mirror image of progressive results: stream a call's **arguments** from caller to callee in successive chunks under one request, so a caller can send a large payload — a file upload, a client-side stream — without buffering it whole before the call.
 
-Bondy always offers the feature; it has no configuration setting. Unlike progressive results, this is **not** silently downgraded: because the caller has already begun streaming, if either peer didn't announce `progressive_calls` (paired with `call_canceling`) in `HELLO`, the call fails outright with `wamp.error.option_not_allowed` rather than being reinterpreted as a plain call.
+Bondy always offers the feature; it has no configuration setting. Unlike progressive results, this is **not** silently downgraded: because the caller has already begun streaming, the call fails outright rather than being reinterpreted as a plain call. A progressive `CALL` from a caller that didn't announce `progressive_call_invocations` in `HELLO` is a protocol error: Bondy aborts the caller's session with `wamp.error.protocol_violation`. A caller that announced the feature must number its requests in sequence, as WAMP requires: Bondy aborts its session on a `CALL` whose request id skips ahead or reuses the id of a live call to the same procedure that is not a progressive call, and discards a chunk that arrives after its call has completed or that names another procedure. The first chunk's options apply to the whole stream, and the first chunk is the only one authorized: a permission revoked during a stream refuses the caller's next call, not the open stream. A callee supports the feature only if it announced both `progressive_call_invocations` and `call_canceling`; a call to any other callee, or to a `wamp.*` or `bondy.*` procedure, gets `wamp.error.feature_not_supported`.
 
 Callers send arguments progressively, reusing one request across chunks:
 
@@ -755,7 +755,7 @@ wampy.register('com.myapp.process_stream', {
 });
 ```
 
-Chunks reach the callee in send order, including across cluster nodes. Timeout and cancellation semantics match progressive results: `CALL.Options.timeout` is the inactivity window between chunks, `CALL.Options._deadline` caps the whole call, and cancelling mid-stream works across nodes. See [Progressive Calls](/router/reference/clients/bondy_connect_sdk) in the `bondy_connect` reference for the Erlang API, including the exact `call_stream/5`/`send_input/4`/`finish_input/4` client functions.
+Chunks reach the callee in send order, including across cluster nodes and to a callee behind a bridge relay that ends on the caller's router. Timeout and cancellation semantics match progressive results: `CALL.Options.timeout` is the inactivity window between chunks, `CALL.Options._deadline` caps the whole call, and cancelling mid-stream works across nodes. See [Progressive Call Invocations](/router/reference/clients/bondy_connect_sdk) in the `bondy_connect` reference for the Erlang API, including the exact `call_stream/5`/`send_input/4`/`finish_input/4` client functions.
 
 ::: warning Mixed-version clusters
 Use either feature only once every node in the cluster runs a Bondy release that implements it — a node running an older release settles a call on its first progressive result (or cannot continue a caller's argument stream), truncating it.

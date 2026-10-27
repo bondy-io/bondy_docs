@@ -88,7 +88,7 @@ A **Callee** serves a procedure by registering a URI with a **handler**: a fun o
 
 ```erlang
 Echo = fun(Args, KWArgs, _Details) ->
-    {reply, Args, KWArgs}
+    {ok, #{args => Args, kwargs => KWArgs}}
 end,
 {ok, _RegId} = bondy_connect_client:register(Conn, <<"com.example.echo">>, Echo).
 ```
@@ -164,7 +164,7 @@ A callee that wants to emit progress receives a `progress` fun in its details ma
 Countdown = fun(_Args, _KWArgs, Details) ->
     Progress = maps:get(progress, Details, fun(_A, _KW) -> ok end),
     [Progress([N], #{}) || N <- [3, 2, 1]],
-    {reply, [<<"liftoff">>]}
+    {ok, #{args => [<<"liftoff">>]}}
 end,
 {ok, _} = bondy_connect_client:register(Conn, <<"com.example.countdown">>, Countdown).
 ```

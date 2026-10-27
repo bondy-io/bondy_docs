@@ -47,7 +47,9 @@ nothing to configure to turn it on.
   acting on the sender's possibly-stale choice of entry. If the chosen
   node's summary was momentarily stale, a bounded pre-invocation retry
   reroutes to another candidate before the call fails with
-  `wamp.error.no_eligible_callee`.
+  `wamp.error.no_eligible_callee`. A progressive call invocation is not
+  rerouted, because the caller's later chunks follow the first one to the
+  node it reached; a miss there is final.
 - **Broker (events).** To publish to remote subscribers, a node discovers
   the subscriber *nodes* from the subscription stubs and relays one
   `PUBLISH` per such node; the receiving node matches and delivers to its

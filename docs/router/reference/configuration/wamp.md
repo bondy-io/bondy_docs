@@ -62,9 +62,9 @@ Controls whether Bondy publishes the [registration](/router/reference/wamp_api/r
 
 ## Dealer
 
-[Progressive Call Results](/router/concepts/wamp/advanced/rpc#progressive-call-results) and [Progressive Calls](/router/concepts/wamp/advanced/rpc#progressive-calls) have no configuration settings. Bondy always offers both in its `WELCOME`, and a session can use each one only if its own `HELLO` announces it for the role (caller or callee) that uses it. A session that announces `progressive_calls` must also announce `call_canceling`. Otherwise Bondy answers the `HELLO` with an `ABORT` whose reason is `wamp.error.protocol_violation`.
+[Progressive Call Results](/router/concepts/wamp/advanced/rpc#progressive-call-results) and [Progressive Call Invocations](/router/concepts/wamp/advanced/rpc#progressive-call-invocations) have no configuration settings. Bondy always offers both in its `WELCOME`, and a session can use each one only if its own `HELLO` announces it for the role (caller or callee) that uses it. A callee also needs `call_canceling` to support `progressive_call_invocations`.
 
-In a cluster, the node a callee is connected to checks the callee's own session. A progressive call to a callee that did not announce `progressive_calls` fails with `wamp.error.option_not_allowed`.
+In a cluster, the node a callee is connected to checks the callee's own session. A progressive call to a callee that did not announce both `progressive_call_invocations` and `call_canceling` fails with `wamp.error.feature_not_supported`.
 
 ## HTTP Transports (Long-poll and SSE)
 

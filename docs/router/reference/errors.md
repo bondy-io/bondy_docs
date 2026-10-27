@@ -215,7 +215,6 @@ already running. Those have a page each under
 | `not_in_session` | `bondy.error.not_in_session` | `not_in_session` | permanent | 400 | W014 |
 | `deprecated_procedure` | `bondy.error.deprecated_procedure` | `deprecated_procedure` | permanent | 410 | W015 |
 | `feature_not_supported` | `wamp.error.feature_not_supported` | `feature_not_supported` | permanent | 501 | W016 |
-| `invalid_feature_request` | `bondy.error.invalid_feature_request` | `invalid_feature_request` | permanent | 500 | W017 |
 
 ### Cluster
 

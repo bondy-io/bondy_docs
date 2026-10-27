@@ -105,11 +105,11 @@ How many unanswered probes mean a dead connection. After this many, the bridge c
 
 @[config](bridge.$name.reconnect,on|off,on,v1.0.0)
 
-Whether the bridge automatically retries the connection after it fails — either an unrecognised error, or a remote abort with a recoverable reason (e.g. the target realm doesn't exist yet, because it hasn't been provisioned on the remote router).
+Whether the bridge retries after a failed attempt, waiting the next backoff delay each time. A failed attempt is a connect error such as `econnrefused`, `timeout` or `ehostunreach`, a connection lost before a session opens, or a session the remote router refuses with an ABORT. The bridge retries an ABORT whatever its reason, such as a realm not yet provisioned on the remote router or a key it does not know, so the bridge connects once the remote router accepts it. Any other connect error stops the bridge. With `off`, the first failed attempt stops it. A stopped bridge reports `stopped` in [`bondy.router.bridge.status`](/router/reference/wamp_api/bridge_relay#check-status-of-a-bridge) and stays stopped until `bondy.router.bridge.start` starts it again.
 
 @[config](bridge.$name.reconnect.max_retries,integer,100,v1.0.0)
 
-The retry budget: the number of failed attempts after which the bridge client stops. The budget has no time limit.
+The retry budget: the number of failed attempts after which the bridge client exits. The budget has no time limit. Its supervisor then starts a new client, which dials again with a fresh budget.
 
 These events count against the budget:
 

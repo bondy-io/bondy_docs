@@ -185,7 +185,7 @@ When a callee disconnects, its registrations are automatically removed:
 8. Distribution resumes between Instances 2 & 3
 ```
 
-No manual intervention required. The router adapts automatically.
+No manual intervention required. The router adapts automatically. A call the departing instance was still handling fails with `wamp.error.canceled`, unless Bondy routes it again because it set `CALL.Options._retries` and the registration is idempotent.
 
 ### Retry Logic
 

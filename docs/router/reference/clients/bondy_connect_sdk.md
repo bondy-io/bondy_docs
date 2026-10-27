@@ -16,7 +16,7 @@ related:
     - text: WAMP Features Configuration Reference
       type: Reference
       link: /router/reference/configuration/wamp#dealer
-      description: How Bondy negotiates progressive_call_results and progressive_calls with each session.
+      description: How Bondy negotiates progressive_call_results and progressive_call_invocations with each session.
 ---
 
 # Bondy Connect SDK
@@ -289,13 +289,10 @@ Registers `Handler` (see [Handlers](#handlers)) against `Uri`. On success return
 
 | Handler returns | Wire result |
 |---|---|
-| `{reply, Args}` | `YIELD` with positional args |
-| `{reply, Args, KWArgs}` | `YIELD` with positional and keyword args |
-| `ok` or `noreply` | An empty `YIELD` |
-| `{error, Uri}` | `ERROR` with that URI |
-| `{error, Uri, Args}` | `ERROR` with URI and positional args |
-| `{error, Uri, Args, KWArgs}` | `ERROR` with URI, positional and keyword args |
-| anything else, or an exception | `ERROR` `bondy.error.internal_error` — the handler crash or misbehaviour is contained; the connection is unaffected |
+| `ok` or `{ok, #{}}` | An empty `YIELD` |
+| `{ok, #{args => Args, kwargs => KWArgs}}` (both keys optional) | `YIELD` with those args |
+| `{error, #{uri := Uri, args => Args, kwargs => KWArgs}}` (`args` and `kwargs` optional) | `ERROR` with that URI and those args |
+| anything else, including the pre-1.0 `{reply, _}`, `{reply, _, _}` and `noreply`, or an exception | `ERROR` `bondy.error.internal_error` — the handler crash or misbehaviour is contained; the connection is unaffected |
 
 `Opts` carries WAMP registration options, passed through to the router's `REGISTER`:
 
@@ -412,14 +409,14 @@ end.
 
 ### Emitting progressive results (callee side)
 
-When — and only when — the caller requested progressive results, the connection injects a `progress` fun into the handler's `Details` map. Calling it emits one progressive `YIELD` immediately, without ending the invocation; the handler's own return value (`{reply, ...}`, `{error, ...}`, and so on — see [Handler return values](#registering-a-procedure)) is still what produces the final result.
+When — and only when — the caller requested progressive results, the connection injects a `progress` fun into the handler's `Details` map. Calling it emits one progressive `YIELD` immediately, without ending the invocation; the handler's own return value (`{ok, ...}`, `{error, ...}`, and so on — see [Handler return values](#registering-a-procedure)) is still what produces the final result.
 
 ```erlang
 Handler = fun(Args, KWArgs, Details) ->
     Progress = maps:get(progress, Details, fun(_A, _KW) -> ok end),
     Progress([<<"25%">>], #{}),
     Progress([<<"75%">>], #{}),
-    {reply, [<<"100%">>]}
+    {ok, #{args => [<<"100%">>]}}
 end.
 ```
 
@@ -455,10 +452,10 @@ Handler = fun(FirstArgs, FirstKWArgs, Details) ->
     case maps:get(input, Details, undefined) of
         undefined ->
             %% Not a progressive call — FirstArgs/FirstKWArgs is everything.
-            {reply, [byte_size(term_to_binary(FirstArgs))]};
+            {ok, #{args => [byte_size(term_to_binary(FirstArgs))]}};
         Input ->
             Total = collect(Input, [FirstArgs]),
-            {reply, [Total]}
+            {ok, #{args => [Total]}}
     end
 end,
 
@@ -469,7 +466,9 @@ collect(Input, Acc) ->
     end.
 ```
 
-As with `progress`, the `input` fun is only present when the invocation is actually part of an argument stream (`Details` carries `progress => true` on every non-final chunk); a handler registered against a URI that might be called either progressively or normally must check for it rather than assume it.
+As with `progress`, the `input` fun is only present when the invocation is actually part of an argument stream; a handler registered against a URI that might be called either progressively or normally must check for it rather than assume it. `Details` does not carry the WAMP `progress` flag of the invocation: the `input` fun stands for it, and the `progress` key holds only the fun for progressive results, so a handler can use both in one call.
+
+A chunk that reaches the callee after its handler replied is discarded rather than starting the handler again. The connection remembers a stream until its final chunk arrives, or for the invocation's timeout (60 seconds without one) after its last chunk.
 
 ## Load regulation
 
@@ -586,7 +585,7 @@ Failures a connection can produce, independent of where documented above:
 | `{error, #{uri := <<"wamp.error.unavailable">>}}` | `call`, `call_async` | The callee's load regulator rejected the invocation. |
 | `{error, #{uri := <<"bondy.error.internal_error">>}}` | `call`, `call_async` | The callee handler crashed, or returned something other than a documented handler result (contained — the connection is unaffected). |
 | `{error, #{uri := <<"wamp.error.canceled">>}}` | `call_async`, `call_stream` (terminal message) | The call was cancelled via `cancel/2,3`. |
-| `{error, #{uri := Uri, ...}}` | `call`, `call_async` | A business error the callee returned with `{error, Uri, ...}`. |
+| `{error, #{uri := Uri, ...}}` | `call`, `call_async` | A business error the callee returned with `{error, #{uri := Uri, ...}}`. |
 | `{error, {invalid_handler, _}}` | `register`, `subscribe` | The handler is not a fun of arity 3, `{Module, Function}`, or `{Module, Function, Extra}`. |
 | `{error, no_such_registration}` | `unregister` | `RegRef` matches no registration this connection currently holds. |
 | `{error, no_such_subscription}` | `unsubscribe` | `SubRef` matches no subscription this connection currently holds. |
@@ -594,6 +593,9 @@ Failures a connection can produce, independent of where documented above:
 | `{error, invalid_cancel_mode}` | `cancel` | `Mode` is not `skip`, `kill`, or `killnowait`. |
 | `{error, not_a_progressive_call}` | `send_input`, `finish_input` | `Token` identifies a call that was not opened with `call_stream/5`. |
 | `{error, unknown_token}` | `send_input`, `finish_input` | `Token` matches no in-flight call at all. |
+| `{error, input_finished}` | `send_input`, `finish_input` | `finish_input/4` already sent the stream's final chunk. Nothing was sent. |
+| `{error, {message_too_large, Size, Max}}` | `send_input`, `finish_input` | The chunk exceeds the transport's frame limit and was not sent. The stream stays open, so a smaller chunk can follow. |
+| `{error, feature_not_supported}` | `call_stream` | The router did not announce `progressive_call_invocations`. Nothing was sent: WAMP makes a progressive call to such a router a protocol error that ends the session. |
 | `{error, local_transport_unavailable}` | `connect` (`local` transport) | No router handler is registered on this node. |
 | `{error, {already_started, Name}}` | `connect/2` | `Name` is already registered to a live connection. |
 | `{error, invalid_spec}` \| `missing_realm` \| `{invalid_realm, _}` \| `{invalid_agent, _}` \| `missing_authmethod` \| `{unsupported_authmethod, _}` \| `invalid_auth` \| `invalid_tls` \| `{invalid_network_timeout, _}` \| `{unknown_option, _, _}` \| `{invalid_option, _, _, _}` | `connect` | The connect spec itself failed validation; see [Opening a connection](#opening-a-connection). Returned synchronously, before any network I/O. |

@@ -143,7 +143,7 @@ Registrations and subscriptions themselves are **not** replicated — only a com
 9. Node A → Client: Deliver RESULT
 ```
 
-Step 5 matters: Node B decides the final callee from its own current, authoritative local state rather than acting on Node A's possibly momentarily-stale summary. If Node A's summary turns out to be stale (the procedure was just unregistered on Node B), a bounded retry reroutes to another candidate before the call fails.
+Step 5 matters: Node B decides the final callee from its own current, authoritative local state rather than acting on Node A's possibly momentarily-stale summary. If Node A's summary turns out to be stale (the procedure was just unregistered on Node B), a bounded retry reroutes to another candidate before the call fails. A progressive call invocation is the exception: its later chunks follow the first one to Node B, so a miss there is final.
 
 This happens automatically and transparently — from the client's perspective, it's just calling a procedure. The same node-addressed forwarding applies to Pub/Sub: a publish reaches every node with an interested subscriber, and each node delivers to its own local subscribers.
 
