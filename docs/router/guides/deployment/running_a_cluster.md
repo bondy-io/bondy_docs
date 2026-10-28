@@ -32,7 +32,7 @@ Every node of a cluster runs with [`cluster.enabled = on`](/router/reference/con
 :::
 
 ::: tip Just want to try this locally?
-For a local, single-host dev cluster with no DNS setup at all, use the `just node1` / `just node2` / `just node3` targets described in [How to Monitor a Bondy Cluster](/router/guides/administration/monitoring#steps) — they start three pre-configured nodes that discover each other automatically. The rest of this guide is for a real, multi-host deployment.
+For a local, single-host dev cluster with no DNS setup at all, use the `just node1` / `just node2` / `just node3` targets described in [How to Monitor a Bondy Cluster](/router/guides/administration/monitoring#steps) — `just node1` and `just node2` form a two-node cluster on their own (node2 finds node1 through a static `list`), while `just node3` starts with discovery off and runs alone. The rest of this guide is for a real, multi-host deployment.
 :::
 
 ## Steps

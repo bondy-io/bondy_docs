@@ -107,7 +107,7 @@ Bondy uses a masterless architecture—every node is equal:
 - **Horizontal scaling** - Add nodes to increase capacity
 - **Geographic distribution** - Deploy nodes in different regions
 
-Nodes automatically discover each other through DNS and form a mesh network. When a client connects to any node, it can interact with clients connected to any other node in the cluster.
+Nodes discover each other through the Partisan discovery strategy set in `cluster.peer_discovery.type` (`dns`, `list`, or a custom module) and form a full mesh. When a client connects to any node, it can interact with clients connected to any other node in the cluster.
 
 ### State Replication
 

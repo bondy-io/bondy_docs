@@ -20,7 +20,7 @@ related:
 
 Bondy ships a ready-to-run Prometheus and Grafana stack under `monitoring/` in the source tree, pre-provisioned with scrape targets, datasources and five Grafana dashboards covering cluster topology, the storage stack, the router and WAMP layer, and the BEAM VM. This guide brings the stack up against a local multi-node dev cluster.
 
-**Prerequisites:** a Bondy source checkout (the stack lives in `monitoring/`, it is not part of the release package), Docker and Docker Compose, and the ability to build and run a local dev cluster (`make node1` and friends). See [Clustering](/router/concepts/clustering) for the concepts behind what the dashboards show.
+**Prerequisites:** a Bondy source checkout (the stack lives in `monitoring/`, it is not part of the release package), Docker and Docker Compose, and the ability to build and run a local dev cluster (`just node1` and friends). See [Clustering](/router/concepts/clustering) for the concepts behind what the dashboards show.
 
 ## Steps
 
