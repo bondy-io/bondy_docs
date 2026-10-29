@@ -96,7 +96,7 @@ If you're reusing the same hosts for the 1.0.0 release, remove the old storage e
 
 ```bash
 # On each host being reused for 1.0.0, after the backup above is confirmed
-bin/bondy stop
+bin/bondy-connect stop
 rm -rf /path/to/bondy/data
 ```
 

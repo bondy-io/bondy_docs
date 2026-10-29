@@ -58,7 +58,7 @@ With the default `on` and no other member, the node refuses every
 authentication, the edge's included. See
 [`cluster.enabled`](/router/reference/configuration/cluster#enabling-clustering).
 
-If you have run the `node1` target before, delete `_build/node1/rel/bondy/data`
+If you have run the `node1` target before, delete `_build/node1/rel/bondy-connect/data`
 now.
 
 In the first terminal, set the environment variables that the core node's
@@ -146,7 +146,7 @@ security.admin_user.password = edge-admin-secret
 
 This sets the password of the edge node's `admin` user, which you will use to
 manage the bridge. Bondy applies it when the node first creates its data, so
-if you have run the `edge1` target before, delete `_build/edge1/rel/bondy/data`
+if you have run the `edge1` target before, delete `_build/edge1/rel/bondy-connect/data`
 now.
 
 Save the file.
@@ -166,7 +166,7 @@ Then start it, giving it the private key that matches `device1`'s public key:
 ```bash
 EDGE1_DEVICE1_PRIVKEY=4ffddd896a530ce5ee8c86b83b0d31835490a97a9cd718cb2f09c9fd31c4a7d7 \
 ERL_DIST_PORT=27784 \
-_build/edge1/rel/bondy/bin/bondy console
+_build/edge1/rel/bondy-connect/bin/bondy-connect console
 ```
 
 The key is the 32-byte Ed25519 seed, written as 64 hexadecimal characters.
@@ -392,7 +392,7 @@ To finish, stop the callee with <kbd>Ctrl</kbd>+<kbd>C</kbd>. Then stop each
 node: type `q().` in its console and press <kbd>Enter</kbd>.
 
 Before you use `node1` in a cluster again, remove the `cluster.enabled = off`
-line you added in step 1 and delete `_build/node1/rel/bondy/data`. A node that
+line you added in step 1 and delete `_build/node1/rel/bondy-connect/data`. A node that
 ran with clustering off joins only nodes that hold no data.
 
 ## What you built

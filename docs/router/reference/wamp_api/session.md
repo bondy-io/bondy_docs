@@ -59,8 +59,8 @@ None.
 Raises `bondy.error.not_found` if the call somehow has no associated session — a defensive case, since a `CALL` always originates from an active session in practice.
 
 ### Retrieve a session
-##### wamp.session.get(realm_uri, session_id) -> session() {.wamp-procedure}
-Retrieves the details of a specific session. Bondy routes the call to whichever node owns the session, so the caller does not need to track session-to-node placement itself.
+##### wamp.session.get(session_id) -> session() {.wamp-procedure}
+Retrieves the details of a session in the caller's realm. Bondy routes the call to whichever node owns the session, so the caller does not need to track session-to-node placement itself. The procedure takes no realm argument; a call with extra positional arguments fails with `wamp.error.invalid_argument`.
 
 #### Call
 ##### Positional Args
@@ -68,10 +68,6 @@ Retrieves the details of a specific session. Bondy routes the call to whichever 
     :maxDepth="10"
     :data="JSON.stringify({
         '0':{
-            'type': 'uri',
-            'description' : 'The URI of the realm the session is attached to.'
-        },
-        '1':{
             'type': 'id',
             'description' : 'The session identifier, as returned in the session object\'s `session` field or the `session_guid` field of `authextra`.'
         }

@@ -181,7 +181,7 @@ worked.
 Per-hash evidence for aborts is retained in the node and outlives the log:
 
 ```bash
-bin/bondy eval 'bondy_oplog_instance:gc_aborts().'
+bin/bondy-connect eval 'bondy_oplog_instance:gc_aborts().'
 ```
 
 Pass an instance id to narrow it — `bondy_oplog_instance:gc_aborts(<<"registry-4">>)`.

@@ -120,20 +120,21 @@ that may `wamp.call` or `wamp.register` it; for a topic, one that may
 one, so the reply is not an existence oracle. Callers on the master realm,
 and callers on a realm with security disabled, see everything.
 
-#### wamp.reflection.procedure.list(realm_uri) -> [uris] {.wamp-procedure}
+#### wamp.reflection.procedure.list() -> [uris] {.wamp-procedure}
 
-#### wamp.reflection.topic.list(realm_uri) -> [uris] {.wamp-procedure}
+#### wamp.reflection.topic.list() -> [uris] {.wamp-procedure}
 
-#### wamp.reflection.error.list(realm_uri) -> [uris] {.wamp-procedure}
+#### wamp.reflection.error.list() -> [uris] {.wamp-procedure}
 
-The URIs of the realm's described procedures, topics or errors, filtered as
-above.
+The URIs of the caller's realm's described procedures, topics or errors,
+filtered as above. The reflection procedures take no realm argument; a call
+with extra positional arguments fails with `wamp.error.invalid_argument`.
 
-#### wamp.reflection.procedure.describe(realm_uri, uri) -> [entry] {.wamp-procedure}
+#### wamp.reflection.procedure.describe(uri) -> [entry] {.wamp-procedure}
 
-#### wamp.reflection.topic.describe(realm_uri, uri) -> [entry] {.wamp-procedure}
+#### wamp.reflection.topic.describe(uri) -> [entry] {.wamp-procedure}
 
-#### wamp.reflection.error.describe(realm_uri, uri) -> [entry] {.wamp-procedure}
+#### wamp.reflection.error.describe(uri) -> [entry] {.wamp-procedure}
 
 The full metadata entry for one URI — description, schemas, declared
 errors, version and the `source` document id that declared it.

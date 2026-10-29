@@ -94,11 +94,11 @@ Every route follows the same rules:
 | `GET` | `/realms/:realm_uri/callees` | `bondy.wamp.callee.list` — **broken:** no procedure has this name, so the route answers with an error |
 | `GET` | `/realms/:realm_uri/callees/:session_id` | `bondy.wamp.callee.get` — **broken:** no procedure has this name, so the route answers with an error |
 | `GET` | `/realms/:realm_uri/registrations` | [`bondy.registration.list`](/router/reference/wamp_api/registration) |
-| `GET` | `/realms/:realm_uri/registrations_summary` | [`wamp.registration.list`](/router/reference/wamp_api/registration) |
-| `GET` | `/realms/:realm_uri/registrations/:id` | [`wamp.registration.get`](/router/reference/wamp_api/registration) |
-| `GET` | `/realms/:realm_uri/registrations/:id/callees` | [`wamp.registration.list_callees`](/router/reference/wamp_api/registration) |
+| `GET` | `/realms/:realm_uri/registrations/:id` | [`bondy.registration.get`](/router/reference/wamp_api/registration#get-a-registration-in-a-realm) |
+| `GET` | `/realms/:realm_uri/registrations/:id/callees` | [`bondy.registration.list_callees`](/router/reference/wamp_api/registration#list-a-registration-s-callees-in-a-realm) |
 | `GET` | `/realms/:realm_uri/subscriptions` | [`bondy.subscription.list`](/router/reference/wamp_api/subscription) |
-| `GET` | `/realms/:realm_uri/subscriptions_summary` | [`wamp.subscription.list`](/router/reference/wamp_api/subscription) |
+
+The `/registrations` and `/subscriptions` routes are paginated. Each entry carries its id and its match policy.
 
 ### API Gateway specifications
 

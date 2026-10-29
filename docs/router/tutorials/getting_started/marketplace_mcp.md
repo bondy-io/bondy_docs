@@ -233,7 +233,7 @@ second.
 You can verify the metadata layer from any WAMP session on the realm:
 
 ```
-wamp.reflection.procedure.list("com.market.demo")
+wamp.reflection.procedure.list()
 ```
 
 ## 3. Expose the tools with an overlay

@@ -156,7 +156,7 @@ Then start the edge with the private seed from step 1 in the variable named by
 `privkey_env_var`:
 
 ```bash
-BONDY_EDGE_PRIVKEY=<private seed from step 1> bin/bondy foreground
+BONDY_EDGE_PRIVKEY=<private seed from step 1> bin/bondy-connect foreground
 ```
 
 How you set that variable depends on how you run Bondy: a systemd

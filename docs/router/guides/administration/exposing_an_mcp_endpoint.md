@@ -175,7 +175,7 @@ First verify the metadata layer through WAMP Interface Reflection, from any
 WAMP client on the realm:
 
 ```
-wamp.reflection.procedure.list("com.example.fleet")
+wamp.reflection.procedure.list()
 ```
 
 answers the URIs the *calling* principal is authorized to see — which also

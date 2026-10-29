@@ -603,7 +603,7 @@ call bondy.user.list \
 ## Managing the password
 
 ### Change the user password
-#### bondy.user.change_password(realm_uri(), username(), new_password(), old_password()) {.wamp-procedure}
+#### bondy.user.change_password(realm_uri(), username(), new_password()[, old_password()]) {.wamp-procedure}
 Changes the password of an existing user.
 
 Publishes an event under topic [bondy.user.credentials_changed](#bondy-user-credentials-changed){.uri} after the user's password has been changed.
@@ -611,7 +611,7 @@ Publishes an event under topic [bondy.user.credentials_changed](#bondy-user-cred
 #### Call
 
 ##### Positional Args
-The operation supports 3 or 4 positional arguments.
+The operation supports 3 or 4 positional arguments. The realm URI is required. Bondy does not default it to the caller's realm, because the procedure also takes an optional trailing argument.
 
 <DataTreeView
 	:maxDepth="10"
@@ -704,7 +704,7 @@ call bondy.user.get "com.leapsight.test_creation_1" "user_3" | jq
 ```bash [Call w/old password]
 ./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
 call bondy.user.change_password \
-"com.leapsight.test_creation_1" "user_3" "my_password" "my_new_password"
+"com.leapsight.test_creation_1" "user_3" "my_new_password" "my_password"
 ```
 :::
 

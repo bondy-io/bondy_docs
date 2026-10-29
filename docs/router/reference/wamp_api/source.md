@@ -292,13 +292,13 @@ call bondy.source.list \
 :::
 
 ### Find sources from a realm
-#### bondy.source.match(realm_uri(), username()) -> [source()] {.wamp-procedure}
+#### bondy.source.match(realm_uri(), username()[, ip_address()]) -> [source()] {.wamp-procedure}
 Returns the sources that apply to `username` in the realm: the user's own sources, the realm's `all` sources, and those the realm inherits from its prototype.
 
 #### Call
 
 ##### Positional Args
-The procedure takes the realm URI and a username. If you pass only one argument, Bondy treats it as the **username** and uses the calling session's realm. A session outside the master realm can match only in its own realm.
+The procedure takes the realm URI, a username and an optional IP address. The realm URI is required. Bondy does not default it to the caller's realm, because the procedure also takes an optional trailing argument. A session outside the master realm can match only in its own realm.
 
 <DataTreeView
 	:maxDepth="10"
@@ -306,18 +306,23 @@ The procedure takes the realm URI and a username. If you pass only one argument,
 		'0':{
 			'type': 'string',
 			'required': true,
-			'description' : 'The URI of the realm. Defaults to the calling session\'s realm when only one argument is given.'
+			'description' : 'The URI of the realm.'
 		},
 		'1':{
 			'type': 'string',
 			'required': true,
 			'description' : 'The username, or `all` or `anonymous`.'
+		},
+		'2':{
+			'type': 'ip_address',
+			'required': false,
+			'description' : 'The connecting client\'s IP address. See the warning below.'
 		}
 	})"
 />
 
 ::: warning A connection address cannot be passed over WAMP
-The procedure accepts a third argument, the connecting client's IP address, but only as an Erlang IP address tuple, which a WAMP client cannot send. Do not pass a third argument.
+The procedure accepts the connecting client's IP address only as an Erlang IP address tuple, which a WAMP client cannot send. Do not pass a third argument.
 :::
 
 ##### Keyword Args

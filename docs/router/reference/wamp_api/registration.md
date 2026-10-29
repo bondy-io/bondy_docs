@@ -18,12 +18,12 @@ related:
 # Registration
 A registration is a callee's offer to handle calls to a procedure URI. Bondy creates one when a client sends a WAMP `REGISTER`, and removes it on `UNREGISTER` or when the owning session closes.
 
-Bondy exposes registration introspection as two independent procedure families, both reading the same underlying data:
+Bondy exposes registration introspection as two procedure families. Both read the same underlying data.
 
-- **`bondy.registration.*`** — cluster-wide, keyset-**paginated**, unbounded. Built for realms with more registrations than fit comfortably in one message.
-- **`wamp.registration.*`** — the WAMP Meta API, kept in the shape a single-node router historically returned (grouped-by-policy `list`, flat-id `match`). Since a distributed router's realm-wide set has no fixed bound, each `wamp.*` enumeration is capped: past the ceiling it raises `bondy.error.too_many_results` and steers the caller to the paginated family instead of silently truncating.
+- **`bondy.registration.*`** takes the realm URI as its first positional argument. A session in the master realm (`com.leapsight.bondy`) uses this family to read another realm. The enumerations are cluster-wide and keyset-**paginated**.
+- **`wamp.registration.*`** is the WAMP Meta API. Each procedure takes exactly the arguments the WAMP specification gives and acts on the caller's realm. Results take the shapes the WAMP specification gives. No procedure in this family takes a realm argument: a call with extra positional arguments fails with `wamp.error.invalid_argument` ("Invalid number of positional arguments."). The cluster-wide set of registrations has no fixed bound, so each `wamp.registration.*` enumeration is capped. Past the ceiling it raises `bondy.error.too_many_results` and points the caller to the paginated family. Bondy does not truncate the result.
 
-Only the node that owns a registration holds its full record; other nodes know it only through the RIB's compact summary (see [Registry Routing (RIB)](/router/concepts/registry_routing)). Both families above run a cluster-wide query behind the scenes to answer "list/match the realm's registrations" from a single call.
+Only the node that owns a registration holds its full record. Other nodes know it only through the RIB's compact summary (see [Registry Routing (RIB)](/router/concepts/registry_routing)). Both families run a cluster-wide query to answer a call.
 
 ## Types
 
@@ -33,7 +33,13 @@ The external form of a registration entry, common to every procedure below.
 
 <DataTreeView :data="registration" :maxDepth="10" />
 
-### page(registration){.datatype}
+### callee{.datatype}
+
+The entry of a `bondy.registration.callee.list` page: one callee, identified by the node it is connected to and its session.
+
+<DataTreeView :data="callee" :maxDepth="10" />
+
+### page(registration), page(callee){.datatype}
 
 The result shape of every paginated `bondy.registration.*` procedure.
 
@@ -46,6 +52,9 @@ The result shape of every paginated `bondy.registration.*` procedure.
 |[List registrations (paginated)](#list-registrations-paginated)|`bondy.registration.list`|
 |[Match a procedure URI (paginated)](#match-a-procedure-uri-paginated)|`bondy.registration.match`|
 |[List callees](#list-callees)|`bondy.registration.callee.list`|
+|[Get a registration in a realm](#get-a-registration-in-a-realm)|`bondy.registration.get`|
+|[List a registration's callees in a realm](#list-a-registration-s-callees-in-a-realm)|`bondy.registration.list_callees`|
+|[Count a registration's callees in a realm](#count-a-registration-s-callees-in-a-realm)|`bondy.registration.count_callees`|
 |[List registrations](#list-registrations)|`wamp.registration.list`|
 |[Look up a registration](#look-up-a-registration)|`wamp.registration.lookup`|
 |[Match a procedure URI](#match-a-procedure-uri)|`wamp.registration.match`|
@@ -70,9 +79,7 @@ Returns a cluster-wide page of every registration in the realm, in node-then-ent
 />
 
 ##### Keyword Args
-Pagination is driven by the two keyword arguments below. They were
-`CALL.Options` extension keys (`_limit` / `_cursor`) until 2026-09-01; the
-option form is no longer read.
+The two keyword arguments below drive pagination.
 
 <DataTreeView
     :maxDepth="10"
@@ -148,11 +155,13 @@ None.
 Same as [`bondy.registration.list`](#list-registrations-paginated).
 
 ### List callees
-##### bondy.registration.callee.list(realm_uri[, procedure_uri]) -> callee[] {.wamp-procedure}
-Returns the realm's callees — one entry per distinct `(node, session_id)` pair — either across every registration, or restricted to one procedure URI's exact-match registrations.
+##### bondy.registration.callee.list(realm_uri[, procedure_uri]) -> page(callee) {.wamp-procedure}
+Returns a cluster-wide page of the realm's callees, one `callee` entry per distinct `(node, session_id)` pair. Without `procedure_uri`, the page covers every registration in the realm. With `procedure_uri`, it covers only the registration stored under exactly `(procedure_uri, exact)`. A prefix or wildcard registration that would route a call to `procedure_uri` is not included.
+
+The realm URI is required. Bondy does not default it, because the procedure also takes an optional trailing argument.
 
 ::: tip Not the same shape as wamp.registration.list_callees
-This procedure and [`wamp.registration.list_callees`](#list-a-registration-s-callees) both answer "who is serving this?", but for different questions and with different results. This one lists distinct callees (by node and session) across a realm or one procedure URI, unpaginated. `wamp.registration.list_callees` instead takes one specific registration id and returns the plain list of its callees' session ids.
+This procedure and [`wamp.registration.list_callees`](#list-a-registration-s-callees) both answer "who is serving this?", but for different questions and with different results. This one pages through distinct callees (by node and session) across a realm or one exact procedure URI. `wamp.registration.list_callees` instead takes one registration id, acts on the caller's realm, and returns the plain list of its callees' session ids.
 :::
 
 #### Call
@@ -162,17 +171,17 @@ This procedure and [`wamp.registration.list_callees`](#list-a-registration-s-cal
     :data="JSON.stringify({
         '0':{
             'type': 'uri',
-            'description' : 'The URI of the realm to search.'
+            'description' : 'Required. The URI of the realm to search.'
         },
         '1':{
             'type': 'uri',
-            'description' : 'Optional. Restricts the result to the callees of this exact procedure URI.'
+            'description' : 'Optional. Restricts the result to the callees of the registration stored under exactly `(procedure_uri, exact)`.'
         }
     })"
 />
 
 ##### Keyword Args
-None.
+Same `limit` / `cursor` keyword arguments as [`bondy.registration.list`](#list-registrations-paginated).
 
 #### Result
 ##### Positional Results
@@ -180,42 +189,8 @@ None.
     :maxDepth="10"
     :data="JSON.stringify({
         '0':{
-            'type': 'array',
-            'description' : 'A list of `{node, session_id}` objects, one per distinct callee. Empty when there are none.'
-        }
-    })"
-/>
-
-##### Keyword Results
-None.
-
-### List registrations
-##### wamp.registration.list(realm_uri) -> dict {.wamp-procedure}
-Returns every registration id in the realm, grouped by match policy. Bounded: raises `bondy.error.too_many_results` if the realm has more registrations than the configured ceiling (1000 by default) — use [`bondy.registration.list`](#list-registrations-paginated) instead when that happens.
-
-#### Call
-##### Positional Args
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        '0':{
-            'type': 'uri',
-            'description' : 'The URI of the realm to list.'
-        }
-    })"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-##### Positional Results
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        '0':{
-            'type': 'dict',
-            'description' : 'A `{exact, prefix, wildcard}` object, each key holding the list of registration ids using that match policy.'
+            'type': 'page(callee)',
+            'description' : 'The requested page. Each entry in `values` is a `callee` object (see the types above).'
         }
     })"
 />
@@ -224,53 +199,11 @@ None.
 None.
 
 #### Errors
-Raises `bondy.error.too_many_results` past the enumeration ceiling.
+Same as [`bondy.registration.list`](#list-registrations-paginated).
 
-### Look up a registration
-##### wamp.registration.lookup(realm_uri, procedure_uri[, options]) -> id {.wamp-procedure}
-Returns the single registration id that owns `procedure_uri` under an exact match, if one exists.
-
-#### Call
-##### Positional Args
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        '0':{
-            'type': 'uri',
-            'description' : 'The URI of the realm to search.'
-        },
-        '1':{
-            'type': 'uri',
-            'description' : 'The procedure URI to look up.'
-        },
-        '2':{
-            'type': 'dict',
-            'description' : 'Optional. Accepted for spec compatibility; Bondy does not currently interpret any keys in it.'
-        }
-    })"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-##### Positional Results
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        '0':{
-            'type': 'id',
-            'description' : 'The registration id, present only when a match was found. When there is no match, the result carries no positional arguments at all rather than a null or zero value.'
-        }
-    })"
-/>
-
-##### Keyword Results
-None.
-
-### Match a procedure URI
-##### wamp.registration.match(realm_uri, procedure_uri[, options]) -> id[] {.wamp-procedure}
-Returns every registration id whose procedure URI matches `procedure_uri` under that registration's own match policy. Bounded like [`wamp.registration.list`](#list-registrations) — raises `bondy.error.too_many_results` past the ceiling.
+### Get a registration in a realm
+##### bondy.registration.get([realm_uri, ]registration_id) -> registration {.wamp-procedure}
+As [`wamp.registration.get`](#get-a-registration), for the named realm. The realm URI may be omitted, because the procedure takes no optional argument; Bondy then uses the caller's realm.
 
 #### Call
 ##### Positional Args
@@ -279,60 +212,11 @@ Returns every registration id whose procedure URI matches `procedure_uri` under 
     :data="JSON.stringify({
         '0':{
             'type': 'uri',
-            'description' : 'The URI of the realm to search.'
-        },
-        '1':{
-            'type': 'uri',
-            'description' : 'The procedure URI to match.'
-        },
-        '2':{
-            'type': 'dict',
-            'description' : 'Optional. Accepted for spec compatibility; Bondy does not currently interpret any keys in it.'
-        }
-    })"
-/>
-
-##### Keyword Args
-None.
-
-#### Result
-##### Positional Results
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        '0':{
-            'type': 'array',
-            'description' : 'The matching registration ids. Empty when there are none.'
-        }
-    })"
-/>
-
-##### Keyword Results
-None.
-
-#### Errors
-Raises `bondy.error.too_many_results` past the enumeration ceiling.
-
-### Get a registration
-##### wamp.registration.get(realm_uri, registration_id[, details]) -> registration {.wamp-procedure}
-Returns the full external form of one registration, resolved cluster-wide — the id doesn't have to belong to a registration owned by the node handling the call.
-
-#### Call
-##### Positional Args
-<DataTreeView
-    :maxDepth="10"
-    :data="JSON.stringify({
-        '0':{
-            'type': 'uri',
-            'description' : 'The URI of the realm the registration belongs to.'
+            'description' : 'Optional. The URI of the realm the registration belongs to. When the call carries one positional argument, that argument is the registration id and Bondy uses the caller\'s realm.'
         },
         '1':{
             'type': 'id',
             'description' : 'The registration id.'
-        },
-        '2':{
-            'type': 'dict',
-            'description' : 'Optional. Accepted for spec compatibility; Bondy does not currently interpret any keys in it.'
         }
     })"
 />
@@ -356,11 +240,11 @@ None.
 None.
 
 #### Errors
-Raises `wamp.error.no_such_registration` when no node holds a registration with this id. Raises `bondy.error.unavailable`, rather than a false "no such registration", when a node that might hold it could not be reached in time to confirm its absence.
+Same as [`wamp.registration.get`](#get-a-registration). Naming a realm other than the caller's requires a session in the master realm (`com.leapsight.bondy`). Any other session receives `wamp.error.not_authorized`.
 
-### List a registration's callees
-##### wamp.registration.list_callees(realm_uri, registration_id) -> id[] {.wamp-procedure}
-Returns the WAMP session ids of the callees currently serving `registration_id`, gathered cluster-wide.
+### List a registration's callees in a realm
+##### bondy.registration.list_callees([realm_uri, ]registration_id) -> id[] {.wamp-procedure}
+As [`wamp.registration.list_callees`](#list-a-registration-s-callees), for the named realm. The realm URI may be omitted; Bondy then uses the caller's realm.
 
 #### Call
 ##### Positional Args
@@ -369,7 +253,7 @@ Returns the WAMP session ids of the callees currently serving `registration_id`,
     :data="JSON.stringify({
         '0':{
             'type': 'uri',
-            'description' : 'The URI of the realm the registration belongs to.'
+            'description' : 'Optional. The URI of the realm the registration belongs to. When the call carries one positional argument, that argument is the registration id and Bondy uses the caller\'s realm.'
         },
         '1':{
             'type': 'id',
@@ -397,11 +281,11 @@ None.
 None.
 
 #### Errors
-Raises `wamp.error.no_such_registration` or `bondy.error.unavailable` — same distinction as [`wamp.registration.get`](#get-a-registration), since resolving the id to its procedure URI is itself a cluster-wide lookup.
+Same as [`wamp.registration.list_callees`](#list-a-registration-s-callees). Naming a realm other than the caller's requires a session in the master realm (`com.leapsight.bondy`). Any other session receives `wamp.error.not_authorized`.
 
-### Count a registration's callees
-##### wamp.registration.count_callees(realm_uri, registration_id) -> integer {.wamp-procedure}
-Returns the number of callees currently serving `registration_id`, cluster-wide.
+### Count a registration's callees in a realm
+##### bondy.registration.count_callees([realm_uri, ]registration_id) -> integer {.wamp-procedure}
+As [`wamp.registration.count_callees`](#count-a-registration-s-callees), for the named realm. The realm URI may be omitted; Bondy then uses the caller's realm.
 
 #### Call
 ##### Positional Args
@@ -410,7 +294,7 @@ Returns the number of callees currently serving `registration_id`, cluster-wide.
     :data="JSON.stringify({
         '0':{
             'type': 'uri',
-            'description' : 'The URI of the realm the registration belongs to.'
+            'description' : 'Optional. The URI of the realm the registration belongs to. When the call carries one positional argument, that argument is the registration id and Bondy uses the caller\'s realm.'
         },
         '1':{
             'type': 'id',
@@ -438,7 +322,222 @@ None.
 None.
 
 #### Errors
-Raises `wamp.error.no_such_registration` or `bondy.error.unavailable` — same distinction as [`wamp.registration.get`](#get-a-registration).
+Same as [`wamp.registration.count_callees`](#count-a-registration-s-callees). Naming a realm other than the caller's requires a session in the master realm (`com.leapsight.bondy`). Any other session receives `wamp.error.not_authorized`.
+
+### List registrations
+##### wamp.registration.list() -> dict {.wamp-procedure}
+Returns every registration id in the caller's realm, grouped by match policy. Bounded: raises `bondy.error.too_many_results` if the realm has more registrations than the configured ceiling (1000 by default). Use [`bondy.registration.list`](#list-registrations-paginated) instead when that happens.
+
+#### Call
+##### Positional Args
+None.
+
+##### Keyword Args
+None.
+
+#### Result
+##### Positional Results
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'dict',
+            'description' : 'A `{exact, prefix, wildcard}` object, each key holding the list of registration ids using that match policy.'
+        }
+    })"
+/>
+
+##### Keyword Results
+None.
+
+#### Errors
+Raises `bondy.error.too_many_results` past the enumeration ceiling.
+
+### Look up a registration
+##### wamp.registration.lookup(procedure_uri[, options]) -> id | null {.wamp-procedure}
+Returns the registration stored under exactly `(procedure_uri, options.match)` in the caller's realm. Every callee holds its own registration in Bondy, so when several callees share that key, the result is the oldest registration under it.
+
+#### Call
+##### Positional Args
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'uri',
+            'description' : 'The procedure URI to look up.'
+        },
+        '1':{
+            'type': 'dict',
+            'description' : 'Optional. Its `match` key selects the match policy: `exact` (the default), `prefix`, or `wildcard`.'
+        }
+    })"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+##### Positional Results
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'id',
+            'description' : 'The registration id. When no registration is stored under the key, the result is null: the RESULT carries no positional arguments.'
+        }
+    })"
+/>
+
+##### Keyword Results
+None.
+
+#### Errors
+Raises `wamp.error.invalid_argument` when `options.match` is not `exact`, `prefix`, or `wildcard`.
+
+### Match a procedure URI
+##### wamp.registration.match(procedure_uri) -> id | null {.wamp-procedure}
+Returns the one registration a `CALL` to `procedure_uri` would reach in the caller's realm. Bondy takes the best-ranked group of matching registrations across the cluster, then that group's oldest registration. The procedure takes no options argument.
+
+#### Call
+##### Positional Args
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'uri',
+            'description' : 'The procedure URI to match.'
+        }
+    })"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+##### Positional Results
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'id',
+            'description' : 'The registration id. When no registration matches, the result is null: the RESULT carries no positional arguments.'
+        }
+    })"
+/>
+
+##### Keyword Results
+None.
+
+### Get a registration
+##### wamp.registration.get(registration_id) -> registration {.wamp-procedure}
+Returns the full external form of one registration in the caller's realm, resolved cluster-wide. The id does not have to belong to a registration owned by the node handling the call.
+
+#### Call
+##### Positional Args
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'id',
+            'description' : 'The registration id.'
+        }
+    })"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+##### Positional Results
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'registration',
+            'description' : 'The requested registration (see the `registration` type above).'
+        }
+    })"
+/>
+
+##### Keyword Results
+None.
+
+#### Errors
+Raises `wamp.error.no_such_registration` when no node holds a registration with this id. Raises `bondy.error.unavailable`, rather than a false "no such registration", when a node that may hold it could not be reached to confirm its absence.
+
+### List a registration's callees
+##### wamp.registration.list_callees(registration_id) -> id[] {.wamp-procedure}
+Returns the WAMP session ids of the callees of the registration stored under the same `(uri, match)` key as `registration_id`, gathered cluster-wide.
+
+#### Call
+##### Positional Args
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'id',
+            'description' : 'The registration id.'
+        }
+    })"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+##### Positional Results
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'array',
+            'description' : 'The session ids of the registration\'s current callees.'
+        }
+    })"
+/>
+
+##### Keyword Results
+None.
+
+#### Errors
+Raises `wamp.error.no_such_registration` or `bondy.error.unavailable`, with the same distinction as [`wamp.registration.get`](#get-a-registration).
+
+### Count a registration's callees
+##### wamp.registration.count_callees(registration_id) -> integer {.wamp-procedure}
+Returns the number of callees of the registration stored under the same `(uri, match)` key as `registration_id`, counted cluster-wide.
+
+#### Call
+##### Positional Args
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'id',
+            'description' : 'The registration id.'
+        }
+    })"
+/>
+
+##### Keyword Args
+None.
+
+#### Result
+##### Positional Results
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        '0':{
+            'type': 'integer',
+            'description' : 'The number of current callees.'
+        }
+    })"
+/>
+
+##### Keyword Results
+None.
+
+#### Errors
+Raises `wamp.error.no_such_registration` or `bondy.error.unavailable`, with the same distinction as [`wamp.registration.get`](#get-a-registration).
 
 ## Topics
 Bondy publishes these meta events on a registration's lifecycle, subject to the `wamp.meta_events` setting (`demand` by default: an event is only produced when a matching subscriber exists). Because delivery isn't guaranteed, a consumer should snapshot current state via [`wamp.registration.list`](#list-registrations) (or the paginated family) after subscribing, which also covers the gap between subscribing and the next emitted event.
@@ -520,8 +619,8 @@ export default {
                     "mutable": false
                 },
                 "created" : {
-                    "description": "The date and time the registration was created.",
-                    "type": "datetime",
+                    "description": "The date and time the registration was created, as an ISO 8601 string.",
+                    "type": "string",
                     "required": true,
                     "mutable": false
                 },
@@ -544,9 +643,23 @@ export default {
                     "mutable": false
                 }
             }`,
+            callee: `{
+                "node" : {
+                    "description": "The name of the node the callee's session is connected to.",
+                    "type": "string",
+                    "required": true,
+                    "mutable": false
+                },
+                "session_id" : {
+                    "description": "The callee's WAMP session id.",
+                    "type": "id",
+                    "required": true,
+                    "mutable": false
+                }
+            }`,
             page: `{
                 "values" : {
-                    "description": "The page's entries — \`registration\` objects for this family.",
+                    "description": "The page's entries: \`registration\` objects, or \`callee\` objects for \`bondy.registration.callee.list\`.",
                     "type": "array",
                     "required": true,
                     "mutable": false

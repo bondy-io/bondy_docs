@@ -188,7 +188,7 @@ This procedure copies one storage tree with `bondy_mst_admin` and restores it. I
 
 ### Prerequisites
 
-* Shell access to the node's release and the ability to attach an Erlang shell to it (`bin/bondy remote_console`) — `bondy_mst_admin`'s functions are Erlang calls, not a separate CLI tool.
+* Shell access to the node's release and the ability to attach an Erlang shell to it (`bin/bondy-connect remote_console`) — `bondy_mst_admin`'s functions are Erlang calls, not a separate CLI tool.
 * The `bondy_oplog` instance ID(s) whose storage you are protecting. List the running ones from the shell if you don't already track them:
 
   ```erlang

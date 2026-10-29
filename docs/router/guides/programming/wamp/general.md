@@ -43,7 +43,7 @@ own_session = await self._session.call("bondy.session.self")
 
 # Retrieve a specific session by id (routed cluster-wide)
 other_session = await self._session.call(
-    "wamp.session.get", realm_uri, session_id
+    "wamp.session.get", session_id
 )
 ```
 :::
