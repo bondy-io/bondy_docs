@@ -7,7 +7,7 @@ name: Deploy
 
 on:
   push:
-    branches: [master]
+    branches: [main]
 
 concurrency:
   group: pages

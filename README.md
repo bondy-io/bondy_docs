@@ -84,7 +84,7 @@ The site is versioned: a small dropdown in the navbar lets readers switch betwee
 
 - **`docs/versions.json`** is the single source of truth. It lists the `current` version and every `archived` version (each with the git tag that produced it). `docs/.vitepress/config.mjs` reads this file at build time to populate the navbar version picker and the `bondyVersion` site metadata — nothing about the version list is hardcoded in `config.mjs` itself.
 - **Archived versions are built exactly once, ever.** Tagging a commit `docs-<version>` (e.g. `docs-1.0.0-rc`) triggers `.github/workflows/release-docs.yml`, which builds that snapshot with its base path set to `/v<version>/` and publishes the output as a GitHub Release asset. That build is never repeated.
-- **Every push to `master`** triggers `.github/workflows/deploy.yml`, which builds only the *current* version fresh, downloads each archived version's already-built package from GitHub Releases (per `docs/versions.json`, no rebuild), combines them into one directory (current at `/`, each archive at `/v<version>/`), and pushes the result to Netlify as a production deploy via the Netlify CLI.
+- **Every push to `main`** triggers `.github/workflows/deploy.yml`, which builds only the *current* version fresh, downloads each archived version's already-built package from GitHub Releases (per `docs/versions.json`, no rebuild), combines them into one directory (current at `/`, each archive at `/v<version>/`), and pushes the result to Netlify as a production deploy via the Netlify CLI.
 - **`.github/workflows/ci.yml`** runs on every push/PR: build check, broken-link check, spellcheck. It doesn't deploy anything.
 
 ### Cutting a new archived version
@@ -93,7 +93,7 @@ When a future rewrite needs the same treatment:
 
 1. Update `docs/versions.json`: move the current entry into `archived` (giving it a `tag`), and set a new `current`.
 2. Tag the commit you want frozen: `git tag -a docs-<version> -m "..."` and `git push origin docs-<version>`. This triggers `release-docs.yml`, which builds and publishes it once.
-3. Push the `versions.json` update to `master`. The next `deploy.yml` run picks up the new archived entry automatically — no further workflow changes needed.
+3. Push the `versions.json` update to `main`. The next `deploy.yml` run picks up the new archived entry automatically — no further workflow changes needed.
 
 **The `version` field is the URL path, and it must equal the tag minus its `docs-` prefix.** `release-docs.yml` derives the base path a snapshot is built with from the tag name, while `deploy.yml` mounts that snapshot at `/v<version>/` from `versions.json`. If the two disagree the archived version still loads, but every stylesheet and script in it 404s. Use `label` for what the navbar should display when it differs from the path — e.g. the entry below is served at `/v1.0.0-rc.65.1/` and shown as `v1.0.0-rc`:
 
