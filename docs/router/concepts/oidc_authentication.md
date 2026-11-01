@@ -137,9 +137,22 @@ The `redirect_uri` must exactly match the redirect URI registered with the IdP. 
                 "cookie_domain": ".example.com"
             }
         }
-    }
+    },
+    "sources": [
+        {"usernames": "all", "authmethod": "cookie", "cidr": "0.0.0.0/0"}
+    ]
 }
 ```
+
+The `sources` entry lets OIDC users authenticate with the ticket cookie from any address. Narrow its `cidr` to restrict where they may connect from.
+
+### Sources
+
+Bondy applies the realm's [sources](/router/reference/wamp_api/source) to an OIDC user as it does to any other user. The ticket cookie authenticates only when a source allows the `cookie` method from the client's address. This holds for a WAMP session opened with the cookie, for a path the `oidc` scheme protects, and for the Admin API.
+
+It holds whether or not Bondy keeps a user record for the subject. Without `auto_provision` there is no record, so only sources assigned to `all` can match: a source that names users requires those users to exist.
+
+The [verify route](/router/reference/api_gateway/specification#verify-route) does not check sources.
 
 
 ## API Gateway Security Scheme
@@ -176,7 +189,7 @@ This automatically registers four HTTP routes under the version's `base_path`:
 | `<base_path>/oidc/logout` | GET, POST | Terminates the session |
 | `<base_path>/oidc/verify` | GET, HEAD | Tells a reverse proxy whether a request carries a valid ticket. See [Verify route](/router/reference/api_gateway/specification#verify-route). |
 
-The version's own paths require the ticket cookie. The realm's `authmethods` must include `cookie`. See [CSRF Protection](#csrf-protection) for requests that change state.
+The version's own paths require the ticket cookie. The realm's `authmethods` must include `cookie`, and a [source](#sources) must allow it from the client's address. See [CSRF Protection](#csrf-protection) for requests that change state.
 
 
 ## Cookies
@@ -225,7 +238,7 @@ The SPA has to:
 1. Read the `bondy_csrf_<realm_uri>` cookie value from `document.cookie`.
 2. Include it as the `X-CSRF-Token` header on every `POST` request to the Longpoll and SSE transport endpoints, and on every request other than `GET`, `HEAD` or `OPTIONS` to a path the `oidc` scheme protects.
 
-Bondy validates that the header value matches the cookie value. Requests without a matching header receive a `403 Forbidden` response.
+Bondy validates that the header value matches the CSRF cookie of the realm whose ticket cookie authenticated the request. A browser signed in to several realms holds one pair per realm. Requests without a matching header receive a `403 Forbidden` response.
 
 ::: tip
 The CSRF cookie has `HttpOnly` set to `false` so that JavaScript can read it. The ticket cookie has `HttpOnly` set to `true`, so JavaScript cannot read the ticket. An SPA that needs the session's details calls `bondy.session.self` over the WAMP session.

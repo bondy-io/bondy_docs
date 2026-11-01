@@ -50,6 +50,13 @@ A token request authenticates the resource owner, and the API client, with the `
 Obtaining an OAuth2 token requires the use of HTTP (Bondy HTTP Gateway). If you are using WAMP mainly, just use [`ticket`](#ticket)
 :::
 
+#### cookie
+With cookie-based authentication, the client presents the ticket cookie that the [OIDC](/router/concepts/oidc_authentication) authorization code flow sets. No challenge is issued.
+
+::: warning Important
+Sources apply to an OIDC user whether or not Bondy holds a user record for them. A user without a record, because the provider does not set `auto_provision`, is matched only by sources assigned to `all` and by the prototype realm's `all` sources. A source that names users requires those users to exist.
+:::
+
 
 ### How sources are applied
 
