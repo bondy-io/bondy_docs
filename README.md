@@ -1,6 +1,6 @@
 # Bondy Developer Documentation
 
-Official documentation for [Bondy](https://bondy.io) - an open-source, scalable application networking platform.
+Official documentation for [Bondy Connect](https://bondy.io) - an open-source, scalable application networking platform.
 
 [![CI](https://github.com/bondy-io/bondy_docs/actions/workflows/ci.yml/badge.svg)](https://github.com/bondy-io/bondy_docs/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-CC--BY--SA--4.0-blue.svg)](LICENSE)
