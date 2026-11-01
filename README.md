@@ -1,6 +1,6 @@
 # Bondy Developer Documentation
 
-Official documentation for [Bondy](https://bondy.io) - an open-source, scalable application networking platform.
+Official documentation for [Bondy Connect](https://bondy.io) - an open-source, scalable application networking platform.
 
 [![CI](https://github.com/bondy-io/bondy_docs/actions/workflows/ci.yml/badge.svg)](https://github.com/bondy-io/bondy_docs/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-CC--BY--SA--4.0-blue.svg)](LICENSE)
@@ -14,8 +14,8 @@ Visit [developer.bondy.io](https://developer.bondy.io) to view the live document
 ### Prerequisites
 
 - Node.js 20 or higher (use `.nvmrc` with `nvm use`)
-- Yarn package manager
-- [`just`](https://just.systems) and [`codespell`](https://github.com/codespell-project/codespell) - only needed for `yarn spellcheck` / `yarn spellfix`
+- npm (ships with Node.js)
+- [`just`](https://just.systems) and [`codespell`](https://github.com/codespell-project/codespell) - only needed for `npm run spellcheck` / `npm run spellfix`
 
 ### Setup
 
@@ -27,13 +27,13 @@ cd bondy_docs
 
 2. Install dependencies
 ```bash
-yarn install
+npm install
 ```
-`yarn install` fetches `@leapsight/vitepress-template` directly from its (public) git repo — no credentials needed.
+`npm install` fetches `@leapsight/vitepress-template` and `@bondy/site-chrome` directly from their public git repos over HTTPS — no credentials or SSH key needed.
 
 3. Start development server
 ```bash
-yarn docs:dev
+npm run docs:dev
 ```
 
 The site will be available at `http://localhost:5173`
@@ -41,23 +41,23 @@ The site will be available at `http://localhost:5173`
 ## Available Scripts
 
 ### Development
-- `yarn docs:dev` - Start development server with hot reload
-- `yarn docs:preview` - Preview production build locally
+- `npm run docs:dev` - Start development server with hot reload
+- `npm run docs:preview` - Preview production build locally
 
 ### Building
-- `yarn docs:build` - Build for production (includes assets and sitemap)
+- `npm run docs:build` - Build for production (includes assets and sitemap)
 
 ### Code Quality
-- `yarn format` - Format markdown files with Prettier
-- `yarn format:check` - Check formatting without making changes
-- `yarn lint:md` - Lint markdown files
-- `yarn lint:md:fix` - Auto-fix markdown linting issues
-- `yarn spellcheck` - Check spelling
-- `yarn spellfix` - Auto-fix spelling issues (interactive)
-- `yarn check` - Run all checks (format, lint, spell)
+- `npm run format` - Format markdown files with Prettier
+- `npm run format:check` - Check formatting without making changes
+- `npm run lint:md` - Lint markdown files
+- `npm run lint:md:fix` - Auto-fix markdown linting issues
+- `npm run spellcheck` - Check spelling
+- `npm run spellfix` - Auto-fix spelling issues (interactive)
+- `npm run check` - Run all checks (format, lint, spell)
 
 ### Maintenance
-- `yarn outdated` - List outdated dependencies
+- `npm outdated` - List outdated dependencies
 
 ## Project Structure
 
@@ -84,7 +84,7 @@ The site is versioned: a small dropdown in the navbar lets readers switch betwee
 
 - **`docs/versions.json`** is the single source of truth. It lists the `current` version and every `archived` version (each with the git tag that produced it). `docs/.vitepress/config.mjs` reads this file at build time to populate the navbar version picker and the `bondyVersion` site metadata — nothing about the version list is hardcoded in `config.mjs` itself.
 - **Archived versions are built exactly once, ever.** Tagging a commit `docs-<version>` (e.g. `docs-1.0.0-rc`) triggers `.github/workflows/release-docs.yml`, which builds that snapshot with its base path set to `/v<version>/` and publishes the output as a GitHub Release asset. That build is never repeated.
-- **Every push to `master`** triggers `.github/workflows/deploy.yml`, which builds only the *current* version fresh, downloads each archived version's already-built package from GitHub Releases (per `docs/versions.json`, no rebuild), combines them into one directory (current at `/`, each archive at `/v<version>/`), and pushes the result to Netlify as a production deploy via the Netlify CLI.
+- **Every push to `main`** triggers `.github/workflows/deploy.yml`, which builds only the *current* version fresh, downloads each archived version's already-built package from GitHub Releases (per `docs/versions.json`, no rebuild), combines them into one directory (current at `/`, each archive at `/v<version>/`), and pushes the result to Netlify as a production deploy via the Netlify CLI.
 - **`.github/workflows/ci.yml`** runs on every push/PR: build check, broken-link check, spellcheck. It doesn't deploy anything.
 
 ### Cutting a new archived version
@@ -93,7 +93,7 @@ When a future rewrite needs the same treatment:
 
 1. Update `docs/versions.json`: move the current entry into `archived` (giving it a `tag`), and set a new `current`.
 2. Tag the commit you want frozen: `git tag -a docs-<version> -m "..."` and `git push origin docs-<version>`. This triggers `release-docs.yml`, which builds and publishes it once.
-3. Push the `versions.json` update to `master`. The next `deploy.yml` run picks up the new archived entry automatically — no further workflow changes needed.
+3. Push the `versions.json` update to `main`. The next `deploy.yml` run picks up the new archived entry automatically — no further workflow changes needed.
 
 **The `version` field is the URL path, and it must equal the tag minus its `docs-` prefix.** `release-docs.yml` derives the base path a snapshot is built with from the tag name, while `deploy.yml` mounts that snapshot at `/v<version>/` from `versions.json`. If the two disagree the archived version still loads, but every stylesheet and script in it 404s. Use `label` for what the navbar should display when it differs from the path — e.g. the entry below is served at `/v1.0.0-rc.65.1/` and shown as `v1.0.0-rc`:
 
@@ -103,7 +103,7 @@ When a future rewrite needs the same treatment:
 
 ### Previewing the combined site locally
 
-`yarn docs:dev` only ever serves the current version. To see what actually gets deployed — current version plus every archived version at its own path:
+`npm run docs:dev` only ever serves the current version. To see what actually gets deployed — current version plus every archived version at its own path:
 
 ```bash
 just preview-site   # builds current, downloads archived releases, serves it all
@@ -147,8 +147,8 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 1. Fork and create a feature branch
 2. Make your changes
-3. Run quality checks: `yarn check`
-4. Test locally: `yarn docs:dev`
+3. Run quality checks: `npm run check`
+4. Test locally: `npm run docs:dev`
 5. Submit a pull request
 
 ## Technology Stack

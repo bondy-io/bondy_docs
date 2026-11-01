@@ -68,7 +68,7 @@ is *not* a task, and that every declared detail key is actually delivered at the
 raise site.
 
 That last check is worth naming precisely, because the guarantee is narrower
-than it sounds: three of the nine entries declare detail keys and six declare
+than it sounds: ten of the fourteen entries declare detail keys and four declare
 none, so the check proves an entry cannot lie about what it declares — not
 that every alarm carries structured detail.
 
@@ -86,13 +86,14 @@ moment to argue about it.
 Severity does not decide whether a node leaves the load balancer.
 `affects_ready` is its own per-alarm flag, and the reason is that the two
 judgements genuinely differ: an unreachable upstream connector is `major` and
-must *not* drain the node, because the whole WAMP data plane is unaffected. A
-failed durable store is also `major` and must.
+does *not* drain the node, because the whole WAMP data plane is unaffected. A
+node whose durable store failed to open leaves the load balancer.
 
-Today every catalogue entry declares `affects_ready => false`. That is a
-finding rather than an oversight — of the nine conditions, only
-`bondy_db_main_unavailable` stops the node serving, and its readiness flag
-deliberately does not travel through the alarm at all. Conditions that must
+Every catalogue entry declares `affects_ready => false`. That is a
+finding rather than an oversight — of the fourteen conditions, only
+`bondy_db_main_unavailable` and `bondy_oplog_instance_down` stop the node
+serving its tables, and their readiness signals deliberately do not travel
+through the alarm at all. Conditions that must
 survive an alarm-handler crash are recorded outside the alarm subsystem and
 only mirrored as an alarm, so that a crash of the reporting mechanism cannot
 erase the report.
@@ -113,15 +114,16 @@ tribal knowledge:
   signal handler; these references are pulled, not pushed. The
   [task catalogue](/router/reference/wamp_api/task) already used `observe_with`
   for the same kind of thing, and both now carry the same `{kind, ref}` shape.
-- a **task** is a `bondy.*` procedure sanctioned as a remediation, and it must
+- a **task** is a `bondy.*` procedure sanctioned as a remediation, and it has to
   be an entry in the [task catalogue](/router/reference/wamp_api/task), which
   carries its `impact` and `blast_radius`.
 
-**Six of the nine entries have no task, and that is the answer rather than a
-gap.** Only the mail relay and the MCP name collision have a remediation in
-the WAMP API; nothing in `bondy.*` fixes a stalled drain, an unopenable durable
-store, an unwritable retirement set, an oversized sync item or a retention
-ceiling. An empty list is what an operator — or an agent — needs: it stops the
+**Twelve of the fourteen entries have no task, and that is the answer rather
+than a gap.** Only the mail relay and the MCP name collision have a remediation
+in the WAMP API; nothing in `bondy.*` fixes an unreachable HTTP connector upstream, a stalled drain, an unopenable
+durable store, a stopped storage shard, memory pressure, a frontier hole, a
+receipt-derived frontier, an undeclared table a peer replicates into, an
+unwritable retirement set, an oversized sync item or a retention ceiling. An empty list is what an operator — or an agent — needs: it stops the
 search rather than inviting improvisation.
 
 Every rendered alarm carries a `catalogue_id`, because an alarm's id is
@@ -183,7 +185,8 @@ overwriting the first.
 
 Most alarms will not have one, and that is a property of what Bondy raises
 rather than an omission. Bondy has no ambient trace context: a trace rides in a
-message's options, and seven of the nine producers are background probes,
+message's options, and only the two retained-message ceilings are raised on a
+request path. The other twelve entries are raised by background probes,
 appliers and sweepers with no request to inherit from. The field is absent
 there rather than filled with a freshly minted id, which would correlate with
 nothing.
@@ -221,5 +224,5 @@ clearing one without fixing the condition would make the surface lie.
 | [`bondy.alarm.{raised,updated,cleared}` topics](/router/reference/wamp_api/alarm#events) | The same alarm shape, pushed on transition, in the master realm. |
 | [Prometheus](/router/reference/metrics) | `bondy_alarms`, `bondy_alarm_active` and `bondy_node_ready`, with the alarm family as a bounded label. |
 | Logs | Every transition, at `warning` for a raise or update and `notice` for a clear. |
-| `/ready` | 503 while any raised alarm declares `affects_ready`. |
+| `/ready` | 503 while the node is not ready: boot has not finished, the durable `main` database did not open, a kept shard instance is not running, or a raised alarm declares `affects_ready`. |
 | MCP | The read procedures and the three topics, through the shipped `bondy_sre_read` overlay — see [MCP Gateway](/router/concepts/mcp_gateway). |

@@ -39,7 +39,7 @@ cluster. This page is about the durability of what it replicates.
 
 Every replicated operation carries a key: a hybrid logical clock, the
 **origin** that minted it, and that origin's monotonically increasing
-**seq**. A node's **applied frontier** is the per-origin maximum seq it has
+**seq**. A node's **applied frontier** is the per-origin seq it reports as
 applied — a version vector over origins.
 
 The frontier is the unit of comparison because it is the only thing that says
@@ -49,12 +49,19 @@ same frontier hold the same operations. This is what
 across nodes is the cheapest convergence check available: equal hashes on every
 node, at rest, is convergence.
 
-The frontier is a maximum, not a prefix. It records that seq 7 arrived from an
-origin; it does not, by itself, record that 5 and 6 did. That gap between "the
-frontier looks right" and "the data is there" is what the rest of this page is
-about — see
-[Per-Origin Prefix Closure](/router/concepts/prefix_closure) for the property
-that closes it on the apply path.
+Each entry is a **prefix bound**, not a maximum: the largest seq below which
+nothing from that origin is missing. A report of 7 therefore asserts that 5 and
+6 arrived, and that assertion is what makes equal frontiers mean equal
+operation sets. An operation folded above a hole is neither lost nor reported:
+the node records it in a per-origin **pending set** and adds it to the bound
+once the hole closes. A node that carries a hole therefore reports a lower
+frontier, and its hash differs until the hole fills. See [Per-Origin Prefix Closure](/router/concepts/prefix_closure) for how
+the apply path keeps that bound honest.
+
+The applied frontier changes with every fold. The **durable frontier** is the
+applied frontier as the node last checkpointed it; on an in-memory database the
+two are the same. Peers exchange durable frontiers, and compaction and
+reclamation trust only those.
 
 ## How a replica catches up: the sync round
 
@@ -81,23 +88,28 @@ because a capped round has not seen enough to justify them.
 The hazard in this design is that each of steps 1–4 can succeed while data goes
 missing, and the round still records success. A node that concludes "we agree"
 from a round that lost an operation will then act on that conclusion — it will
-let the origin reclaim the space, and the loss becomes permanent and invisible.
+let the cluster truncate history, and the loss becomes permanent.
 
 Three mechanisms exist to prevent exactly that. They are worth knowing by name,
 because each has a counter, and each counter is a different question.
 
 ### The watermark door
 
-A node truncates history it has confirmed. Its **watermark** is how far it has
-truncated. The tempting rule — an operation at or below the watermark has
-already been folded, so it can be discarded — is false for an operation that a
-peer wrote while the round was in flight. It is at or below the watermark and it
-has never been applied here.
+**Compaction** removes from the tree the prefix of operations that every member
+has confirmed. That removal is a **truncation**, and a node's **watermark**
+records how far it has truncated. The tempting rule — an operation at or below
+the watermark has already been folded, so it can be discarded — is false for an
+operation that a peer wrote while the round was in flight. It is at or below the
+watermark and it has never been applied here.
 
 The **watermark door** tests that directly rather than inferring it from the
-watermark. A never-applied operation arriving at or below the watermark is
-accepted: folded into the projection inline, or held for the applier's replay.
-Only an operation the applied frontier genuinely witnesses is discarded.
+watermark. After every merge from a sync round, the door truncates an operation
+at or below the watermark only when every compaction witness (below) confirms
+it, this node's own durable frontier included. A never-applied operation stays:
+it is folded into the projection inline, or held for the applier's replay. The
+same door runs on the live-push path. There, a never-applied operation at or
+below the watermark is installed like any other, and an already-applied one is
+dropped as a duplicate.
 
 `bondy_oplog_doored_events_total` counts what the door accepted. Under sustained
 write load this is a normal steady-state path, not an anomaly — an operation
@@ -111,19 +123,40 @@ a compaction sweeping in that window would collect them. A merge that then finds
 a subtree missing treats it as empty, and the round completes having silently
 dropped it.
 
-So a sync session **pins** the root it is pulling for the life of the round, and
-the sweep honours the pin. If the sweep finds the current root unservable
+So a sync session **pins** the root it is pulling, and the sweep honours the
+pin. A successful integrate releases the pin. A pin that its session never
+releases, because the session died, expires after 120 seconds. If the sweep
+finds the current root unservable
 anyway — pages a live root needs are already gone — it aborts rather than
 sweeping, because sweeping around a hole widens it.
 `bondy_mst_gc_aborted_total` counts those aborts, labelled by which layer lost
 the page.
 
-### Capped truncation
+### The compaction witnesses and the truncation cap
 
-Compaction truncates operations it has evidence every replica holds. That
-evidence is a peer's root **or** its recorded applied frontier — the frontier
-alone is enough, and admitting it is what lets a peer that has itself compacted
-still constrain the decision.
+Compaction truncates only operations it has evidence every member holds. Each
+cluster **member** is a **witness**, and its evidence is the durable frontier it
+last reported. This node's own durable frontier is a witness too. A durable
+frontier survives the member's own compaction, so two nodes that both compact
+keep confirming each other's prefix.
+
+Every member is a witness on every database, the in-memory registry included.
+A member that is down or partitioned keeps the frontier it last confirmed.
+Compaction does not truncate past that frontier, however long the member stays
+silent: **there is no timeout**. A member that has never confirmed holds compaction the same way.
+A member stops holding compaction only when it leaves the cluster, through
+[`bondy.cluster.leave`](/router/reference/wamp_api/cluster) or
+[`cluster.automatic_leave`](/router/reference/configuration/cluster#cluster.automatic_leave).
+Until then, history grows on every shard: on disk for the durable database, in
+memory for the registry. The only bound on the registry's history is
+[`db.registry.retention.*`](/router/reference/configuration/data_storage), off
+by default. Retention truncates by local policy, without the witnesses, so it
+is one of the ways a hole forms.
+
+A node with no other member truncates on its own frontier only when it runs with
+[`cluster.enabled = off`](/router/reference/configuration/cluster#cluster.enabled).
+With clustering enabled and no other member listed, it truncates nothing, and
+the compaction scheduler logs a "GC stalled" warning with reason `no_members`.
 
 Separately, a node will not truncate past an operation its own projection has
 not folded yet. The truncation point is capped below the first such operation,
@@ -147,7 +180,8 @@ that the origin covers on the next round. So Bondy debounces: a gap must strike
 remedy. A successful round clears the count.
 
 The remedy is a **catalogue re-bootstrap**: the peer streams its whole
-projection and the local one is re-derived from it. This is correct in the case
+projection and the local one is re-derived from it (see
+[Re-bootstrap](#re-bootstrap)). This is correct in the case
 that matters — history compacted past this replica cannot be recovered by
 syncing, because the operations are gone — and it is expensive, which is why a
 single transient must never trigger it. `bondy_oplog_rebootstraps_scheduled_total`
@@ -157,17 +191,72 @@ The cost of the debounce is one round of detection delay. That is the deliberate
 trade: detection is delayed, never lost, because a standing gap cannot heal by
 syncing and so strikes again immediately.
 
+Frontier **adoption** is separate and stricter. A node adopts a peer's
+frontier only at the end of a re-bootstrap, and only when the install claimed
+every cell the peer shipped. A sync round compares the peer's frontier with
+its own but never merges it: a peer's frontier says nothing about which of the
+peer's operations reached this node.
+
 ### Healing an unservable own root
 
 The remaining case is a node whose *own* tree has lost pages. It cannot serve
 its root to anyone, and it cannot repair by pulling, because the missing pages
-are its own.
+are its own. Anti-entropy on that node advertises the root as empty, so peers
+pull nothing from it. Its compaction truncates nothing while the tree walk
+meets a missing page. A peer whose frontier is behind recovers what the node
+applied from the node's projection, by re-bootstrap. The peer schedules one
+after three consecutive refusals of the root, each within two minutes of the
+previous one.
 
-Such a node drops the tree and resumes anti-entropy on a fresh one — but only
-after proving that no peer depends on the tree it is discarding.
-`bondy_oplog_mst_rebuilt_total` counts that self-heal. It should be zero. Any
-occurrence means pages went missing, and the question worth asking is not
-whether the heal worked but why they went missing.
+Once every member's durable frontier covers what the node applied, its
+compaction rebuilds the tree: it truncates the tree past every lost page, but
+never past the first operation the node has not applied, and anti-entropy
+resumes on what is left. `bondy_oplog_mst_rebuilt_total` counts that rebuild.
+It should be zero. Any occurrence means pages went missing, and the question
+worth asking is not whether the heal worked but why they went missing.
+
+## Re-bootstrap
+
+A **re-bootstrap** replaces the state of one shard with a peer's snapshot of
+that shard. The sync scheduler dispatches one when:
+
+- a frontier gap stands (two strikes, above);
+- a peer cannot serve pages this node needs, because it reclaimed them;
+- a peer's root is persistently unservable while its frontier is ahead;
+- a shard owes an install that no session has completed, for example after a
+  crash during one.
+
+The session streams the peer's snapshot into a spool file,
+`catalogue_install.spool`, in the write-ahead-log directory of the shard. The
+projection does not change until the stream ends. The spool grows to the
+encoded size of the peer's snapshot of that shard, and is deleted when the
+install is written or abandoned.
+
+When the stream ends, the shard installs it in one step, so that no other write
+folds in between:
+
+1. Every snapshot cell replaces the local cell. A local cell is deleted when the
+   snapshot covers its table but does not contain the cell.
+2. When every cell the peer shipped was installed, the shard sets its applied
+   frontier to the frontier the peer reported before the stream.
+3. The shard re-folds its retained local history, so local writes the peer had
+   not received are kept.
+
+Until the shard's own frontier claims what the install adopted, it holds a
+**re-fold mark**. While it holds the mark, it refuses to serve its snapshot or
+its frontier to a peer, and compaction truncates nothing. A shard that is
+serving its own snapshot to a peer does not start an install. It refuses the
+session, which is retried later. A failed stream or a failed projection write adopts
+nothing, and the scheduler dispatches another re-bootstrap.
+
+A node refuses an install, before writing anything, when the peer's frontier
+does not cover operations the node has already truncated
+(`source_behind_truncation`): those operations are in neither the snapshot nor
+the local tree. The node keeps serving and compacting, and logs the refusal on
+every retry. A refusal that repeats means both nodes truncated history on their
+own before they were joined; see
+[Enabling clustering](/router/reference/configuration/cluster#enabling-clustering)
+for the recovery.
 
 ## How long convergence takes
 

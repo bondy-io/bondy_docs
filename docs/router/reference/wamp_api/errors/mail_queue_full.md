@@ -24,12 +24,18 @@ A queue that fills persistently means the relay cannot keep up with what is bein
 />
 
 ##### Keyword Results
+The standard [error payload](/router/reference/errors#the-error-payload). Each key of `details` also appears at the top level.
+
 <DataTreeView
 	:maxDepth="10"
 	:data="JSON.stringify({
-        'relay': {
+        'code': {
             'type': 'string',
-            'description': 'The configured NAME of the relay. Never its hostname, username or credential.'
+            'description': 'mail_queue_full'
+        },
+        'details': {
+            'type': 'object',
+            'description': 'Holds relay. The configured name of the relay. Never its hostname, username or credential.'
         }
 	})"
 />

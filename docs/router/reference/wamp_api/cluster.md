@@ -18,7 +18,7 @@ related:
 
 A cluster forms and grows through Partisan's automatic peer discovery, configured entirely through `bondy.conf` — see [Running a Cluster](/router/guides/deployment/running_a_cluster) — not through a WAMP procedure. This page covers the procedures and topics that let a session observe cluster membership and connectivity.
 
-**Every procedure on this page is master realm only.** `bondy.cluster.members` and `bondy.cluster.info` were not, until 2026-09-02: `bondy.*` procedures are dispatched statically, so those two URIs resolved in any realm and only the absence of an RBAC grant stood between a tenant session and them. `bondy.cluster.info` answers this node's `node_spec`, which carries its listen addresses and ports.
+**Every procedure on this page is master realm only.** A call from any other realm fails with `wamp.error.not_authorized`. `bondy.cluster.info` answers this node's `node_spec`, which carries its listen addresses and ports.
 
 ## Procedures
 
@@ -26,6 +26,8 @@ A cluster forms and grows through Partisan's automatic peer discovery, configure
 |:---|:---|
 |[Retrieve cluster members](#retrieve-cluster-members)|`bondy.cluster.members`|
 |[Retrieve cluster info](#retrieve-cluster-info)|`bondy.cluster.info`|
+|[List peer connections](#list-peer-connections)|`bondy.cluster.connections`|
+|[Remove a node from the cluster](#remove-a-node-from-the-cluster)|`bondy.cluster.leave`|
 
 ### Retrieve cluster members
 ##### bondy.cluster.members() -> [string()] {.wamp-procedure}
@@ -190,8 +192,8 @@ so a peer appears once per channel.
 Removes `node` from the Partisan membership. Master realm only, and the only
 [task](/router/reference/wamp_api/task) graded `destructive`.
 
-`node` is the name as it appears in `bondy.cluster.members`, and must be
-given even when removing the node serving the call. Naming the target is the
+`node` is the name as it appears in `bondy.cluster.members`. The caller gives
+`node` also to remove the node that serves the call: naming the target is the
 point of the procedure.
 
 Supports `dry_run: true`, which runs the survey below and reports without
@@ -229,8 +231,8 @@ The reply carries the survey either way:
 and `CALL.Options._deadline` (milliseconds from now) caps that — a caller can
 shorten the wait, never lengthen it. A caller whose deadline is already spent
 gets the fail-closed reading: every remaining member is reported `silent` and
-`safe` is `false`. "I ran out of time" and "everyone answered" must not produce
-the same verdict when the verdict authorises a decommission.
+`safe` is `false`. A survey that ran out of time never gives the verdict of a
+survey that every member answered.
 
 `oplog_instances` is **reported, not enforced**. A member with fewer
 registered instances than its peers is the under-advertising case the survey
@@ -242,8 +244,9 @@ Bondy would be guessing at.
 
 | Error | When |
 |---|---|
-| `bondy.error.not_a_member` | `node` is not in the current membership. The name is resolved without creating an atom, so an unknown name is refused rather than interned. |
-| `bondy.error.unsafe_to_leave` | The survey found a silent or not-ready member. The payload names which. |
+| `bondy.error.internal_error` | `node` is not in the current membership, or the survey found a silent or not-ready member. The error does not say which of the two applies, and it does not name the members. Call `bondy.cluster.members` to check the name, and call with `dry_run: true` to read the survey. Bondy resolves the name without creating an atom, so it refuses an unknown name and does not intern it. |
+| `bondy.error.invalid_value` | `node` is not a string. |
+| `bondy.error.cluster_disabled` | The node runs with [`cluster.enabled = off`](/router/reference/configuration/cluster#cluster.enabled), so it has no cluster to change. Nothing is changed. |
 | `wamp.error.not_authorized` | Called from a realm other than the master realm. |
 
 ## Not implemented

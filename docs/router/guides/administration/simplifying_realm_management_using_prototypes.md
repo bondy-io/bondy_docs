@@ -83,6 +83,7 @@ Groups, sources, and grants inherit too, following the rules in step 3 above: a 
 - **Single inheritance only.** A realm's `prototype_uri` points to one prototype, and a prototype cannot itself have a `prototype_uri` — the chain is bounded to one level, not arbitrarily deep.
 - **`prototype_uri` is immutable.** Once a realm is created with (or later given) a prototype, it cannot be pointed at a different one or un-set.
 - **`is_prototype` is immutable.** A realm designated a prototype cannot be un-designated later; decide this at creation.
+- **A prototype in use cannot be deleted.** `bondy.realm.delete` refuses with `bondy.error.conflict` while any realm names the prototype in its `prototype_uri`, even when you pass `force: true`. Delete the inheriting realms first.
 
 ## Result
 

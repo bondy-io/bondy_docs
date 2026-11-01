@@ -4,7 +4,7 @@ outline: [2,3]
 related:
     - text: Network Listeners
       type: Configuration Reference
-      link: /router/reference/configuration/listeners#api-gateway-http-listener
+      link: /router/reference/configuration/listeners#identity-and-mount
       description: Configure the network listeners for the HTTP API Gateway.
     - text: Security
       type: Configuration Reference
@@ -51,7 +51,7 @@ The following diagram shows the object tree in detail, including all properties 
 The properties of the objects in the object tree can contain static values and/or dynamically evaluated values via [expressions](#expression-language) that are resolved against the HTTP request data at runtime.
 
 ::: definition FSM State
-The [API Context](#api-context) is the state of the API Gateway FSM. It is is [incrementally](#incremental-evaluation) an [recursively](#recursive-evaluation) constructed.
+The [API Context](#api-context) is the state of the API Gateway FSM. It is [incrementally](#incremental-evaluation) and [recursively](#recursive-evaluation) constructed.
 :::
 
 So an API Gateway Specification is the basis of an [API Context](#api-context) but also it is evaluated against it, primarily because the context will contain the [Request Object](#request-object) at runtime.
@@ -59,9 +59,7 @@ So an API Gateway Specification is the basis of an [API Context](#api-context) b
 The key to the definition of an API Gateway Specification is understanting the [API Context](#api-context), since defining a specification implies writing expressions that target (read and/or update) the context.
 
 ::: info On the Open API standard
-[Open API (formerly Swagger)](https://www.openapis.org) defines a standard on how HTTP APIs are described, not its implementation. An API Gateway Specification describes and API and the behaviour of the Gateway, that is, it also defines its implementation in terms of the actions that the Gateway need to perform.
-
-A Future version of the API Gateway will aligning with Open API. In addition, the API Gateway implementation will be able to produce and serve an Open API specification of the APIs defined in Bondy.
+[Open API (formerly Swagger)](https://www.openapis.org) defines a standard on how HTTP APIs are described, not its implementation. An API Gateway Specification describes an API and the behaviour of the Gateway, that is, it also defines its implementation in terms of the actions that the Gateway performs.
 :::
 
 
@@ -88,14 +86,14 @@ You access the values in this object by writing expressions using the [API Speci
 #### WAMP Result
 The result for a [WAMP Action](#wamp-action).
 
-This object will be accessible with the expression `{{"\{\{action.result\}\}"}}`.
+This object will be accessible with the expression `{{action.result}}`.
 
 <DataTreeView :data="wampResult" :maxDepth="10" />
 
 #### HTTP Forward Result
 The result of a [Forward Action](#forward-action) whose upstream responded with a status code below `400`.
 
-This object will be accessible with the expression `{{"\{\{action.result\}\}"}}`.
+This object will be accessible with the expression `{{action.result}}`.
 
 ```json
 {
@@ -109,9 +107,9 @@ This object will be accessible with the expression `{{"\{\{action.result\}\}"}}`
 `uri` is the upstream response's `Location` header, if it sent one, or an empty string otherwise.
 
 ### Error Object
-The shape of `{{"\{\{action.error\}\}"}}` when an action fails, for either a [WAMP Action](#wamp-action) or a [Forward Action](#forward-action).
+The shape of `{{action.error}}` when an action fails, for either a [WAMP Action](#wamp-action) or a [Forward Action](#forward-action).
 
-For a WAMP action, the error is the called procedure's own WAMP `ERROR` message, with an added `status_code` (derived from `error_uri` via the API's [`status_codes`](#api-object) map):
+For a WAMP action, the error is the called procedure's own WAMP `ERROR` message, with an added `status_code`. Bondy derives `status_code` from `error_uri` through the default HTTP status of the [error catalogue](/router/reference/errors), not through the specification's `status_codes` map:
 
 ```json
 {
@@ -144,7 +142,7 @@ The expression language operates on the [API Context](#api-context) and it works
 Let's assume that we receive the following HTTP request:
 
 ```bash
-curl -X "POST" "http://localhost:18081/accounts/" \
+curl -X "POST" "http://localhost:18080/accounts/" \
 -H 'Content-Type: application/json; charset=utf-8' \
 -H 'Accept: application/json; charset=utf-8' \
 --data-binary '{
@@ -181,17 +179,16 @@ The following table shows some example expressions being evaluated against the A
 
 |Expression String|Evaluates To|
 |---|---|
-|`{{"\{\{request.method\}\}"}}`|`POST`|
-|`{{"\{\{request.body\}\}"}}`|`{"id": 12345, "bill_to":...}`|
-|`{{"\{\{request.body.sku\}\}"}}`|`"ZPK1972"`|
-|`{{"The sku number is \{\{request.body.sku\}\}"}}`|`"The sku number is ZPK1972"`|
-|`{{"\{\{request.body.price\}\}"}}`|`13.99`|
-|`{{"\{\{request.body.price \|> integer\}\}"}}`|`13`|
-|`{{"\{\{request.body.price \|> string\}\}"}}`|`"13.99"`|
-|`{{"\{\{request.body.customer.first_name\}\}"}}`|`"John"`|
-|`{{"\{\{request.body.customer.first_name\}\}"}} {{"\{\{request.body.customer.last_name\}\}"}}`|`"John Doe"`|
-|`{{"\{\{variables.foo\}\}"}}`|Returns the value of the `foo` variable|
-|`{{"\{\{defaults.status_codes\}\}"}}`|Returns the status codes map|
+|`{{request.method}}`|`POST`|
+|`{{request.body}}`|`{"id": 12345, "bill_to":...}`|
+|`{{request.body.sku}}`|`"ZPK1972"`|
+|`"The sku number is {{request.body.sku}}"`|`"The sku number is ZPK1972"`|
+|`{{request.body.price}}`|`13.99`|
+|`{{request.body.price \|> integer}}`|`13`|
+|`{{request.body.customer.first_name}}`|`"John"`|
+|`"{{request.body.customer.first_name}} {{request.body.customer.last_name}}"`|`"John Doe"`|
+|`{{variables.foo}}`|Returns the value of the `foo` variable|
+|`{{status_codes}}`|Returns the status codes map|
 
 ::: info Learn more
 Expressions also allow to set values in the context and use functions to manipulate the request data. Learn more about expressions in the [API Specification Expressions](/router/reference/api_gateway/expressions) reference section.
@@ -212,6 +209,17 @@ The evaluation of the expressions in the API Gateway Specification is done by pa
 At each level of the tree children nodes can
 can use the values of the certain properties defined in the ancestor node (through expressions), override them and/or update the [API Context](#api-context).
 
+### Validation
+Each object accepts only the properties listed for it on this page, under any of their names. The parser refuses a specification that has any other key in one of these places:
+
+- the API, Version, Path and Operation objects;
+- an Action Object, according to its `type`;
+- the `on_result` and `on_error` objects of a Response Object;
+- the `defaults` of the API, a version or a path;
+- a Security Object, according to its `type`.
+
+A misspelt key is therefore refused, not replaced by its default. The `info` object of a version or an operation is the exception: it is free-form, and the parser checks only that it is an object.
+
 
 
 ## API Object
@@ -227,7 +235,7 @@ The API object is the root of an API Specification. It contains one or more [API
   "name" : "Bonding in HTTP",
   "host" : "_",
   "realm_uri" : "com.example.public",
-  "meta": {"foo" : "bar"}
+  "meta": {"foo" : "bar"},
   "variables" : {
      "cors_headers": {
         "access-control-allow-origin": "*",
@@ -245,12 +253,26 @@ The API object is the root of an API Specification. It contains one or more [API
     "com.example.error.unknown_error": 500,
     "com.example.error.internal_error": 500
   },
-  "versions" : [
+  "versions" : {
     ...
-  ]
+  }
 }
 ```
 :::
+
+### Request matching
+Bondy serves the paths of a specification only to requests whose host matches the specification's `host`.
+
+When more than one host, or more than one path, matches a request, the most specific one answers it. At the first segment where two hosts or two paths differ in kind, a literal segment wins over a binding such as `:id`, and a binding wins over `[...]`. The host or path `_` comes last. Bondy compares hosts from the top-level domain.
+
+Bondy's own paths, such as `/ping` and `/metrics`, belong to the host `_`. When a specification declares one of these paths, the outcome depends on the specification's `host`:
+
+- With the host `_`, Bondy's own path answers the request.
+- With any other host, the specification's path answers requests for that host.
+
+When two specifications declare the same path for the same host, only one of them answers it. In each of these cases Bondy logs a warning and serves the other paths of the specification.
+
+Bondy serves a specification's paths only while its realm exists. When the realm is deleted, its specifications stay stored and their paths stop being served. After the realm is created again, the next rebuild of the routes on a node serves them again on that node. Loading or deleting any specification triggers a rebuild.
 
 
 ## Version Object
@@ -338,7 +360,7 @@ A path specification to be used as a value to a key in the `paths` property of a
 ::: details Operation Object example
 ```json
 {
-    "info": "Echoes the request body back to the caller.",
+    "info": {"summary": "Echoes the request body back to the caller."},
     "body_max_bytes": 1048576,
     "action": {
         "type": "static",
@@ -355,7 +377,7 @@ A path specification to be used as a value to a key in the `paths` property of a
 
 ## Action Object
 
-The API Gateway currently supports 3 types of actions.
+The API Gateway supports four types of action: `static`, `forward`, `wamp_call` and `wamp_publish`.
 
 ### Static Action
 An action that returns a static response.
@@ -389,7 +411,6 @@ An action that forwards the incoming HTTP request to an upstream HTTP endpoint.
 ```json
 {
     "type": "forward",
-    "http_method": "{{request.method}}",
     "host": "upstream.example.com",
     "path": "{{request.path}}",
     "query_string": "{{request.query_string}}",
@@ -397,15 +418,34 @@ An action that forwards the incoming HTTP request to an upstream HTTP endpoint.
     "body": "{{request.body}}",
     "timeout": 5000,
     "connect_timeout": 5000,
-    "retries": 0
+    "retries": 2,
+    "retry_timeout": 1000
 }
 ```
 :::
+
+#### Retries
+When the upstream sends no response, the gateway sends the request again only if its method is idempotent ([RFC 9110, section 9.2.2](https://www.rfc-editor.org/rfc/rfc9110#section-9.2.2)): `get`, `head`, `options`, `put` or `delete`. The gateway sends the request up to `retries` more times, and waits `retry_timeout` milliseconds before each retry. A timeout counts as no response. The gateway never sends a `post` or `patch` request again. It never retries a request that received a response, whatever its status.
+
+#### Responses
+The upstream status becomes the response status unless the [Response Object](#response-object) sets `status_code`.
+
+When the response `body` is `{{action.result.body}}` or `{{action.error.body}}`, the gateway sends the upstream bytes as it received them. The response then keeps the upstream `content-type`, or has none when the upstream sent none. A `content-type` in the Response Object `headers` replaces the upstream one. The gateway sends any other text body as it is. It encodes any other body in the negotiated content type.
+
+#### Failures without a response
+When the upstream sends no response and no retry is left, the gateway answers with an error body and does not evaluate `on_error`:
+
+| Cause | Error URI | Status |
+|---|---|---|
+| The connect or the response outlasts `connect_timeout` or `timeout` | `bondy.error.gateway_timeout` | `504` |
+| Any other failure to reach the upstream | `bondy.error.bad_gateway` | `502` |
 
 ### WAMP Action
 An action that transforms an incoming HTTP request to a WAMP operation.
 
 <DataTreeView :data="wampAction" :maxDepth="10" />
+
+A `wamp_call` action passes its `timeout` as the CALL option `timeout`, and its `retries` as the CALL option `_retries`. A non-zero value of the same option in `options` takes precedence. After a timeout or the loss of the callee, the router retries the call only when the callee registered the procedure with `_idempotent` set to `true`. The action accepts no `connect_timeout` and no `retry_timeout`.
 
 ::: details WAMP Action example
 
@@ -432,10 +472,29 @@ An action that transforms an incoming HTTP request to a WAMP operation.
 ```
 :::
 
+### WAMP Publish Action
+An action that publishes an event to a WAMP topic, with `type` set to `wamp_publish`. Its fields are those of the WAMP call action, with `topic` in place of `procedure`: `topic`, `options`, `args` and `kwargs`. It also accepts `timeout`, which defaults to `defaults.timeout`; the gateway does not pass it to the publication. It accepts no `retries`. Every field can be an expression evaluated against the [API Context](#api-context).
+
+On success, `action.result` is `{"publication_id": <id>}`.
+
+::: details WAMP Publish Action example
+
+```json
+{
+    "type": "wamp_publish",
+    "topic": "com.example.account.created",
+    "options": {},
+    "args": ["{{request.body}}"],
+    "kwargs": {},
+    "timeout": 15000
+}
+```
+:::
+
 ## Response Object
 The response object defines what the API Gateway should respond in case of a successful result or error. The purpose of this declaration is to be able to customise the outcome of the action performed according to the [Action Object](#action-object) declaration.
 
-The outcome is obtained from the [API Context](#api-context) `action` property by using an expression such as `{{"\{\{action.result.PROP\}\}"}}` (in case of a successful result) and `{{"\{\{action.error.PROP\}\}"}}` (in case of an error) where `PROP` will depend on the type of action performed.
+The outcome is obtained from the [API Context](#api-context) `action` property by using an expression such as `{{action.result.PROP}}` (in case of a successful result) and `{{action.error.PROP}}` (in case of an error) where `PROP` will depend on the type of action performed.
 
 
 <DataTreeView :data="response" :maxDepth="10" />
@@ -481,64 +540,90 @@ The API Specification parser will use this object to find a default value for th
 <DataTreeView :data="defaults" :maxDepth="10" />
 
 ## Security Object
-The Security Object defines the authentication method to be used for an API Version. The supported authentication methods are:
+The Security Object defines how requests to an API version authenticate. The router enforces three of the schemes the parser accepts:
 
-* Basic Authentication
-* API Key
-* OAuth2
-    * Client Credentials
-    * Resource Owner Password
+| `type` | Requests to the version's paths | Routes Bondy adds under the version's `base_path` |
+|---|---|---|
+| (empty object) | Served without authentication. | None. |
+| `oauth2` | Require a valid Bondy OAuth2 access token. | The token and revoke paths, `/oauth/jwks`, and a [verify route](#verify-route). |
+| `oidc` | Require the realm's OIDC ticket cookie, `bondy_ticket_<realm_uri>`. A request other than `GET`, `HEAD` or `OPTIONS` must also send the value of the `bondy_csrf_<realm_uri>` cookie in `x-csrf-token`. | `/oidc/login`, `/oidc/<provider>/callback`, `/oidc/logout`, and a [verify route](#verify-route). See [OIDC Authentication](/router/concepts/oidc_authentication). |
+| `basic` | **Refused.** | None. |
+| `api_key` | **Refused.** | None. |
 
+Each scheme accepts only the keys listed for it below. The parser refuses any other key, including `scopes`: the gateway checks no OAuth2 scope.
 
-### Basic Authentication
-
-<DataTreeView :data="basicSecurity" :maxDepth="10" />
-
-
-### API Key Authentication
-
-<DataTreeView :data="apiKeySecurity" :maxDepth="10" />
-::: warning
-CURRENTLY NOT IMPLEMENTED
+::: danger `basic` and `api_key` do not protect a path
+A specification using one of these schemes loads, but Bondy refuses every request to the version's own paths. It never serves them without authentication. Use `oauth2` or `oidc` to protect an HTTP API.
 :::
 
+An `oidc` path authenticates the cookie the way a WAMP session opened with it authenticates: the realm's `authmethods` must include `cookie`, the ticket's scope must cover the realm, and its issuer must be trusted by the realm. A ticket issued for an identity Bondy does not store takes its roles from the ticket.
 
 ### OAuth2 Authentication
 
 <DataTreeView :data="oauth2" :maxDepth="10" />
 
+### OIDC Authentication
+
+<DataTreeView :data="oidcSecurity" :maxDepth="10" />
+
+### Basic Authentication
+
+<DataTreeView :data="basicSecurity" :maxDepth="10" />
+
+### API Key Authentication
+
+<DataTreeView :data="apiKeySecurity" :maxDepth="10" />
+
+### Verify route
+
+The `oauth2` and `oidc` schemes add a route that lets a reverse proxy, such as NGINX with `auth_request`, ask whether a request carries a valid Bondy credential. It is mounted at `<base_path>/oauth/verify` for `oauth2` and `<base_path>/oidc/verify` for `oidc`; set `verify_path` in the Security Object to change it. It verifies against the realm the specification is bound to.
+
+The route accepts `GET` and `HEAD`. It reads the credential from the first of these that is present, and does not fall back to a later one if that credential fails:
+
+1. `Authorization: Bearer <credential>`
+2. `X-Bondy-Ticket: <ticket>`
+3. The `bondy_ticket_<realm_uri>` cookie set by the OIDC login flow
+
+It checks the credential's signature, expiry and revocation; that its scope covers the realm and its issuer is trusted by the realm; that the user is enabled and still exists; and that the realm still allows connections. A credential issued by the OIDC login flow for an identity Bondy does not store locally passes without a local user.
+
+| Outcome | Status | Response |
+|---|---|---|
+| Valid credential | `200` | A JSON body with `active`, `authid`, `authrealm`, `realm`, `authroles`, `authmethod`, `scope`, `issued_at`, `expires_at` and `expires_in`, and the headers `x-bondy-authid`, `x-bondy-authrealm`, `x-bondy-realm`, `x-bondy-authroles` (comma-separated), `x-bondy-authmethod` and `x-bondy-expires-at`. |
+| Anything else | `401` | A JSON error body with `active: false`. |
+
+Every failure answers `401`, including server-side ones, because NGINX turns any other non-2xx status from `auth_request` into a `500`. The route answers *who* the caller is, not what they may do.
+
+## Loading Specifications at Startup
+
+Specifications are usually loaded at runtime through the [HTTP API](/router/reference/http_api/api_gateway). A node can also load them from a file on every boot.
+
+@[config](api_gateway.config_file,path,none,v0.8.8)
+
+The path of a JSON file holding one specification object or an array of them. When the key is unset, no file is loaded.
+
+Each node reads the file on every boot, before its listeners start, and stores each valid specification in the replicated store, from where it reaches the other nodes. A specification identical to the stored one is not written again, so an unchanged file produces no replicated writes on reboot.
+
+The file only adds and updates specifications. Removing a specification from the file does not delete it from the store; delete it with the `bondy.http_gateway.api.delete` WAMP procedure.
+
+Bondy validates every specification in the file before it stores any of them:
+
+- A missing file logs a warning, and the boot continues.
+- A file that is not valid JSON logs an error. Nothing from it is loaded, and the node does not boot.
+- A specification that fails validation logs an error. No specification from the file is loaded, and the node does not boot.
+
 ## Default Values
 
 ### Status Codes
-The following are the default values used to initialise the [API Context](#api-context).
+Every error URI in Bondy's catalogue has a default HTTP status, listed in the `HTTP` column of the [Error Reference](/router/reference/errors). When a `wamp_call` or `wamp_publish` action fails and the `on_error` response sets no `status_code`, the gateway answers with the default status of the error URI. For a URI that is not in the catalogue, including an application's own error URI, the default status is `500`.
+
+Bondy also initialises the [API Context](#api-context) `status_codes` map from the catalogue. The specification's `status_codes` key overrides or extends that map, at the API level and again at the version level. The map changes a response status only through an expression that reads it, such as `{{status_codes |> get({{action.error.error_uri}}, 500) |> integer}}` in `on_error.status_code`:
 
 ```json
 {
-    "bondy.error.already_exists": 400, // BAD REQUEST
-    "bondy.error.not_found": 404, // NOT FOUND
-    "bondy.error.bad_gateway": 504, // SERVICE UNAVAILABLE
-    "bondy.error.http_gateway.invalid_expression": 500, // INTERNAL SERVER ERROR,
-    "bondy.error.timeout": 504, // GATEWAY TIMEOUT
-    "wamp.error.authorization_failed": 500, // INTERNAL SERVER ERROR,
-    "wamp.error.canceled": 400, // BAD REQUEST
-    "wamp.error.close_realm": 500, // INTERNAL SERVER ERROR,
-    "wamp.error.disclose_me_not_allowed": 400, // BAD REQUEST
-    "wamp.error.goodbye_and_out": 500, // INTERNAL SERVER ERROR,
-    "wamp.error.invalid_argument": 400, // BAD REQUEST
-    "wamp.error.invalid_uri": 400, // BAD REQUEST
-    "wamp.error.net_failure": 502, // BAD GATEWAY
-    "wamp.error.not_authorized": 403, // FORBIDDEN
-    "wamp.error.no_eligible_callee": 502, // BAD GATEWAY
-    "wamp.error.no_such_procedure": 501, // NOT IMPLEMENTED
-    "wamp.error.no_such_realm": 502, // BAD GATEWAY
-    "wamp.error.no_such_registration": 502, // BAD GATEWAY
-    "wamp.error.no_such_role": 400, // BAD REQUEST
-    "wamp.error.no_such_session": 500, // INTERNAL SERVER ERROR,
-    "wamp.error.no_such_subscription": 502, // BAD GATEWAY
-    "wamp.error.option_disallowed_disclose_me": 400, // BAD REQUEST
-    "wamp.error.option_not_allowed": 400, // BAD REQUEST
-    "wamp.error.procedure_already_exists": 400, // BAD REQUEST
-    "wamp.error.system_shutdown": 500 // INTERNAL SERVER ERROR
+    "status_codes": {
+        "com.example.error.not_found": 404,
+        "bondy.error.timeout": 503
+    }
 }
 ```
 

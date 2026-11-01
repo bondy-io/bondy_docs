@@ -7,7 +7,7 @@ related:
       description: Overview of Bondy's capabilities and use cases.
     - text: What is WAMP
       type: concepts
-      link: /wamp/concepts/what_is_wamp
+      link: /router/concepts/wamp/what_is_wamp
       description: Understanding the Web Application Messaging Protocol.
     - text: Architecture
       type: concepts
@@ -97,7 +97,7 @@ This comparison includes NATS, Apache Kafka, RabbitMQ, Apache Pulsar, and gRPC. 
 
 |Project|Guarantees|
 |---|---|
-|**Bondy**|Currently: at-most-once. Roadmap: at-least-once and exactly-once delivery for critical operations (trust levels feature).|
+|**Bondy**|At-most-once.|
 |**NATS**|Core: at-most-once. JetStream: at-least-once and exactly-once available.|
 |**gRPC**|At-most-once (depends on underlying transport and application retry logic).|
 |**Kafka**|At-least-once (default), exactly-once semantics available for producer-to-consumer scenarios.|
@@ -141,7 +141,7 @@ This comparison includes NATS, Apache Kafka, RabbitMQ, Apache Pulsar, and gRPC. 
 
 |Project|Retention and Persistence|
 |---|---|
-|**Bondy**|Event retention (last event per topic for late subscribers), configurable to memory, disk, or both. Event history on roadmap. Focus on real-time communication.|
+|**Bondy**|Event retention (last event per topic for late subscribers), stored durably so that it survives a restart. No event history or replay. Focus on real-time communication.|
 |**NATS**|Core NATS: in-memory, no persistence. **JetStream**: persistent streams with configurable retention (time/size/count-based), replicated across cluster (R=1,3,5). File or memory storage.|
 |**gRPC**|No persistence—pure RPC framework. Requires application-level implementation or separate storage system.|
 |**Kafka**|**Persistent by design**. All messages written to disk and replicated. Configurable retention (time-based: default 7 days; size-based: per partition). Retention policies: delete or compact.|
@@ -163,7 +163,7 @@ This comparison includes NATS, Apache Kafka, RabbitMQ, Apache Pulsar, and gRPC. 
 
 |Project|Deployment Models|
 |---|---|
-|**Bondy**|Binary releases, Docker containers, Kubernetes (Helm charts). **Zero external dependencies**—no database, no key-value store, no coordination service. Runs on bare metal, VMs, containers, ARM devices. DNS-based clustering.|
+|**Bondy**|Binary releases, Docker containers, Kubernetes (StatefulSet; no official Helm chart). **Zero external dependencies**—no database, no key-value store, no coordination service. Runs on bare metal, VMs, containers, ARM devices. DNS-based clustering.|
 |**NATS**|Binary distributions, Docker, Kubernetes (Helm charts, NACK operator for JetStream CRDs). Lightweight footprint. Simple configuration. NATS surveyor for monitoring integration.|
 |**gRPC**|Library embedded in applications (not standalone service). Deploy with application code. Often paired with service mesh (Istio, Linkerd) or external load balancer. Kubernetes Gateway API integration (2024 preview).|
 |**Kafka**|Requires JVM. Traditionally requires ZooKeeper (being removed in v4.0). Docker, Kubernetes (Strimzi operator). Confluent offers managed cloud services. Resource-intensive—requires careful capacity planning.|
@@ -196,7 +196,7 @@ This comparison includes NATS, Apache Kafka, RabbitMQ, Apache Pulsar, and gRPC. 
 
 |Project|Built-in and Third-Party Integrations|
 |---|---|
-|**Bondy**|**Built-in HTTP API Gateway** (REST to WAMP translation). **Kafka Bridge** (bidirectional WAMP-Kafka mapping). OAuth2 support. Extensible via WAMP application components. MQTT bridge on roadmap. Focus on enabling gradual adoption.|
+|**Bondy**|**Built-in HTTP API Gateway** (REST to WAMP translation). **Broker Bridge** (WAMP events out to Kafka, SMS and email; no consumer side back into WAMP). OAuth2 support. Extensible via WAMP application components. Focus on enabling gradual adoption.|
 |**NATS**|Extensive integrations: Kafka, AWS services, GCP, Azure, databases, monitoring tools. NATS Streaming provides additional connectors. Community-contributed bridges. Strong cloud-native ecosystem integration.|
 |**gRPC**|No built-in integrations—pure RPC library. gRPC Gateway for REST-to-gRPC transcoding (third-party). Integrations typically at application level. Wide language support enables broad integration.|
 |**Kafka**|**Kafka Connect** framework with hundreds of connectors (databases, cloud services, data lakes, monitoring). KSQL for stream processing. Strong ecosystem. De facto standard for event streaming integration.|
@@ -266,7 +266,7 @@ Choose Bondy when you need:
 Consider alternatives when:
 
 - **Need persistent event log**: Kafka or Pulsar provide durable log-based storage with replay capabilities
-- **Require exactly-once semantics today**: NATS JetStream, Kafka, and Pulsar offer this; Bondy has it on roadmap
+- **Require exactly-once semantics**: NATS JetStream, Kafka, and Pulsar offer this; Bondy does not
 - **Only need message broker**: RabbitMQ or NATS core may be simpler if you don't need RPC
 - **Only need RPC**: gRPC is simpler if you don't need pub/sub or peer-to-peer capabilities
 - **Kubernetes-centric**: Istio provides deeper K8s integration and infrastructure-level features

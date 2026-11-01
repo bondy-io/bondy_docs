@@ -121,8 +121,8 @@ an operator holding an alarm can jump to the exact request that tripped it.
 
 The field is absent on most alarms, and that follows from the propagation model
 above rather than from an omission: a trace rides in a message's options, so a
-producer with no request to inherit from has none. Seven of the nine conditions
-Bondy can raise are background probes, appliers and sweepers. Bondy leaves the
+producer with no request to inherit from has none. Twelve of the fourteen
+conditions Bondy can raise are background probes, appliers and sweepers. Bondy leaves the
 field absent there rather than minting an id that would correlate with nothing.
 
 `onset_trace_id` names the **first** occurrence and survives restatement, the

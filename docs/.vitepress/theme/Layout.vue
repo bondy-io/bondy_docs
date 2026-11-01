@@ -9,16 +9,31 @@
 
      Everything generic — the bar, the burger, the night toggle, the footer
      grid, the palette — comes from @bondy/site-chrome. What stays here is
-     only what is specific to this site: the breadcrumb, the version picker,
+     only what is specific to this site: the context row in the bar's
+     #context slot (DocsContext.vue: the set, its sections and the version)
      and the footer's Diataxis column set. Search comes from the chrome too —
      it spans all three deploys, so it cannot belong to any one of them. -->
 <script setup>
-import Theme, { NavbarVersion } from '@leapsight/vitepress-template/theme'
+import Theme from '@leapsight/vitepress-template/theme'
 import { SiteNav, SiteFooter, SiteSearch, GITHUB_ROUTER, ORIGINS } from '@bondy/site-chrome'
-import { withBase } from 'vitepress'
-import Breadcrumb from './Breadcrumb.vue'
+import { computed } from 'vue'
+import { withBase, useData, useRoute } from 'vitepress'
+import DocsContext from './DocsContext.vue'
+import { docsContext } from './docsContext.js'
 
 const { Layout } = Theme
+
+const { site } = useData()
+const route = useRoute()
+
+// The route with the deploy base stripped, so an archived snapshot (base
+// /v<version>/) resolves the same context as the current site.
+const ctx = computed(() => {
+  let p = route.path
+  const base = site.value.base
+  if (base && base !== '/' && p.startsWith(base)) p = '/' + p.slice(base.length)
+  return docsContext(p)
+})
 
 const footerColumns = [
   {
@@ -45,7 +60,8 @@ const footerColumns = [
       { text: 'bondy.io', href: ORIGINS.website },
       { text: 'GitHub', href: GITHUB_ROUTER },
       { text: 'Community', href: `${ORIGINS.website}/community/` },
-      { text: 'Support', href: `${ORIGINS.website}/support` }
+      { text: 'Support', href: `${ORIGINS.website}/support` },
+      { text: 'Code of Conduct', href: `${ORIGINS.website}/code-of-conduct` }
     ]
   }
 ]
@@ -60,10 +76,7 @@ const BLURB =
     <template #layout-top>
       <SiteNav active="docs" self="docs" layout="docs" :github="GITHUB_ROUTER">
         <template #search><SiteSearch self="docs" /></template>
-        <template #subbar>
-          <Breadcrumb />
-          <NavbarVersion />
-        </template>
+        <template v-if="ctx" #context><DocsContext :ctx="ctx" /></template>
       </SiteNav>
     </template>
   </Layout>
@@ -71,6 +84,6 @@ const BLURB =
     layout="docs"
     :columns="footerColumns"
     :blurb="BLURB"
-    note="Content CC-BY-SA-4.0 · Bondy Apache-2.0"
+    note="Content CC-BY-SA-4.0 · Bondy Connect Apache-2.0"
   />
 </template>

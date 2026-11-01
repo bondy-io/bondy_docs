@@ -30,7 +30,7 @@ With SSO one or more realms can delegate the credentials management and the auth
 Enabling this new feature doesn't affect the capability to manage users "locally" in each realm.
 
 ::: info Notice
-At the moment the realm object only allows a single SSO realm to be associated with it, but the rest of the logic in the platform already caters for multiple SSO realms per realm, so we will be enabling this in the future.
+A realm names at most one SSO realm, in its `sso_realm_uri` property.
 :::
 
 ## How does it work?
@@ -62,17 +62,23 @@ Changing credentials (`password` or `authorized_keys`) can be done by calling th
 
 Users can still be created normally on any realm (aka a "Local" user). To do this we just create the user without specifying a value for the property `sso_realm_uri` or setting it to `null`.
 
+## Removing linked users and realms
+
+A linked user has no credentials of its own. It depends on the user of the same name in the SSO realm. The SSO realm also signs the realm's tokens and tickets and holds their revocations. For that reason Bondy refuses these operations with an error:
+
+* Deleting a user from the SSO realm while other realms hold a linked user of the same name. The linked users have to be deleted first.
+* Deleting the SSO realm while other realms name it in `sso_realm_uri`.
+* Changing a realm's `sso_realm_uri` while the realm holds users linked to its current SSO realm.
+
+The two deletions fail with [`bondy.error.conflict`](/router/reference/wamp_api/errors/conflict). The change fails with [`bondy.error.inconsistency_error`](/router/reference/wamp_api/errors/inconsistency_error).
+
 ## Configuring via a file
 
 The security file format is just the same payload used by the WAMP APIs explained above.
 
-Every time Bondy boots it loads the provided security configuration file and makes a call to `bondy.realm.add`. This however uses a **special mode of operation** of the API. While use interactively (and as mentioned above) the API will **return an error when trying to create and already existing object** but when applying the configuration from file it will override the data.
+Every time Bondy boots it loads the provided security configuration file and creates each realm in it, as `bondy.realm.create` does, but in a **special mode of operation**. Called interactively, `bondy.realm.create` **returns an error when the object already exists**. Applied from the file, the same data overrides the stored object.
 
 That is, when using a configuration file Bondy treats it as a declarative configuration statement.
-
-::: info Complete working example
-* [ ] link to repo here
-:::
 
 ## FAQs
 

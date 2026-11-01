@@ -59,8 +59,8 @@ None.
 Raises `bondy.error.not_found` if the call somehow has no associated session — a defensive case, since a `CALL` always originates from an active session in practice.
 
 ### Retrieve a session
-##### wamp.session.get(realm_uri, session_id) -> session() {.wamp-procedure}
-Retrieves the details of a specific session. Bondy routes the call to whichever node owns the session, so the caller does not need to track session-to-node placement itself.
+##### wamp.session.get(session_id) -> session() {.wamp-procedure}
+Retrieves the details of a session in the caller's realm. Bondy routes the call to whichever node owns the session, so the caller does not need to track session-to-node placement itself. The procedure takes no realm argument; a call with extra positional arguments fails with `wamp.error.invalid_argument`.
 
 #### Call
 ##### Positional Args
@@ -68,12 +68,8 @@ Retrieves the details of a specific session. Bondy routes the call to whichever 
     :maxDepth="10"
     :data="JSON.stringify({
         '0':{
-            'type': 'uri',
-            'description' : 'The URI of the realm the session is attached to.'
-        },
-        '1':{
-            'type': 'id',
-            'description' : 'The session identifier, as returned in the session object\'s `session` field or the `session_guid` field of `authextra`.'
+            'type': 'string',
+            'description' : 'The session identifier, as returned in the `session_guid` field of the session object\'s `authextra`. The integer `session` field is not accepted: a call with it fails with `wamp.error.no_such_session`.'
         }
     })"
 />
@@ -98,11 +94,11 @@ None.
 None.
 
 #### Errors
-Raises `wamp.error.no_such_session` if no session with the given identifier exists on the realm, whether because it never existed, has since closed, or lived on a node that is currently unreachable.
+Raises `wamp.error.no_such_session` if no session with the given identifier exists on the realm, whether because it never existed, has since closed, or lived on a node that is currently unreachable. Raises the same error if the argument is not a `session_guid` string.
 
 ## Topics
 
-Bondy publishes these two events to `wamp.session.<session_id>` and to every realm-wide session-lifecycle subscriber; they are the basis for the "Registry RIB — routing summaries, retry & presence" observability described in [Registry Routing (RIB)](/router/concepts/registry_routing).
+Bondy publishes these two events in the session's realm, on the topics `wamp.session.on_join` and `wamp.session.on_leave`.
 
 ##### wamp.session.on_join{.wamp-topic}
 Published when a session opens.
@@ -119,7 +115,15 @@ Published when a session opens.
 />
 
 ##### Keyword Results
-None.
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        'session_guid':{
+            'type': 'string',
+            'description' : 'The internal, node-hash-qualified session identifier Bondy uses for cluster-wide routing.'
+        }
+    })"
+/>
 
 ### wamp.session.on_leave{.wamp-topic}
 Published when a session closes, whether by client disconnect, explicit `GOODBYE`, or the router terminating it.
@@ -134,7 +138,7 @@ Published when a session closes, whether by client disconnect, explicit `GOODBYE
         },
         '1':{
             'type': 'string',
-            'description' : 'The session\'s authid, or `null` if it authenticated anonymously.'
+            'description' : 'The session\'s authid. For an anonymous session, Bondy generates a unique authid when the session opens.'
         },
         '2':{
             'type': 'string',
@@ -144,7 +148,15 @@ Published when a session closes, whether by client disconnect, explicit `GOODBYE
 />
 
 ##### Keyword Results
-None.
+<DataTreeView
+    :maxDepth="10"
+    :data="JSON.stringify({
+        'session_guid':{
+            'type': 'string',
+            'description' : 'The internal, node-hash-qualified session identifier Bondy uses for cluster-wide routing.'
+        }
+    })"
+/>
 
 ## See also
 
@@ -187,13 +199,13 @@ export default {
                     "mutable": false
                 },
                 "authextra" : {
-                    "description": "Extra authentication context: \`session_guid\` (the internal, node-hash-qualified session identifier used for cluster-wide routing) and \`node\` (the node the session is attached to).",
+                    "description": "Extra authentication context: \`session_guid\` (the internal, node-hash-qualified session identifier used for cluster-wide routing), \`node\` (the node the session is attached to) and, for a session that is not anonymous, \`meta\` (the user's metadata).",
                     "type": "dict",
                     "required": true,
                     "mutable": false
                 },
                 "transport" : {
-                    "description": "Transport-level information, currently the peer's \`peername\` (address and port).",
+                    "description": "Transport-level information: the peer's \`peername\` (address and port). An internal session that has no socket has an empty map.",
                     "type": "dict",
                     "required": true,
                     "mutable": false
@@ -207,7 +219,7 @@ export default {
                     "mutable": false
                 },
                 "x_meta" : {
-                    "description": "The user's metadata, taken from \`authextra.meta\`.",
+                    "description": "The user's metadata, taken from \`authextra.meta\`. An empty map for an anonymous session.",
                     "type": "dict",
                     "required": true,
                     "mutable": false

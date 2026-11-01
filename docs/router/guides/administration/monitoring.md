@@ -18,9 +18,9 @@ related:
 
 # How to Monitor a Bondy Cluster with Prometheus and Grafana
 
-Bondy ships a ready-to-run Prometheus and Grafana stack under `monitoring/` in the source tree, pre-provisioned with scrape targets, datasources and five Grafana dashboards covering cluster topology, the storage stack, the router and WAMP layer, and the BEAM VM. This guide brings the stack up against a local multi-node dev cluster.
+Bondy ships a ready-to-run Prometheus and Grafana stack under `monitoring/` in the source tree, pre-provisioned with scrape targets, datasources and nine Grafana dashboards. They cover cluster topology and sync, the storage stack, the router and WAMP layer, the BEAM VM, the HTTP Connector, MCP and Mail. This guide brings the stack up against a local multi-node dev cluster.
 
-**Prerequisites:** a Bondy source checkout (the stack lives in `monitoring/`, it is not part of the release package), Docker and Docker Compose, and the ability to build and run a local dev cluster (`make node1` and friends). See [Clustering](/router/concepts/clustering) for the concepts behind what the dashboards show.
+**Prerequisites:** a Bondy source checkout (the stack lives in `monitoring/`, it is not part of the release package), Docker and Docker Compose, and the ability to build and run a local dev cluster (`just node1` and friends). See [Clustering](/router/concepts/clustering) for the concepts behind what the dashboards show.
 
 ## Steps
 
@@ -29,12 +29,12 @@ Bondy ships a ready-to-run Prometheus and Grafana stack under `monitoring/` in t
 From the repository root, build and start each dev-cluster node you want to observe:
 
 ```bash
-make node1        # and optionally, in separate terminals:
-make node2
-make node3
+just node1        # and optionally, in separate terminals:
+just node2
+just node3
 ```
 
-Each target builds that node's release and starts it attached to your terminal (`bondy console`) &mdash; run each one in its own terminal, or background it. The dev cluster offsets each node's Admin API port by `100`: node1 serves `18081`, node2 `18181`, node3 `18281`.
+Each target builds that node's release and starts it attached to your terminal (`bondy-connect console`) &mdash; run each one in its own terminal, or background it. The dev cluster offsets each node's Admin API port by `100`: node1 serves `18081`, node2 `18181`, node3 `18281`.
 
 ### 2. Start the monitoring stack
 
@@ -43,11 +43,12 @@ cd monitoring
 docker compose up -d
 ```
 
-This starts two containers: Prometheus (`prom/prometheus`, port `9090`) and Grafana (`grafana/grafana`, port `3000`), wired together by `monitoring/docker-compose.yml`. Grafana is provisioned with:
+This starts three containers, wired together by `monitoring/docker-compose.yml`: Prometheus (`prom/prometheus`, port `9090`), Tempo (`grafana/tempo`, ports `3200` for queries and `4318` for OTLP/HTTP trace ingest) and Grafana (`grafana/grafana`, port `3000`). Grafana is provisioned with:
 
 - a **Prometheus** datasource pointing at the `prometheus` container;
+- a **Tempo** datasource pointing at the `tempo` container, for the traces of [Distributed Tracing](/router/guides/administration/distributed_tracing);
 - an **Infinity** datasource (`yesoreyeram-infinity-datasource`, installed automatically) used to shape the cluster topology graph;
-- five dashboards, auto-loaded from `monitoring/grafana/dashboards/` into a **Bondy** folder, refreshed every 30 seconds if you edit the JSON files on disk.
+- nine dashboards, auto-loaded from `monitoring/grafana/dashboards/` into a **Bondy** folder: cluster overview, cluster graph, cluster sync, storage (oplog and MST), router and WAMP, BEAM runtime, HTTP Connector, MCP, and Mail. They are refreshed every 30 seconds if you edit the JSON files on disk.
 
 Prometheus scrapes every `10s` and retains `7d` of data by default (`monitoring/prometheus/prometheus.yml` and the `--storage.tsdb.retention.time` flag in `docker-compose.yml`, respectively) &mdash; enough for local debugging, not a production retention policy.
 
@@ -83,7 +84,7 @@ On Linux, `host.docker.internal` needs the `extra_hosts: host-gateway` entry alr
 
 ## Reading the dashboards
 
-Each dashboard opens on the **Bondy** folder and answers a different operational question.
+Each dashboard opens on the **Bondy** folder and answers a different operational question. This section describes five of the nine dashboards.
 
 ### Bondy — Cluster Overview
 
@@ -110,7 +111,7 @@ Per-node router internals, WAMP session and messaging traffic, the HTTP API gate
 - **WAMP — sessions & transports** &mdash; session churn and close reasons, session duration, router-initiated ping RTT.
 - **WAMP — messaging & RPC** &mdash; message mix by type, call round-trip latency (heatmap, quantiles, slowest procedures), in-flight invocations per procedure, dropped messages, registration/subscription churn.
 - **HTTP — API gateway & admin listeners** &mdash; status-class, error and duration panels, including per-route golden signals.
-- **Registry RIB — routing summaries, retry & presence** &mdash; the routing-summary machinery behind [Registry Routing](/router/concepts/registry_routing): summary occupancy, damping suppressions, consistency-sweep divergences, and cross-node call retry/completion outcomes.
+- **Registry RIB — routing summaries, retry & presence** &mdash; the routing-summary machinery behind [Registry Routing](/router/concepts/registry_routing): summary occupancy, consistency-sweep divergences, and cross-node call retry/completion outcomes.
 
 ### Bondy — Runtime / BEAM
 
@@ -118,7 +119,7 @@ Per-node BEAM VM runtime: scheduler microstate-accounting breakdown, run queues,
 
 ## Result
 
-You now have a live Prometheus and Grafana stack scraping your dev cluster's Admin API `/metrics` endpoint every 10 seconds, with five dashboards covering cluster topology, the storage stack, the router and WAMP layer, and the BEAM VM. Stop it with:
+You now have a live Prometheus and Grafana stack scraping your dev cluster's Admin API `/metrics` endpoint every 10 seconds, with the nine dashboards of the **Bondy** folder. Stop it with:
 
 ```bash
 docker compose down          # add -v to also drop the Prometheus/Grafana data volumes

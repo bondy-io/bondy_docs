@@ -59,12 +59,12 @@ Entry fields:
 
 | Field | Required | Meaning |
 |---|---|---|
-| `realm` | yes | The realm the entry belongs to. It must exist at load time. |
+| `realm` | yes | The realm the entry belongs to. Bondy rejects the document if the realm does not exist at load time. |
 | `kind` | yes | `procedure`, `topic` or `error`. |
 | `uri` | yes | The WAMP URI described, valid under the entry's match policy. |
 | `match_policy` | no | Defaults to `exact`. |
 | `description` | no | Prose description. |
-| `format` | no | The format every schema-valued field is in. `json_schema_2020_12` is the default and the only member of the set today. |
+| `format` | no | The format every schema-valued field is in. `json_schema_2020_12` is the default and the only accepted value. |
 | `args_schema` | no | Schema for positional call/publish arguments. |
 | `kwargs_schema` | no | Schema for keyword arguments. |
 | `result_args_schema` | no | Schema for positional result arguments. |
@@ -84,9 +84,9 @@ Three rules give the store its integrity:
 
 ## Management procedures
 
-All four procedures require admin authority: they are callable from the
-master realm (or by a caller whose own realm is the one named in argument
-0, per the standard admin argument convention).
+All four procedures are master realm only. A call from any other realm fails
+with `wamp.error.not_authorized`. None of the four takes a realm argument: each
+entry of a document names its own realm.
 
 #### bondy.interface.load(document) -> [] {.wamp-procedure}
 
@@ -117,26 +117,32 @@ principal is authorized to access or provide — for a procedure, a caller
 that may `wamp.call` or `wamp.register` it; for a topic, one that may
 `wamp.subscribe` or `wamp.publish` it. Error URIs are not filtered. A
 `describe` of an entry the caller may not see answers exactly as an absent
-one, so the reply is not an existence oracle. Callers on the master realm,
-and callers on a realm with security disabled, see everything.
+one, so the reply is not an existence oracle. A caller on a realm with security
+disabled sees every entry of that realm. The master realm gets no exemption: its
+callers see what their grants permit.
 
-#### wamp.reflection.procedure.list(realm_uri) -> [uris] {.wamp-procedure}
+#### wamp.reflection.procedure.list() -> [uris] {.wamp-procedure}
 
-#### wamp.reflection.topic.list(realm_uri) -> [uris] {.wamp-procedure}
+#### wamp.reflection.topic.list() -> [uris] {.wamp-procedure}
 
-#### wamp.reflection.error.list(realm_uri) -> [uris] {.wamp-procedure}
+#### wamp.reflection.error.list() -> [uris] {.wamp-procedure}
 
-The URIs of the realm's described procedures, topics or errors, filtered as
-above.
+The URIs of the caller's realm's described procedures, topics or errors,
+filtered as above. The reflection procedures take no realm argument; a call
+with extra positional arguments fails with `wamp.error.invalid_argument`.
 
-#### wamp.reflection.procedure.describe(realm_uri, uri) -> [entry] {.wamp-procedure}
+#### wamp.reflection.procedure.describe(uri) -> [entry] {.wamp-procedure}
 
-#### wamp.reflection.topic.describe(realm_uri, uri) -> [entry] {.wamp-procedure}
+#### wamp.reflection.topic.describe(uri) -> [entry] {.wamp-procedure}
 
-#### wamp.reflection.error.describe(realm_uri, uri) -> [entry] {.wamp-procedure}
+#### wamp.reflection.error.describe(uri) -> [entry] {.wamp-procedure}
 
 The full metadata entry for one URI — description, schemas, declared
 errors, version and the `source` document id that declared it.
+
+Raises `bondy.error.not_found` when the caller's realm has no entry for `uri`,
+or when the caller may not see the entry. Raises `wamp.error.invalid_argument`
+when `uri` is not a string.
 
 ::: info Reflection reads metadata, not the registry
 An entry answers whether or not a callee is currently registered for its

@@ -9,56 +9,62 @@ If no `http_connector.services.*` keys are present, the HTTP Connector subsystem
 
 ## Service Settings
 
-@[config](http_connector.services.$service.base_url,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.base_url,string,,v1.0.0)
 
 The upstream service base URL. All procedure paths are appended to this URL. Supports `{{var}}` interpolation from auth variables.
 
-@[config](http_connector.services.$service.prefix,string,/,v1.0.0-rc.50)
+@[config](http_connector.services.$service.prefix,string,/,v1.0.0)
 
 Path prefix to strip from incoming request paths.
 
-@[config](http_connector.services.$service.auth_mod,generic,generic,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth_mod,generic,generic,v1.0.0)
 
-The authentication module to use. Currently only `generic` is supported, which provides declarative OAuth2 and API key authentication.
+The authentication module to use. The only supported value is `generic`, which provides declarative OAuth2 and API key authentication.
 
-@[config](http_connector.services.$service.timeout,duration,30s,v1.0.0-rc.50)
+@[config](http_connector.services.$service.timeout,duration,30s,v1.0.0)
 
-Upstream HTTP request timeout.
+Deadline for a whole call to a procedure of this service, measured from its start and including every retry. Each attempt gets only the time left before the deadline. The connector skips a retry whose backoff wait would end past the deadline. A call that reaches the deadline without an upstream response fails with `bondy.error.gateway_timeout` (status 504).
 
-@[config](http_connector.services.$service.retries,integer,3,v1.0.0-rc.50)
+@[config](http_connector.services.$service.retries,integer,3,v1.0.0)
 
-Number of retry attempts on connection failures, using exponential backoff.
+Number of retry attempts on transport failures, using jittered exponential backoff. After an HTTP response, the connector retries only a `401` or `403`, once, with a fresh token. It never retries while the service's pool is down.
+
+@[config](http_connector.services.$service.tls_verify,verify_peer&#124;verify_none,verify_peer,v1.0.0)
+
+Whether Bondy verifies the upstream service's TLS certificate when `base_url` uses `https`. With `verify_peer`, Bondy checks the certificate against the trust store managed by the [certificate manager](/router/reference/configuration/cert_manager). With `verify_none`, Bondy skips verification for this service only: the connection is still encrypted, but the upstream is not authenticated. Use `verify_none` only for development or testing.
+
+The setting applies to the service's connection pool, so it covers every procedure mapped to the service.
 
 
 ## Connection Pool
 
 Each service gets a dedicated HTTP connection pool.
 
-@[config](http_connector.services.$service.pool.size,integer,25,v1.0.0-rc.50)
+@[config](http_connector.services.$service.pool.size,integer,25,v1.0.0)
 
 Maximum number of connections in the pool.
 
-@[config](http_connector.services.$service.pool.checkout_timeout,duration,5s,v1.0.0-rc.50)
+@[config](http_connector.services.$service.pool.checkout_timeout,duration,5s,v1.0.0)
 
 Timeout for acquiring a connection from the pool.
 
-@[config](http_connector.services.$service.pool.connect_timeout,duration,8s,v1.0.0-rc.50)
+@[config](http_connector.services.$service.pool.connect_timeout,duration,8s,v1.0.0)
 
-TCP connection timeout.
+TCP connection timeout. On a call to a procedure, the connector replaces it with the time left before the service's `timeout`.
 
-@[config](http_connector.services.$service.pool.idle_timeout,duration,5m,v1.0.0-rc.50)
+@[config](http_connector.services.$service.pool.idle_timeout,duration,5m,v1.0.0)
 
 How long idle connections are kept in the pool.
 
-@[config](http_connector.services.$service.pool.recv_timeout,duration,60s,v1.0.0-rc.50)
+@[config](http_connector.services.$service.pool.recv_timeout,duration,60s,v1.0.0)
 
-Timeout for receiving a response from the upstream.
+Timeout for receiving a response from the upstream. On a call to a procedure, the connector replaces it with the time left before the service's `timeout`.
 
-@[config](http_connector.services.$service.pool.follow_redirect,on|off,off,v1.0.0-rc.50)
+@[config](http_connector.services.$service.pool.follow_redirect,on|off,off,v1.0.0)
 
 Whether to follow HTTP redirects.
 
-@[config](http_connector.services.$service.pool.max_redirect,integer,5,v1.0.0-rc.50)
+@[config](http_connector.services.$service.pool.max_redirect,integer,5,v1.0.0)
 
 Maximum number of redirects to follow (when enabled).
 
@@ -89,7 +95,7 @@ Connect/receive timeout for a single probe request.
 
 @[config](http_connector.services.$service.liveness.failure_threshold,integer,3,v1.0.0)
 
-Consecutive probe failures required before the pool is marked down and the service-down alarm is raised. Guards against flapping on a single transient blip.
+Consecutive probe failures required before the pool is marked down and the service-down alarm is raised. Guards against flapping on a single transient blip. A probe succeeds on any HTTP response, whatever its status, and fails when the request itself fails. While the pool is down, calls to the service fail at once with `wamp.error.unavailable` (status 503).
 
 @[config](http_connector.services.$service.liveness.success_threshold,integer,1,v1.0.0)
 
@@ -104,46 +110,46 @@ After `failure_threshold` consecutive failures, Bondy raises an OTP alarm with i
 
 Configure how the connector acquires authentication tokens for the upstream service.
 
-@[config](http_connector.services.$service.auth.fetch.method,get|post,post,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.fetch.method,get|post,post,v1.0.0)
 
 HTTP method for the token request.
 
-@[config](http_connector.services.$service.auth.fetch.url,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.fetch.url,string,,v1.0.0)
 
 Token endpoint URL. Supports `{{var}}` interpolation.
 
-@[config](http_connector.services.$service.auth.fetch.body_encoding,form|json|none,none,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.fetch.body_encoding,form|json|none,none,v1.0.0)
 
 How to encode the token request body:
 - `form` — URL-encoded form (`application/x-www-form-urlencoded`)
 - `json` — JSON (`application/json`)
 - `none` — No body
 
-@[config](http_connector.services.$service.auth.fetch.body.$key,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.fetch.body.$key,string,,v1.0.0)
 
 A key-value pair in the token request body. Supports `{{var}}` interpolation. Define one line per key.
 
-@[config](http_connector.services.$service.auth.fetch.headers.$key,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.fetch.headers.$key,string,,v1.0.0)
 
 A custom header on the token request. Supports `{{var}}` interpolation.
 
-@[config](http_connector.services.$service.auth.fetch.token_path,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.fetch.token_path,string,,v1.0.0)
 
 Dot-separated JSON path to the token in the response (e.g. `access_token` or `data.token`).
 
-@[config](http_connector.services.$service.auth.fetch.error_path,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.fetch.error_path,string,,v1.0.0)
 
 Dot-separated JSON path to the error message in the response.
 
-@[config](http_connector.services.$service.auth.fetch.expires_in_path,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.fetch.expires_in_path,string,,v1.0.0)
 
 Dot-separated JSON path to the token TTL (in seconds) in the response.
 
-@[config](http_connector.services.$service.auth.fetch.basic_auth.username,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.fetch.basic_auth.username,string,,v1.0.0)
 
 HTTP Basic authentication username for the token request. Supports `{{var}}` interpolation.
 
-@[config](http_connector.services.$service.auth.fetch.basic_auth.password,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.fetch.basic_auth.password,string,,v1.0.0)
 
 HTTP Basic authentication password for the token request. Supports `{{var}}` interpolation.
 
@@ -152,60 +158,60 @@ HTTP Basic authentication password for the token request. Supports `{{var}}` int
 
 Configure how the acquired token is applied to upstream requests.
 
-@[config](http_connector.services.$service.auth.apply.placement,header|query_param,header,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.apply.placement,header|query_param,header,v1.0.0)
 
 Where to place the token on upstream requests.
 
-@[config](http_connector.services.$service.auth.apply.name,string,Authorization,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.apply.name,string,Authorization,v1.0.0)
 
 The header name or query parameter name.
 
-@[config](http_connector.services.$service.auth.apply.format,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.apply.format,string,,v1.0.0)
 
-Format template for the token value. Use `{{token}}` as a placeholder. For example, `Bearer {{token}}` produces the header `Authorization: Bearer <token>`.
+Format template for the token value. Use `{{token}}` as a placeholder. For example, `Bearer {{token}}` produces the header `Authorization: Bearer <token>`. Unset, the connector sends the raw token.
 
 
 ## Auth: Variable Bindings
 
 Define variables for `{{var}}` interpolation in all auth-related fields.
 
-@[config](http_connector.services.$service.auth.vars.$var,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.vars.$var,string,,v1.0.0)
 
 A named variable binding. The variable name is the `$var` portion of the key. Referenced as `{{var}}` in auth URLs, headers, body values, and basic auth credentials.
 
 
 ## Auth: Token Cache
 
-@[config](http_connector.services.$service.auth.cache.default_ttl,duration,1h,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.cache.default_ttl,duration,1h,v1.0.0)
 
 Default token TTL when the token response does not include an `expires_in` value.
 
-@[config](http_connector.services.$service.auth.cache.refresh_margin,duration,1m,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.cache.refresh_margin,duration,1m,v1.0.0)
 
-How many seconds before token expiry to trigger a background refresh. Set to `0` to disable preemptive refresh.
+How long before token expiry the connector starts a background refresh. Set to `0` to disable preemptive refresh: the connector then fetches a new token synchronously on the first request after expiry.
 
 
 ## Auth: External Secrets
 
 Resolve credentials from an external secrets provider at startup. Resolved values override static auth variables.
 
-@[config](http_connector.services.$service.auth.secrets.provider,aws_sm,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.secrets.provider,aws_sm,,v1.0.0)
 
-The secrets provider. Currently only `aws_sm` (AWS Secrets Manager) is supported.
+The secrets provider. The only supported value is `aws_sm` (AWS Secrets Manager).
 
-@[config](http_connector.services.$service.auth.secrets.secret_id,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.secrets.secret_id,string,,v1.0.0)
 
 The secret identifier — an ARN or secret name.
 
-@[config](http_connector.services.$service.auth.secrets.region,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.secrets.region,string,,v1.0.0)
 
 The AWS region where the secret is stored.
 
-@[config](http_connector.services.$service.auth.secrets.vars.$var.field,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.secrets.vars.$var.field,string,,v1.0.0)
 
 The JSON field name in the secret to extract for this variable.
 
-@[config](http_connector.services.$service.auth.secrets.vars.$var.transform,none|basic_username|basic_password,none,v1.0.0-rc.50)
+@[config](http_connector.services.$service.auth.secrets.vars.$var.transform,none|basic_username|basic_password,none,v1.0.0)
 
 Transform to apply to the extracted value:
 - `none` — Use the raw value
@@ -217,19 +223,19 @@ Transform to apply to the extracted value:
 
 Map WAMP procedure URIs to upstream HTTP endpoints. Each procedure is identified by a short name (`$proc`) used only as a configuration key.
 
-@[config](http_connector.services.$service.procedures.$proc.uri,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.procedures.$proc.uri,string,,v1.0.0)
 
 The WAMP procedure URI to register (e.g. `com.billing.get_invoice`). **Required.**
 
-@[config](http_connector.services.$service.procedures.$proc.realm,string,,v1.0.0-rc.50)
+@[config](http_connector.services.$service.procedures.$proc.realm,string,,v1.0.0)
 
 The Bondy realm to register the procedure in. **Required.**
 
-@[config](http_connector.services.$service.procedures.$proc.method,get|post|put|patch|delete|head,get,v1.0.0-rc.50)
+@[config](http_connector.services.$service.procedures.$proc.method,get|post|put|patch|delete|head,get,v1.0.0)
 
 The HTTP method for the upstream request.
 
-@[config](http_connector.services.$service.procedures.$proc.path,string,/,v1.0.0-rc.50)
+@[config](http_connector.services.$service.procedures.$proc.path,string,/,v1.0.0)
 
 The URL path template. Use `{{var}}` placeholders for path variables filled from the call kwargs.
 

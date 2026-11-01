@@ -11,7 +11,7 @@ related:
       description: Step-by-step guide to implementing Same Sign-on.
     - text: Security
       type: concepts
-      link: /wamp/concepts/security
+      link: /router/concepts/wamp/security
       description: Authentication and authorization in WAMP.
 ---
 # Single Sign-On
@@ -19,7 +19,7 @@ related:
 Bondy Single Sign-On (SSO) is a feature that enables users to authenticate once and gain access to multiple realms without re-entering credentials. This reduces authentication friction while maintaining security boundaries between realms.
 
 ::: warning Terminology: SSO vs Same Sign-On
-Bondy implements **Same Sign-On** (also abbreviated SSO), not traditional Single Sign-On. With Same Sign-On, users still authenticate when opening a session to each realm, but they use the same shared credentials. Traditional Single Sign-On would allow a user to authenticate once and automatically access all connected realms without re-authenticating. Bondy's approach maintains stronger security boundaries while simplifying credential management.
+Bondy uses SSO for two related features. With **Same Sign-On**, users still authenticate when opening a session to each realm, but they use the same shared credentials. Bondy **Single Sign-On** combines Same Sign-On with the [Ticket](/router/concepts/realms#ticket) authentication method, so a ticket lets the user open sessions on linked realms without re-entering credentials. Most of this page describes Same Sign-On, which both features build on.
 :::
 
 ## The Problem: Credential Sprawl
@@ -247,16 +247,16 @@ This separation allows:
 Changing a password affects all linked realms:
 
 ```javascript
-// Can update from any linked realm
-wampy.call('bondy.user.update', ['com.example.app1', 'alice@example.com', {
-    password: 'new_secure_password'
-}]);
+// Can change from any linked realm: realm, username, new password, old password
+wampy.call('bondy.user.change_password', [
+    'com.example.app1', 'alice@example.com', 'new_secure_password', 'secure_password'
+]);
 
-// Bondy updates password in SSO realm
-// New password immediately works for all linked realms
+// Bondy changes the password in the SSO realm
+// The new password works for all linked realms
 ```
 
-Password changes are automatically propagated to the SSO realm, affecting authentication across all linked user realms.
+`bondy.user.change_password` forwards the change of a linked user to the SSO realm, so the change affects authentication across all linked user realms. `bondy.user.update` does not change a password.
 
 ### Adding Users to Additional Realms
 
@@ -355,14 +355,7 @@ Same Sign-On shares credentials, not sessions:
 
 ### Password Policy
 
-Since passwords are centralized, apply strong policies:
-
-- Minimum length requirements
-- Complexity rules
-- Rotation policies
-- Lockout after failed attempts
-
-Configure these at the SSO realm level to enforce consistently across all linked realms.
+Since passwords are centralized, one password policy governs every linked realm. Bondy enforces a minimum and a maximum password length, set for the whole node by `security.password.min_length` and `security.password.max_length` (see the [Security Configuration Reference](/router/reference/configuration/security)). Bondy has no complexity, rotation or lockout rules. An application that needs them enforces them where it sets passwords.
 
 ## Comparison: Same Sign-On vs Single Sign-On
 
@@ -391,7 +384,7 @@ Bondy's approach prioritizes security isolation while reducing credential manage
 1. **Consistent usernames** - Use email addresses as usernames for clarity
 2. **Document SSO links** - Track which realms share which SSO realm
 3. **Test credential updates** - Verify password changes propagate correctly
-4. **Handle user deletion** - Understand that deleting from SSO realm affects all linked realms
+4. **Handle user deletion** - Delete a user from each linked realm before you delete it from the SSO realm. Bondy refuses to delete an SSO user while other realms link to it.
 
 ### Operations
 
@@ -421,4 +414,4 @@ Bondy Same Sign-On simplifies credential management in multi-realm architectures
 - **Reduced friction** for users accessing multiple realms
 - **Maintained security** through realm isolation
 
-It's an elegant solution to the credential sprawl problem in distributed applications, maintaining strong security boundaries while improving user experience.
+It addresses credential sprawl in distributed applications and keeps the security boundary of each realm.

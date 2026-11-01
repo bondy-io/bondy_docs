@@ -65,7 +65,7 @@ unparseable `Origin` is refused with 403.
 @[config](listeners.$name.mcp.public_base_uri,string,,v1.0.0)
 
 The public origin (scheme and host, e.g. `https://mcp.example.com`) this
-endpoint publishes in documents that must carry one, such as the OAuth
+endpoint publishes in documents that carry one, such as the OAuth
 protected-resource metadata document. Set it when the listener sits behind
 a TLS-terminating proxy, where neither the listener's transport nor the
 request reflects the public URL. Unset, the scheme is derived from the
@@ -77,8 +77,8 @@ Maximum size of an MCP request body on this listener.
 
 @[config](listeners.$name.mcp.max_inflight,integer,64,v1.0.0)
 
-Maximum number of concurrent in-flight MCP calls per session on this
-listener.
+Has no effect. Bondy accepts the key but does not limit the number of
+concurrent MCP calls per session.
 
 @[config](listeners.$name.mcp.idle_timeout,duration,10m,v1.0.0)
 
@@ -94,13 +94,13 @@ Page size used for MCP list results when the client does not name one.
 
 @[config](listeners.$name.mcp.schema.max_depth,integer,32,v1.0.0)
 
-Maximum nesting depth accepted when validating a JSON Schema carried by an
-MCP request on this listener.
+Has no effect. Bondy accepts the key, but does not validate the arguments
+of an MCP request against a tool's input schema.
 
 @[config](listeners.$name.mcp.schema.max_validation_ms,duration,50ms,v1.0.0)
 
-Time bound on validating a single JSON Schema carried by an MCP request on
-this listener.
+Has no effect, for the same reason as
+[`listeners.$name.mcp.schema.max_depth`](#listeners.$name.mcp.schema.max_depth).
 
 ## Manifest
 
@@ -145,8 +145,8 @@ principal, the tool and the arguments.
 
 @[config](mcp.request_state.ttl,duration,5m,v1.0.0)
 
-How long a continuation stays valid: the retry must arrive within this
-window or it is rejected. This bounds the replay window — keep it short.
+How long a continuation stays valid. Bondy rejects a retry that arrives
+after this window. This bounds the replay window — keep it short.
 
 @[config](mcp.request_state.max_size,bytesize,64KB,v1.0.0)
 
@@ -183,8 +183,8 @@ mode.
 service this upstream rides: its `base_url`, TLS verification, connection
 pool, timeouts and token-acquisition auth all come from
 `http_connector.services.<name>.*`. The service's credential is a shared
-service account applied to every projected call, which is why `identity`
-below must be declared explicitly.
+service account applied to every projected call. For that reason the `identity`
+key below has no default.
 
 @[config](mcp.upstreams.$upstream.realm,string,,v1.0.0)
 
@@ -195,9 +195,9 @@ upstream tool becomes a WAMP procedure registered in this realm.
 
 **Required.** The WAMP URI prefix projected procedures are registered
 under: tool `t` becomes `<prefix>.<t>` (tool names are lowercased and
-characters outside `[a-z0-9_]` replaced with `_`). Must be unique per realm
-across upstreams — startup refuses a duplicate — so no upstream can shadow
-another's tool names.
+characters outside `[a-z0-9_]` replaced with `_`). Two upstreams in one
+realm cannot share a prefix — startup refuses a duplicate — so no upstream
+can shadow another's tool names.
 
 @[config](mcp.upstreams.$upstream.identity,enum,,v1.0.0)
 
@@ -206,8 +206,7 @@ upstream. The only supported value is `service`: the shared service account
 configured on the `http_connector` service, applied regardless of which
 WAMP caller invoked the projected procedure. That is permitted only where
 explicitly declared — which is what this key is; an upstream without it
-refuses to start. Per-caller identities (token exchange) are a planned
-extension, not a configuration today.
+refuses to start.
 
 @[config](mcp.upstreams.$upstream.path,string,"",v1.0.0)
 

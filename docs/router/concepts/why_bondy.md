@@ -47,7 +47,7 @@ Most of these protocols were designed as vertical solutions for one use case —
 
 ## What a single protocol buys back
 
-WAMP unifies RPC and Pub/Sub in one protocol with a peer-to-peer programming model, transport-agnostic and with multiple serialization formats, plus built-in multi-tenancy through realms — see [What is WAMP](/wamp/concepts/what_is_wamp). Because every kind of client uses the same protocol and the same semantics over the same connection, a browser can expose a procedure for a server to call, not only call procedures itself: the architecture can be genuinely peer-to-peer rather than client-server with an extra channel bolted on.
+WAMP unifies RPC and Pub/Sub in one protocol with a peer-to-peer programming model, transport-agnostic and with multiple serialization formats, plus built-in multi-tenancy through realms — see [What is WAMP](/router/concepts/wamp/what_is_wamp). Because every kind of client uses the same protocol and the same semantics over the same connection, a browser can expose a procedure for a server to call, not only call procedures itself: the architecture can be genuinely peer-to-peer rather than client-server with an extra channel bolted on.
 
 Bondy is a WAMP router that additionally:
 
@@ -59,7 +59,7 @@ Bondy is a WAMP router that additionally:
 
 ## AI agent communication
 
-The same properties that make WAMP suit distributed applications generally — RPC and Pub/Sub unified, peer-to-peer by default, authentication/authorization/multi-tenancy built in — apply directly to AI agent systems, where an agent typically needs to both expose capabilities and consume them, and needs event coordination alongside function calling. See [WAMP for agent-to-agent communication](/wamp/concepts/what_is_wamp#wamp-for-agent-to-agent-communication) for the detailed case, including the comparison against agent-specific protocols such as MCP.
+The same properties that make WAMP suit distributed applications generally — RPC and Pub/Sub unified, peer-to-peer by default, authentication/authorization/multi-tenancy built in — apply directly to AI agent systems, where an agent typically needs to both expose capabilities and consume them, and needs event coordination alongside function calling. See [WAMP for agent-to-agent communication](/router/concepts/wamp/what_is_wamp#wamp-for-agent-to-agent-communication) for the detailed case, including the comparison against agent-specific protocols such as MCP.
 
 ## What replacing the stack looks like
 

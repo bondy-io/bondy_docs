@@ -12,8 +12,10 @@ This guide provides steps to install and configure Bondy on Docker using the off
 
 If you want to build and use your own Docker image, make sure you check the official images sources first as you might want to use them as your template.
 
-These are located at the Bondy's Github repository under the ["deployment" directory](https://github.com/bondy-io/bondy/tree/develop/deployment).
+These are located at the Bondy's Github repository under the ["deployment" directory](https://github.com/bondy-io/bondy-connect/tree/develop/deployment).
 :::
+
+The images include the Erlang runtime they were built with, so the host needs no Erlang. `deployment/Dockerfile` builds on Erlang/OTP 29.1.2 and runs on Debian trixie (slim); `deployment/alpine.Dockerfile` builds on Erlang/OTP 29.1.2 and runs on Alpine 3.24.2.
 
 ## Prerequisites
 * A Docker-enabled system with proper Docker access
@@ -130,7 +132,12 @@ Again using your text editor create a file name `bondy.conf` in the `${BONDY_HOM
 
 ```text
 security.config_file = /bondy/etc/security.config.json
+cluster.enabled = off
 ```
+
+::: warning `cluster.enabled = off` is required for a single node
+This guide runs one node, so it turns clustering off. A node left on the default `cluster.enabled = on` with no other member never compacts its history. Under the default fence policy, it also refuses every authentication, anonymous included, once its security tables stay unconfirmed for longer than `db.aae.fence.max_lag`. To run a cluster instead, follow [Running a Cluster](/router/guides/deployment/running_a_cluster) and see [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering).
+:::
 
 ### 4. Verify your setup
 
@@ -141,52 +148,41 @@ tree -L 2
 
 You should get the following output:
 
-```bash
+```text
+.
+├── data
 └── etc
     ├── bondy.conf
-    ├── security.config.json
-````
+    └── security.config.json
+```
 
 ### 5. Run Bondy
 
-We will run an official Bondy Docker image using the `docker run` command with an image name using the following syntax: `leapsight/bondy:{VERSION}[-{VARIANT}]` where:
+Run the official image with `docker run`. The image is `leapsight/bondy-connect:{TAG}`, also published as `ghcr.io/bondy-io/bondy-connect:{TAG}`, where `{TAG}` is one of:
 
-- `{VERSION}` can be `master`, `develop` or a tag like <SiteMeta k="bondyVersion"/>
-- `{VARIANT}` can be null or `slim` (we will provide the `alpine` variant in the future).
+- a release version, such as <SiteMeta k="bondyVersion"/>;
+- `latest`, the most recent stable release (Docker Hub only);
+- `main` or `develop`, a build of that branch.
 
-For example to run the <SiteMeta k="bondyVersion"/> release you would use:
+The published image is the Debian build of `deployment/Dockerfile`, for `linux/amd64` and `linux/arm64`. To run on Alpine, build `deployment/alpine.Dockerfile` yourself.
 
-::: code-group
-```bash-vue [Debian]
+To run the <SiteMeta k="bondyVersion"/> release:
+
+```bash-vue
 docker run \
     -e BONDY_ERL_NODENAME=bondy1@127.0.0.1 \
     -e BONDY_ERL_DISTRIBUTED_COOKIE=bondy \
     -p 18080:18080 \
-    -p 18081:18081 \
     -p 18082:18082 \
     -p 18086:18086 \
     -u 0:1000 \
     --name bondy \
     -v "${BONDY_HOME}/etc:/bondy/etc" \
     -v "${BONDY_HOME}/data:/bondy/data" \
-    -d leapsight/bondy:{{bondyVersion}}
+    -d leapsight/bondy-connect:{{bondyVersion}}
 ```
 
-```bash-vue [Alpine]
-docker run \
-    -e BONDY_ERL_NODENAME=bondy1@127.0.0.1 \
-    -e BONDY_ERL_DISTRIBUTED_COOKIE=bondy \
-    -p 18080:18080 \
-    -p 18081:18081 \
-    -p 18082:18082 \
-    -p 18086:18086 \
-    -u 0:1000 \
-    --name bondy \
-    -v "${BONDY_HOME}/etc:/bondy/etc" \
-    -v "${BONDY_HOME}/data:/bondy/data" \
-    -d leapsight/bondy:{{bondyVersion}}-alpine
-```
-:::
+The command does not publish port `18081`. The `admin` listener serves the Admin API on that port, and it binds `127.0.0.1` inside the container, so a published port does not reach it. To expose the Admin API outside the container, declare the node's listeners in `bondy.conf` and give the `admin` listener an explicit `ip`. See [Configuring Network Listeners](/router/guides/administration/configuring_listeners#declare-the-inventory).
 
 
 

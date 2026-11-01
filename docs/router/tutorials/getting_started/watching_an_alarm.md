@@ -27,15 +27,17 @@ configuration and WAMP calls.
 
 The condition you will raise is a **failing mail relay**. It is a good one to
 learn on because it is entirely under your control, it harms nothing, and it is
-one of only three conditions in the catalogue that names a task you may run.
+one of only two conditions in the catalogue that names a task you may run.
 
-By the end you will have used all four alarm procedures, followed the runbook
+By the end you will have used three of the four alarm procedures, followed the runbook
 join from an alarm to its remedy, and seen the difference between an alarm and
 a log line.
 
 ## Prerequisites
 
-A single Bondy node you can restart, and a WAMP client that can call procedures
+A single Bondy node you can restart, running with
+[`cluster.enabled = off`](/router/tutorials/getting_started/get_bondy#default-listeners),
+and a WAMP client that can call procedures
 on the **master realm** (`com.leapsight.bondy`). Any client will do; the
 examples show the procedure and its arguments rather than a particular library.
 
@@ -54,7 +56,7 @@ third:
 ```ini
 mail.relay.demo.host                     = 127.0.0.1
 mail.relay.demo.port                     = 2525
-mail.relay.demo.transport                = tcp
+mail.relay.demo.transport                = plain
 mail.relay.demo.from                     = no-reply@example.com
 mail.relay.demo.realms                   = com.leapsight.bondy
 mail.relay.demo.health.failure_threshold = 1
@@ -91,6 +93,7 @@ Call `bondy.alarm.list` on the master realm. You should see one alarm:
       "severity": "major",
       "class": "integration",
       "affects_ready": false,
+      "description": "The mail relay is failing its health check.",
       "details": {"relay": "demo", "consecutive_failures": 1},
       "raised_at": 1756640000000,
       "updated_at": 1756640000000
@@ -160,13 +163,16 @@ Call `bondy.alarm.catalogue` and find the entry whose `id_pattern` matches the
 }
 ```
 
-Run the two `procedure` references under **`observe_with`**. Each is read-only
-by construction, so this is always safe:
+The two `procedure` references under **`observe_with`** are read-only by
+construction, so calling them is always safe. Run `bondy.mail.relay.list`:
 
 ```
 bondy.mail.relay.list("com.leapsight.bondy")
-bondy.mail.status.get("com.leapsight.bondy", <id from step 2>)
 ```
+
+`bondy.mail.status.get` takes the realm and the id of a message. A send that
+fails answers an error rather than an id, so the sends in steps 2 and 3 left
+no message for it to report on.
 
 Then look at the `metric` references. Scrape `/metrics` on the admin listener
 (`http://localhost:18081/metrics` by default) and find:

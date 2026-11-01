@@ -41,8 +41,8 @@ listeners.agents.transport = tls
 listeners.agents.protocol  = http
 listeners.agents.port      = 8443
 listeners.agents.services  = mcp
-listeners.agents.tls.certfile = {{platform_etc_dir}}/keycert.pem
-listeners.agents.tls.keyfile  = {{platform_etc_dir}}/key.pem
+listeners.agents.tls.certfile = /etc/bondy/ssl/keycert.pem
+listeners.agents.tls.keyfile  = /etc/bondy/ssl/key.pem
 ```
 
 Remember that declaring any `listeners.*` key switches the node onto the
@@ -175,7 +175,7 @@ First verify the metadata layer through WAMP Interface Reflection, from any
 WAMP client on the realm:
 
 ```
-wamp.reflection.procedure.list("com.example.fleet")
+wamp.reflection.procedure.list()
 ```
 
 answers the URIs the *calling* principal is authorized to see — which also
@@ -224,8 +224,8 @@ issue, so a restricted session can never mint a wider ticket than itself.
   want a modern-only endpoint; the default serves `2026-07-28`,
   `2025-11-25` and `2025-06-18`.
 - **Rate limiting**: MCP requests draw from the per-source-IP `http`
-  class, which can be budgeted at three scopes that all must admit a
-  request: node-wide
+  class, which can be budgeted at three scopes. A request is admitted only
+  when all three admit it: node-wide
   ([`security.rate_limit.http.*`](/router/reference/configuration/security#rate-limiting)),
   per listener
   ([`listeners.$name.rate_limit.http.*`](/router/reference/configuration/listeners#rate-limiting) —
@@ -233,8 +233,9 @@ issue, so a restricted session can never mint a wider ticket than itself.
   internal ones), and per realm (the realm's `rate_limit` property,
   whose `total` kind is a per-node tenant quota — see the
   [rate limiting guide](/router/guides/administration/load_regulation_and_rate_limiting#scopes-node-listener-realm)).
-- **Bounds**: `mcp.max_body_size` (4MB) and `mcp.max_inflight` (64 per
-  session) have per-listener spellings; raise them deliberately.
+- **Bounds**: `listeners.$name.mcp.max_body_size` (default 4MB) and
+  `listeners.$name.mcp.max_inflight` (default 64 per session) bound each
+  listener. They have no node-wide spelling. Raise them deliberately.
 - **Metrics**: watch the `bondy_mcp_*` families — in particular
   `bondy_mcp_manifest_collisions_total`, which counts catalogue entries
   skipped over a name collision, each of which also raises an alarm.

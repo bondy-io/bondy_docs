@@ -3,7 +3,7 @@ draft: false
 related:
     - type: concepts
       text: What is WAMP
-      link: /wamp/concepts/what_is_wamp
+      link: /router/concepts/wamp/what_is_wamp
       description: Find out more about the Web Application Messaging Protocol
 ---
 
@@ -30,7 +30,7 @@ An application network is a dynamic [overlay network](https://en.wikipedia.org/w
   caption="Bondy application network"
   width="600"/>
 
-Bondy implements the [Web Application Messaging Protocol (WAMP)](/wamp/concepts/what_is_wamp), an open standard that provides:
+Bondy implements the [Web Application Messaging Protocol (WAMP)](/router/concepts/wamp/what_is_wamp), an open standard that provides:
 
 1. **Authentication** with multiple methods including anonymous, password, cryptosign, and OAuth2
 2. **Authorization** through fine-grained Role-Based Access Control (RBAC)
@@ -41,7 +41,7 @@ This combination gives Bondy the capabilities of both an event mesh and a servic
 
 ## Open source
 
-Bondy is licensed under Apache 2.0. The [source code](https://github.com/bondy-io/bondy) is publicly available on GitHub.
+Bondy is licensed under Apache 2.0. The [source code](https://github.com/bondy-io/bondy-connect) is publicly available on GitHub.
 
 ## Architecture properties
 
@@ -53,7 +53,7 @@ Distributed routing delivers RPC and Pub/Sub messages between clients connected 
 
 ### Availability
 
-State replication uses an anti-entropy protocol that maintains consistency across the cluster without requiring a consensus round on every write. All nodes being equal means there is no leader election and no split-brain scenario.
+State replication uses an anti-entropy protocol that maintains consistency across the cluster without requiring a consensus round on every write. All nodes are equal, so there is no leader election and no leader to lose. A network partition does not stop either side: each side keeps accepting writes, and the two converge when the partition heals.
 
 Active anti-entropy continuously repairs missing or divergent state after node failures, data corruption, or network partitions, so a new node synchronizes with the cluster and begins handling traffic without manual intervention. See [Clustering](/router/concepts/clustering) for the full mechanism.
 
@@ -67,7 +67,7 @@ Message routing adjusts as clients connect, disconnect, and move between nodes: 
 
 Bondy's clients implement an open protocol available in multiple programming languages, over multiple transports, with multiple serialization formats. A backend service in Python, a web app in JavaScript, an IoT device in C, and a mobile app in Swift or Kotlin can all attach to the same realm and interoperate without an adapter or translation layer between them.
 
-Clients choose WebSocket, raw TCP, or Unix domain sockets as a transport, and JSON, MessagePack, or CBOR as a serialization format, independently of each other.
+Clients choose WebSocket, raw TCP, Unix domain sockets, or HTTP long-poll and Server-Sent Events as a transport, and JSON, MessagePack, or CBOR as a serialization format. The HTTP transports carry JSON only; on the others, the transport and the serialization are independent of each other.
 
 ### Deployment
 
@@ -93,7 +93,7 @@ The same Bondy release runs at the edge (for local processing and failover durin
 
 ### AI agent communication
 
-An AI agent system needs more than function calling: event coordination, service discovery, authentication, and authorization, plus the ability for an agent to expose capabilities as well as consume them. WAMP's routed RPC and Pub/Sub, combined with Bondy's RBAC, cover all of this in one protocol rather than requiring it to be assembled separately. See [WAMP for AI agents](/wamp/concepts/what_is_wamp#wamp-for-agent-to-agent-communication) for the detailed comparison against agent-specific protocols such as MCP.
+An AI agent system needs more than function calling: event coordination, service discovery, authentication, and authorization, plus the ability for an agent to expose capabilities as well as consume them. WAMP's routed RPC and Pub/Sub, combined with Bondy's RBAC, cover all of this in one protocol rather than requiring it to be assembled separately. See [WAMP for AI agents](/router/concepts/wamp/what_is_wamp#wamp-for-agent-to-agent-communication) for the detailed comparison against agent-specific protocols such as MCP.
 
 ## Bondy compared to alternatives
 
@@ -123,13 +123,11 @@ Bondy is built on Erlang/OTP, the runtime that also underlies telecommunications
 - **Hot code loading** — code can be updated without stopping the node
 - **Soft real-time scheduling** — predictable latency and throughput under load
 
-For clustering and routing, Bondy uses [Partisan](https://partisan.dev) in place of Erlang's standard distribution protocol. Partisan supports multiple network topologies; Bondy currently deploys a full-mesh topology, scaling to hundreds of nodes.[^topo]
-
-[^topo]: A peer-to-peer topology based on Partisan's HyParView implementation, intended to scale to thousands of nodes, is in development. Partisan is maintained by the same team that builds Bondy.
+For clustering and routing, Bondy uses [Partisan](https://partisan.dev) in place of Erlang's standard distribution protocol. Partisan supports multiple network topologies; Bondy deploys a full-mesh topology, scaling to hundreds of nodes. Partisan is maintained by the same team that builds Bondy.
 
 ## Next steps
 
-- [WAMP](/wamp/concepts/what_is_wamp) and [Architecture](/router/concepts/architecture) — the concepts behind the protocol and the platform.
+- [WAMP](/router/concepts/wamp/what_is_wamp) and [Architecture](/router/concepts/architecture) — the concepts behind the protocol and the platform.
 - [Getting started tutorial](/router/tutorials/getting_started/marketplace) — build something with Bondy.
 - [Deployment guides](/router/guides/deployment/running_a_cluster) — run a cluster.
-- [Community forum](https://github.com/bondy-io/bondy/discussions) — ask a question.
+- [Community forum](https://github.com/bondy-io/bondy-connect/discussions) — ask a question.

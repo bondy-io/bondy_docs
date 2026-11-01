@@ -30,6 +30,10 @@ The request failed because the authid provided does not exist.
         'message': {
             'type': 'string',
             'description': 'The error message'
+        },
+        'details': {
+            'type': 'object',
+            'description': 'Holds authid, the authid that does not exist, when Bondy knows it. authid also appears at the top level.'
         }
 	})"
 />

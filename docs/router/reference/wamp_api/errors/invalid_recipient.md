@@ -22,7 +22,21 @@ A relay may also reject a recipient it considers invalid; that arrives as [`bond
 />
 
 ##### Keyword Results
-None.
+The standard [error payload](/router/reference/errors#the-error-payload). Each key of `details` also appears at the top level.
+
+<DataTreeView
+	:maxDepth="10"
+	:data="JSON.stringify({
+        'code': {
+            'type': 'string',
+            'description': 'invalid_recipient'
+        },
+        'details': {
+            'type': 'object',
+            'description': 'Holds address, the value that is not a valid address.'
+        }
+	})"
+/>
 
 ## See also
 - [Mail](/router/concepts/mail) — the model these errors come from.

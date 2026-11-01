@@ -1,35 +1,9 @@
 # bondy.error.import_in_progress
-When an export or import is requested while an import is already running.
+Bondy 1.0.0 does not return this error URI.
 
 ## Description
-Raised by [`bondy.export.create`](/router/reference/wamp_api/export#create-an-export) or [`bondy.export.import`](/router/reference/wamp_api/export#import-an-export) — only one export or import runs at a time, node-wide. Check [`bondy.export.status`](/router/reference/wamp_api/export#check-status) and retry once it reports idle.
+The condition is a call to [`bondy.export.create`](/router/reference/wamp_api/export) or [`bondy.export.import`](/router/reference/wamp_api/export) while an import runs on the node. A node runs one export or import at a time.
 
-##### Positional Results
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-        0: {
-            'type': 'string',
-            'description': 'The error message'
-        }
-	})"
-/>
+The caller of a procedure that meets this condition receives [`bondy.error.internal_error`](/router/reference/wamp_api/errors/internal_error) instead. The error carries a `trace_id` and no detail about the condition.
 
-##### Keyword Results
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-        'code': {
-            'type': 'string',
-            'description': 'import_in_progress'
-        },
-        'description': {
-            'type': 'string',
-            'description': 'The error description'
-        },
-        'message': {
-            'type': 'string',
-            'description': 'The error message'
-        }
-	})"
-/>
+Call [`bondy.export.status`](/router/reference/wamp_api/export) to see whether an export or import runs.

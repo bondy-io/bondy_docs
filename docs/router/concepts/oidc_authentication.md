@@ -99,13 +99,14 @@ OIDC providers are configured per-realm in the realm's `info.oidc_providers` map
 | `redirect_uri` | string | Yes | — | The callback URL registered with the IdP. Must match exactly. |
 | `scopes` | list | Yes | `["openid","profile","email"]` | OAuth2 scopes to request during authorization. |
 | `authid_claim` | string | Yes | `"preferred_username"` | The ID token or userinfo claim to use as the Bondy `authid`. Falls back to the `sub` claim if not present. |
-| `auto_provision` | boolean | Yes | `true` | When `true`, Bondy automatically creates a local user record on first OIDC login. |
+| `auto_provision` | boolean | Yes | `false` | When `true`, Bondy automatically creates a local user record on first OIDC login. |
 | `role_claim` | string | Yes | `"roles"` | The claim containing the user's roles. Supports dotted notation for nested claims (e.g. `"realm_access.roles"`). |
 | `role_claim_fallback` | string | Yes | `"role"` | Fallback claim if the primary `role_claim` is absent. |
 | `role_mapping` | map | No | `{}` | Maps IdP role names to Bondy group names. Unmapped roles pass through unchanged. |
 | `ticket_expiry_secs` | integer | No | Global default | Per-provider override for ticket lifetime in seconds. |
 | `allow_unsafe_http` | boolean | Yes | `false` | Allow plain HTTP issuer URLs. Only use for development or testing. |
 | `cookie_domain` | string | No | — | The `Domain` attribute for cookies (e.g. `.example.com`). Enables cookie sharing across subdomains. |
+| `cookie_same_site` | string | Yes | `"lax"` | The `SameSite` attribute for both cookies: `"lax"`, `"strict"` or `"none"`. |
 
 ::: warning Important
 The `redirect_uri` must exactly match the redirect URI registered with the IdP. A mismatch will cause the IdP to reject the authorization request with an `invalid_request` error.
@@ -136,9 +137,22 @@ The `redirect_uri` must exactly match the redirect URI registered with the IdP. 
                 "cookie_domain": ".example.com"
             }
         }
-    }
+    },
+    "sources": [
+        {"usernames": "all", "authmethod": "cookie", "cidr": "0.0.0.0/0"}
+    ]
 }
 ```
+
+The `sources` entry lets OIDC users authenticate with the ticket cookie from any address. Narrow its `cidr` to restrict where they may connect from.
+
+### Sources
+
+Bondy applies the realm's [sources](/router/reference/wamp_api/source) to an OIDC user as it does to any other user. The ticket cookie authenticates only when a source allows the `cookie` method from the client's address. This holds for a WAMP session opened with the cookie, for a path the `oidc` scheme protects, and for the Admin API.
+
+It holds whether or not Bondy keeps a user record for the subject. Without `auto_provision` there is no record, so only sources assigned to `all` can match: a source that names users requires those users to exist.
+
+The [verify route](/router/reference/api_gateway/specification#verify-route) does not check sources.
 
 
 ## API Gateway Security Scheme
@@ -166,13 +180,16 @@ To expose the OIDC endpoints, add an `oidc` security scheme to your [API Gateway
 }
 ```
 
-This automatically registers three HTTP routes under the version's `base_path`:
+This automatically registers four HTTP routes under the version's `base_path`:
 
 | Route | Method | Description |
 |:---|:---|:---|
 | `<base_path>/oidc/login` | GET | Initiates the OIDC flow |
 | `<base_path>/oidc/<provider>/callback` | GET | Receives the IdP callback |
 | `<base_path>/oidc/logout` | GET, POST | Terminates the session |
+| `<base_path>/oidc/verify` | GET, HEAD | Tells a reverse proxy whether a request carries a valid ticket. See [Verify route](/router/reference/api_gateway/specification#verify-route). |
+
+The version's own paths require the ticket cookie. The realm's `authmethods` must include `cookie`, and a [source](#sources) must allow it from the client's address. See [CSRF Protection](#csrf-protection) for requests that change state.
 
 
 ## Cookies
@@ -185,8 +202,8 @@ Bondy sets two cookies after a successful OIDC callback:
 |:---|:---|
 | **Name** | `bondy_ticket_<realm_uri>` |
 | **Value** | Signed JWT |
-| **HttpOnly** | `false` |
-| **SameSite** | `Lax` |
+| **HttpOnly** | `true` |
+| **SameSite** | Value of `cookie_same_site` config, `Lax` by default |
 | **Secure** | `true` when served over HTTPS |
 | **Path** | `/` |
 | **Domain** | Value of `cookie_domain` config, or omitted |
@@ -199,7 +216,7 @@ Bondy sets two cookies after a successful OIDC callback:
 | **Name** | `bondy_csrf_<realm_uri>` |
 | **Value** | UUID v4 |
 | **HttpOnly** | `false` |
-| **SameSite** | `Lax` |
+| **SameSite** | Value of `cookie_same_site` config, `Lax` by default |
 | **Secure** | `true` when served over HTTPS |
 | **Path** | `/` |
 | **Domain** | Value of `cookie_domain` config, or omitted |
@@ -216,15 +233,15 @@ If the SPA and Bondy share the same origin, you do not need to set `cookie_domai
 
 Bondy uses the **double-submit cookie** pattern for CSRF protection on [HTTP transport](/router/concepts/http_transports) endpoints.
 
-The SPA must:
+The SPA has to:
 
 1. Read the `bondy_csrf_<realm_uri>` cookie value from `document.cookie`.
-2. Include it as the `X-CSRF-Token` header on every `POST` request to the Longpoll and SSE transport endpoints.
+2. Include it as the `X-CSRF-Token` header on every `POST` request to the Longpoll and SSE transport endpoints, and on every request other than `GET`, `HEAD` or `OPTIONS` to a path the `oidc` scheme protects.
 
-Bondy validates that the header value matches the cookie value. Requests without a matching header receive a `403 Forbidden` response.
+Bondy validates that the header value matches the CSRF cookie of the realm whose ticket cookie authenticated the request. A browser signed in to several realms holds one pair per realm. Requests without a matching header receive a `403 Forbidden` response.
 
 ::: tip
-The CSRF cookie has `HttpOnly` set to `false` specifically so that JavaScript can read it. The ticket cookie also has `HttpOnly` set to `false` to allow the SPA to check for the presence of a session.
+The CSRF cookie has `HttpOnly` set to `false` so that JavaScript can read it. The ticket cookie has `HttpOnly` set to `true`, so JavaScript cannot read the ticket. An SPA that needs the session's details calls `bondy.session.self` over the WAMP session.
 :::
 
 
@@ -256,6 +273,7 @@ The logout endpoint (`GET` or `POST <base_path>/oidc/logout`) performs the follo
 | `realm` | Route's realm | Override which realm's cookies to clear |
 | `redirect_uri` | `/` | Where to redirect after logout |
 | `cookie_domain` | From provider config | Override cookie domain for clearing |
+| `cookie_same_site` | From provider config | Override the cookies' `SameSite` attribute for clearing |
 
 ::: warning Important
 The logout handler is designed to be resilient. If the realm or provider no longer exists on this Bondy node, it will still clear the cookies and redirect. Ticket revocation is best-effort.

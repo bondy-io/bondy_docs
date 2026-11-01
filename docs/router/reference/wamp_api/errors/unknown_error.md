@@ -1,8 +1,10 @@
 # bondy.error.unknown_error
-A catch-all for an internal error term that doesn't match any of Bondy's more specific error codes.
+When an error carries a code that the error catalogue does not hold.
 
 ## Description
-Bondy maps most internal error reasons to a specific `bondy.error.*` code so a caller can act on it programmatically. When an operation fails with a reason that isn't one of those recognised cases, it's reported as `unknown_error` instead of being silently swallowed. The `description` field carries the raw underlying error term (formatted as text) for diagnosis — treat this as a signal to check Bondy's own logs or file an issue, not something to branch application logic on.
+Bondy raises this error when it builds an error from an error map whose `code` names no catalogued type. For example, a value that does not have the required data type arrives with this URI and with `code` set to `invalid_datatype`. In that case, `code`, `message`, `description` and `details` come from the original failure. The URI and the handle `S002` come from this entry.
+
+A failure that Bondy cannot describe safely arrives as [`bondy.error.internal_error`](/router/reference/wamp_api/errors/internal_error) instead.
 
 ##### Positional Results
 <DataTreeView
@@ -21,11 +23,11 @@ Bondy maps most internal error reasons to a specific `bondy.error.*` code so a c
 	:data="JSON.stringify({
         'code': {
             'type': 'string',
-            'description': 'unknown_error'
+            'description': 'The code of the original failure, for example invalid_datatype'
         },
         'description': {
             'type': 'string',
-            'description': 'The underlying error term, formatted as text'
+            'description': 'The description of the original failure'
         },
         'message': {
             'type': 'string',

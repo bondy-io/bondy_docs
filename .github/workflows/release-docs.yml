@@ -29,7 +29,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          cache: 'yarn'
+          cache: 'npm'
 
       - name: Derive version from tag
         id: version
@@ -47,12 +47,12 @@ jobs:
           sed -i "0,/^export default {/s//export default {\n    base: '\/v${{ steps.version.outputs.version }}\/',/" docs/.vitepress/config.mjs
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Build documentation
         env:
           DOCS_BASE: /v${{ steps.version.outputs.version }}/
-        run: yarn docs:build
+        run: npm run docs:build
 
       - name: Package build output
         run: tar -czf "docs-${{ steps.version.outputs.version }}.tar.gz" -C docs/.vitepress/dist .

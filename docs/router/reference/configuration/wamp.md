@@ -2,13 +2,13 @@
 
 ## WAMP URIs
 
-@[config](wamp.uri.strictness,loose|strict,loose,v0.9.0)
+@[config](wamp.uri.strictness,loose|strict,loose,v1.0.0-rc.1)
 
 The validation applied to every WAMP URI Bondy accepts, in realm names, procedure and topic registrations, and calls. `loose` allows any non-empty dot-separated component; `strict` additionally restricts each component to the WAMP specification's stricter character set. Set to `strict` to catch malformed URIs from a client early, at the router, rather than downstream in application code.
 
 ## Call Timeout
 
-@[config](wamp.call_timeout,duration_time_units,30s,v0.1.0)
+@[config](wamp.call_timeout,duration_time_units,30s,v0.8.3)
 
 The default timeout for WAMP (RPC) Calls when the `CALL.Options.timeout`
 property is not used. This value will be restricted by the
@@ -16,7 +16,7 @@ property is not used. This value will be restricted by the
 
 
 
-@[config](wamp.max_call_timeout,duration_time_units,10m,v0.1.0)
+@[config](wamp.max_call_timeout,duration_time_units,10m,v1.0.0-rc.1)
 
 The maximum timeout value for WAMP (RPC) Calls for the `CALL.Options.
 timeout` or the [`wamp.call_timeout`](#wamp.call_timeout) default.
@@ -30,27 +30,27 @@ The WAMP specification treats an unspecified timeout, or a value of `0`, as disa
 
 WAMP's message retention feature lets a publisher mark an event to be retained, so a subscriber that joins later can still receive the last (or last few) events on a topic instead of only ones published after it subscribed.
 
-@[config](wamp.message_retention.enabled,on|off,on,v0.9.0)
+@[config](wamp.message_retention.enabled,on|off,on,v1.0.0-rc.1)
 
-Master switch for message retention. When off, Bondy accepts a publish with retention options but does not store the event, so a later subscriber sees nothing retained.
+Has no effect. Bondy accepts the key, but retention is controlled per publication: an event is retained when its publisher sets `retain: true`, whatever this key says.
 
-@[config](wamp.message_retention.storage_type,ram|disk|ram_disk,ram,v0.9.0)
+@[config](wamp.message_retention.storage_type,ram|disk|ram_disk,ram,v1.0.0-rc.1)
 
-Where retained messages are stored. `ram` is fastest but does not survive a node restart; `disk` persists across restarts at the cost of write latency; `ram_disk` keeps a working set in memory backed by a disk copy.
+Has no effect. Bondy always stores retained events in a durable table, so they survive a node restart, whatever this key says.
 
-@[config](wamp.message_retention.max_messages,integer,1000000,v0.9.0)
+@[config](wamp.message_retention.max_messages,integer,1000000,v1.0.0-rc.1)
 
 Maximum number of retained messages held on a single node. Once reached, no further events are retained until space frees up (e.g. via TTL expiry). `0` means no limit.
 
-@[config](wamp.message_retention.max_memory,byte_size_units,1GB,v0.9.0)
+@[config](wamp.message_retention.max_memory,byte_size_units,1GB,v1.0.0-rc.1)
 
 Maximum memory a node spends on retained messages. Once reached, no further events are retained. `0` means no limit.
 
-@[config](wamp.message_retention.max_message_size,byte_size_units,64KB,v0.9.0)
+@[config](wamp.message_retention.max_message_size,byte_size_units,64KB,v1.0.0-rc.1)
 
 Per-event size ceiling. An event larger than this is not retained, regardless of the limits above — it is still delivered live to current subscribers, only excluded from retention.
 
-@[config](wamp.message_retention.default_ttl,time_duration_units,0,v0.9.0)
+@[config](wamp.message_retention.default_ttl,time_duration_units,0,v1.0.0-rc.1)
 
 Default time-to-live applied to a retained event when the publisher doesn't specify one. `0` means a retained event never expires on its own (it can still be evicted by the `max_messages`/`max_memory` limits above).
 
@@ -58,24 +58,74 @@ Default time-to-live applied to a retained event when the publisher doesn't spec
 
 @[config](wamp.meta_events,demand|on|off,demand,v1.0.0)
 
-Controls whether Bondy publishes the [registration](/router/reference/wamp_api/registration#topics) and [subscription](/router/reference/wamp_api/subscription#topics) meta events (`wamp.registration.on_create`, `wamp.subscription.on_subscribe`, and similar). `demand` — the default — only produces an event when a matching subscriber currently exists, checked with one fast registry probe per registration/subscription change; `on` always produces them regardless of demand; `off` disables them entirely. Since delivery of these events isn't guaranteed, a consumer should snapshot current state via the corresponding `wamp.*.list` meta procedure right after subscribing.
+Controls whether Bondy publishes the [registration](/router/reference/wamp_api/registration#topics) and [subscription](/router/reference/wamp_api/subscription#topics) meta events: `wamp.registration.on_register`, `wamp.registration.on_unregister`, `wamp.subscription.on_subscribe` and `wamp.subscription.on_unsubscribe`. Bondy never publishes the `on_create` and `on_delete` events. `demand` — the default — only produces an event when a matching subscriber currently exists, checked with one fast registry probe per registration/subscription change; `on` always produces them regardless of demand; `off` disables them entirely. Since delivery of these events isn't guaranteed, a consumer should snapshot current state via the corresponding `wamp.*.list` meta procedure right after subscribing.
 
 ## Dealer
 
-@[config](wamp.dealer.progressive_call_results,on|off,off,v1.0.0)
+[Progressive Call Results](/router/concepts/wamp/advanced/rpc#progressive-call-results) and [Progressive Call Invocations](/router/concepts/wamp/advanced/rpc#progressive-call-invocations) have no configuration settings. Bondy always offers both in its `WELCOME`, and a session can use each one only if its own `HELLO` announces it for the role (caller or callee) that uses it. A callee also needs `call_canceling` to support `progressive_call_invocations`.
 
-Enables the dealer's [Progressive Call Results](/wamp/concepts/advanced/rpc#progressive-call-results) feature (WAMP Advanced Profile).
+In a cluster, the node a callee is connected to checks the callee's own session. A progressive call to a callee that did not announce both `progressive_call_invocations` and `call_canceling` fails with `wamp.error.feature_not_supported`.
 
-::: warning Mixed-version clusters
-Only enable this once every node in the cluster runs a Bondy version that supports it. A node without support settles a call on the first progressive result, truncating a stream that crosses it. The flag is read at call time on the node the caller is connected to, so it can be flipped without a restart.
-:::
+## HTTP Transports (Long-poll and SSE)
 
-@[config](wamp.dealer.progressive_calls,on|off,off,v1.0.0)
+These settings apply only to WAMP sessions carried over the [long-poll and SSE transports](/router/concepts/http_transports). WebSocket and RawSocket sessions never use them.
 
-Enables the dealer's [Progressive Calls](/wamp/concepts/advanced/rpc#progressive-calls) feature (WAMP Advanced Profile) — streaming a call's arguments from caller to callee in successive chunks.
+A long-poll client is not connected between `/receive` requests, and an SSE stream can drop and reconnect while its session survives. So Bondy keeps a server-side session process for each HTTP transport, and parks every outbound message for that session in a queue until the client reads it. This lets a WAMP session outlive the HTTP request that carries it. The queue is bounded by message count, byte size and age, because a client may never come back.
 
-::: warning Mixed-version clusters
-Only enable this once every node in the cluster runs a Bondy version that supports it. While the flag is on, every `CALL` on that node pays a small bounded promise lookup to tell a first chunk from a subsequent one — a low constant cost, but paid by all calls on the node, not only progressive ones. Toggling it off while a stream is open is safe but coarse: the node stops recognising further chunks as continuations, so the caller's in-flight stream fails rather than completing. Flip it during a quiet window, not mid-stream.
-:::
+The settings are node-wide. One set of queue tables and one eviction sweep serve every HTTP transport on the node, whichever listener the request arrived on.
+
+@[config](wamp.http_transport.idle_timeout,duration_time_units,1h,v1.0.0)
+
+How long an HTTP transport session survives with no HTTP request touching it. Each long-poll request resets the timer. While an SSE stream is attached, the session does not time out. When the timer fires, Bondy closes the transport session and its WAMP session, and discards every message still in its queue.
+
+This is the session's deadline. It is not the listener's connection idle timeout, [`listeners.$name.longpoll.idle_timeout`](/router/reference/configuration/listeners#listeners.$name.longpoll.idle_timeout).
+
+@[config](wamp.http_transport.queue.max_messages,integer,1000,v1.0.0)
+
+The maximum number of messages held for one transport session, as a positive integer. When a new message arrives and the queue already holds this many, Bondy drops the oldest messages for that session (up to 100 at a time) and then stores the new one. Neither the client nor the publisher is told that messages were dropped.
+
+The bound applies to all output for the session, including replies Bondy produces directly, such as an inline `ERROR`.
+
+@[config](wamp.http_transport.queue.max_bytes,byte_size_units,10MB,v1.0.0)
+
+The maximum total size of the messages held for one transport session. It is enforced together with `max_messages`: whichever bound is reached first triggers eviction. Eviction works as for `max_messages`: Bondy drops the oldest messages for that session (up to 100 at a time) and then stores the new one. The new message is always stored, even when it alone is larger than this bound.
+
+A reply Bondy has already encoded counts as its encoded byte size. Any other message counts as the size of its Erlang external term encoding.
+
+@[config](wamp.http_transport.queue.message_ttl,duration_time_units,5m,v1.0.0)
+
+How long a queued message stays deliverable. A message older than this is never delivered: a client read skips it, and the next eviction sweep removes it. The client is not told. The setting assumes that a client absent this long no longer wants the message.
+
+@[config](wamp.http_transport.queue.eviction_interval,duration_time_units,5s,v1.0.0)
+
+How often the sweep that removes expired messages (see `message_ttl`) runs across every partition. A shorter interval frees memory sooner. It has no effect on delivery, because a client read already skips expired messages.
+
+@[config](wamp.http_transport.queue.partitions,integer,schedulers,v1.0.0)
+
+The number of ETS partitions the queue is sharded across, as a positive integer. All messages for one transport session live in a single partition. More partitions reduce table contention between sessions, and make each sweep visit more tables. The schema has no default value; when the key is unset, Bondy uses the number of Erlang schedulers on the node, which is normally the number of CPU cores. The value is read once, when the queue is created at node start.
+
+## Serializers
+
+@[config](serializers.json.float_format,string,[&#123;decimals&#44;16&#125;],v1.0.0-rc.27)
+
+Controls how Bondy writes floating-point numbers in WAMP messages serialised as JSON. The value is a string holding an Erlang list of [`erlang:float_to_binary/2`](https://www.erlang.org/doc/apps/erts/erlang.html#float_to_binary/2) options, for example:
+
+```ini
+serializers.json.float_format = [{decimals, 16}]
+```
+
+Configuration generation fails when the value does not parse as an Erlang term. The WAMP JSON encoder uses the configured options. The default, `[{decimals, 16}]`, writes 16 digits after the decimal point: `1.5` is encoded as `1.5000000000000000`.
+
+The [WAMP RawSocket](https://wamp-proto.org/wamp_latest_ietf.html) handshake names the serializer by a number from 1 to 15. Bondy fixes slot 1 to JSON, slot 2 to MessagePack and slot 3 to CBOR. The two keys below assign slots to the Erlang-specific serializers. They exist because some clients expect a given serializer in a given slot.
+
+@[config](wamp.serializers.erl,integer,15,v1.0.0-rc.1)
+
+The RawSocket slot for the `erl` serializer, which encodes WAMP messages in the Erlang External Term Format. Bondy decodes it with `binary_to_term/2` and the `safe` option, so a client cannot create new atoms on the node. Use a value from 4 to 15. Slots 1 to 3 are already taken by JSON, MessagePack and CBOR, and those always win. The value is not validated.
+
+On WebSocket, the same serializer is negotiated by the `wamp.2.erl` subprotocol, and this key does not apply.
+
+@[config](wamp.serializers.bert,integer,4,v1.0.0-rc.1)
+
+Has no effect. Bondy accepts the key, but it does not accept the BERT serializer on any transport. A RawSocket handshake that asks for this slot is refused with "serializer unsupported", and the `wamp.2.bert` WebSocket subprotocol is not offered. BERT is disabled because its decoder can create atoms from untrusted input before the client authenticates, which can exhaust the node's atom table.
 
 

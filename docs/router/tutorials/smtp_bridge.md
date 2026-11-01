@@ -60,7 +60,7 @@ mail.default_relay = local
 
 `realms = *` opens this relay to every realm. That is right for a local mail
 catcher and wrong for anything else — a real relay names the realms allowed to
-use it, and defaults to admitting none.
+use it. A relay with no `realms` key admits the master realm only.
 
 Restart Bondy.
 
@@ -184,10 +184,13 @@ docker compose stop mailpit
 
 Publish to the bridged topic a few times. Nothing is delivered — and publishing
 is exactly as fast as it was. Your subscribers keep receiving events, your RPC
-calls keep returning. The relay's queue fills, sends start being refused with
-[`bondy.error.mail_queue_full`](/router/reference/wamp_api/errors/mail_queue_full),
-and after a few consecutive failures the relay is marked down and raises the
-`mail_relay_down` alarm.
+calls keep returning. Each send fails, and after three consecutive failures
+(the default `mail.relay.$name.health.failure_threshold`) the relay is marked
+down and raises the `mail_relay_down` alarm. A relay that stays down keeps
+taking messages into its queue. When the queue holds
+`mail.relay.$name.queue.max_size` messages (1000 by default), Bondy refuses
+further sends with
+[`bondy.error.mail_queue_full`](/router/reference/wamp_api/errors/mail_queue_full).
 
 Mail degraded. Routing did not.
 

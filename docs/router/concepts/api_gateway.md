@@ -19,7 +19,7 @@ related:
       description: The HTTP Connector works in the opposite direction — bridging WAMP calls to upstream HTTP services.
     - text: Network Listeners
       type: Configuration Reference
-      link: /router/reference/configuration/listeners#api-gateway-http-listener
+      link: /router/reference/configuration/listeners#identity-and-mount
       description: Configure the network listeners for the HTTP API Gateway.
     - text: Marketplace HTTP API Gateway
       type: Tutorial
@@ -79,7 +79,9 @@ An API Gateway Specification is a JSON document that describes:
 1. **An API** — Identified by a unique ID and bound to a single [Realm](/router/concepts/realms).
 2. **Versions** — Each version has a `base_path` and a set of path definitions.
 3. **Paths** — Each path maps HTTP methods to operations.
-4. **Operations** — Each operation defines an action (WAMP call, HTTP forward, or static response) and a response transformation.
+4. **Operations** — Each operation defines an action (WAMP call, WAMP publish, HTTP forward, or static response) and a response transformation.
+
+The parser accepts only the keys that each object declares. It refuses a specification with a misspelt or unsupported key, rather than ignoring the key and applying a default. See [Validation](/router/reference/api_gateway/specification#validation).
 
 ::: definition A Declarative Finite State Machine
 An API Gateway Specification is effectively a declarative Finite State Machine (FSM) definition. It exposes an HTTP/REST API and converts HTTP nouns and verbs into WAMP or HTTP actions. The FSM state — the [API Context](/router/reference/api_gateway/specification#api-context) — is incrementally and recursively constructed as the specification is evaluated.
@@ -93,7 +95,7 @@ API Object
       └── Path Object(s)
            └── HTTP Method (GET, POST, PUT, ...)
                 └── Operation Object
-                     ├── Action Object (wamp_call | static | http_forward)
+                     ├── Action Object (wamp_call | wamp_publish | forward | static)
                      └── Response Object
 ```
 
@@ -121,7 +123,7 @@ HTTP Client                     Bondy API Gateway                    WAMP Servic
 
 ## Action Types
 
-The API Gateway supports three types of actions:
+The API Gateway supports four types of actions: `wamp_call`, `wamp_publish`, `static` and `forward`. This section shows `wamp_call`, `static` and `forward`; the [Specification Reference](/router/reference/api_gateway/specification) describes all four.
 
 ### WAMP Action
 
@@ -132,8 +134,8 @@ Translates the HTTP request into a WAMP procedure call. The procedure URI, argum
     "type": "wamp_call",
     "procedure": "com.billing.get_invoice",
     "options": {},
-    "args": ["{{"\{\{request.path_params.id\}\}"}}"],
-    "kwargs": "{{"\{\{request.body\}\}"}}"
+    "args": ["{{request.path_params.id}}"],
+    "kwargs": "{{request.body}}"
 }
 ```
 
@@ -150,17 +152,15 @@ Returns a static response without making any backend call. Useful for health che
 
 ### HTTP Forward Action
 
-Forwards the HTTP request to an external upstream API. Bondy acts as a traditional reverse proxy.
+Forwards the HTTP request to an external upstream API. Bondy acts as a traditional reverse proxy. When the response body is the upstream body, Bondy returns the upstream bytes and content type as it received them. When the upstream sends no response, Bondy sends the request again only if its method is idempotent, because a request that got no response may still have reached the upstream. See [Forward Action](/router/reference/api_gateway/specification#forward-action).
 
 ```json
 {
     "type": "forward",
-    "http_method": "{{"\{\{request.method\}\}"}}",
-    "host": "billing.internal",
-    "port": 8080,
-    "path": "/api{{"\{\{request.path\}\}"}}",
-    "headers": "{{"\{\{request.headers\}\}"}}",
-    "body": "{{"\{\{request.body\}\}"}}"
+    "host": "http://billing.internal:8080",
+    "path": "\"/api{{request.path}}\"",
+    "headers": "{{request.headers}}",
+    "body": "{{request.body}}"
 }
 ```
 
@@ -173,11 +173,11 @@ Expressions operate on the [API Context](/router/reference/api_gateway/specifica
 
 | Expression | Evaluates To |
 |:---|:---|
-| `{{"\{\{request.method\}\}"}}` | `POST` |
-| `{{"\{\{request.body.sku\}\}"}}` | `"ZPK1972"` |
-| `{{"\{\{request.body.price \\|> integer\}\}"}}` | `13` |
-| `{{"\{\{request.body.customer.first_name\}\}"}}` | `"John"` |
-| `{{"\{\{variables.foo\}\}"}}` | Value of the `foo` variable |
+| `{{request.method}}` | `post` |
+| `{{request.body.sku}}` | `"ZPK1972"` |
+| `{{request.body.price \\|> integer}}` | `13` |
+| `{{request.body.customer.first_name}}` | `"John"` |
+| `{{variables.foo}}` | Value of the `foo` variable |
 
 ::: info Learn More
 See the full [Expression Language Reference](/router/reference/api_gateway/expressions) for details on pipes, type conversions, and context manipulation.
@@ -205,7 +205,7 @@ Provides OAuth2 token endpoints (token issuance and revocation) and protects API
 
 ### OIDC
 
-Integrates with external Identity Providers via [OpenID Connect](/router/concepts/oidc_authentication). Automatically registers login, callback, and logout endpoints.
+Integrates with external Identity Providers via [OpenID Connect](/router/concepts/oidc_authentication). It registers login, callback, logout and verify endpoints, and the login flow ends with a ticket cookie that authenticates WAMP sessions over the HTTP transports. The version's own paths require that cookie, and a request other than `GET`, `HEAD` or `OPTIONS` must also send its CSRF token in `x-csrf-token`. See the [Security Object](/router/reference/api_gateway/specification#security-object).
 
 ```json
 {
@@ -228,6 +228,7 @@ API specifications are loaded, inspected, and deleted via the [Admin HTTP API](/
 | Load a spec | POST | `/api_specs` |
 | List all specs | GET | `/api_specs` |
 | Get a spec | GET | `/api_specs/:id` |
+| Delete a spec | DELETE | `/api_specs/:id` |
 
 ::: tip Cluster Deployments
 APIs are replicated, synchronised, and activated across the cluster automatically, so that each node serves all the defined APIs.

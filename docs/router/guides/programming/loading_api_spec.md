@@ -2,7 +2,7 @@
 related:
     - text: HTTP API Gateway Specification Reference
       type: Reference
-      link: /router/reference/api_gateway/specification#api-specification-object
+      link: /router/reference/api_gateway/specification#api-object
       description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics.
     - text: HTTP API Gateway
       type: HTTP API Reference
@@ -17,7 +17,7 @@ related:
 # Loading an API Gateway Specification
 Learn how to load an API Gateway Specification using the HTTP Admin API.
 
-Loading an API you have defined using the [API Gateway Specification](#/reference/api_gateway/specification) is very easy you just need to know the location of your file and use the [HTTP Admin API](/router/reference/http_api/api_gateway).
+Loading an API you have defined using the [API Gateway Specification](/router/reference/api_gateway/specification) is very easy you just need to know the location of your file and use the [HTTP Admin API](/router/reference/http_api/api_gateway).
 
 ## Assumptions
 
@@ -60,3 +60,19 @@ If the previous command didn't fail the API has been loaded and activated. Howev
 curl -X "GET" "http://localhost:18081/api_specs/com.example.my_api"
 ```
 :::
+
+A stored specification is not always served. To check that a node serves it, call the WAMP procedure [`bondy.http_gateway.api.status`](/router/reference/wamp_api/api_gateway#get-the-status-of-the-api-specs) on that node:
+
+::: code-group
+```bash [WAMP]
+wick --url ws://localhost:18080/ws \
+--realm com.leapsight.bondy \
+call bondy.http_gateway.api.status
+```
+:::
+
+Find the element whose `id` is your specification's `id`. The status `active` means that the node serves the specification.
+
+If the status is `pending_realm`, the specification's realm does not exist on the node. Create the realm. The node installs the specification's routes at its next rebuild after the realm appears.
+
+If the status is `rejected`, the specification failed to parse, and `reason` describes the failure. Correct the specification and load it again.

@@ -63,7 +63,7 @@ WAMP Call(KWArgs)
 
 4. **Authentication** — A token is acquired from the per-service token cache. If the cache is empty, the connector fetches a token from the configured auth endpoint. Tokens are cached with preemptive refresh.
 
-5. **HTTP request** — The request is sent to the upstream service with configurable retries and exponential backoff on connection failures.
+5. **HTTP request** — The request is sent to the upstream service with configurable retries and exponential backoff on connection failures. The procedure's `timeout` bounds the whole call, retries included.
 
 6. **Response mapping** — The HTTP response is mapped back to a WAMP result (2xx) or error (non-2xx).
 
@@ -174,7 +174,7 @@ Tokens are cached per-service with:
 
 ## Secret Management
 
-For production deployments, you can store credentials in an external secrets provider instead of the `bondy.conf` file. The HTTP Connector currently supports **AWS Secrets Manager**.
+For production deployments, you can store credentials in an external secrets provider instead of the `bondy.conf` file. The HTTP Connector supports **AWS Secrets Manager**.
 
 Secrets are resolved at startup and mapped into the auth variable bindings (`auth.vars`), overriding any static values. Each secret variable specifies:
 
@@ -182,7 +182,7 @@ Secrets are resolved at startup and mapped into the auth variable bindings (`aut
 - An optional transform: `none` (raw value), `basic_username` (extract username from `Basic base64(user:pass)`), or `basic_password` (extract password)
 
 ::: info Resilient Startup
-If secret resolution fails at startup (e.g. AWS is unreachable), the service is registered immediately but marked as "not ready". WAMP calls receive a `bondy.error.bad_gateway` (503) error. Secret resolution is retried in the background with exponential backoff until it succeeds.
+If secret resolution fails at startup (e.g. AWS is unreachable), the service is registered immediately but marked as "not ready". WAMP calls receive a `bondy.error.unavailable` error with status 503. Secret resolution is retried in the background with exponential backoff until it succeeds.
 :::
 
 
@@ -192,18 +192,34 @@ If secret resolution fails at startup (e.g. AWS is unreachable), the service is 
 
 | HTTP Status | WAMP Error URI |
 |:---|:---|
+| 3xx | `bondy.error.bad_gateway` |
 | 400 | `wamp.error.invalid_argument` |
 | 401 | `wamp.error.not_authorized` |
 | 403 | `wamp.error.not_authorized` |
-| 404 | `wamp.error.not_found` |
+| 404 | `bondy.error.not_found` |
 | 408 | `wamp.error.timeout` |
 | 422 | `wamp.error.invalid_argument` |
 | 429 | `bondy.error.too_many_requests` |
-| 4xx (other) | `bondy.error.invalid_argument` |
+| 4xx (other) | `wamp.error.invalid_argument` |
 | 502 | `bondy.error.bad_gateway` |
 | 503 | `bondy.error.bad_gateway` |
 | 504 | `wamp.error.timeout` |
 | 5xx (other) | `bondy.error.bad_gateway` |
+
+### Failures Without an Upstream Response
+
+A call can fail before the upstream sends a response. The connector answers it with an error of its own:
+
+| Condition | WAMP Error URI | `status` |
+|:---|:---|:---|
+| The connect, the pool checkout or the response outlasts the procedure's `timeout` | `bondy.error.gateway_timeout` | 504 |
+| The service's connection pool is down | `wamp.error.unavailable` | 503 |
+| The service's secrets are not resolved yet, or the auth token fetch fails | `bondy.error.unavailable` | 503 |
+| Any other transport failure | `bondy.error.bad_gateway` | 502 |
+
+The error kwargs carry the `status` and a `message`. When the connector itself fails, the router answers the call with `bondy.error.internal_error`.
+
+The HTTP API Gateway maps each of these URIs to the HTTP status in the table. So an HTTP client that reaches the connector through the gateway receives the same status.
 
 ### WAMP Return Format
 
@@ -227,14 +243,11 @@ The WAMP error kwargs contain the HTTP status and response body:
 
 ### Retries
 
-HTTP requests are retried on connection failures with exponential backoff:
+Bondy retries a request when it fails at the transport level, for example a refused connection. After an HTTP response, it retries only a 401 or 403, once, with a fresh token (see [Auth Rejection Auto-Retry](#auth-rejection-auto-retry)). It does not retry while the service's connection pool is marked down.
 
-| Attempt | Backoff |
-|:---|:---|
-| 1 | 0 ms (immediate) |
-| 2 | 300 ms |
-| 3 | 600 ms |
-| 4 | 1200 ms |
+The procedure's `timeout` is one deadline for the whole call, measured from its start. Each attempt gets only the time left before the deadline. Bondy skips a retry whose wait would end past the deadline, and the retry after a token refresh shares the same deadline. So a request that timed out is not retried.
+
+Before each retry Bondy waits a random time with jittered exponential backoff. The first wait is between 50 ms and 150 ms. Each later wait is drawn from the previous one, and no wait exceeds 200 ms. The wait is kept short because the connector runs inside the caller's dispatch path, so a long sleep would delay other calls queued behind it.
 
 Default: 3 retries, 30 second timeout. Both are configurable per service.
 

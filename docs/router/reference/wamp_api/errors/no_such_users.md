@@ -1,38 +1,7 @@
 # bondy.error.no_such_users
-When the usernames value is invalid.
+Bondy 1.0.0 does not return this error URI.
 
 ## Description
-Normally this is caused when there are request or input data validation failures.
+The condition is a call to [`bondy.source.add`](/router/reference/wamp_api/source) whose `usernames` names a user that does not exist.
 
-##### Positional Results
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-        0: {
-            'type': 'string',
-            'description': 'The error message'
-        }
-	})"
-/>
-
-##### Keyword Results
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-        'code': {
-            'type': 'string',
-            'description': 'no_such_users'
-        },
-        'description': {
-            'type': 'string',
-            'description': 'The error description'
-        },
-        'message': {
-            'type': 'array',
-            'description': 'The invalid usernames',
-            'items': {
-                'type': 'string'
-            }
-        }
-	})"
-/>
+The caller of a procedure that meets this condition receives [`bondy.error.internal_error`](/router/reference/wamp_api/errors/internal_error) instead. The error carries a `trace_id` and no detail about the condition.

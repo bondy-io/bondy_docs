@@ -3,14 +3,16 @@ name: Deploy
 # Builds the current version fresh, downloads every archived version's
 # already-built package from GitHub Releases (see release-docs.yml —
 # archived versions are never rebuilt here), combines them, and pushes
-# the result to Netlify as a production deploy.
+# the result to Netlify. A push to main is a production deploy; a push
+# to develop is a preview deploy at https://develop--<site>.netlify.app.
 
 on:
   push:
-    branches: [master]
+    branches: [main, develop]
 
+# One group per branch, so a develop push never cancels a main deploy.
 concurrency:
-  group: pages
+  group: pages-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -27,17 +29,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          cache: 'yarn'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       # docs:release = docs:build + docs:index. The Pagefind bundle has to
       # ship: search is merged in the browser from one bundle per property,
       # so a deploy without /pagefind/ contributes nothing to site-wide
       # search and its own search box comes up empty.
       - name: Build and index documentation (current version)
-        run: yarn docs:release
+        run: npm run docs:release
 
       - name: Assemble combined site
         run: |
@@ -67,8 +69,18 @@ jobs:
       # auth token; NETLIFY_SITE_ID is this site's API ID (Site settings
       # -> General -> Site details). Both must be added as repository
       # secrets.
-      - name: Deploy combined site to Netlify
+      - name: Deploy combined site to Netlify (production)
+        if: github.ref_name == 'main'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: npx --yes netlify-cli deploy --prod --dir=combined --message "Deploy ${{ github.sha }}"
+
+      # --alias gives the preview a fixed URL, <alias>--<site>.netlify.app,
+      # that each develop push overwrites.
+      - name: Deploy combined site to Netlify (develop preview)
+        if: github.ref_name == 'develop'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: npx --yes netlify-cli deploy --alias develop --dir=combined --message "Preview ${{ github.sha }}"

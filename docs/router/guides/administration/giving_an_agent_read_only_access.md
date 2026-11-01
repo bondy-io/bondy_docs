@@ -112,7 +112,7 @@ to the group you just created, and a short expiry:
 {"authroles": ["sre_readonly"], "expiry_time_secs": 3600}
 ```
 
-`authroles` must be a subset of the roles your session holds, so add yourself
+`authroles` has to be a subset of the roles your session holds, so add yourself
 to `sre_readonly` first if you are not already in it.
 
 A session authenticating with this ticket gets **exactly** those roles. The

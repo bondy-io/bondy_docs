@@ -7,7 +7,7 @@ related:
       description: A tutorial that demonstrates how to add an HTTP API to an existing project using the HTTP API Gateway.
     - text: HTTP API Gateway
       type: Reference
-      link: /router/reference/api_gateway/specification.html#api-specification-object
+      link: /router/reference/api_gateway/specification#api-object
       description: Bondy HTTP API Gateway acts as a reverse proxy by accepting incoming REST API actions and translating them into WAMP actions over a Realm's procedures and topics.
 ---
 # Marketplace
@@ -62,14 +62,14 @@ Bot
     Uses [AutobahnPython](https://github.com/crossbario/autobahn-python)
 
     ::: info Configuration
-    The demo spawns 5 bots that are configured to:
+    The demo starts 4 bots that are configured to:
     * Bid on any items whose prices are lower than a given limit,
     * Increasing the price by a given amount
     * Taking a given amount of time to perform the bid, i.e. lag between computing the price and actually bidding. We use this lag is to have some bids from the bots rejected and slow down the demo to a more human friendly rhythm.
     :::
 
 Web App
-: A single page Web App written in Javascript. Uses using [VueJS](https://vuejs.org) and [AutobahnJS](https://github.com/crossbario/autobahn-js) (Browser).
+: A single page Web App written in TypeScript. It uses [Vue](https://vuejs.org) and the [wampy](https://github.com/KSDaemon/wampy.js) WAMP client.
 
 Interactive CLI
 : An interactive command line interface written in Python and using the Autobahn Python WAMP client.
@@ -83,6 +83,7 @@ All components open a single WAMP session to Bondy on the `com.market.demo` real
 * [Docker](https://www.docker.com) (Docker Desktop in case you use macOS or Windows)
 * `git`
 * `make`
+* `openssl`, which `make` uses to generate the demo's credentials
 
 Make sure that Docker is running before you start.
 
@@ -111,7 +112,7 @@ This will result in the following Docker containers:
 <ZoomImg alt="Docker Dashboard showing all containers" src="/assets/tutorials/marketplace/docker_dashboard.png"/>
 
 ::: info Note
-Bondy needs a few seconds to start and be ready to accept connections, this is because Bondy is validating and indexing the internal database. This can actualle be controlled via [configuration](/router/reference/configuration/startup_shutdown).
+Bondy needs a few seconds to start and be ready to accept connections.
 
 From the Docker containers' logs you might notice microservices are trying to reconnect with logs like the following, do not worry, they will keep on retrying to connect to Bondy.
 
@@ -206,7 +207,7 @@ In line 3 we call a util function that returns the following dictionary:
 This tells Autobahn to open a websocket session with Bondy attached to the `com.market.demo` realm and using WAMP Cryptosign authentication.
 
 ::: info Note
-The `com.market.demo` realm is configured by the Make target responsible to running the Bondy docker instance.
+The file `bondy/etc/security_config.json.template` in the demo repository defines the `com.market.demo` realm. The Bondy container renders it with the keys from the generated `.env` file and loads it at boot.
 :::
 
 
@@ -214,12 +215,14 @@ The `com.market.demo` realm is configured by the Make target responsible to runn
 
 Once connected, the `_on_join` method is called with the established session.
 
-Once it has established a session to Bondy on the `com.market.demo` realm, the market registers 6 RPCs under the following URIs:
+Once it has established a session to Bondy on the `com.market.demo` realm, the market registers 8 RPCs under the following URIs:
 
-* `com.market.bidder.add` - Add a user as bidder
-* `com.market.bidder.gone` - Remove a user as bidder
+* `com.market.bidder.add` - Bind a bidder name to the caller's session
+* `com.market.bidder.gone` - Release the caller's bidder name
 * `com.market.get` - List all the items for sale
+* `com.market.settled` - List the items that sold or expired and are still retained
 * `com.market.item.bid` - Place a bid on a listed item
+* `com.market.item.bids` - List the accepted bids on an item
 * `com.market.item.get` - Return an item's details
 * `com.market.item.sell` -  List a new item for sale.
 
@@ -269,7 +272,7 @@ You can also bid for item using the item button at the end of the row.
 
 ### Bots
 
-Similarly the bots connect to Bondy with their own private crytpsign key.
+Similarly the bots connect to Bondy with WAMP Cryptosign. All four bots share the `bot` identity; each one bids under its own name, which `com.market.bidder.add` binds to the bot's session.
 However, upon successful connections, the bots will only subscribe to the `com.market.opened` topic and wait until the marketplace is open before trying to bid on items.
 
 The subscription is simply done by calling `subscribe` on the session:

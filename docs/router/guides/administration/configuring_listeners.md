@@ -89,9 +89,11 @@ listeners.public_https.transport    = tls
 listeners.public_https.protocol     = http
 listeners.public_https.port         = 8443
 listeners.public_https.services     = api_gateway, wamp_ws
-listeners.public_https.tls.certfile = {{platform_etc_dir}}/cert.pem
-listeners.public_https.tls.keyfile  = {{platform_etc_dir}}/key.pem
+listeners.public_https.tls.certfile = /etc/bondy/ssl/cert.pem
+listeners.public_https.tls.keyfile  = /etc/bondy/ssl/key.pem
 ```
+
+Write each `tls.*` path in full. `bondy.conf` has no variable for the `etc` directory.
 
 The certificate is checked at boot. If you want to declare the listener
 before its certificate has been provisioned, park it:
@@ -114,7 +116,7 @@ The same pattern serves WAMP raw socket and the bridge relay over TLS:
 none still connects. Requiring one takes the pair:
 
 ```
-listeners.public_https.tls.cacertfile           = {{platform_etc_dir}}/cacert.pem
+listeners.public_https.tls.cacertfile           = /etc/bondy/ssl/cacert.pem
 listeners.public_https.tls.verify               = verify_peer
 listeners.public_https.tls.fail_if_no_peer_cert = on
 ```
@@ -137,8 +139,8 @@ listeners.agents.transport    = tls
 listeners.agents.protocol     = http
 listeners.agents.port         = 9443
 listeners.agents.services     = mcp
-listeners.agents.tls.certfile = {{platform_etc_dir}}/cert.pem
-listeners.agents.tls.keyfile  = {{platform_etc_dir}}/key.pem
+listeners.agents.tls.certfile = /etc/bondy/ssl/cert.pem
+listeners.agents.tls.keyfile  = /etc/bondy/ssl/key.pem
 ```
 
 Services choose subprotocols too: `wamp_ws` and `bamp_ws` both mount
@@ -158,16 +160,16 @@ listeners.tenant_a.protocol     = http
 listeners.tenant_a.ip           = 10.0.0.1
 listeners.tenant_a.port         = 443
 listeners.tenant_a.services     = api_gateway
-listeners.tenant_a.tls.certfile = {{platform_etc_dir}}/tenant_a.pem
-listeners.tenant_a.tls.keyfile  = {{platform_etc_dir}}/tenant_a_key.pem
+listeners.tenant_a.tls.certfile = /etc/bondy/ssl/tenant_a.pem
+listeners.tenant_a.tls.keyfile  = /etc/bondy/ssl/tenant_a_key.pem
 
 listeners.tenant_b.transport    = tls
 listeners.tenant_b.protocol     = http
 listeners.tenant_b.ip           = 10.0.0.2
 listeners.tenant_b.port         = 443
 listeners.tenant_b.services     = api_gateway
-listeners.tenant_b.tls.certfile = {{platform_etc_dir}}/tenant_b.pem
-listeners.tenant_b.tls.keyfile  = {{platform_etc_dir}}/tenant_b_key.pem
+listeners.tenant_b.tls.certfile = /etc/bondy/ssl/tenant_b.pem
+listeners.tenant_b.tls.keyfile  = /etc/bondy/ssl/tenant_b_key.pem
 ```
 
 `ip` takes an address literal, not a hostname. A listener that states no
@@ -236,22 +238,37 @@ quotas compose with this — is the subject of the
 ## Answer probes before the node is ready
 
 An orchestrator's liveness probe and the metrics scrape are useful
-precisely while the node is still starting. `start_phase = early` starts a
-listener before every `normal` one, while the node still reports
-`initialising` — which is why the built-in `admin` listener (carrying
-`/ping`, `/ready` and `/metrics`) is declared early. If you move probes or
+precisely while the node is still starting. `start_phase = early` binds a
+listener before the storage layer opens, which on a node with enough data can
+take minutes: `/ping` answers throughout, so a liveness probe does not kill a
+node that is still opening its store, and `/ready` answers `503` until the node
+is ready. The rest of an early listener's routes, `/metrics` included, answer
+`404` until the node's services start, which is still before every `normal`
+listener binds. That is why the built-in `admin` listener (carrying `/ping`,
+`/ready` and `/metrics`) is declared early. If you move probes or
 metrics onto a listener of your own, carry the phase over:
 
 ```
 listeners.probes.transport   = tcp
 listeners.probes.protocol    = http
 listeners.probes.port        = 9090
+listeners.probes.ip          = 0.0.0.0
 listeners.probes.start_phase = early
 listeners.probes.services    = admin, metrics
 ```
 
-`/ready` answering means the normal phase finished binding — use it, not
-`/ping`, as the signal to route traffic to the node.
+Set `ip` when the prober is on another host or in another network
+namespace. A listener that serves `admin` or `metrics` and sets no `ip`
+binds loopback only.
+
+Declare the `admin` service on the early listener. An early listener
+without it answers `404` to every path until the node's services start.
+
+Point a liveness probe at `/ping` and a readiness probe at `/ready`. `/ready`
+answering `204` means the normal phase finished binding — use it, not `/ping`,
+as the signal to route traffic to the node. Do not use `/ready` for
+liveness: it answers `503` while the node opens its storage, so the
+orchestrator restarts a node that is only starting.
 
 ## Take the node out of rotation without a restart
 
@@ -267,6 +284,14 @@ Suspending stops a listener accepting *new* connections and leaves
 established ones running — which is what makes it a drain: suspend
 `normal`, let in-flight sessions finish, and the node has left rotation
 without dropping work.
+
+To see which listeners a phase covers before you act, call either
+procedure with `dry_run = true`. A dry run changes nothing. Its result
+lists the names of those listeners under `listeners`:
+
+```
+bondy.listener.suspend("normal", dry_run=true)
+```
 
 ::: warning Suspending `all` includes your probes
 The `early` phase carries `/ping`, `/ready` and `/metrics`. Suspend `all`

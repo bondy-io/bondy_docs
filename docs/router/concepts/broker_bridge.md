@@ -56,7 +56,7 @@ Three things happen, in order, every time an event matches a subscription:
 - **Mailgun / SendGrid** — provider HTTP APIs, predating the SMTP bridge. They do not share its authority model, its pooling or its error handling, and they configure the *same* underlying HTTP client through global application settings, so **enabling both at once is mutually destructive**. Prefer the SMTP bridge unless you specifically need SendGrid's server-side templates (`template_id` + `template_data`).
 
 ## Configuring at runtime vs. bondy.conf
-A specification file is the normal way to define subscriptions, loaded once from the path in `broker_bridge.config_file`. There is also a `subscribe/5` function that creates a subscription at runtime — but it is a plain Erlang API, not a WAMP procedure; there is no `bondy.broker_bridge.*` (or similar) WAMP admin surface for it. Managing subscriptions dynamically today means editing the specification file (and reloading), not calling a procedure.
+A specification file is the normal way to define subscriptions, loaded once from the path in `broker_bridge.config_file`. There is also a `subscribe/5` function that creates a subscription at runtime — but it is a plain Erlang API, not a WAMP procedure; there is no `bondy.broker_bridge.*` (or similar) WAMP admin surface for it. To change the subscriptions, an operator edits the specification file and reloads it; no WAMP procedure does this.
 
 ## See also
 - [Broker Bridge Configuration Reference](/router/reference/configuration/broker_bridge) — every `broker_bridge.*` key, across all five bridges.

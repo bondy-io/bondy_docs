@@ -7,7 +7,7 @@ related:
       description: What a bridge relay is, why it exists, and what actually happens when one connects.
 ---
 # Bridge Relay (Edge)
-The WAMP procedures for managing bridge relays (Bondy Edge connections) at runtime — adding, removing, starting, stopping, and checking the status of a bridge. For what a bridge relay is, why it's distinct from clustering, and what syncs (and doesn't yet sync) when one connects, see [Bondy Edge (Bridge Relay)](/router/concepts/bridge_relay).
+The WAMP procedures for managing bridge relays (Bondy Edge connections) at runtime — adding, removing, starting, stopping, and checking the status of a bridge. For what a bridge relay is, why it's distinct from clustering, and what syncs (and what does not sync) when one connects, see [Bondy Edge (Bridge Relay)](/router/concepts/bridge_relay).
 
 ## Types
 ### input_data(){.datatype}
@@ -16,7 +16,13 @@ A Bridge Relay object configuration has the following properties:
 <DataTreeView :data="inputCreateData" :maxDepth="10" />
 
 ## Procedures
-The following wamp api is used to configure and manage the proper Edge:
+The following WAMP procedures add, start, stop, inspect and remove bridge relays.
+
+::: warning AUTHORIZATION
+Only a session attached to the master realm (`com.leapsight.bondy`) can call these procedures. A session in any other realm gets `wamp.error.not_authorized`.
+:::
+
+Bondy also reserves `bondy.router.bridge.update`, but does not implement it. A call to it fails with `wamp.error.no_such_procedure`. To change a bridge, remove it and add it again.
 
 |Name|URI|
 |:---|:---|
@@ -45,7 +51,12 @@ Adds a Bridge Relay specification and optionally starts the bridge.
 		'autostart':{
 			'type': 'boolean',
 			'required': false,
-			'description' : 'If true immediately starts the bridge, otherwise the bridge should be started using bondy.router.bridge.start procedure.'
+			'description' : 'If true, Bondy starts the bridge at once. If false, start the bridge with bondy.router.bridge.start. Defaults to false.'
+		},
+		'dry_run':{
+			'type': 'boolean',
+			'required': false,
+			'description' : 'If true, Bondy validates the specification and checks that the name is free, but does not add or start the bridge. The result is an object with dry_run (true), would (a sentence that names the action) and bridge (the parsed specification). Defaults to false.'
 		}
 	})"
 />
@@ -61,6 +72,7 @@ None.
 #### Errors
 
 * [bondy.error.already_exists](/router/reference/wamp_api/errors/already_exists): when the provided bridge name already exists.
+* The validation errors of [`bondy.router.bridge.check_spec`](#check-spec-of-a-bridge): when the specification is not valid.
 
 #### Example
 
@@ -94,13 +106,13 @@ call bondy.router.bridge.add \
   "enabled": false,
   "endpoint": "127.0.0.1:18093",
   "idle_timeout": 86400000,
-  "max_frame_size": "infinity",
+  "max_frame_size": 4194304,
   "name": "edge_test",
   "parallelism": 1,
   "ping": {
     "enabled": true,
     "idle_timeout": 20000,
-    "max_attemps": 2,
+    "max_attempts": 3,
     "timeout": 10000
   },
   "realms": [
@@ -140,10 +152,10 @@ call bondy.router.bridge.add \
 
 
 ### Remove a bridge
-##### bondy.router.bridge.remove() {.wamp-procedure}
-Removes the definition of a bridge from the bridge manager.
+##### bondy.router.bridge.remove(name) {.wamp-procedure}
+Stops the bridge if it runs, and removes its definition from the bridge manager. For a `permanent` bridge, Bondy also deletes the stored definition.
 
-Returns an error if undefined or if the bridge is running, but no errors if the bridge doesn't exist or it is removed successfully.
+The call succeeds when the bridge does not exist.
 
 #### Call
 
@@ -172,7 +184,7 @@ None.
 
 #### Errors
 
-* [bondy.error.running](/router/reference/wamp_api/errors/running): when the bridge is running or restarting — stop it first.
+* `bondy.error.internal_error`: when the bridge supervisor refuses to delete the bridge, for example because the bridge restarts at the moment of the call.
 
 #### Example
 
@@ -221,7 +233,7 @@ None.
 
 * [bondy.error.not_found](/router/reference/wamp_api/errors/not_found): when the provided bridge name is not found.
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there are an invalid number of positional arguments.
-* [bondy.error.unknown_error](/router/reference/wamp_api/errors/unknown_error): when the bridge fails to start for a reason that doesn't map to a more specific error.
+* `bondy.error.internal_error`: when the bridge fails to start. The node log records the reason.
 
 #### Examples
 
@@ -238,7 +250,7 @@ call bondy.router.bridge.start "edge_test"
 ##### bondy.router.bridge.stop(name()) {.wamp-procedure}
 Stops an existing running bridge.
 
-Returns an error if the bridge is not running or undefined.
+A call for a bridge that was started and has stopped succeeds. A call for a bridge that was never started on this node fails with `bondy.error.not_found`.
 
 #### Call
 
@@ -267,7 +279,7 @@ None.
 
 #### Errors
 
-* [bondy.error.not_found](/router/reference/wamp_api/errors/not_found): when the provided bridge name is not found or not running.
+* [bondy.error.not_found](/router/reference/wamp_api/errors/not_found): when no bridge with this name exists, or when the bridge was never started on this node.
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there are an invalid number of positional arguments.
 
 #### Examples
@@ -332,14 +344,14 @@ call bondy.router.bridge.get "edge_test" | jq
   "endpoint": "127.0.0.1:18093",
   "hibernate": "idle",
   "idle_timeout": 86400000,
-  "max_frame_size": "infinity",
+  "max_frame_size": 4194304,
   "name": "edge_test",
   "network_timeout": 30000,
   "parallelism": 1,
   "ping": {
     "enabled": true,
     "idle_timeout": 20000,
-    "max_attempts": 2,
+    "max_attempts": 3,
     "timeout": 10000
   },
   "realms": [
@@ -416,14 +428,14 @@ call bondy.router.bridge.list | jq
         "endpoint": "127.0.0.1:18093",
         "hibernate": "idle",
         "idle_timeout": 86400000,
-        "max_frame_size": "infinity",
+        "max_frame_size": 4194304,
         "name": "edge_test",
         "network_timeout": 30000,
         "parallelism": 1,
         "ping": {
             "enabled": true,
             "idle_timeout": 20000,
-            "max_attempts": 2,
+            "max_attempts": 3,
             "timeout": 10000
         },
         "realms": [
@@ -533,7 +545,7 @@ None.
 #### Errors
 
 * [bondy.error.missing_required_value](/router/reference/wamp_api/errors/missing_required_value): when a required value is not provided.
-* [bondy.error.invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype): when the data type is invalid.
+* `bondy.error.unknown_error`, with `code` `invalid_datatype`: when the data type is invalid.
 * [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the data value is invalid.
 * [bondy.error.invalid_data](/router/reference/wamp_api/errors/invalid_data): when the data values are invalid.
 
@@ -567,7 +579,7 @@ call bondy.router.bridge.check_spec \
   "enabled": false,
   "endpoint": "127.0.0.1:18093",
   "idle_timeout": 86400000,
-  "max_frame_size": "infinity",
+  "max_frame_size": 4194304,
   "name": "edge_test",
   "parallelism": 1,
   "ping": {},
@@ -691,6 +703,12 @@ const bridgeData = {
                 "description": "The allowed values are: verify_peer and verify_none.",
                 "default": '"verify_none"'
             },
+            "hostname_verification": {
+                "type": "string",
+                "required": false,
+                "mutable": false,
+                "description": "The allowed values are: wildcard and none. With wildcard, the bridge checks the server certificate hostname with the HTTPS rules, which accept a wildcard certificate."
+            },
             "certfile": {
                 "type": "string",
                 "required": false,
@@ -756,7 +774,7 @@ const bridgeData = {
         "type": "string",
         "required": true,
 		"mutable": false,
-		"description": "Defines when a terminated bridge must be restarted. The allowed values are: `permanent` and `transient`. \n* A `permanent` bridge is always restarted, even after recovering from a Bondy node crash or when the node is manually stopped and re-started. Bondy persists the configuration of permanent bridges in the database and reads them during startup.\n* A `transient` bridge is restarted only if it terminated abnormally. In case of a node crash or manually stopped and re-started they will not be restarted.",
+		"description": "Defines when the supervisor restarts a terminated bridge. The allowed values are: `permanent` and `transient`. \n* A `permanent` bridge is always restarted, even after recovering from a Bondy node crash or when the node is manually stopped and re-started. Bondy persists the configuration of permanent bridges in the database and reads them during startup.\n* A `transient` bridge is restarted only if it terminated abnormally. A node crash, or a manual stop and restart of the node, does not restart it.",
         "default": "transient"
     },
     "idle_timeout": {
@@ -791,14 +809,14 @@ const bridgeData = {
         "type": "integer | infinity",
         "required": true,
 		"mutable": false,
-		"description": "The maximum frame size in bytes. ",
-        "default": "infinity"
+		"description": "The maximum frame size in bytes, or `infinity`.",
+        "default": "4194304"
     },
     "reconnect": {
         "type": "object",
         "required": true,
 		"mutable": false,
-		"description": "Enables or disables the reconnect feature. Once a connection is established but fails due to an unknown error or by the connecting being aborted by the remote with an error that is recoverable, we might want to ask Bondy to retry the connection e.g. when connecting with realm A the remote aborts the connection with reason `no_such_realm`, in this case maybe the realm has not yet been provisioned, so we want the connection to retry indefinitely.",
+		"description": "Enables or disables the reconnect feature. Once a connection is established but fails due to an unknown error or by the connecting being aborted by the remote with an error that is recoverable, we might want to ask Bondy to retry the connection e.g. when connecting with realm A the remote aborts the connection with reason `no_such_realm`, in this case maybe the realm has not yet been provisioned, so we want the connection to retry indefinitely. When reconnect is disabled, or when Bondy does not retry the connect error, the bridge stops and stays stopped until a call to `bondy.router.bridge.start`.",
         "properties": {
             "enabled": {
                 "type": "boolean",
@@ -869,7 +887,7 @@ const bridgeData = {
                 "required": true,
                 "mutable": false,
                 "description": "The max retries after which Bondy deems the connection dead and closes the socket.",
-                "default": "2"
+                "default": "3"
             }
         },
         "default": "`{}`"
@@ -938,7 +956,7 @@ const bridgeData = {
                         "type": "object",
                         "properties": procedureActionSpec
                     },
-                    "description": "Accepted and validated, but not yet enforced by the running bridge — see Bondy Edge.",
+                    "description": "Bondy accepts and validates this list, but the running bridge does not act on it. See Bondy Edge.",
                     "default": "[]"
                 },
                 "topics": {

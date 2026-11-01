@@ -1,14 +1,17 @@
 # wamp.error.timeout
-When an operation did not finish within the time the caller allowed it.
+When an operation did not finish within its timeout.
 
 ## Description
-Raised when a `bondy.*` procedure runs out of the time budget the call set, and stops rather than answering with a partial result presented as a whole one.
+Bondy raises this error in these cases:
 
-The budget comes from the `CALL.Options._deadline` extension option — milliseconds from now, after which to give up. A caller can only *shorten* what a procedure would otherwise wait: a deadline says when to give up, not how long the router may take.
+- The dealer's call timeout elapses before the callee answers. The `ERROR` message's `Details` hold `procedure_uri` and `timeout`, the timeout in milliseconds. `Args[0]` states the timeout. The message has no keyword arguments. See [`wamp.call_timeout`](/router/reference/configuration/wamp#call-timeout).
+- A `bondy.*` procedure runs out of the time budget that the call set.
+- An [HTTP connector](/router/reference/configuration/http_connector) upstream answers with status `504` or `408`. The keyword arguments are `status` and `body`.
+- A `SUBSCRIBE` times out while the broker waits for the subscription to complete.
 
-[`bondy.alarm.history`](/router/reference/wamp_api/alarm#bondy.alarm.history) raises it on a **progressive** walk whose deadline is spent. The chunks already delivered are complete as far as they go; nothing after them was read. The error settles the call in place of a final result, because a truncated stream marked `has_more: false` would claim to be complete. When paging rather than streaming, a spent budget is not an error at all — the page stops early and its `cursor` resumes where it stopped.
+The time budget of a `bondy.*` procedure comes from the `CALL.Options._deadline` extension option, in milliseconds from now. A caller can only shorten what a procedure would otherwise wait: a deadline says when to give up, not how long the router can take.
 
-Distinct from [`bondy.error.timeout`](/router/reference/wamp_api/errors/timeout), which is Bondy waiting on the result of a call it issued internally.
+[`bondy.alarm.history`](/router/reference/wamp_api/alarm#bondy-alarm-history-page) raises it on a **progressive** walk whose deadline is spent. The chunks already delivered are complete as far as they go; nothing after them was read. The error settles the call in place of a final result, because a truncated stream marked `has_more: false` would claim to be complete. When paging rather than streaming, a spent budget is not an error at all — the page stops early and its `cursor` resumes where it stopped.
 
 ##### Positional Results
 <DataTreeView

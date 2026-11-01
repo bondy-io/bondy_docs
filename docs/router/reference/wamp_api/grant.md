@@ -52,7 +52,7 @@ These procedures facilitate the management of permissions in an RBAC system by a
 ## Creating and revoking
 
 ### Create a new grant
-#### bondy.grant.create(realm_uri(), input_data()) -> grant() {.wamp-procedure}
+#### bondy.grant.create(realm_uri(), input_data()) {.wamp-procedure}
 This procedure is used to create a new grant, which assigns specific permissions to a user, group, or role for a particular resource. By invoking `bondy.grant.create`, administrators can specify who (the principal) is being granted access, what resources they can access, and what actions they are permitted to perform.
 
 It creates a new grant and adds it to the given realm uri.
@@ -78,7 +78,7 @@ None.
 #### Errors
 
 * [wamp.error.no_such_realm](/router/reference/wamp_api/errors/wamp_no_such_realm): when the given realm uri does not exist.
-* [bondy.error.unknown_roles](/router/reference/wamp_api/errors/unknown_roles): when the given roles do not exist.
+* [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when the given roles do not exist. Bondy 1.0.0 returns this URI in place of [`bondy.error.unknown_roles`](/router/reference/wamp_api/errors/unknown_roles).
 * [bondy.error.invalid_data](/router/reference/wamp_api/errors/invalid_data): when there are validation failures on the given data.
 
 #### Examples
@@ -147,7 +147,7 @@ call bondy.grant.create \
 :::
 
 ### Revoke an existing grant
-#### bondy.grant.revoke(realm_uri(), input_data()) -> grant() {.wamp-procedure}
+#### bondy.grant.revoke(realm_uri(), input_data()) {.wamp-procedure}
 This procedure is used to remove an existing grant. When `bondy.grant.revoke` is called, it removes the permissions previously granted to a user, group, or role for a specific resource. This helps in managing and adjusting access control by revoking rights that are no longer needed or are being altered.
 
 ##### Positional Args
@@ -167,7 +167,7 @@ None.
 #### Errors
 
 * [wamp.error.no_such_realm](/router/reference/wamp_api/errors/wamp_no_such_realm): when the given realm uri does not exist.
-* [bondy.error.unknown_roles](/router/reference/wamp_api/errors/unknown_roles): when the given roles do not exist.
+* [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when the given roles do not exist. Bondy 1.0.0 returns this URI in place of [`bondy.error.unknown_roles`](/router/reference/wamp_api/errors/unknown_roles).
 * [bondy.error.invalid_data](/router/reference/wamp_api/errors/invalid_data): when there are validation failures on the given data.
 
 #### Examples
@@ -228,6 +228,10 @@ call bondy.grant.revoke \
 ### List grants of the realm
 #### bondy.realm.grants(realm_uri()) -> [grant()] {.wamp-procedure}
 This procedure retrieves the list of grants applied at the realm level. It provides a comprehensive view of all permissions that are granted within a particular realm, which can include various users, groups, and roles along with their associated permissions on resources.
+
+::: warning AUTHORIZATION
+This call is only available to sessions attached to the **Master Realm**.
+:::
 
 ##### Positional Args
 <DataTreeView

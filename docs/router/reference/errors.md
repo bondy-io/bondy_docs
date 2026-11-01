@@ -8,7 +8,7 @@ related:
       description: "The `status_codes` map, which overrides the HTTP status an error maps to."
     - text: "Bondy Connect SDK"
       type: "Reference"
-      link: "/wamp/reference/clients/bondy_connect_sdk"
+      link: "/router/reference/clients/bondy_connect_sdk"
       description: "The Erlang client, whose call errors carry this same payload."
     - text: "Prometheus Metrics Reference"
       type: "Reference"
@@ -44,10 +44,10 @@ both transports.
 | Field | Contract |
 | --- | --- |
 | `uri` | The error's identity, and the only field to branch on. Always present, always a valid URI. |
-| `code` | A short token retained for compatibility with the payloads Bondy emitted before this catalogue existed. Fixed per error type, and not always derivable from `uri`. New code should not branch on it. |
+| `code` | A short token retained for compatibility with the payloads Bondy emitted before this catalogue existed. Fixed per error type, and not always derivable from `uri`. Do not branch on it in new code. |
 | `handle` | A stable identifier for support and documentation, such as `C010`. Never interpreted by software. |
 | `nature` | `transient` or `permanent`. See [Retry semantics](#retry-semantics). |
-| `message` | One sentence, safe to show a user. Also `Args[0]` of a WAMP `ERROR`. |
+| `message` | One sentence, safe to show a user. Also `Args[0]` of a WAMP `ERROR`, except for `wamp.error.not_authorized` raised by a Bondy administration procedure, whose `Args[0]` is this whole payload map. |
 | `description` | A longer explanation, safe to show a user. May be empty. |
 | `details` | Structured context: the offending key, the limit reached, the realm that was missing. Values are JSON scalars, lists or maps. |
 | `causes` | Errors that led to this one, outermost first. Each entry has this same shape. Usually empty. |
@@ -73,8 +73,20 @@ as `bondy.error.internal_error` with a `trace_id` and nothing else. The same
 operator can join the two without the peer ever seeing it.
 
 Every value in the payload is JSON-encodable by construction. A term with no
-JSON representation is rendered as text, and both nesting depth and total size
-are bounded.
+JSON representation is rendered as text. Within `details`, a value nested deeper
+than 8 levels is rendered as text, and each string is truncated to about 4096
+bytes, ending in `...`. Bondy does not truncate `message` or `description`, and
+does not bound the total size of the payload.
+
+### Correlating requests and errors
+
+Bondy generates the `trace_id` of an internal error from a UUIDv7, so trace
+IDs sort by creation time. The HTTP API Gateway gives every request an ID of
+the same kind when the request arrives. An API specification reads that ID as
+`{{request.id}}`. When an action fails, Bondy logs the error against the same
+ID, and the specification can return it to the client as `{{action.error.id}}`.
+The log record carries the value that the client receives, so either ID
+locates the record of a failure.
 
 ## Retry semantics
 
@@ -99,13 +111,13 @@ the operation is permitted, and is transient.
 
 `HTTP` is the status an API Gateway response uses. An API specification can
 override it per host or version through its
-[`status_codes` map](/router/reference/api_gateway/specification). A `†` marks a type
-that shares another's URI.
+[`status_codes` map](/router/reference/api_gateway/specification). An error URI
+with no HTTP mapping answers `500` unless the specification maps it. A `†` marks
+a type that shares another's URI.
 
-The administrative WAMP API raises a further set of errors specific to its own
-resources &mdash; stale pagination cursors, unknown group names, an export
-already running. Those have a page each under
-[WAMP API Errors](/router/reference/wamp_api/errors/index).
+The error URIs that the administrative WAMP API raises have a page each under
+[WAMP API Errors](/router/reference/wamp_api/errors/index). Each page says
+which procedures raise the error and what its `details` carry.
 
 ### Authentication
 
@@ -153,6 +165,7 @@ already running. Those have a page each under
 | `conflict` | `bondy.error.conflict` | `conflict` | permanent | 409 | C016 |
 | `proxy_protocol_error` | `bondy.error.proxy_protocol_error` | `proxy_protocol_error` | permanent | 403 | C017 |
 | `badarg` | `wamp.error.invalid_argument` | `invalid_argument` | permanent | 400 | C018 † |
+| `not_implemented` | `bondy.error.not_implemented` | `not_implemented` | permanent | 500 | C019 |
 
 ### Limits
 
@@ -179,7 +192,7 @@ already running. Those have a page each under
 | `oauth2_invalid_scope` | `bondy.error.invalid_scope` | `invalid_scope` | permanent | 400 | G006 |
 | `unsupported_token_type` | `bondy.error.unsupported_token_type` | `unsupported_token_type` | transient | 503 | G007 |
 | `invalid_scheme` | `bondy.error.invalid_client` | `invalid_client` | permanent | 401 | G008 † |
-| `invalid_expression` | `bondy.error.http_gateway.invalid_expression` | `invalid_expression` | permanent | 500 | G009 |
+| `invalid_expression` | `bondy.error.http_gateway.invalid_expression` | `bondy.error.http_gateway.invalid_expression` | permanent | 500 | G009 |
 
 ### WAMP protocol
 
@@ -192,7 +205,7 @@ already running. Those have a page each under
 | `no_such_session` | `wamp.error.no_such_session` | `no_such_session` | permanent | 500 | W005 |
 | `procedure_already_exists` | `wamp.error.procedure_already_exists` | `procedure_already_exists` | permanent | 400 | W006 |
 | `option_not_allowed` | `wamp.error.option_not_allowed` | `option_not_allowed` | permanent | 400 | W007 |
-| `disclose_me_not_allowed` | `wamp.error.disclose_me.not_allowed` | `not_allowed` | permanent | 400 | W008 |
+| `disclose_me_not_allowed` | `wamp.error.disclose_me.not_allowed` | `disclose_me_not_allowed` | permanent | 400 | W008 |
 | `no_eligible_callee` | `wamp.error.no_eligible_callee` | `no_eligible_callee` | transient | 502 | W009 |
 | `no_available_callee` | `wamp.error.no_available_callee` | `no_available_callee` | transient | 502 | W010 |
 | `protocol_violation` | `wamp.error.protocol_violation` | `protocol_violation` | permanent | 400 | W011 |
@@ -209,6 +222,7 @@ already running. Those have a page each under
 | `node_down` | `bondy.error.node_down` | `node_down` | transient | 503 | K001 |
 | `cluster_not_formed` | `bondy.error.cluster_not_formed` | `cluster_not_formed` | transient | 503 | K002 |
 | `partition_detected` | `bondy.error.partition_detected` | `partition_detected` | transient | 503 | K003 |
+| `cluster_disabled` | `bondy.error.cluster_disabled` | `cluster_disabled` | permanent | 501 | K004 |
 
 ### Mail
 
@@ -248,16 +262,17 @@ that cannot succeed.
 | `unavailable` | `bondy.error.unavailable` | `unavailable` | transient | 503 | S004 |
 | `temporarily_unavailable` | `bondy.error.temporarily_unavailable` | `temporarily_unavailable` | transient | 503 | S005 |
 | `gateway_timeout` | `bondy.error.gateway_timeout` | `gateway_timeout` | transient | 504 | S006 |
-| `bad_gateway` | `bondy.error.bad_gateway` | `bad_gateway` | transient | 503 | S007 |
+| `bad_gateway` | `bondy.error.bad_gateway` | `bad_gateway` | transient | 502 | S007 |
 | `disk_full` | `bondy.error.disk_full` | `disk_full` | transient | 500 | S008 |
 | `out_of_memory` | `bondy.error.out_of_memory` | `out_of_memory` | transient | 500 | S009 |
 | `too_many_connections` | `bondy.error.too_many_connections` | `too_many_connections` | transient | 503 | S010 |
 | `too_many_processes` | `bondy.error.too_many_processes` | `too_many_processes` | transient | 500 | S011 |
 | `insufficient_resources` | `bondy.error.insufficient_resources` | `insufficient_resources` | transient | 503 | S012 |
-| `system_shutdown` | `wamp.error.system_shutdown` | `system_shutdown` | transient | 500 | S013 |
+| `system_shutdown` | `wamp.close.system_shutdown` | `system_shutdown` | transient | 500 | S013 |
 | `noproc` | `wamp.error.unavailable` | `unavailable` | transient | 503 | S014 † |
 | `overload` | `bondy.error.too_many_requests` | `too_many_requests` | transient | 429 | S015 † |
 | `overloaded` | `bondy.error.too_many_requests` | `too_many_requests` | transient | 429 | S016 † |
+
 ### POSIX errors
 
 Errors named by a POSIX atom &mdash; `enoent`, `econnrefused`, `etimedout` and

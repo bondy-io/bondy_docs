@@ -12,46 +12,50 @@ If this is your first time trying Bondy, you might prefer to start with one of o
 ## Prerequisites
 
 * Operating Systems: macOS (Intel|Apple Silicon) or Linux (AMD64|ARM64)
-* [Erlang/OTP](https://www.erlang.org/downloads) 28 or later
-* [Rebar3](http://www.rebar3.org/) 3.17.0 or later
-* openssl
-* libssl
-* Libsodium
-* libsnappy
-* liblz4
+* [Erlang/OTP](https://www.erlang.org/downloads) 29 or later
+* [Rebar3](http://www.rebar3.org/) 3.27.0 or later
+* [just](https://just.systems/), the task runner
+* A C and C++ toolchain, `cmake` and `git`, to build the native dependencies
+* OpenSSL
 
 ## Steps
 
 ### 1. Building
 Clone the repository and cd to the location where you cloned it.
 
-To generate a Bondy release to be used in production execute the following command which will generate a tarball containing the release at `$(PWD)/_build/prod/rel/`.
+To build a production release tarball, run the following command. It writes the tarball to `_build/prod/rel/bondy-connect/bondy-connect-1.0.0.tar.gz`.
 
 ```bash
-rebar3 as prod tar
+just release-tar
 ```
 
-Untar and copy the resulting tarball to the location where you want to install Bondy e.g. ~/tmp/bondy.
+Unpack the tarball in the location where you want to install Bondy, for example `~/tmp/bondy`.
 
 ```bash
-tar -zxvf _build/prod/rel/bondy-1.0.0.tar.gz -C ~/tmp/bondy
+mkdir -p ~/tmp/bondy
+tar -zxvf _build/prod/rel/bondy-connect/bondy-connect-1.0.0.tar.gz -C ~/tmp/bondy
 ```
 
 ### 2. Running
+
+::: warning Set `cluster.enabled = off` to run a single node
+Before starting a node meant to run alone, set `cluster.enabled = off` in the release's `etc/bondy.conf`. A node left on the default `cluster.enabled = on` with no other member never compacts its history. Under the default fence policy, it also refuses every authentication once its security tables stay unconfirmed for longer than `db.aae.fence.max_lag`. See [Enabling clustering](/router/reference/configuration/cluster#enabling-clustering).
+:::
+
 To run Bondy, cd to the location where you installed it e.g. ~/tmp/bondy and run the following command which will print all the options.
 
 ```bash
-bin/bondy
+bin/bondy-connect
 ```
 
 For example, to run Bondy with output to stdout do
 
 ```bash
-bin/bondy foreground
+bin/bondy-connect foreground
 ```
 
 And to run Bondy with an interactive Erlang shell do
 
 ```bash
-bin/bondy console
+bin/bondy-connect console
 ```
