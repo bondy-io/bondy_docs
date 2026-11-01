@@ -45,7 +45,7 @@ You can load, inspect and delete API Specifications using the [Admin HTTP API](/
 
 
 ::: tip Cluster deployments
-APIs are replicated, synchronised and activated across the cluster automatically, so that each node serves all the defined APIs.
+Bondy replicates each API specification to every node of the cluster. Each node rebuilds its HTTP routes when a specification changes, so every node serves all the defined APIs. Replication between nodes requires anti-entropy, so [`db.aae`](/router/reference/configuration/data_storage#db.aae) has to be `on` (the default).
 :::
 
 ## Next Steps

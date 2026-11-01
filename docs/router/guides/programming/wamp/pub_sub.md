@@ -76,47 +76,45 @@ See [Subscriber Black- and White-listing](/router/concepts/wamp/advanced/pubsub#
 
 ## Publisher Exclusion
 
-By default a publisher that's also subscribed to its own topic receives its own publication. Opt out with `exclude_me`:
+By default Bondy does not deliver a publication to its own publisher, even when the publisher is subscribed to the topic. `exclude_me` defaults to `true`. To receive your own publication, set `exclude_me` to `False`:
 
 ::: code-group
 ```Python
 from autobahn.wamp.types import PublishOptions
 
 await self._session.publish(
-    "com.example.chat.message", "Hello!",
-    options=PublishOptions(exclude_me=True)
+    "com.example.state.updated", state,
+    options=PublishOptions(exclude_me=False)
 )
 ```
 :::
 
-Useful for chat and collaborative-editing style topics, where a publisher shouldn't see its own message echoed back.
+Keep the default for chat and collaborative-editing topics, where a publisher does not need its own message echoed back.
 
 ## Publisher Identification
 
-A subscriber that wants to know who published an event requests disclosure with `SubscribeOptions(details_arg=...)`, reading `details.publisher` on delivery; the publisher must separately opt in with `PublishOptions(disclose_me=True)`, or nothing is disclosed:
+Bondy discloses the publisher to subscribers by default. To read the publisher's identity, subscribe with `SubscribeOptions(details_arg=...)` and read `details.publisher`, `details.publisher_authid` and `details.publisher_authrole`:
 
 ::: code-group
 ```Python
-from autobahn.wamp.types import SubscribeOptions, PublishOptions
+from autobahn.wamp.types import SubscribeOptions
 
-# Subscriber: request publisher disclosure and read it
+# Subscriber: read the publisher's identity
 def on_event(data, details=None):
     print("Published by session:", details.publisher)
+    print("Authenticated as:", details.publisher_authid)
 
 await self._session.subscribe(
     on_event, "com.example.events",
     options=SubscribeOptions(details_arg="details")
 )
 
-# Publisher: consent to being identified
-await self._session.publish(
-    "com.example.events", data,
-    options=PublishOptions(disclose_me=True)
-)
+# Publisher: no option is needed
+await self._session.publish("com.example.events", data)
 ```
 :::
 
-Both sides must agree — a subscriber that requests disclosure still sees nothing if the publisher didn't set `disclose_me`.
+Bondy omits the publisher only when the `PUBLISH` sets `disclose_me` to `false`. See [Publisher Identification](/router/concepts/wamp/advanced/pubsub#publisher-identification).
 
 ## Pattern-Based Subscriptions
 
@@ -140,9 +138,9 @@ await self._session.subscribe(
 
 `details.topic` carries the exact topic a publication was sent to, so one subscription can dispatch by suffix. See [Pattern-based Subscriptions](/router/concepts/wamp/advanced/pubsub#pattern-based-subscriptions) for `prefix` vs. `wildcard` matching.
 
-## Event History
+## Event Retention
 
-Bondy can retain recent events on a topic and deliver them to a subscriber that wasn't connected when they were published — configured node-wide via [`wamp.message_retention.*`](/router/reference/configuration/wamp#message-retention). A publisher opts a specific event into retention, and a subscriber opts into receiving it on subscribe:
+Bondy can retain the last event on a topic and deliver it to a subscriber that was not connected when it was published — configured node-wide via [`wamp.message_retention.*`](/router/reference/configuration/wamp#message-retention). A publisher opts a specific event into retention, and a subscriber opts into receiving it on subscribe:
 
 ::: code-group
 ```Python
@@ -179,8 +177,8 @@ await self._session.subscribe(
     on_unsubscribed, "wamp.subscription.on_unsubscribe"
 )
 
-# Look up who is currently subscribed to a topic
-info = await self._session.call("wamp.subscription.match", "com.example.users.created")
+# List the subscriptions an event on a topic would reach
+sub_ids = await self._session.call("wamp.subscription.match", "com.example.users.created")
 ```
 :::
 

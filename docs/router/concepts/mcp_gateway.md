@@ -60,7 +60,7 @@ The endpoint mounts two paths on that listener, on every virtual host:
   which realm a request addresses is part of its URL.
 - `/.well-known/oauth-protected-resource/realm/:realm` — reserved for the
   OAuth protected-resource metadata document. It answers `501 Not
-  Implemented` in this release.
+  Implemented`.
 
 A listener may combine `mcp` with other services (`api_gateway`, `wamp_ws`,
 …) — with one exception: `mcp` together with `admin_api` is refused at boot.

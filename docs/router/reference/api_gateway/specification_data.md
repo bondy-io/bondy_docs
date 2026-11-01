@@ -77,10 +77,10 @@ const request = {
             "description": "The hostname of the request."
         },
         "port": {
-            "type": "string",
+            "type": "integer",
             "required": false,
             "mutable": false,
-            "description": "The port number the request."
+            "description": "The port number of the request."
         },
         "headers": headers,
         "language": {
@@ -106,7 +106,7 @@ const request = {
             "type": "map",
             "required": false,
             "mutable": false,
-            "description": "A map of path variable bindings. Bindings occur when the [Path Object](3path-object) contains patterns.\n\nExamples: For the path specification `/accounts/:acc_id/users/:user_id`\n|Request|Property Value|\n|---|---|\n|`GET /accounts/001/users/002`|`{\"acc_id\": \"001\", \"user_id\": \"002\"}`|\n"
+            "description": "A map of path variable bindings. Bindings occur when the [Path Object](/router/reference/api_gateway/specification#path-object) contains patterns.\n\nExamples: For the path specification `/accounts/:acc_id/users/:user_id`\n|Request|Property Value|\n|---|---|\n|`GET /accounts/001/users/002`|`{\"acc_id\": \"001\", \"user_id\": \"002\"}`|\n"
         },
         "body": {
             "type": "any",
@@ -131,10 +131,10 @@ const context = {
         "description": "The contents (data and metadata) of the HTTP request being evaluated. The request data is available at runtime, so any expression defined during design time will result in a `promise` that will be evaluated to a value when handling the HTTP request."
     },
     "security": {
-        "type": "SecurityObject",
+        "type": "map",
         "required": false,
         "mutable": true,
-        "description": "An instance of the [Security Object](/router/reference/api_gateway/specification#security-object). Its initial value comes from the [API Object](/router/reference/api_gateway/specification#api-object) `defaults.security` or `variables.security` property. It is then possibly overridden recursively during evaluation by each [Path Object](/router/reference/api_gateway/specification#path-object) definition."
+        "description": "The identity of the authenticated caller. The gateway sets it at runtime, after it authenticates the request with an OAuth2 token, so an expression that reads it is a `promise`. It holds `realm_uri`, `session`, `client_id`, `authid`, `username` (same value as `authid`), `authmethod`, `groups`, `locale` and `meta`. The authentication scheme itself is set by the [Security Object](/router/reference/api_gateway/specification#security-object), not by this key."
     },
     "action": {
         "type": "object",
@@ -143,11 +143,11 @@ const context = {
         "properties": {
             "result" : {
                 "type": "ResultObject",
-                "description": "If the action was successful the value will be the result of evaluating the [Response Object](/router/reference/api_gateway/specification#response-object) `on_result` property associated with the [Operation Object](/router/reference/api_gateway/specification#operation-object) executed for this HTTP Request."
+                "description": "When the action succeeds, the result of the action: a [WAMP Result](/router/reference/api_gateway/specification#wamp-result) or an [HTTP Forward Result](/router/reference/api_gateway/specification#http-forward-result). The gateway then evaluates the [Response Object](/router/reference/api_gateway/specification#response-object) `on_result` property against this context."
             },
             "error" : {
                 "type": "ErrorObject",
-                "description": "If the action failed the value will be the result of evaluating the [Response Object](/router/reference/api_gateway/specification#response-object) `on_error` property associated with the [Operation Object](/router/reference/api_gateway/specification#operation-object) executed for this HTTP Request."
+                "description": "When the action fails, the [Error Object](/router/reference/api_gateway/specification#error-object) of the action. The gateway then evaluates the [Response Object](/router/reference/api_gateway/specification#response-object) `on_error` property against this context."
             }
         },
         "description": "At runtime, it will contain the result or error of the action performed by the API Gateway during the handling of an HTTP request."
@@ -288,7 +288,7 @@ const version = {
         "required": false,
         "mutable": false,
         "default": "`true`",
-        "description": "Whether the path is active."
+        "description": "Whether Bondy serves the paths of this version. When `false`, Bondy adds no route for the version."
     },
     "is_deprecated": {
         "type": "boolean",
@@ -302,7 +302,7 @@ const version = {
         "required": false,
         "mutable": false,
         "default": '`200`',
-        "description": ""
+        "description": "The parser accepts this key. Bondy does not use its value."
     },
     "info": {
         "type": "map",
@@ -595,7 +595,7 @@ const fwdAction = {
         "required": false,
         "mutable": false,
         "default": "The method of the incoming request.",
-        "description": "The HTTP method to be used when forwarding the request to the upstream endpoint. It must be one of the HTTP methods below, written as a literal value, not as an expression:\n- `delete`\n- `get`\n- `head`\n- `options`\n- `patch`\n- `post`\n- `put`"
+        "description": "The HTTP method to be used when forwarding the request to the upstream endpoint. The value is one of the HTTP methods below, written as a literal value, not as an expression:\n- `delete`\n- `get`\n- `head`\n- `options`\n- `patch`\n- `post`\n- `put`"
     },
     "host" : {
         "type": "string",
@@ -647,7 +647,7 @@ const fwdAction = {
         "type": "() => integer",
         "required": false,
         "mutable": false,
-        "description": "The time in milliseconds to wait before each retry. It must be a non-negative integer.",
+        "description": "The time in milliseconds to wait before each retry, as a non-negative integer.",
         "default": "`defaults.retry_timeout`"
     }
 };

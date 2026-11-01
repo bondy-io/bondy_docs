@@ -124,10 +124,10 @@ await wampy.subscribe('com.example.ticks', (event) => {
 });
 ```
 
-Now publish an event to that topic:
+Now publish an event to that topic. By default Bondy does not deliver an event to the session that published it, so this publication sets `exclude_me: false`:
 
 ```javascript
-await wampy.publish('com.example.ticks', { argsList: ['tock'] });
+await wampy.publish('com.example.ticks', { argsList: ['tock'] }, { exclude_me: false });
 ```
 
 > **You should see:** `publish()` resolves to `{ topic: 'com.example.ticks', requestId: ..., publicationId: ... }`, and — asynchronously, as the event comes back through the router — the subscriber's handler logs `tick: [ 'tock' ]`. Publishing is fire-and-forget by default: the promise resolves once the event is on the wire, without waiting for any subscriber to receive it.

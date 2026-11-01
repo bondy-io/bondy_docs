@@ -37,9 +37,7 @@ The client and Router negotiate the transport-level connection parameters, inclu
 Once connected, the client attempts to join a Realm by sending a `HELLO` message containing:
 - **Realm URI** - The target realm to join (e.g., `com.example.realm1`)
 - **Roles** - The roles the client wants to play (Caller, Callee, Publisher, Subscriber)
-- **Authentication details** - Credentials or auth
-
- method information
+- **Authentication details** - Credentials or authentication method information
 
 The Router responds with either:
 - **WELCOME** - Session established successfully, includes session ID and Router capabilities

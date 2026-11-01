@@ -1,35 +1,9 @@
 # bondy.error.stale
-When a pagination `cursor` no longer matches the query it was minted for.
+Bondy 1.0.0 does not return this error URI.
 
 ## Description
-Raised by a paginated `bondy.*` procedure — for example [`bondy.registration.list`](/router/reference/wamp_api/registration#list-registrations-paginated) — when the `cursor` keyword argument was minted under a different schema or node-walk shape than the one now in effect (a Bondy upgrade changed the cursor encoding, or the cursor was replayed against a different query). Restart pagination from the first page (omit `cursor`) rather than retrying the same one.
+The condition is a `cursor` keyword argument that was minted for a different query, or by a release with a different cursor encoding.
 
-##### Positional Results
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-        0: {
-            'type': 'string',
-            'description': 'The error message'
-        }
-	})"
-/>
+The caller of a procedure that meets this condition receives [`bondy.error.internal_error`](/router/reference/wamp_api/errors/internal_error) instead. The error carries a `trace_id` and no detail about the condition.
 
-##### Keyword Results
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-        'code': {
-            'type': 'string',
-            'description': 'stale'
-        },
-        'description': {
-            'type': 'string',
-            'description': 'The error description'
-        },
-        'message': {
-            'type': 'string',
-            'description': 'The error message'
-        }
-	})"
-/>
+This applies to the paginated registry procedures, for example [`bondy.registration.list`](/router/reference/wamp_api/registration#list-registrations-paginated). [`bondy.alarm.history`](/router/reference/wamp_api/alarm) answers the same condition with [`wamp.error.invalid_argument`](/router/reference/wamp_api/errors/wamp_invalid_argument), and `details.reason` is `stale`. In both cases, restart from the first page: omit `cursor`.

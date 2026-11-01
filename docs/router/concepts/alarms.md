@@ -86,8 +86,8 @@ moment to argue about it.
 Severity does not decide whether a node leaves the load balancer.
 `affects_ready` is its own per-alarm flag, and the reason is that the two
 judgements genuinely differ: an unreachable upstream connector is `major` and
-must *not* drain the node, because the whole WAMP data plane is unaffected. A
-node whose durable store failed to open must leave the load balancer.
+does *not* drain the node, because the whole WAMP data plane is unaffected. A
+node whose durable store failed to open leaves the load balancer.
 
 Every catalogue entry declares `affects_ready => false`. That is a
 finding rather than an oversight — of the fourteen conditions, only
@@ -114,13 +114,13 @@ tribal knowledge:
   signal handler; these references are pulled, not pushed. The
   [task catalogue](/router/reference/wamp_api/task) already used `observe_with`
   for the same kind of thing, and both now carry the same `{kind, ref}` shape.
-- a **task** is a `bondy.*` procedure sanctioned as a remediation, and it must
+- a **task** is a `bondy.*` procedure sanctioned as a remediation, and it has to
   be an entry in the [task catalogue](/router/reference/wamp_api/task), which
   carries its `impact` and `blast_radius`.
 
 **Twelve of the fourteen entries have no task, and that is the answer rather
 than a gap.** Only the mail relay and the MCP name collision have a remediation
-in the WAMP API; nothing in `bondy.*` fixes a stalled drain, an unopenable
+in the WAMP API; nothing in `bondy.*` fixes an unreachable HTTP connector upstream, a stalled drain, an unopenable
 durable store, a stopped storage shard, memory pressure, a frontier hole, a
 receipt-derived frontier, an undeclared table a peer replicates into, an
 unwritable retirement set, an oversized sync item or a retention ceiling. An empty list is what an operator — or an agent — needs: it stops the

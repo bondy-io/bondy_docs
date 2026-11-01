@@ -44,7 +44,7 @@ both transports.
 | Field | Contract |
 | --- | --- |
 | `uri` | The error's identity, and the only field to branch on. Always present, always a valid URI. |
-| `code` | A short token retained for compatibility with the payloads Bondy emitted before this catalogue existed. Fixed per error type, and not always derivable from `uri`. New code should not branch on it. |
+| `code` | A short token retained for compatibility with the payloads Bondy emitted before this catalogue existed. Fixed per error type, and not always derivable from `uri`. Do not branch on it in new code. |
 | `handle` | A stable identifier for support and documentation, such as `C010`. Never interpreted by software. |
 | `nature` | `transient` or `permanent`. See [Retry semantics](#retry-semantics). |
 | `message` | One sentence, safe to show a user. Also `Args[0]` of a WAMP `ERROR`, except for `wamp.error.not_authorized` raised by a Bondy administration procedure, whose `Args[0]` is this whole payload map. |
@@ -115,10 +115,9 @@ override it per host or version through its
 with no HTTP mapping answers `500` unless the specification maps it. A `†` marks
 a type that shares another's URI.
 
-The administrative WAMP API raises a further set of errors specific to its own
-resources &mdash; stale pagination cursors, unknown group names, an export
-already running. Those have a page each under
-[WAMP API Errors](/router/reference/wamp_api/errors/index).
+The error URIs that the administrative WAMP API raises have a page each under
+[WAMP API Errors](/router/reference/wamp_api/errors/index). Each page says
+which procedures raise the error and what its `details` carry.
 
 ### Authentication
 
@@ -273,6 +272,7 @@ that cannot succeed.
 | `noproc` | `wamp.error.unavailable` | `unavailable` | transient | 503 | S014 † |
 | `overload` | `bondy.error.too_many_requests` | `too_many_requests` | transient | 429 | S015 † |
 | `overloaded` | `bondy.error.too_many_requests` | `too_many_requests` | transient | 429 | S016 † |
+
 ### POSIX errors
 
 Errors named by a POSIX atom &mdash; `enoent`, `econnrefused`, `etimedout` and

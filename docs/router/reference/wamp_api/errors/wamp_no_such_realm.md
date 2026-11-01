@@ -2,7 +2,7 @@
 When the given realm uri does not exist.
 
 ## Description
-Normally this is caused when there are request or input data validation failures.
+A procedure raises this error when the realm URI it was given names no realm. `details.realm_uri` holds that URI when Bondy knows it.
 
 ##### Positional Results
 <DataTreeView
@@ -30,6 +30,10 @@ Normally this is caused when there are request or input data validation failures
         'message': {
             'type': 'string',
             'description': 'The error message'
+        },
+        'details': {
+            'type': 'object',
+            'description': 'Holds realm_uri, the URI that names no realm, when Bondy knows it. realm_uri also appears at the top level.'
         }
 	})"
 />

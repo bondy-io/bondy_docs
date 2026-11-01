@@ -24,12 +24,18 @@ This can also occur *after* a message was queued, if the relay was reconfigured 
 />
 
 ##### Keyword Results
+The standard [error payload](/router/reference/errors#the-error-payload). Each key of `details` also appears at the top level.
+
 <DataTreeView
 	:maxDepth="10"
 	:data="JSON.stringify({
-        'relay': {
+        'code': {
             'type': 'string',
-            'description': 'The configured NAME of the relay. Never its hostname, username or credential.'
+            'description': 'no_such_relay'
+        },
+        'details': {
+            'type': 'object',
+            'description': 'Holds relay, the name the request gave. Empty when the request named no relay.'
         }
 	})"
 />

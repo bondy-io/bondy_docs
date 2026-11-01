@@ -23,7 +23,7 @@ related:
 
 Bondy's Erlang-based WAMP client for the BEAM (Bondy, Erlang, Elixir, Gleam). One connection is one WAMP session on one realm; a process opens as many connections as it needs, each running its own supervised process tree. 
 
-`bondy_connect` has no dependency on the `bondy` router application — it embeds in any BEAM service — and supports all four WAMP client roles (Caller, Callee, Publisher, Subscriber), every Bondy transport, every Bondy authentication method, and supports the same features as Bondy Connect.
+The `bondy_connect_sdk` application has no dependency on the Bondy router application, so it embeds in any BEAM service. It supports all four WAMP client roles (Caller, Callee, Publisher, Subscriber), the transports listed under [Opening a connection](#opening-a-connection), and the four WAMP authentication methods listed under [Authenticating](#authenticating).
 
 This page documents the complete public API, grouped by what you use it to do. For a guided first run, see the [tutorial](/router/tutorials/wamp/bondy_connect_sdk).
 
@@ -52,7 +52,7 @@ connect(Name, Spec) -> {ok, conn()} | {error, term()}.
 | `auth` | `#{method => <<"anonymous">>}` | Authentication method and credentials — see [Authenticating](#authenticating). |
 | `serializers` | `[json]` | Preferred order of `json` \| `msgpack` \| `cbor`. |
 | `roles` | the full advanced profile | The WAMP roles and features to advertise in `HELLO`. Advertising is on an *advertise-equals-handle* basis: the default enables every advanced feature the client actually implements, no more. See [Progressive calls and results](#progressive-calls-and-results) for why this default matters there. |
-| `agent` | the client's own `bondy_connect/<version>` string | The agent string sent in `HELLO`. Must be a binary if supplied. |
+| `agent` | `<<"bondy_connect_sdk/0.1.0">>` | The agent string sent in `HELLO`. A supplied value has to be a binary. |
 | `reconnect` | see [Resilience](#resilience) | Reconnect and backoff policy. |
 | `ping` | see [Resilience](#resilience) | Idle keepalive (ping/pong) policy. |
 | `network_timeout` | `60000` | How long (ms) to wait for network recovery in `waiting_for_network` before giving up. Only relevant when Partisan network monitoring is available. |
@@ -87,9 +87,9 @@ connect(Name, Spec) -> {ok, conn()} | {error, term()}.
 #{transport => local, endpoint => local, realm => Realm}
 ```
 
-**Fails** with `{error, Reason}` without attempting a network connection when `Spec` itself is invalid: `missing_realm`, `{invalid_realm, Uri}`, `{invalid_agent, not_a_binary}`, `missing_authmethod`, `{unsupported_authmethod, Method}`, `invalid_auth`, `invalid_tls`, `{invalid_network_timeout, T}`, `{invalid_option, Group, Key, Value}` or `{unknown_option, Group, Key}` (for an unrecognised key inside `reconnect`, `ping`, or `handler`), or `invalid_spec` if `Spec` is not a map. It also fails with `{error, {already_started, Name}}` from `connect/2` if `Name` is already registered to a live connection.
+**Fails** with `{error, Reason}` without attempting a network connection when `Spec` itself is invalid: `missing_realm`, `{invalid_realm, Uri}`, `{invalid_agent, not_a_binary}`, `missing_authmethod`, `{unsupported_authmethod, Method}`, `invalid_auth`, `invalid_tls`, `{invalid_network_timeout, T}`, `{invalid_peer_service, P}`, `{invalid_option, Group, Value}` (when `reconnect`, `ping` or `handler` is not a map), `{invalid_option, Group, Key, Value}` or `{unknown_option, Group, Key}` (for an invalid value or an unrecognised key inside `reconnect`, `ping`, or `handler`), or `invalid_spec` if `Spec` is not a map. It also fails with `{error, {already_started, Name}}` from `connect/2` if `Name` is already registered to a live connection.
 
-Once the spec is valid, `connect/1,2` is **fail-fast on the first attempt** by default: a dead endpoint or a rejected handshake fails immediately rather than retrying. See [Resilience](#resilience) for `retry_initial_connect` and what happens once a session has established at least once.
+Once the spec is valid, `connect/1,2` is **fail-fast on the first attempt** by default: a dead endpoint or a rejected handshake fails immediately rather than retrying. A rejected handshake returns `{error, {abort, ReasonUri, Details}}` with the router's `ABORT` reason, for example `wamp.error.no_such_realm`. One exception applies: when the router sends an `ABORT` whose `nature` is `transient`, the first attempt also retries with backoff, because the request itself is not at fault. See [Resilience](#resilience) for `retry_initial_connect` and what happens once a session has established at least once.
 
 ### Named connections
 
@@ -205,14 +205,16 @@ call(Conn, Uri, Args, KWArgs, Opts) -> {ok, map()} | {error, term()}.
 
 Blocks the calling process until the `RESULT` or `ERROR` for the call arrives, or until `Opts`' `timeout` (in ms, default 30000) elapses. When `Opts` sets `'_retries'` to a positive integer, the call waits for the router's retries: until `'_deadline'` when it is set, and otherwise for `'_retries' + 1` timeouts. On success, returns `{ok, #{args := list(), kwargs := map(), details := map()}}` — exactly the positional and keyword results the callee produced. The three shorter arities fill in `Args = []`, `KWArgs = #{}`, and `Opts = #{}` in that order.
 
-**Fails** with:
+**Fails** with `{error, Error}`, where `Error` is a map that `kind` discriminates (see [Error shape](#error-shape)):
 
-- `{error, #{uri := <<"wamp.error.no_such_procedure">>}}` — nothing is registered for `Uri`.
-- `{error, #{uri := BusinessErrorUri, args := ..., kwargs := ...}}` — the callee returned `{error, ...}`; see [Handler return values](#registering-a-procedure).
-- `{error, timeout}` — the call exceeded its `timeout`.
-- `{error, disconnected}` — the link dropped while the call was in flight (fail-fast; see [Resilience](#resilience)).
-- `{error, not_connected}` — `Conn` resolves to no live connection.
-- `{error, {invalid_option, receive_progress}}` — `Opts` carried `receive_progress => true`. A single synchronous reply cannot represent a stream of progressive results; use `call_async/5` instead — see [Progressive calls and results](#progressive-calls-and-results).
+- `#{kind := wamp, uri := <<"wamp.error.no_such_procedure">>}` — nothing is registered for `Uri`.
+- `#{kind := wamp, uri := BusinessErrorUri, args := ..., kwargs := ...}` — the callee returned `{error, ...}`; see [Handler return values](#registering-a-procedure).
+- `#{kind := client, reason := timeout}` — the call exceeded its `timeout`.
+- `#{kind := client, reason := disconnected}` — the link dropped while the call was in flight (fail-fast; see [Resilience](#resilience)).
+- `#{kind := client, reason := not_established}` — the connection is alive but has no established session, for example while it reconnects.
+- `#{kind := client, reason := {invalid_option, receive_progress}}` — `Opts` carried `receive_progress => true`. A single synchronous reply cannot represent a stream of progressive results; use `call_async/5` instead — see [Progressive calls and results](#progressive-calls-and-results).
+
+When `Conn` resolves to no live connection process, the call returns the bare `{error, not_connected}`.
 
 ### Calling asynchronously
 
@@ -271,7 +273,7 @@ fun(Args, KWArgs, Details) -> Result end
 `register/3,4` and `subscribe/3,4` validate a handler's *shape* before accepting it and fail immediately — without contacting the router — if it is none of the three forms above:
 
 ```erlang
-{error, {invalid_handler, Other}}
+{error, #{kind => client, reason => {invalid_handler, Other}}}
 ```
 
 ## Registering procedures
@@ -305,7 +307,7 @@ Registers `Handler` (see [Handlers](#handlers)) against `Uri`. On success return
 | `_idempotent` | Bondy extension. `true` tells the router that running an invocation twice is safe, so it can retry a call that set `_retries`. See [Call Retries](/router/concepts/wamp/advanced/rpc#call-retries). |
 | `force_reregister` | Accepted and passed to the router, which ignores it. A second `single` registration of the same URI still fails with `wamp.error.procedure_already_exists`. |
 
-**Fails** with `{error, {invalid_handler, _}}` for a malformed handler (see [Handlers](#handlers)), or with the router's `ERROR` response — most commonly `{error, #{uri := <<"wamp.error.procedure_already_exists">>}}`.
+**Fails** with `{error, #{kind := client, reason := {invalid_handler, _}}}` for a malformed handler (see [Handlers](#handlers)), or with the router's `ERROR` response — most commonly `{error, #{kind := wamp, uri := <<"wamp.error.procedure_already_exists">>}}`.
 
 ### Unregistering
 
@@ -313,7 +315,7 @@ Registers `Handler` (see [Handlers](#handlers)) against `Uri`. On success return
 unregister(Conn, RegRef) -> ok | {error, term()}.
 ```
 
-`RegRef` is either the `RegistrationId` `register/3,4` returned or the procedure's URI. **Fails** with `{error, no_such_registration}` if `RegRef` matches nothing this connection currently has registered.
+`RegRef` is either the `RegistrationId` `register/3,4` returned or the procedure's URI. **Fails** with `{error, #{kind := client, reason := no_such_registration}}` if `RegRef` matches nothing this connection currently has registered.
 
 ## Publishing events
 
@@ -331,7 +333,7 @@ publish_ack(Conn, Topic, Args, KWArgs, Opts) -> {ok, pos_integer()} | {error, te
 
 `publish/3,4,5` is **fire-and-forget**: it returns `ok` as soon as the `PUBLISH` message is on the wire, without waiting for the router. It rejects `acknowledge => true` in `Opts` with `{error, badarg}`.
 
-`publish_ack/3,4,5` waits for the router's `PUBLISHED` and returns `{ok, PublicationId}`, or the router's `ERROR` as `{error, #{uri := ..., ...}}`. It always sets `acknowledge`, whatever `Opts` says. The two functions are separate so that each has one return type.
+`publish_ack/3,4,5` waits for the router's `PUBLISHED` and returns `{ok, PublicationId}`, or the router's `ERROR` as `{error, #{kind := wamp, uri := ..., ...}}`. It always sets `acknowledge`, whatever `Opts` says. The two functions are separate so that each has one return type.
 
 `Opts` also carries WAMP publication options, passed through to the router:
 
@@ -366,7 +368,7 @@ Subscribes `Handler` (see [Handlers](#handlers)) to `Topic`. On success returns 
 | `nkey` | Node key used for pattern-based subscription routing metadata. |
 | `ordered` | `true` (default) delivers events for this subscription **FIFO**: the next event waits for the current handler to finish. Set `false` to dispatch events concurrently, one worker per event, when throughput matters more than order. |
 
-**Fails** with `{error, {invalid_handler, _}}` for a malformed handler.
+**Fails** with `{error, #{kind := client, reason := {invalid_handler, _}}}` for a malformed handler.
 
 ### Unsubscribing
 
@@ -374,7 +376,7 @@ Subscribes `Handler` (see [Handlers](#handlers)) to `Topic`. On success returns 
 unsubscribe(Conn, SubRef) -> ok | {error, term()}.
 ```
 
-`SubRef` is either the `SubscriptionId` `subscribe/3,4` returned or the topic's URI. **Fails** with `{error, no_such_subscription}` if `SubRef` matches nothing this connection currently holds.
+`SubRef` is either the `SubscriptionId` `subscribe/3,4` returned or the topic's URI. **Fails** with `{error, #{kind := client, reason := no_such_subscription}}` if `SubRef` matches nothing this connection currently holds.
 
 ## Progressive calls and results
 
@@ -531,7 +533,7 @@ An idle raw-socket connection is probed with WAMP pings; unanswered pings tear t
 
 ### Fail-fast on disconnect
 
-When the link drops, every call already in flight fails immediately with `{error, disconnected}` rather than hanging until its timeout, and any new call issued on a connection that is currently down returns `{error, not_connected}`.
+When the link drops, every call already in flight fails immediately with `{error, #{kind := client, reason := disconnected}}` rather than hanging until its timeout. A new call issued while the connection reconnects fails with reason `not_established`. A new call issued on a connection whose process has stopped returns `{error, not_connected}`.
 
 ## Securing the transport (TLS)
 
@@ -554,7 +556,7 @@ The `tls` and `wss` transports are **secure by default**: peer verification is o
 ```
 
 ::: warning
-Disabling verification (`verify => verify_none`) removes protection against man-in-the-middle attacks. It is logged at `WARNING` level and should be limited to development against a known, trusted endpoint.
+Disabling verification (`verify => verify_none`) removes protection against man-in-the-middle attacks. The client logs it at `warning` level. Use it only in development, against a known and trusted endpoint.
 :::
 
 ## The in-VM (local) transport
@@ -574,33 +576,46 @@ Because an in-VM peer is already inside the trusted BEAM, WAMP's challenge-based
 
 ## Errors
 
-Failures a connection can produce, independent of where documented above:
+Failures a connection can produce, independent of where documented above.
+
+### Error shape
+
+The functions `call`, `call_async`, `call_stream`, `register`, `unregister`, `subscribe`, `unsubscribe` and `publish_ack` return `{error, Error}`, where `Error` is a map with a `kind` key:
+
+- `#{kind := wamp, uri := binary(), args := list(), kwargs := map(), message := binary(), nature := ...}` is an `ERROR` that the router sent. Use `uri` to identify the error. Use `nature` (`transient` or `permanent`) to decide whether a retry can succeed.
+- `#{kind := client, reason := Reason}` is a local failure. `Reason` is the Erlang term that the table below names.
+
+The reply messages of `call_async` and `call_stream` carry the same `{error, Error}` shape. The functions `connect`, `cancel`, `send_input`, `finish_input` and `publish` return a bare `{error, Reason}`.
 
 | Error | Where | Meaning |
 |---|---|---|
-| `{error, not_connected}` | any operation | `Conn` resolves to no live connection process. |
-| `{error, disconnected}` | an in-flight call, or `connect/1,2` itself | The link dropped while the operation was outstanding — for `connect/1,2`, this is also what a rejected or aborted handshake currently surfaces as (see note below). |
-| `{error, timeout}` | `call/5` | The call exceeded its `timeout` option. |
-| `{error, #{uri := <<"wamp.error.no_such_procedure">>}}` | `call`, `call_async` | Nothing is registered for the URI. |
-| `{error, #{uri := <<"wamp.error.unavailable">>}}` | `call`, `call_async` | The callee's load regulator rejected the invocation. |
-| `{error, #{uri := <<"bondy.error.internal_error">>}}` | `call`, `call_async` | The callee handler crashed, or returned something other than a documented handler result (contained — the connection is unaffected). |
-| `{error, #{uri := <<"wamp.error.canceled">>}}` | `call_async`, `call_stream` (terminal message) | The call was cancelled via `cancel/2,3`. |
-| `{error, #{uri := Uri, ...}}` | `call`, `call_async` | A business error the callee returned with `{error, #{uri := Uri, ...}}`. |
-| `{error, {invalid_handler, _}}` | `register`, `subscribe` | The handler is not a fun of arity 3, `{Module, Function}`, or `{Module, Function, Extra}`. |
-| `{error, no_such_registration}` | `unregister` | `RegRef` matches no registration this connection currently holds. |
-| `{error, no_such_subscription}` | `unsubscribe` | `SubRef` matches no subscription this connection currently holds. |
+| `{error, not_connected}` | any operation | `Conn` resolves to no live connection process. When the process stops during the request, the tagged form is `#{kind := client, reason := not_connected}`. |
+| reason `not_established` | any request operation | The connection process is alive but its session is not established, for example while it reconnects. |
+| reason `disconnected` | an in-flight request | The link dropped while the request was outstanding. |
+| reason `timeout` | `call`, `call_async` | The call exceeded its `timeout` option. |
+| `#{kind := wamp, uri := <<"wamp.error.no_such_procedure">>}` | `call`, `call_async` | Nothing is registered for the URI. |
+| `#{kind := wamp, uri := <<"wamp.error.unavailable">>}` | `call`, `call_async` | The callee's load regulator rejected the invocation. |
+| `#{kind := wamp, uri := <<"bondy.error.internal_error">>}` | `call`, `call_async` | The callee handler crashed, or returned something other than a documented handler result (contained — the connection is unaffected). |
+| `#{kind := wamp, uri := <<"wamp.error.canceled">>}` | `call_async`, `call_stream` (terminal message) | The call was cancelled via `cancel/2,3`. |
+| `#{kind := wamp, uri := Uri, ...}` | `call`, `call_async` | A business error the callee returned with `{error, #{uri := Uri, ...}}`. |
+| reason `{invalid_handler, _}` | `register`, `subscribe` | The handler is not a fun of arity 3, `{Module, Function}`, or `{Module, Function, Extra}`. |
+| reason `no_such_registration` | `unregister` | `RegRef` matches no registration this connection currently holds. |
+| reason `no_such_subscription` | `unsubscribe` | `SubRef` matches no subscription this connection currently holds. |
+| reason `feature_not_supported` | `call_stream` | The router did not announce `progressive_call_invocations`. Nothing was sent: WAMP makes a progressive call to such a router a protocol error that ends the session. |
 | `{error, unknown_call}` | `cancel` | `Token` matches no call currently in flight. |
 | `{error, invalid_cancel_mode}` | `cancel` | `Mode` is not `skip`, `kill`, or `killnowait`. |
 | `{error, not_a_progressive_call}` | `send_input`, `finish_input` | `Token` identifies a call that was not opened with `call_stream/5`. |
 | `{error, unknown_token}` | `send_input`, `finish_input` | `Token` matches no in-flight call at all. |
 | `{error, input_finished}` | `send_input`, `finish_input` | `finish_input/4` already sent the stream's final chunk. Nothing was sent. |
 | `{error, {message_too_large, Size, Max}}` | `send_input`, `finish_input` | The chunk exceeds the transport's frame limit and was not sent. The stream stays open, so a smaller chunk can follow. |
-| `{error, feature_not_supported}` | `call_stream` | The router did not announce `progressive_call_invocations`. Nothing was sent: WAMP makes a progressive call to such a router a protocol error that ends the session. |
+| `{error, badarg}` | `publish` | `Opts` carried `acknowledge => true`. Use `publish_ack/3,4,5`. |
+| `{error, {abort, ReasonUri, Details}}` | `connect` | The router rejected the handshake with an `ABORT`, for example `wamp.error.no_such_realm` or `wamp.error.authentication_failed`. |
+| `{error, {welcome_without_challenge, Method}}` | `connect` | The router welcomed a credential-bearing method without a `CHALLENGE`. See the note below. |
 | `{error, local_transport_unavailable}` | `connect` (`local` transport) | No router handler is registered on this node. |
 | `{error, {already_started, Name}}` | `connect/2` | `Name` is already registered to a live connection. |
-| `{error, invalid_spec}` \| `missing_realm` \| `{invalid_realm, _}` \| `{invalid_agent, _}` \| `missing_authmethod` \| `{unsupported_authmethod, _}` \| `invalid_auth` \| `invalid_tls` \| `{invalid_network_timeout, _}` \| `{unknown_option, _, _}` \| `{invalid_option, _, _, _}` | `connect` | The connect spec itself failed validation; see [Opening a connection](#opening-a-connection). Returned synchronously, before any network I/O. |
+| `{error, invalid_spec}` \| `missing_realm` \| `{invalid_realm, _}` \| `{invalid_agent, _}` \| `missing_authmethod` \| `{unsupported_authmethod, _}` \| `invalid_auth` \| `invalid_tls` \| `{invalid_network_timeout, _}` \| `{invalid_peer_service, _}` \| `{unknown_option, _, _}` \| `{invalid_option, _, _}` \| `{invalid_option, _, _, _}` | `connect` | The connect spec itself failed validation; see [Opening a connection](#opening-a-connection). Returned synchronously, before any network I/O. |
 | exit reason `{shutdown, {reconnect_failed, Reason}}` | (the connection process) | The reconnect budget was exhausted; `status/1` reports `down`. |
 
 ::: info A credential-bearing method welcomed unchallenged
-`bondy_connect` refuses to accept a session the router welcomed without issuing a `CHALLENGE` for a method that carries credentials (see [Unchallenged credentials are refused](#unchallenged-credentials-are-refused)); the handshake is aborted rather than silently downgraded. The connect attempt fails as a result — currently observed as `{error, disconnected}`, the same generic failure any aborted handshake produces, rather than a reason naming the downgrade specifically.
+`bondy_connect_sdk` refuses to accept a session the router welcomed without issuing a `CHALLENGE` for a method that carries credentials (see [Unchallenged credentials are refused](#unchallenged-credentials-are-refused)). The client sends an `ABORT` with `wamp.error.protocol_violation` and stops the connection with the reason `{welcome_without_challenge, Method}`, which `connect/1,2` returns.
 :::

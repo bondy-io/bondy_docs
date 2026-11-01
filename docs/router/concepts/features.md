@@ -42,7 +42,7 @@ Bondy provides a comprehensive set of features for building scalable, real-time 
 
 ### Clustering
 - **Masterless architecture** - No single point of failure
-- **Automatic peer discovery** - DNS, static, Kubernetes
+- **Automatic peer discovery** - DNS or a static list; Kubernetes uses DNS through a headless Service
 - **Full mesh topology** - Direct node-to-node connections
 - **Horizontal scaling** - Add nodes for more capacity
 
@@ -55,7 +55,7 @@ Bondy provides a comprehensive set of features for building scalable, real-time 
 ### Consistency Model
 - **Eventually consistent** - AP in CAP theorem
 - **Conflict-free** - CRDT-based state replication
-- **Convergent** - Merkle tree-based reconciliation
+- **Convergent** - Anti-entropy that compares Merkle Search Trees
 - **Tunable** - Application-level consistency where needed
 
 ## Identity & Access Management
@@ -91,24 +91,22 @@ Bondy provides a comprehensive set of features for building scalable, real-time 
 - **CORS** - Cross-origin resource sharing
 - **Rate limiting** - Request throttling
 
-### GraphQL Gateway (Planned)
-- Queries → RPC calls
-- Subscriptions → PubSub topics
-- Schema-driven development
-
 ## Integration & Interoperability
 
-### Broker Bridge (Edge)
-- **Connect remote Bondy clusters** - WAN-optimized
-- **Selective replication** - Choose what to bridge
-- **Bidirectional** - Messages flow both ways
-- **Resilient** - Automatic reconnection
+### Bridge Relay (Bondy Edge)
+- **Connect to a remote Bondy router** - The edge dials out, so it needs no inbound port
+- **Selective sharing** - The edge proxies its registrations, and the events of the topics configured with `direction: out`, to the remote router
+- **Security sync** - The remote router syncs the bridged realm's security model to the edge
+- **Resilient** - Automatic reconnection with backoff
 
-### Kafka Bridge
-- **Publish to Kafka** - Forward WAMP events to Kafka topics
-- **Consume from Kafka** - Kafka messages → WAMP events
-- **Configurable** - Per-topic routing rules
-- **High-throughput** - Optimized for streaming
+See [Bondy Edge (Bridge Relay)](/router/concepts/bridge_relay).
+
+### Broker Bridge
+- **Publish to Kafka** - Forward WAMP events to Kafka topics; there is no consumer side back into WAMP
+- **SMS and email** - Send an SMS through AWS SNS, or an email through SMTP, Mailgun or SendGrid
+- **Configurable** - Per-subscription action templates
+
+See [Broker Bridge](/router/concepts/broker_bridge).
 
 ### WAMP Client Libraries
 - JavaScript/TypeScript
@@ -127,7 +125,6 @@ Bondy provides a comprehensive set of features for building scalable, real-time 
 ### Application Security
 - **Session-based** - All messages authenticated
 - **Fine-grained authorization** - Per-URI permissions
-- **Audit logging** - Track all administrative actions
 - **Security events** - Subscribe to security-related events
 
 ### Network Security
@@ -144,9 +141,8 @@ Bondy provides a comprehensive set of features for building scalable, real-time 
 - **Resource usage** - CPU, memory, connections
 
 ### Logging
-- **Structured logging** - JSON-formatted logs
+- **Structured logging** - Key-value (`key=value`) log lines
 - **Log levels** - Fine-grained control
-- **Audit trails** - Security and admin operations
 - **Integration** - Works with standard log aggregators
 
 ### Admin APIs
@@ -179,12 +175,12 @@ Bondy provides a comprehensive set of features for building scalable, real-time 
 
 ### Deployment
 - **Docker** - Official Docker images
-- **Kubernetes** - Helm charts available
-- **Systemd** - Native Linux service
+- **Kubernetes** - Runs the Docker image as a StatefulSet; there is no official Helm chart or Operator
+- **Release tarball** - Runs as a service under a process supervisor such as systemd
 - **Cloud-ready** - AWS, Azure, GCP compatible
 
 ### Configuration
-- **File-based** - YAML/JSON configuration
+- **File-based** - A key-value `bondy.conf`, plus JSON files for security configuration and API specifications
 - **Environment variables** - 12-factor app compatible
 - **Dynamic** - Runtime configuration changes
 - **Defaults** - Sensible out-of-box settings
@@ -192,7 +188,7 @@ Bondy provides a comprehensive set of features for building scalable, real-time 
 ### Upgrades
 - **Full-restart upgrades** - Upgrade a cluster by restarting every node on the new release; rolling upgrades are not supported
 - **Backward compatible** - Clients don't require updates
-- **Schema evolution** - Config format versioning
+- **Configuration migration** - `scripts/migrate_conf.escript` checks a `bondy.conf` and rewrites renamed or removed keys
 
 ## Developer Experience
 
@@ -204,7 +200,6 @@ Bondy provides a comprehensive set of features for building scalable, real-time 
 
 ### Tooling
 - **CLI** - Command-line tools for common tasks
-- **Web Console** (Planned) - Browser-based admin UI
 - **Client libraries** - Multiple language support
 - **Testing tools** - Mock routers, test utilities
 
@@ -217,20 +212,12 @@ Bondy provides a comprehensive set of features for building scalable, real-time 
 ## Advanced Features
 
 ### Same Sign-On (SSO)
-- **Multi-realm auth** - Authenticate once, access many realms
+- **Multi-realm auth** - One set of credentials for many realms; with a ticket, authenticate once (Single Sign-On)
 - **Credential sharing** - Centralized user management
-- **Flexible** - Configure SSO groups
-
-### Event History (Planned)
-- **Persistent events** - Store events for offline clients
-- **Replay** - Retrieve missed events on reconnect
-- **TTL** - Configurable retention
 
 ### Overload Protection
-- **Backpressure** - Flow control mechanisms
-- **Circuit breakers** - Prevent cascade failures
-- **Load shedding** - Graceful degradation under load
-- **Quotas** - Per-user/per-session limits
+- **Load regulation** - Bounded router worker pools, and load and memory monitors (`load_regulation.*`)
+- **Rate limiting** - Per-source-IP token buckets for handshakes, authentication, connections and HTTP requests, and an opt-in per-session message rate (`security.rate_limit.*`, off by default)
 
 ## See Also
 

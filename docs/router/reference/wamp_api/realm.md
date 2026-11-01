@@ -15,6 +15,8 @@ Creating, retrieving and managing realms and also enabling, disabling and checki
 
 [Realms](/router/concepts/realms) are routing and administrative domains that act as namespaces. All resources in Bondy belong to a Realm. Messages are routed separately for each individual realm so sessions attached to a realm won’t see message routed on another realm.
 
+Every procedure on this page is available only to sessions attached to the **Master Realm**. Bondy refuses the call from a session attached to any other realm.
+
 <!--@include: ../parts/realm_data.md-->
 
 ## Procedures
@@ -65,7 +67,7 @@ None.
 
 * [bondy.error.already_exists](/router/reference/wamp_api/errors/already_exists): when the provided uri already exists.
 * [bondy.error.missing_required_value](/router/reference/wamp_api/errors/missing_required_value): when a required value is not provided
-* [bondy.error.invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype): when the data type is invalid
+* [bondy.error.unknown_error](/router/reference/wamp_api/errors/unknown_error) with `code` `invalid_datatype`: when the data type is invalid. See [invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype).
 * [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the data value is invalid
 * [bondy.error.invalid_data](/router/reference/wamp_api/errors/invalid_data): when the data values are invalid
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): for example when the provided `sso_realm_uri` property value doesn't exist or there are some inconsistent property values.
@@ -151,7 +153,7 @@ None.
 #### Errors
 
 * [bondy.error.missing_required_value](/router/reference/wamp_api/errors/missing_required_value): when a required value is not provided
-* [bondy.error.invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype): when the data type is invalid
+* [bondy.error.unknown_error](/router/reference/wamp_api/errors/unknown_error) with `code` `invalid_datatype`: when the data type is invalid. See [invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype).
 * [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the data value is invalid
 * [bondy.error.invalid_data](/router/reference/wamp_api/errors/invalid_data): when the data values are invalid
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): for example when the provided `sso_realm_uri` property value doesn't exist or there are some inconsistent property values.
@@ -819,6 +821,7 @@ None.
 #### Errors
 
 * [bondy.error.not_found](/router/reference/wamp_api/errors/not_found): when the provided uri is not found.
+* [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when the provided uri is the URI of the Master Realm. Security cannot be disabled on the Master Realm.
 
 #### Examples
 

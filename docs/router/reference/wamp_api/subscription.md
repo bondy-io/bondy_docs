@@ -104,7 +104,7 @@ The two keyword arguments below drive pagination.
 None.
 
 #### Errors
-Raises `bondy.error.stale` if `cursor` was minted by an incompatible cursor schema or node-walk shape (the caller should restart from the first page), or `bondy.error.malformed` if `cursor` isn't a decodable cursor at all. Unlike `limit`, a cursor has no tolerant fallback: a resume position cannot be guessed.
+Raises `bondy.error.internal_error` if this procedure did not mint `cursor`, or if an incompatible release minted it. The error does not say which of the two applies. In both cases, restart from the first page: omit `cursor`. Unlike `limit`, a cursor has no tolerant fallback: a resume position cannot be guessed.
 
 ### Match a topic URI (paginated)
 ##### bondy.subscription.match(realm_uri, uri) -> page(subscription) {.wamp-procedure}
@@ -338,7 +338,7 @@ None.
 None.
 
 #### Errors
-Raises `wamp.error.invalid_argument` when `options.match` is not `exact`, `prefix`, or `wildcard`.
+Raises `wamp.error.invalid_argument` when `options.match` is not `exact`, `prefix`, or `wildcard`. Raises `bondy.error.unavailable` when a node that may hold the subscription could not be reached.
 
 ### Match a topic URI
 ##### wamp.subscription.match(topic_uri) -> id[] | null {.wamp-procedure}
@@ -489,7 +489,7 @@ None.
 Raises `wamp.error.no_such_subscription` or `bondy.error.unavailable`, with the same distinction as [`wamp.subscription.get`](#get-a-subscription).
 
 ## Topics
-Bondy publishes these meta events on a subscription's lifecycle, subject to the `wamp.meta_events` setting (`demand` by default: an event is only produced when a matching subscriber exists). Because delivery isn't guaranteed, a consumer should snapshot current state via [`wamp.subscription.list`](#list-subscriptions) (or the paginated family) after subscribing, which also covers the gap between subscribing and the next emitted event.
+Bondy publishes these meta events on a subscription's lifecycle, subject to the `wamp.meta_events` setting (`demand` by default: an event is only produced when a matching subscriber exists). Because delivery isn't guaranteed, a consumer takes a snapshot of the current state with [`wamp.subscription.list`](#list-subscriptions) (or the paginated family) after subscribing, which also covers the gap between subscribing and the next emitted event.
 
 Bondy does not publish `wamp.subscription.on_create` or `wamp.subscription.on_delete`. The WAMP specification has the router publish them when a topic URI gains its first subscription and loses its last. A cluster cannot decide which subscription is the first or the last without coordinating its nodes. Each node would announce its own, and a subscriber would see a URI deleted while other nodes still serve it. To learn whether a topic URI has subscriptions, call [`wamp.subscription.lookup`](#look-up-a-subscription) or [`wamp.subscription.list`](#list-subscriptions).
 

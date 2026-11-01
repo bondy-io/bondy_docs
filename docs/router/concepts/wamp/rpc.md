@@ -345,12 +345,16 @@ wampy.call('com.app.process_image', ['https://example.com/photo.jpg']);
 IoT device control:
 
 ```javascript
-// Device registers control procedures
-wampy.register('com.iot.device.{device_id}.set_temperature', {
-    rpc: function(args) {
-        setTemperature(args[0]);
+// Device service registers one handler for every device.
+// details.procedure carries the concrete URI, e.g.
+// com.iot.device.livingroom.set_temperature
+wampy.register('com.iot.device..set_temperature', {
+    rpc: function(args, kwargs, details) {
+        const deviceId = details.procedure.split('.')[3];
+        setTemperature(deviceId, args[0]);
         return {status: 'ok', value: args[0]};
-    }
+    },
+    match: 'wildcard'
 });
 
 // Controller calls
@@ -460,10 +464,10 @@ RPC operations are authorized per procedure URI:
 - **Call permission** - Who can call procedures
 
 ```
-# Allow registration of user procedures
+# Allow registration of user procedures (match: prefix)
 com.myapp.users.
 
-# Allow calling public APIs only
+# Allow calling public APIs only (match: prefix)
 com.myapp.public.
 ```
 

@@ -88,7 +88,7 @@ listener, rather than accepted and crashing at start.
 @[config](listeners.$name.port,integer,,v1.0.0)
 
 The bind port, for a `tcp` or `tls` listener. There is no default — a
-default would let two listeners collide silently — so every listener must
+default would let two listeners collide silently — so every listener has to
 state one. `port = 0` asks the operating system to choose, which is the
 only value two listeners may share.
 
@@ -113,12 +113,12 @@ API Gateway, WAMP-over-WebSocket, SSE and long-poll all on port 18080.
 | `admin`        | —          | —        | Liveness/readiness endpoints (`/ping`, `/ready`). |
 | `metrics`      | —          | —        | Prometheus scrape endpoint. |
 | `wamp_ws`      | WebSocket  | WAMP     | |
-| `bamp_ws`      | WebSocket  | BAMP     | Mounts `/ws` restricted to the `bamp` subprotocol. BAMP's wire implementation has not shipped, so a session cannot yet be carried over it. |
+| `bamp_ws`      | WebSocket  | BAMP     | Mounts `/ws` restricted to the `bamp` subprotocol. Bondy 1.0.0 has no BAMP wire implementation, so no session can be carried over it. |
 | `wamp_sse`     | SSE        | WAMP     | |
 | `wamp_longpoll`| Long-poll  | WAMP     | |
 | `mcp`          | MCP        | MCP      | The [MCP Gateway](/router/concepts/mcp_gateway) endpoint. Mounts `/mcp/realm/:realm` and `/.well-known/oauth-protected-resource/realm/:realm`. Cannot share a listener with `admin_api`. |
 
-**An HTTP listener must declare at least one service.** Both a missing
+**An HTTP listener has to declare at least one service.** Both a missing
 `services` key and an empty one are refused at boot, naming the listener.
 Such a listener would bind its socket and answer 404 to everything, with
 nothing reported anywhere. Note that `listeners.<name>.services =` with no
@@ -254,8 +254,8 @@ umask gives it, so a sidecar running under a different uid can reach it.
 
 The socket lives under `platform_runtime_dir`, which is deliberately not
 `platform_tmp_dir`: it has to be on a filesystem that supports Unix domain
-sockets, and it must not be shared with another node. The defaults satisfy
-both. A container image must provide that directory: the node refuses to
+sockets, and no other node can share it. The defaults satisfy
+both. A container image has to provide that directory: the node refuses to
 boot when the internal socket cannot bind, so an image built from a custom
 Dockerfile needs the runtime directory created and owned by the `bondy`
 user, the way the official images do.
@@ -712,7 +712,7 @@ the listener is open to any origin.
 
 @[config](listeners.$name.cors.allowed_headers,string,,v1.0.0)
 
-@[config](listeners.$name.cors.max_age,integer,,v1.0.0)
+@[config](listeners.$name.cors.max_age,integer,86400,v1.0.0)
 
 ## Security headers
 
@@ -926,8 +926,8 @@ How long a fully quiet SSE stream is kept. Feeds the listener's
 
 @[config](listeners.$name.longpoll.poll_timeout,duration,30s,v1.0.0)
 
-How long a poll request is held open waiting for messages. Must stay
-strictly below `longpoll.idle_timeout`, or the connection can be torn down
+How long a poll request is held open waiting for messages. The value has to
+stay strictly below `longpoll.idle_timeout`, or the connection can be torn down
 for inactivity before the long-poll reply is sent.
 
 @[config](listeners.$name.longpoll.idle_timeout,duration,10m,v1.0.0)

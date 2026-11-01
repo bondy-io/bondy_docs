@@ -134,7 +134,7 @@ separate from — and much slower than — the compaction scheduler.
 ## Origins, retirement, and departed nodes
 
 Because one silent member freezes reclamation, a *permanently* departed node
-must leave the membership, and leaving is a deliberate act: the operator's
+has to leave the membership, and leaving is a deliberate act: the operator's
 [`bondy.cluster.leave`](/router/reference/wamp_api/cluster), or the node's own
 graceful shutdown under
 [`cluster.automatic_leave`](/router/reference/configuration/cluster#cluster.automatic_leave).

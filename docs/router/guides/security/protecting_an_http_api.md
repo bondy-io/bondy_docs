@@ -27,7 +27,7 @@ related:
 
 Make every route of an API Gateway specification require a Bondy OAuth2 access token, issue tokens to an application, and revoke them.
 
-The `oauth2` scheme is the only one in a Security Object that protects a route. Bondy refuses every request to a route whose scheme is `basic`, `api_key` or `oidc`; see the [Security Object](/router/reference/api_gateway/specification#security-object).
+The `oauth2` and `oidc` schemes protect a route; this guide covers `oauth2`. Bondy refuses every request to a route whose scheme is `basic` or `api_key`; see the [Security Object](/router/reference/api_gateway/specification#security-object).
 
 ## Before you start
 

@@ -73,7 +73,7 @@ See [Serialization](/router/reference/serialization) for how each serializer map
 |Event retention|Yes|Yes|See [message retention](/router/reference/configuration/wamp).|
 |Payload passthru mode|Yes|Yes||
 |Session meta API|Yes|Partial|See [Session meta API](#session-meta-api).|
-|Subscription meta API|No|Partial|Bondy implements the `wamp.subscription.*` procedures and the `on_subscribe` and `on_unsubscribe` events, but does not announce the feature, so a client library that checks `WELCOME` does not use them. Bondy does not publish `on_create` or `on_delete`; see [NC4](#nc4).|
+|Subscription meta API|Yes|Partial|Bondy implements the `wamp.subscription.*` procedures and publishes the `on_subscribe` and `on_unsubscribe` events. Bondy does not publish `on_create` or `on_delete`; see [NC4](#nc4).|
 |Topic reflection|Yes|Yes|The `wamp.reflection.topic.*` procedures.|
 |Publication trust levels|No|No||
 |Sharded subscription|No|No||
@@ -89,8 +89,8 @@ See [Serialization](/router/reference/serialization) for how each serializer map
 |Caller identification|Yes|Yes|The caller's session ID is disclosed unless both the callee's `disclose_caller` and the caller's `disclose_me` are `false`.|
 |Pattern-based registration|Yes|Yes||
 |Shared registration|Yes|Yes|Invocation policies `single`, `roundrobin`, `random`, `first` and `last`. When sessions on one node register a procedure with `single` concurrently, exactly one registration succeeds.|
-|Progressive call results|Yes|Yes|Granted only to a session that announces it. See [Dealer](/router/reference/configuration/wamp#dealer).|
-|Progressive calls|Yes|Yes|Granted only to a session that announces it together with `call_canceling`.|
+|Progressive call results|Yes|Yes|Granted only to a session that announces it. Bondy asks a callee for progressive results only when the callee also announced `call_canceling`; any other callee settles the call with one final `YIELD`. See [Dealer](/router/reference/configuration/wamp#dealer).|
+|Progressive calls|Yes|Yes|Granted only to a session that announces it. Bondy routes a progressive call only to a callee that announced both `progressive_call_invocations` and `call_canceling`.|
 |Payload passthru mode|Yes|Yes||
 |Registration meta API|Yes|Partial|Bondy publishes `on_register` and `on_unregister`, but not `on_create` or `on_delete`. See [NC4](#nc4).|
 |Session meta API|Yes|Partial|See [Session meta API](#session-meta-api).|

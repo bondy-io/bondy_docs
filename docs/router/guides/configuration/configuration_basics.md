@@ -5,7 +5,7 @@ Bondy configuration file is used to set a wide variety of *static configuration 
 
 |Installation method|Location|
 |:---|:---|
-|Source tarball|`/etc/bondy.conf`|
+|Source tarball|`etc/bondy.conf`, under the directory where you unpacked the release|
 |Docker image|`/bondy/etc/bondy.conf`|
 
 
@@ -13,10 +13,11 @@ Bondy configuration file is used to set a wide variety of *static configuration 
 The file uses a sysctl-like syntax that looks like this:
 
 ```text
-nodename = bondy@127.0.0.1
-distributed_cookie = bondy
 security.allow_anonymous_user = off
+cluster.enabled = off
 ```
+
+The node name and the distribution cookie are not `bondy.conf` keys. Set them with the `BONDY_ERL_NODENAME` and `BONDY_ERL_DISTRIBUTED_COOKIE` environment variables.
 
 ::: warning Notice
 Notice that for every option not provided by your configuration, Bondy will define a default value (also specified in the following sections).
@@ -25,19 +26,16 @@ Notice that for every option not provided by your configuration, Bondy will defi
 
 ### Variable replacement
 
-Within the `bondy.conf` file you can use the following variables which Bondy will substitute before running.
-
-- `platform_etc_dir`
-
-The following is an example of how to use variable substitution.
+A value in `bondy.conf` can contain `$(key)`, where `key` is another key of the file. Bondy replaces `$(key)` with the value of that key, or with its default when the file does not set it. The directory keys `platform_data_dir`, `platform_log_dir`, `platform_tmp_dir`, `platform_lib_dir` and `platform_runtime_dir` are the usual choices.
 
 ```
-broker_bridge.config_file = $(platform_etc_dir)/broker_bridge_config.json
+broker_bridge.config_file = $(platform_data_dir)/broker_bridge_config.json
 ```
 
-::: warning Notice
-These mechanism cannot be used to do OS environment variables substitution.
-However, Bondy provides a tool for OS variable substitution that is automatically used by the Bondy Docker image start script. To understand how to use OS environment variables substitution in Docker read [this](https://www.notion.so/Installing-Bondy-ae4e908297e44a02a82f1d4b7e7ff0b4) section, otherwise take a look at how the `start.sh` script uses it in the official docker images.
+`platform_etc_dir` is not a `bondy.conf` key, so `$(platform_etc_dir)` does not work. When a substitution names a key that does not exist, cuttlefish rejects the whole file without a message. The node then starts on the configuration that the last successful generation wrote, so none of your changes apply.
+
+::: warning OS environment variables
+`$(key)` does not read OS environment variables. To use them, write the file as `etc/bondy.conf.template` and write each variable as `${VARNAME}`. On every start, the pre-start hook writes `etc/bondy.conf` from each `*.template` file in `etc`. If a variable named in a template is unset, the node does not start.
 :::
 
 ### Feature-specific configuration files
@@ -47,8 +45,6 @@ Some features and/or subsystems in Bondy allow providing an additional JSON conf
 In those cases, we need to let Bondy know where to find those specific files. This is done in the `bondy.conf` under the desired section e.g. the following configuration file adds the location for the `security_conf.json` file.
 
 ```
-nodename = bondy@127.0.0.1
-distributed_cookie = bondy
 security.allow_anonymous_user = off
 security.config_file = /bondy/etc/security_conf.json
 ```
@@ -61,7 +57,7 @@ security.config_file = /bondy/etc/security_conf.json
 
 Bondy can accumulate a large number of open file handles during operation. The creation of numerous data files is normal, and the storage backend performs periodic merges of data file collections to avoid accumulating file handles.
 
-To accommodate this you should increase the open files limit on your system. We recommend setting a soft limit of `65536` and a hard limit of `200000`.
+Increase the open files limit on your system. We recommend setting a soft limit of `65536` and a hard limit of `200000`.
 
 Most operating systems can check and change the open-files limit for the current shell session using the `ulimit` command.
 
@@ -83,7 +79,7 @@ This configuration persists only for the duration of your shell session. To chan
 ::: details Open file limits on Linux
 On most Linux distributions, the total limit for open files is controlled by `sysctl`.
 
-If you installed Bondy from a binary package, you will need to the add the following settings to the `/etc/security/limits.conf` file for the `bondy` user:
+If Bondy runs as the `bondy` user, add the following settings to the `/etc/security/limits.conf` file:
 
 ```bash
 bondy soft nofile 65536

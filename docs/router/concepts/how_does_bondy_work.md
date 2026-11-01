@@ -24,7 +24,7 @@ At its core, Bondy is an implementation of the [Web Application Messaging Protoc
 
 When a client connects to Bondy:
 
-1. **Session Establishment** - Client negotiates transport (WebSocket, TCP, Unix socket) and serialization (JSON, MessagePack, CBOR)
+1. **Session Establishment** - Client negotiates transport (WebSocket, HTTP long-poll, SSE, or RawSocket over TCP, TLS or a Unix socket) and serialization (JSON, MessagePack, CBOR)
 2. **Authentication** - Bondy verifies identity using configured methods (anonymous, password, cryptosign, OAuth2, etc.)
 3. **Authorization** - Bondy grants permissions based on realm RBAC configuration
 4. **Communication** - Client can now perform RPC calls, register procedures, publish events, and subscribe to topics
@@ -66,7 +66,7 @@ This routed approach provides several advantages:
 - **Location transparency** - Caller doesn't need to know where Callee is
 - **Dynamic discovery** - Procedures can be registered/unregistered at runtime
 - **Load balancing** - Multiple Callees can implement same procedure
-- **Failover** - If one Callee fails, router can try another
+- **Failover** - When a call gets no answer, the dealer retries it on another Callee if the call sets `_retries` and the registration is `_idempotent`
 
 ### Pub/Sub Routing (Broker Role)
 
@@ -115,7 +115,7 @@ Realm configurations, security settings, and RBAC rules (users, groups, grants, 
 
 Rather than a synchronous write to every node, or a gossip broadcast, replication converges through **active anti-entropy**: nodes compare a Merkle Search Tree (MST) of each table's contents against a peer's and pull only the pages that differ. A write only needs to land durably on the node that accepted it; anti-entropy then carries it to the rest of the cluster.
 
-This gives **eventual consistency** with **high availability**: nodes keep accepting writes during a network partition, and reconcile automatically — with no lost updates, since the underlying CRDTs merge deterministically regardless of delivery order — once connectivity is restored.
+This gives **eventual consistency** with **high availability**: nodes keep accepting writes during a network partition, and reconcile automatically once connectivity is restored. Every replica reaches the same state, because the underlying CRDTs merge deterministically regardless of delivery order. That state is the merge each table's CRDT defines: a last-writer-wins table, for example, keeps one of two concurrent writes.
 
 ### Active Anti-Entropy
 
@@ -135,7 +135,7 @@ Registrations and subscriptions themselves are **not** replicated — only a com
 1. Client → Node A: CALL message
 2. Node A consults its merged RIB summary
 3. Summary indicates Node B serves this procedure
-4. Node A → Node B: Forward INVOCATION, node-addressed
+4. Node A → Node B: Forward CALL, node-addressed
 5. Node B re-selects the callee among its own live local registrations
 6. Node B → Callee: Deliver INVOCATION
 7. Callee → Node B: Return YIELD
@@ -178,7 +178,7 @@ After authentication, Bondy determines what the client can do using Role-Based A
 **Permissions use pattern matching:**
 - Exact: `com.myapp.users.get`
 - Prefix: `com.myapp.users.`
-- Wildcard: `com.myapp.*.get`
+- Wildcard: `com.myapp..get` (an empty URI component matches any one component)
 
 **Example policy:**
 ```json
@@ -270,7 +270,7 @@ Bondy clusters automatically heal from failures:
 - **Node failure** - Clients reconnect to surviving nodes
 - **Network partition** - Clusters split and merge automatically
 - **Data corruption** - AAE detects and repairs
-- **Configuration drift** - Gossip resynchronizes
+- **Configuration drift** - AAE resynchronizes
 
 Operators don't need to manually intervene for common failure scenarios.
 
@@ -302,7 +302,8 @@ This allows legacy HTTP clients to access WAMP services without modification.
 Re-publish WAMP events to a system that doesn't speak WAMP, via a JSON subscription spec — see [Broker Bridge](/router/concepts/broker_bridge):
 - **Kafka** - forward WAMP events to Kafka topics (produce only; there is no consumer side back into WAMP)
 - **AWS SNS** - send SMS messages
-- **Mailgun** / **SendGrid** - send email, the latter with template support
+- **SMTP** - send email through a [mail relay](/router/concepts/mail) declared in `bondy.conf`
+- **Mailgun** / **SendGrid** - send email through the provider's HTTP API, the latter with template support
 
 Bridges enable gradual migration and hybrid architectures.
 

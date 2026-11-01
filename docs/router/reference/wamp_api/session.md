@@ -68,8 +68,8 @@ Retrieves the details of a session in the caller's realm. Bondy routes the call 
     :maxDepth="10"
     :data="JSON.stringify({
         '0':{
-            'type': 'id',
-            'description' : 'The session identifier, as returned in the session object\'s `session` field or the `session_guid` field of `authextra`.'
+            'type': 'string',
+            'description' : 'The session identifier, as returned in the `session_guid` field of the session object\'s `authextra`. The integer `session` field is not accepted: a call with it fails with `wamp.error.no_such_session`.'
         }
     })"
 />
@@ -94,7 +94,7 @@ None.
 None.
 
 #### Errors
-Raises `wamp.error.no_such_session` if no session with the given identifier exists on the realm, whether because it never existed, has since closed, or lived on a node that is currently unreachable.
+Raises `wamp.error.no_such_session` if no session with the given identifier exists on the realm, whether because it never existed, has since closed, or lived on a node that is currently unreachable. Raises the same error if the argument is not a `session_guid` string.
 
 ## Topics
 
@@ -138,7 +138,7 @@ Published when a session closes, whether by client disconnect, explicit `GOODBYE
         },
         '1':{
             'type': 'string',
-            'description' : 'The session\'s authid, or `null` if it authenticated anonymously.'
+            'description' : 'The session\'s authid. For an anonymous session, Bondy generates a unique authid when the session opens.'
         },
         '2':{
             'type': 'string',
@@ -199,13 +199,13 @@ export default {
                     "mutable": false
                 },
                 "authextra" : {
-                    "description": "Extra authentication context: \`session_guid\` (the internal, node-hash-qualified session identifier used for cluster-wide routing) and \`node\` (the node the session is attached to).",
+                    "description": "Extra authentication context: \`session_guid\` (the internal, node-hash-qualified session identifier used for cluster-wide routing), \`node\` (the node the session is attached to) and, for a session that is not anonymous, \`meta\` (the user's metadata).",
                     "type": "dict",
                     "required": true,
                     "mutable": false
                 },
                 "transport" : {
-                    "description": "Transport-level information, currently the peer's \`peername\` (address and port).",
+                    "description": "Transport-level information: the peer's \`peername\` (address and port). An internal session that has no socket has an empty map.",
                     "type": "dict",
                     "required": true,
                     "mutable": false
@@ -219,7 +219,7 @@ export default {
                     "mutable": false
                 },
                 "x_meta" : {
-                    "description": "The user's metadata, taken from \`authextra.meta\`.",
+                    "description": "The user's metadata, taken from \`authextra.meta\`. An empty map for an anonymous session.",
                     "type": "dict",
                     "required": true,
                     "mutable": false

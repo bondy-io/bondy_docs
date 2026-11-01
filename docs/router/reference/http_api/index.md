@@ -15,7 +15,8 @@ Every route follows the same rules:
 - **Base path.** Routes are served at the paths below, and also under the prefix `/v1.0`.
 - **Positional arguments.** Path parameters become the procedure's positional arguments, in the order they appear in the path. For routes that send a body, the JSON request body is the next positional argument.
 - **Result.** A successful call answers with the procedure's first positional result as the JSON response body.
-- **Errors.** A failed call answers with the error's keyword arguments as the JSON body, plus `code` set to the error URI. The HTTP status is the error's default status from the [Error Reference](/router/reference/errors), unless the API's own `status_codes` map overrides it; `bondy.error.not_found` maps to `404`, `bondy.error.already_exists` to `400`.
+- **Errors.** A failed call answers with the error's keyword arguments as the JSON body, with `code` replaced by the error URI. The HTTP status is the error's status from the [Error Reference](/router/reference/errors). For example, `bondy.error.not_found` maps to `404` and `bondy.error.already_exists` to `400`. An error URI that the catalogue does not hold answers `500`.
+- **`OPTIONS`.** Every path also answers `OPTIONS`, with an empty body.
 
 ## Routes
 
@@ -98,7 +99,7 @@ Every route follows the same rules:
 | `GET` | `/realms/:realm_uri/registrations/:id/callees` | [`bondy.registration.list_callees`](/router/reference/wamp_api/registration#list-a-registration-s-callees-in-a-realm) |
 | `GET` | `/realms/:realm_uri/subscriptions` | [`bondy.subscription.list`](/router/reference/wamp_api/subscription) |
 
-The `/registrations` and `/subscriptions` routes are paginated. Each entry carries its id and its match policy.
+The `/registrations` and `/subscriptions` routes answer with the first page of the paginated procedure. The body holds `values`, `has_more` and, when more entries remain, `cursor`. Each entry carries its id and its match policy. These routes pass no `limit` or `cursor` to the procedure, so the page has the default size and no route reads the next page. Use [`POST /services/call`](#calling-any-procedure) to call the procedure with `limit` and `cursor`.
 
 ### API Gateway specifications
 

@@ -151,7 +151,7 @@ The hard threshold answers an admission question that must not flap; the smoothe
 | Live-sync backoff | steady-state background cost | whether the shard's data moved | poll interval backs off geometrically to `db.aae.live_sync.max` (5s), resets on change | `db.aae.live_sync` (`on`) | — |
 | Load-adaptive throttle | routing during a spike | the smoothed run-queue ratio | that tick's bootstraps and non-fence live syncs are skipped; running syncs continue | `db.aae.load_adaptive` (`off`) | `bondy_oplog_sync_scheduler_yielding` |
 | Rate limiting — five classes, three scopes | fair share per source IP / session / tenant | token buckets, consumed node → listener → realm | `429` / `ABORT` / `ERROR` / silent drop, per class — [next section](#rate-limiting-inbound-traffic) | `security.rate_limit.*` · `listeners.$name.rate_limit.*` · the realm `rate_limit` property | `bondy_rate_limited_total{class, scope}` |
-| Callee admission (`bondy_connect`) | the callee's handler pool | in-flight invocation count, plus an optional token bucket | backpressure `ERROR` instead of running the handler | `handler.max_concurrency` · `handler.rate` (client-side, not `bondy.conf`) | — |
+| Callee admission (`bondy_connect_sdk`) | the callee's handler pool | in-flight invocation count, plus an optional token bucket | backpressure `ERROR` instead of running the handler | `handler.max_concurrency` · `handler.rate` (client-side, not `bondy.conf`) | — |
 
 Every row [fails open](#failing-open), so a missing denial counter is not proof the regulator is configured — it may simply never have been needed, or never have been on.
 
@@ -211,7 +211,7 @@ Every per-IP limit throttles a source IP collectively. Clients behind a shared N
 
 The mechanisms above protect the router. A callee has the opposite problem: it is one process pool serving invocations the router sends it, and a burst can overwhelm the handler rather than the router.
 
-Connections built with `bondy_connect` regulate invocation **admission** per connection, through two independent limits: a hard in-flight cap (`max_concurrency`, where `0` means unlimited) counting invocations currently being serviced, and an optional token bucket for the rate. Both live in the connection's `handler` configuration rather than `bondy.conf`, because they belong to the client, not the node.
+Connections built with `bondy_connect_sdk` regulate invocation **admission** per connection, through two independent limits: a hard in-flight cap (`max_concurrency`, where `0` means unlimited) counting invocations currently being serviced, and an optional token bucket for the rate. Both live in the connection's `handler` configuration rather than `bondy.conf`, because they belong to the client, not the node.
 
 When admission is denied the connection replies to the router with a backpressure `ERROR` instead of running the handler. The distinction matters: this governs whether an invocation is *started*, while the handler supervisor governs how it *runs*.
 

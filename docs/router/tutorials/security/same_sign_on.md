@@ -55,11 +55,11 @@ wampy.call('bondy.realm.create', [{
 ```
 :::
 
-Notice that in line 3 we set property `is_sso_realm` to true.
+Notice that in line 6 we set property `is_sso_realm` to true.
 
 Congratulations, that's all we need to define this realm as an SSO realm!
 
-Also notice that on line 4 we disallow connections. This means no user can open a session attached to this realm (which is the recommended option) as the role of this realm is just to become a shared Identity Provider for other realms.
+Also notice that on line 7 we disallow connections. This means no user can open a session attached to this realm (which is the recommended option) as the role of this realm is just to become a shared Identity Provider for other realms.
 
 ::: info Note
 Notice that disallowing connections doesn't affect our ability to manage the realm, because to do it we need to open a session attached to the [Master Realm](/router/concepts/realms#master-realm) anyway.
@@ -104,7 +104,7 @@ wampy.call('bondy.realm.create', [{
 
 Line 7 tells the `com.example.realm.1` realm to delegate the management of credentials and authentication to the `com.example.sso` realm.
 
-Notice that this does not prevent you from having local users (with local credentials) in those realms. By default adding a realm will NOT use the SSO Realm. We need to tell Bondy we want that when creating the users. We will do this in the next step.
+Notice that this does not prevent you from having local users (with local credentials) in those realms. By default a user added to the realm does NOT use the SSO Realm. We need to tell Bondy we want that when creating the users. We will do this in the next step.
 
 ### 3. Add the user
 Now that all realms have been created we will add `Linda` as an "SSO user".
@@ -143,24 +143,26 @@ wampy.call('bondy.user.add', [
 ```
 :::
 
+The `admin` group has to exist in `com.example.realm.1`. Bondy refuses a user whose groups do not exist in the realm.
+
 ::: warning
-If the user already existed in the SSO realm we would get and `already_exists`error.
+If the user already exists in `com.example.realm.1`, the call fails with an `already_exists` error. If the user already exists in the SSO realm, Bondy links the new local user to it and ignores the credentials in the call.
 :::
 
 ::: info Note
-Notice that the user data object includes the property `sso_realm_uri` set to the SSO Realm Uri. This currently has to match the realm's property of the same name but in the near future we will allow a realm to have multiple SSO realm URIs, so this property will need to have one of those URIs.
+Notice that the user data object includes the property `sso_realm_uri` set to the SSO Realm Uri. This property has to match the realm's property of the same name.
 :::
 
 The above call creates two linked records.
 
-The first record is **created in the SSO realm** and looks like this:
+The first record is **created in the SSO realm**. It holds the credentials and has no groups and no metadata of its own. Bondy stores a key derived from the password, never the password itself:
 
 ```json
 {
   "username": "linda@gmail.com",
-  "password": "123456",
-  "groups": ["admin", "owner"],
-  "meta" : {"plan": "family +5"}
+  "password": "...",
+  "groups": [],
+  "meta" : {}
 }
 ```
 

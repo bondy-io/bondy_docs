@@ -41,7 +41,7 @@ This combination gives Bondy the capabilities of both an event mesh and a servic
 
 ## Open source
 
-Bondy is licensed under Apache 2.0. The [source code](https://github.com/bondy-io/bondy) is publicly available on GitHub.
+Bondy is licensed under Apache 2.0. The [source code](https://github.com/bondy-io/bondy-connect) is publicly available on GitHub.
 
 ## Architecture properties
 
@@ -53,7 +53,7 @@ Distributed routing delivers RPC and Pub/Sub messages between clients connected 
 
 ### Availability
 
-State replication uses an anti-entropy protocol that maintains consistency across the cluster without requiring a consensus round on every write. All nodes being equal means there is no leader election and no split-brain scenario.
+State replication uses an anti-entropy protocol that maintains consistency across the cluster without requiring a consensus round on every write. All nodes are equal, so there is no leader election and no leader to lose. A network partition does not stop either side: each side keeps accepting writes, and the two converge when the partition heals.
 
 Active anti-entropy continuously repairs missing or divergent state after node failures, data corruption, or network partitions, so a new node synchronizes with the cluster and begins handling traffic without manual intervention. See [Clustering](/router/concepts/clustering) for the full mechanism.
 
@@ -123,13 +123,11 @@ Bondy is built on Erlang/OTP, the runtime that also underlies telecommunications
 - **Hot code loading** — code can be updated without stopping the node
 - **Soft real-time scheduling** — predictable latency and throughput under load
 
-For clustering and routing, Bondy uses [Partisan](https://partisan.dev) in place of Erlang's standard distribution protocol. Partisan supports multiple network topologies; Bondy currently deploys a full-mesh topology, scaling to hundreds of nodes.[^topo]
-
-[^topo]: A peer-to-peer topology based on Partisan's HyParView implementation, intended to scale to thousands of nodes, is in development. Partisan is maintained by the same team that builds Bondy.
+For clustering and routing, Bondy uses [Partisan](https://partisan.dev) in place of Erlang's standard distribution protocol. Partisan supports multiple network topologies; Bondy deploys a full-mesh topology, scaling to hundreds of nodes. Partisan is maintained by the same team that builds Bondy.
 
 ## Next steps
 
 - [WAMP](/router/concepts/wamp/what_is_wamp) and [Architecture](/router/concepts/architecture) — the concepts behind the protocol and the platform.
 - [Getting started tutorial](/router/tutorials/getting_started/marketplace) — build something with Bondy.
 - [Deployment guides](/router/guides/deployment/running_a_cluster) — run a cluster.
-- [Community forum](https://github.com/bondy-io/bondy/discussions) — ask a question.
+- [Community forum](https://github.com/bondy-io/bondy-connect/discussions) — ask a question.

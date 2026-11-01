@@ -182,12 +182,14 @@ After configuring, verify with `curl`:
 curl -s -D - -o /dev/null \
   -X OPTIONS \
   -H "Origin: https://app.example.com" \
-  https://your-bondy-host:18080/wamp/sse/open
+  https://your-bondy-host:<port>/wamp/sse/open
 
 # Check security headers on a regular request
 curl -s -D - -o /dev/null \
-  https://your-bondy-host:18081/ping
+  https://your-bondy-host:<port>/ping
 ```
+
+Replace `<port>` with the port of the listener you configured. The first request needs a listener that serves `wamp_sse`. The second request needs a listener that serves `admin`.
 
 Look for:
 - `access-control-allow-origin` matching your frontend origin (not `*`)

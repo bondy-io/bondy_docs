@@ -53,7 +53,7 @@ never retires an origin on its own — see
 @[config](db.origin_retirement.path,file,origin_retirement,v1.0.0)
 
 Where this node stores its retirement set, relative to `platform_data_dir`
-unless absolute. A retirement is permanent, so it must survive a restart: a
+unless absolute. A retirement is permanent, so it has to survive a restart: a
 node that forgot one would re-learn the origin's frontier entry from a peer
 and then read its own absence as a deficit, paying a catalogue re-bootstrap
 for data it already holds. A node that cannot write this file refuses to

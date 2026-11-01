@@ -5,8 +5,9 @@ outline: [2,3]
 An authentication ticket is a signed (and possibly encrypted) assertion of a user's identity, that a client can use to authenticate the user without the need to ask it to re-enter its credentials.
 
 ## Description
-Tickets MUST be issued by a session that was opened using an authentication
-method that is neither `ticket` nor `anonymous`.
+A session can issue a ticket only when it was opened with an authentication
+method listed in [`security.ticket.authmethods`](/router/reference/configuration/security#security.ticket.authmethods).
+That list cannot contain `anonymous` or `oauth2`.
 
 
 ### Claims
@@ -28,8 +29,8 @@ The ticket was issued with `allow_sso` option set to `false` or when set to
 was not provided.
 
 ::: warning Authorization
-To be able to issue this ticket, the session must have been granted the
-permission `bondy.issue` on the `bondy.ticket.scope.local` resource.
+To issue this ticket, the session needs the permission `bondy.issue`
+on the `bondy.ticket.scope.local` resource.
 :::
 
 ### SSO Scope
@@ -39,8 +40,8 @@ The ticket was issued with `allow_sso` option set to `true` and the user has
 SSO credentials, and the option `client_ticket` was not provided.
 
 ::: warning Authorization
-To be able to issue this ticket, the session must have been granted the
-permission `bondy.issue` on the `bondy.ticket.scope.sso` resource.
+To issue this ticket, the session needs the permission `bondy.issue`
+on the `bondy.ticket.scope.sso` resource.
 :::
 
 ### Client-Local scope
@@ -52,9 +53,8 @@ was provided having a valid ticket issued by a client
 (a local or sso ticket).
 
 ::: warning Authorization
-To be able to issue this ticket, the session must have been granted the
-permission `bondy.issue` on the `bondy.ticket.scope.client_local`
-resource.
+To issue this ticket, the session needs the permission `bondy.issue`
+on the `bondy.ticket.scope.client_local` resource.
 :::
 
 
@@ -69,9 +69,8 @@ ticket issued by a client ( a local or sso ticket).
 
 
 ::: warning Authorization
-To be able to issue this ticket, the session must have been granted the
-permission `bondy.issue` on the `bondy.ticket.scope.client_local`
-resource.
+To issue this ticket, the session needs the permission `bondy.issue`
+on the `bondy.ticket.scope.client_sso` resource.
 :::
 
 
@@ -187,8 +186,8 @@ Revokes every ticket issued to the user `authid` in the realm, including the tic
     :data="JSON.stringify({
         0:{
             'type': 'string',
-            'required': true,
-            'description' : 'The realm uri we want to revoke the ticket from.'
+            'required': false,
+            'description' : 'The URI of the realm to revoke the tickets in. When you omit it, the router uses the session\'s realm. A session attached to a realm other than the Master Realm cannot name a different realm.'
         },
         1:{
             'type': 'string',
@@ -203,6 +202,7 @@ None.
 
 #### Result
 ##### Positional Args
+None.
 
 ##### Keyword Args
 None.
@@ -215,7 +215,7 @@ const issue_opts = {
         description: "",
         mutable: true,
         required: false,
-        default: "The value of Bondy configuration parameter 'security.ticket.expiry_time'"
+        default: "The value of Bondy configuration parameter 'security.ticket.expiry_time'. Bondy caps the value at 'security.ticket.max_expiry_time'."
     },
     allow_sso : {
         type: "boolean",
@@ -236,7 +236,7 @@ const issue_opts = {
         mutable: true,
         required: false
     },
-    client_instance_id : {
+    device_id : {
         type: "string",
         description: "",
         mutable: true,
@@ -282,13 +282,13 @@ const claims = {
         required: false
     },
     expires_at: {
-        type: "string",
-        description: "Identifies the expiration time, measured in seconds, on or after which the ticket MUST NOT be accepted for processing.  The processing of this attribute requires that the current date/time MUST be before the value assigned to this attribute. Bondy considers a small leeway of 2 minutes by default.",
+        type: "integer",
+        description: "The expiration time, in seconds since the Unix epoch. Bondy rejects the ticket on or after this time. Bondy allows a leeway of 2 minutes by default.",
         mutable: false,
         required: false
     },
     issued_at: {
-        type: "string",
+        type: "integer",
         description: "Identifies the time at which the ticket was issued. This claim can be used to determine the age of the ticket. Its value is a timestamp in seconds.",
         mutable: false,
         required: false
@@ -305,16 +305,10 @@ const claims = {
         computed: true,
         required: false,
         properties: {
-            realm : {required: false, type: "uri", mutable: false},
+            realm : {required: false, type: "uri", mutable: false, description: "If `all`, the ticket grants access to all realms the user has access to through the authrealm (an SSO realm). Otherwise, the value is the realm this ticket is valid on."},
             client_id: {required: false, type: "string", mutable: false},
-            client_instance_id: {required: false, type: "string", mutable: false}
+            device_id: {required: false, type: "string", mutable: false}
         }
-    },
-    realm: {
-        type: "string",
-        description: "If undefined the ticket grants access to all realms the user has access to by the authrealm (an SSO realm). Otherwise, the value is the realm this ticket is valid on.",
-        mutable: false,
-        required: false
     }
 };
 

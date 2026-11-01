@@ -50,13 +50,13 @@ const rateLimitBudget = {
             "type": "integer",
             "required": true,
             "mutable": true,
-            "description": "Tokens per second — the sustained allowance. Must be a positive integer."
+            "description": "Tokens per second — the sustained allowance, as a positive integer."
         },
         "capacity": {
             "type": "integer",
             "required": true,
             "mutable": true,
-            "description": "The burst size — tokens a caller may spend at once before being held to the rate. Must be a positive integer."
+            "description": "The burst size — tokens a caller can spend at once before being held to the rate, as a positive integer."
         }
     }
 };
@@ -128,8 +128,8 @@ const realmPublic = {
         "type": "array",
         "required": true,
         "mutable": true,
-        "description": "The list of the authentication methods allowed by this realm. Allowed values: 'anonymous', 'trust', 'password', 'ticket', 'oauth2', 'wampcra', 'cryptosign'",
-        "default": "`[]`",
+        "description": "The list of the authentication methods allowed by this realm. Allowed values: 'anonymous', 'cookie', 'cryptosign', 'oauth2', 'oidcrp', 'password', 'ticket', 'tls', 'trust', 'wamp-scram', 'wampcra'. Bondy never offers 'tls' or 'oidcrp' to a WAMP session; see [Authentication Method](/router/reference/glossary#authentication-method-authmethod).",
+        "default": "The realm's prototype value if the realm inherits from a prototype, otherwise `[\"anonymous\", \"password\", \"oauth2\", \"wampcra\", \"ticket\"]`.",
         "items" : {
             "type": "string"
         }
@@ -221,7 +221,7 @@ const realmPublic = {
                     "type": "array",
                     "required": true,
                     "mutable": true,
-                    "description": "A list of permissions. Allowed values: 'wamp.register','wamp.unregister','wamp.subscribe','wamp.unsubscribe','wamp.call','wamp.cancel','wamp.publish'",
+                    "description": "A list of permissions. Each permission is a URI. The WAMP permissions are 'wamp.register', 'wamp.unregister', 'wamp.subscribe', 'wamp.unsubscribe', 'wamp.call', 'wamp.cancel' and 'wamp.publish'. Bondy also checks 'bondy.issue' before it issues a ticket.",
                     "items": {
                         "type": "string"
                     }
@@ -281,12 +281,37 @@ const realmPublic = {
 const inputCreateData = {...realmUri, ...realmPublic, ...realmPrivate};
 const inputUpdateData = {...realmPublic, ...realmPrivate};
 
-const realm = {...realmUri, ...realmPublic,
+const realm = {...realmUri,
+    "description": realmPublic.description,
+    "is_prototype": realmPublic.is_prototype,
+    "prototype_uri": realmPublic.prototype_uri,
+    "is_sso_realm": realmPublic.is_sso_realm,
+    "sso_realm_uri": realmPublic.sso_realm_uri,
+    "allow_connections": realmPublic.allow_connections,
+    "authmethods": {...realmPublic.authmethods,
+        "description": "The authentication methods set on this realm. The key is absent when the realm sets none and inherits them."
+    },
+    "rate_limit": realmPublic.rate_limit,
+    "password_opts" :  {
+        "type": "map",
+        "required": false,
+        "mutable": false,
+        "description": "The password hashing options of the realm. The key is absent when the realm sets none."
+    },
+    "public_keys" :  {
+        "type": "array",
+        "required": false,
+        "mutable": false,
+        "description": "The public keys of the realm's signing keys, each as a JSON Web Key (JWK) map.",
+        "items": {
+            "type": "map"
+        }
+    },
     "security_status" :  {
         "type": "string",
         "required": false,
         "mutable": true,
-        "description": "The string 'enabled' if enabled is true. Otherwise the string is 'disabled'."
+        "description": "The string 'enabled' if security is enabled on the realm. Otherwise the string is 'disabled'."
     }
 };
 

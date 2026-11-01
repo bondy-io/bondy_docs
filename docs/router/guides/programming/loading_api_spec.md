@@ -73,4 +73,6 @@ call bondy.http_gateway.api.status
 
 Find the element whose `id` is your specification's `id`. The status `active` means that the node serves the specification.
 
-If the status is `pending_realm`, the specification's realm does not exist on the node. Create the realm, then load the specification again.
+If the status is `pending_realm`, the specification's realm does not exist on the node. Create the realm. The node installs the specification's routes at its next rebuild after the realm appears.
+
+If the status is `rejected`, the specification failed to parse, and `reason` describes the failure. Correct the specification and load it again.

@@ -830,16 +830,9 @@ wampy.call('com.myapp.order.process', [orderData], {
 });
 ```
 
-Bondy maps the key to a callee with jump consistent hashing. The same key reaches the same callee as long as the set of callees does not change. A partitioned call overrides the registration's invocation policy for that call.
+Bondy maps the key to a callee with jump consistent hashing. The same key reaches the same callee as long as the set of callees does not change. A partitioned call overrides the registration's invocation policy for that call. Bondy refuses a partitioned call without `rkey` with `wamp.error.invalid_argument`.
 
-A callee can also make partitioning the policy of the registration, with the Bondy invocation policy `jump_consistent_hash`. Every call to such a registration must then carry `rkey`.
-
-```javascript
-wampy.register('com.myapp.order.process', {
-    rpc: processOrder,
-    invoke: 'jump_consistent_hash'
-});
-```
+Partitioning is a property of the call, not of the registration. `REGISTER.Options.invoke` accepts only the five WAMP invocation policies.
 
 ## Best Practices
 
@@ -942,6 +935,6 @@ Bondy implements these advanced RPC features:
 - **Progressive call results** - Stream results to callers, when both peers announce the feature
 - **Progressive calls** - Stream arguments to callees, when both peers announce the feature
 - **Procedure reflection** - Discover the procedures of a realm
-- **Bondy extensions** - Call deadlines and partitioned calls
+- **Bondy extensions** - Call deadlines, call retries and partitioned calls
 
 For fundamental concepts, see [Routed RPC](/router/concepts/wamp/rpc). For practical patterns, see [Beyond the Basics](/router/concepts/wamp/beyond_the_basics).

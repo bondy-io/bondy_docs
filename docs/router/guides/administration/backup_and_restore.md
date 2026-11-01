@@ -137,7 +137,7 @@ Place the file on the node you will call, at a path the Bondy OS user can read.
 
 #### 3. Confirm the node is idle
 
-Call `bondy.export.status` with `{}` as in the export procedure. The result must be `null`.
+Call `bondy.export.status` with `{}` as in the export procedure. The result has to be `null`.
 
 #### 4. Start the import
 
@@ -205,7 +205,7 @@ One `bondy_mst_admin:backup/2,3` call protects everything under a single storage
 * The **MST pack store** — the packfiles, `.idx` files, and pack-store manifest backing the anti-entropy structure.
 * The **compaction checkpoint** (`checkpoint.etf`) — the CRDT state folded up to the last compaction watermark.
 
-`backup/2,3` walks the source directory recursively and copies every regular file it finds, so the root you pass must contain exactly the files above and nothing you don't want copied. If your deployment configures the WAL at a separate root from the MST pack store (a custom `wal_dir`), back up each root separately — see [Limits](#limits) below.
+`backup/2,3` walks the source directory recursively and copies every regular file it finds, so the root you pass has to contain exactly the files above and nothing you don't want copied. If your deployment configures the WAL at a separate root from the MST pack store (a custom `wal_dir`), back up each root separately — see [Limits](#limits) below.
 
 ### Backing up a storage tree
 
@@ -317,7 +317,7 @@ Use the same `Opts` the instance was running with when you took the backup.
 
 ### Limits
 
-* **Cold only.** This release has no write-barrier primitive (freeze/unfreeze) — the instance must be stopped for the copy to be consistent. For zero-downtime backups, take a filesystem-level snapshot (LVM, ZFS, btrfs, an EBS/disk snapshot) of the storage root instead, then point `backup/2,3` at the stable snapshot mount.
+* **Cold only.** This release has no write-barrier primitive (freeze/unfreeze) — stop the instance so that the copy is consistent. For zero-downtime backups, take a filesystem-level snapshot (LVM, ZFS, btrfs, an EBS/disk snapshot) of the storage root instead, then point `backup/2,3` at the stable snapshot mount.
 * **One call per tree.** Each `backup/2,3` call copies exactly one source directory. If your deployment keeps the `leveled` projection at a different root — or the WAL at a separate root via a custom `wal_dir` — invoke `backup/2,3` once per root, into distinct subdirectories of your backup destination.
 * **Full backups only.** There is no incremental or streaming format; every call is a complete copy of the source tree.
 * **No compression or encryption.** Both are out of scope for this tool. Pipe the backup directory through `tar`, `zstd`, and `age` (or your own tooling) afterwards if you need either — nothing about the manifest format depends on how you store the bytes downstream.

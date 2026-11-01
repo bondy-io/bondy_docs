@@ -111,7 +111,7 @@ When a shard opens an existing log, it:
 
 The applier then resumes. A durable shard resumes from its consumer offset and re-applies the events between that offset and the end of the log. The tree insert is idempotent, so the overlap costs nothing there. An ephemeral shard replays from the beginning to rebuild what it lost.
 
-Events re-applied after a crash are published to subscribers again. Delivery to subscribers is at least once, and subscribers must tolerate duplicates.
+Events re-applied after a crash are published to subscribers again. Delivery to subscribers is at least once, so a subscriber has to tolerate duplicates.
 
 ### The scrubber
 

@@ -51,7 +51,7 @@ The following diagram shows the object tree in detail, including all properties 
 The properties of the objects in the object tree can contain static values and/or dynamically evaluated values via [expressions](#expression-language) that are resolved against the HTTP request data at runtime.
 
 ::: definition FSM State
-The [API Context](#api-context) is the state of the API Gateway FSM. It is is [incrementally](#incremental-evaluation) an [recursively](#recursive-evaluation) constructed.
+The [API Context](#api-context) is the state of the API Gateway FSM. It is [incrementally](#incremental-evaluation) and [recursively](#recursive-evaluation) constructed.
 :::
 
 So an API Gateway Specification is the basis of an [API Context](#api-context) but also it is evaluated against it, primarily because the context will contain the [Request Object](#request-object) at runtime.
@@ -59,9 +59,7 @@ So an API Gateway Specification is the basis of an [API Context](#api-context) b
 The key to the definition of an API Gateway Specification is understanting the [API Context](#api-context), since defining a specification implies writing expressions that target (read and/or update) the context.
 
 ::: info On the Open API standard
-[Open API (formerly Swagger)](https://www.openapis.org) defines a standard on how HTTP APIs are described, not its implementation. An API Gateway Specification describes and API and the behaviour of the Gateway, that is, it also defines its implementation in terms of the actions that the Gateway need to perform.
-
-A Future version of the API Gateway will aligning with Open API. In addition, the API Gateway implementation will be able to produce and serve an Open API specification of the APIs defined in Bondy.
+[Open API (formerly Swagger)](https://www.openapis.org) defines a standard on how HTTP APIs are described, not its implementation. An API Gateway Specification describes an API and the behaviour of the Gateway, that is, it also defines its implementation in terms of the actions that the Gateway performs.
 :::
 
 
@@ -144,7 +142,7 @@ The expression language operates on the [API Context](#api-context) and it works
 Let's assume that we receive the following HTTP request:
 
 ```bash
-curl -X "POST" "http://localhost:18081/accounts/" \
+curl -X "POST" "http://localhost:18080/accounts/" \
 -H 'Content-Type: application/json; charset=utf-8' \
 -H 'Accept: application/json; charset=utf-8' \
 --data-binary '{
@@ -542,22 +540,23 @@ The API Specification parser will use this object to find a default value for th
 <DataTreeView :data="defaults" :maxDepth="10" />
 
 ## Security Object
-The Security Object defines how requests to an API version authenticate. The router enforces only two of the schemes the parser accepts:
+The Security Object defines how requests to an API version authenticate. The router enforces three of the schemes the parser accepts:
 
 | `type` | Requests to the version's paths | Routes Bondy adds under the version's `base_path` |
 |---|---|---|
 | (empty object) | Served without authentication. | None. |
 | `oauth2` | Require a valid Bondy OAuth2 access token. | The token and revoke paths, `/oauth/jwks`, and a [verify route](#verify-route). |
-| `oidc` | **Refused.** | `/oidc/login`, `/oidc/<provider>/callback`, `/oidc/logout`, and a [verify route](#verify-route). See [OIDC Authentication](/router/concepts/oidc_authentication). |
-
+| `oidc` | Require the realm's OIDC ticket cookie, `bondy_ticket_<realm_uri>`. A request other than `GET`, `HEAD` or `OPTIONS` must also send the value of the `bondy_csrf_<realm_uri>` cookie in `x-csrf-token`. | `/oidc/login`, `/oidc/<provider>/callback`, `/oidc/logout`, and a [verify route](#verify-route). See [OIDC Authentication](/router/concepts/oidc_authentication). |
 | `basic` | **Refused.** | None. |
 | `api_key` | **Refused.** | None. |
 
 Each scheme accepts only the keys listed for it below. The parser refuses any other key, including `scopes`: the gateway checks no OAuth2 scope.
 
-::: danger `basic`, `api_key` and `oidc` do not protect a path
-A specification using one of these schemes loads, but Bondy refuses every request to the version's own paths and logs a warning. It never serves them without authentication. Use `oauth2` to protect an HTTP API. The `oidc` scheme exists to run the browser login flow, whose ticket cookie then authenticates WAMP sessions over the [HTTP transports](/router/concepts/http_transports), or a reverse proxy through the verify route.
+::: danger `basic` and `api_key` do not protect a path
+A specification using one of these schemes loads, but Bondy refuses every request to the version's own paths. It never serves them without authentication. Use `oauth2` or `oidc` to protect an HTTP API.
 :::
+
+An `oidc` path authenticates the cookie the way a WAMP session opened with it authenticates: the realm's `authmethods` must include `cookie`, the ticket's scope must cover the realm, and its issuer must be trusted by the realm. A ticket issued for an identity Bondy does not store takes its roles from the ticket.
 
 ### OAuth2 Authentication
 

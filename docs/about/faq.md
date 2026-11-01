@@ -22,8 +22,6 @@ In general, WAMP differs from other messaging platforms in that it natively (and
 
 As its name implies, Publish & Subscribe offers at most once semantics a.k.a fire-and-forget, whereas other messaging platforms provide stronger message delivery guarantees e.g. at least once and exactly once semantics.
 
-Being an extensible protocol means we can extend the message delivery guarantees and we have plans to do so e.g. at least once.
-
 For a further comparison with other products and technologies we invite you to review the [How is Bondy different](/router/concepts/how_is_bondy_different) section and the [WAMP Compared article](https://wamp-proto.org/comparison.html) in the protocol specification website.
 
 ### How is Bondy different than other WAMP routers?
@@ -36,9 +34,11 @@ See [How is Bondy Different](/router/concepts/how_is_bondy_different) for a full
 
 At its core Bondy implements the Web Application Messaging Protocol (WAMP). Learn why this is important in [Why Bondy](/router/concepts/why_bondy).
 
-However, Bondy was envisioned as a multi-protocol router. Bondy already offers HTTP API Gateway capabilities, allowing to configure a mapping between arbitrary HTTP messages to WAMP messages, covering both RPC and Publish/Subscribe interactions.  Bondy also currently provides a Kafka Bridge, allowing to configure a mapping from WAMP topics to Kafka topics.
+Bondy is also a multi-protocol router:
 
-In the near future, Bondy will incorporate additional protocols and communication patterns, but always maintaining its core capability: being able to offer multiple communication patterns under a single protocol (when using WAMP) and a single networking application platform.
+- The HTTP API Gateway maps arbitrary HTTP messages to WAMP messages, covering both RPC and Publish/Subscribe interactions.
+- The MCP Gateway exposes WAMP procedures as tools to AI agents that speak the Model Context Protocol.
+- The Broker Bridge re-publishes WAMP events to Kafka topics, and sends email through an SMTP relay.
 
 ### How compliant is Bondy to WAMP?
 
@@ -79,9 +79,9 @@ Most data entities in Bondy are resident in memory to reduce latency e.g. routin
 
 ### Can Bondy use an external database for storing its state?
 
-The answer is "not now" for some data entities while "not ever" for some others.
+No. Every Bondy node stores its state in its embedded database.
 
-For example, some data entities could be managed externally, and there are plans to enable that through plugins, e.g. managing user identities in an external LDAP or database. But for others, doing so would undermine the architectural trade-offs that justify Bondy's current design — see the previous answer.
+Some data entities, such as user identities, could in principle live in an external LDAP directory or database. For others, an external store would undermine the architectural trade-offs that justify Bondy's design — see the previous answer.
 
 ## License
 
@@ -95,7 +95,7 @@ Yes. See [How is Bondy licensed?](#how-is-bondy-licensed).
 
 ### How is Bondy licensed?
 
-Bondy is licensed under the Apache License 2.0; review a copy of the license [here](https://github.com/bondy-io/bondy/blob/develop/LICENSE).
+Bondy is licensed under the Apache License 2.0; review a copy of the license [here](https://github.com/bondy-io/bondy-connect/blob/develop/LICENSE).
 
 ### How is this documentation licensed?
 

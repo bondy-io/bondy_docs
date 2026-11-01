@@ -28,7 +28,7 @@ related:
 The [Marketplace tutorial](/router/tutorials/getting_started/marketplace)
 builds an auction market out of Python microservices: a **Market** service
 written with [Autobahn|Python](https://github.com/crossbario/autobahn-python)
-registers six WAMP procedures on the `com.market.demo` realm, and bots, a
+registers eight WAMP procedures on the `com.market.demo` realm, and bots, a
 CLI and a web app call them. This tutorial adds one more kind of
 participant: an **AI agent** speaking the
 [Model Context Protocol](https://modelcontextprotocol.io).
@@ -61,7 +61,8 @@ need Python 3 with `autobahn` installed for the loader script in step 2
 
 ## 1. Declare the MCP listener
 
-The demo's Bondy serves WAMP-over-WebSocket on port `18080`. Add an MCP
+Inside its container, the demo's Bondy serves WAMP-over-WebSocket on port
+`18080`, which Docker publishes on the host as `28080`. Add an MCP
 endpoint by declaring listeners in the demo's `bondy.conf`:
 
 ```
@@ -74,6 +75,21 @@ listeners.agents.transport = tcp
 listeners.agents.protocol  = http
 listeners.agents.port      = 18093
 listeners.agents.services  = mcp
+
+security.allow_anonymous_user = on
+```
+
+The agent in step 4 connects without credentials. Docker forwards its
+connection from an address that is not loopback, and under the default
+[`security.allow_anonymous_user = local`](/router/reference/configuration/security)
+Bondy refuses an anonymous session from such an address. The last line
+admits it.
+
+The demo's `docker-compose.yml` publishes only Bondy's default ports. Add
+the MCP port to the `ports` list of the `bondy` service:
+
+```yaml
+            - "28093:18093"
 ```
 
 ::: warning Declare every listener you need
@@ -85,8 +101,9 @@ declaration. See
 [Network Listeners](/router/reference/configuration/listeners).
 :::
 
-Restart the Bondy container. The MCP endpoint for the demo realm is now
-`http://localhost:18093/mcp/realm/com.market.demo`. The default
+Recreate the Bondy container with `docker compose up -d bondy`, so that
+Docker publishes the new port. The MCP endpoint for the demo realm is now
+`http://localhost:28093/mcp/realm/com.market.demo`. The default
 [origin policy](/router/reference/configuration/mcp#listeners.$name.mcp.allowed_origins)
 (`local`) suits a local demo; non-browser agents send no `Origin` header
 and are served regardless.
@@ -157,22 +174,21 @@ keyword arguments, which Python applies to the handler's named parameters
       "realm": "com.market.demo",
       "kind": "procedure",
       "uri": "com.market.item.bid",
-      "description": "Bid on a listed item. The bidder must have joined the market first. Returns true when the bid was accepted (higher than the current price), false otherwise.",
+      "description": "Bid on a listed item under the bidder name that the calling session holds. Returns true when the bid was accepted (higher than the current price), false otherwise.",
       "kwargs_schema": {
         "type": "object",
         "properties": {
           "item_name": { "type": "string" },
-          "bid": { "type": "number" },
-          "bidder_name": { "type": "string" }
+          "bid": { "type": "number" }
         },
-        "required": ["item_name", "bid", "bidder_name"]
+        "required": ["item_name", "bid"]
       }
     },
     {
       "realm": "com.market.demo",
       "kind": "procedure",
       "uri": "com.market.bidder.add",
-      "description": "Join the market as a bidder under a unique name. Returns false when the name is taken.",
+      "description": "Bind a bidder name to the calling session. Returns false when another connected session holds the name.",
       "kwargs_schema": {
         "type": "object",
         "properties": { "name": { "type": "string" } },
@@ -183,11 +199,10 @@ keyword arguments, which Python applies to the handler's named parameters
       "realm": "com.market.demo",
       "kind": "procedure",
       "uri": "com.market.bidder.gone",
-      "description": "Leave the market. Open bids by this bidder are cancelled.",
+      "description": "Release the bidder name that the calling session holds.",
       "kwargs_schema": {
         "type": "object",
-        "properties": { "name": { "type": "string" } },
-        "required": ["name"]
+        "properties": {}
       }
     }
   ]
@@ -196,9 +211,11 @@ keyword arguments, which Python applies to the handler's named parameters
 
 Load it with a few lines of Autobahn — the same library the demo already
 uses. The document is loaded on the **master realm**
-(`com.leapsight.bondy`), which the demo's permissive local configuration
-lets an anonymous session call; a production deployment would use admin
-credentials here.
+(`com.leapsight.bondy`), because loading interface metadata is an
+administrative operation. The demo's security configuration lets an
+anonymous session call it, and the `security.allow_anonymous_user = on`
+line from step 1 admits the script's connection from the host. A
+production deployment would use admin credentials here.
 
 ```python
 #!/usr/bin/env python3
@@ -207,7 +224,7 @@ import json
 from autobahn.asyncio.component import Component, run
 
 component = Component(
-    transports=[{"url": "ws://localhost:18080/ws"}],
+    transports=[{"url": "ws://localhost:28080/ws"}],
     realm="com.leapsight.bondy",
 )
 
@@ -240,7 +257,7 @@ wamp.reflection.procedure.list()
 
 The **overlay** is the explicit act of exposing procedures to agents:
 under the default curated mode, exactly the entries it names exist — so
-this is where you decide that agents may see all six market procedures,
+this is where you decide that agents may see the six procedures described in step 2,
 or only some. It is also where tools get agent-friendly names. It is
 managed exactly like the interface document: a JSON file loaded over
 WAMP, through [`bondy.mcp.overlay.load`](/router/reference/wamp_api/mcp).
@@ -288,7 +305,7 @@ tools, and an overlay entry claiming one replaces it — agents see
 Point any MCP client at:
 
 ```
-http://localhost:18093/mcp/realm/com.market.demo
+http://localhost:28093/mcp/realm/com.market.demo
 ```
 
 Both generations of the official TypeScript SDK work against the endpoint
@@ -304,13 +321,21 @@ descriptions and schemas from step 2 — which is exactly what an LLM needs
 to plan calls. A typical agent
 exchange:
 
-1. `join_market` with `{"name": "claude"}` — registers the agent as a
-   bidder (`market.py`'s `_on_new_bidder` runs, same as for any bot).
+1. `join_market` with `{"name": "claude"}` — binds the bidder name to the
+   agent's WAMP session (`market.py`'s `_on_new_bidder` runs, same as for
+   any bot).
 2. `list_items` — the agent reads the current offers.
-3. `place_bid` with
-   `{"item_name": "bike", "bid": 45.0, "bidder_name": "claude"}` — a
-   `true` result means the bid was accepted, and every other participant
-   sees the `com.market.item.new_price` event exactly as before.
+3. `place_bid` with `{"item_name": "bike", "bid": 45.0}` — the market
+   reads the bidder name from the caller's session. A `true` result means
+   the bid was accepted, and every other participant sees the
+   `com.market.item.new_price` event exactly as before.
+
+::: warning A `2026-07-28` request has its own session
+Bondy serves each `2026-07-28` request in a WAMP session that it does not
+keep past the response. The market releases a bidder name when its session
+ends, so a name that `join_market` claims in one such request is gone
+before `place_bid` runs, and `place_bid` returns `false`.
+:::
 
 If a tool call answers a "no such procedure" error, the catalogue is fine
 and the market service is simply not connected — the manifest declares the
@@ -319,9 +344,10 @@ surface, the registry decides liveness.
 ## What you built
 
 One listener declaration and two JSON documents — one describing, one
-exposing — turned a two-year-old Autobahn|Python microservice into an MCP
+exposing — turned an existing Autobahn|Python microservice into an MCP
 server — with Bondy's RBAC in front of every tool call (the demo grants
-anonymous callers everything; a real deployment would grant an agent
+anonymous callers `wamp.call` and `wamp.subscribe` on the `com.market.`
+prefix; a real deployment would grant an agent
 principal `wamp.call` on exactly the procedures it should see, and the
 agent's `tools/list` would shrink to match). The same pattern applies to
 any WAMP microservice in any language: describe it once, and both

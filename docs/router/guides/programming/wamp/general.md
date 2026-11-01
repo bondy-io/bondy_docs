@@ -32,10 +32,12 @@ Every session's lifecycle is observable by any other session on the same realm, 
 await self._session.subscribe(self.on_session_join, "wamp.session.on_join")
 await self._session.subscribe(self.on_session_leave, "wamp.session.on_leave")
 
-def on_session_join(session):
+# Bondy also sends the keyword argument session_guid,
+# so each handler accepts **kwargs.
+def on_session_join(self, session, **kwargs):
     print("Session joined:", session["session"])
 
-def on_session_leave(session_id, authid, authrole):
+def on_session_leave(self, session_id, authid, authrole, **kwargs):
     print("Session left:", session_id, authid, authrole)
 
 # Retrieve this session's own details

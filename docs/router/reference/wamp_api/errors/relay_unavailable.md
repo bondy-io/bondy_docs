@@ -2,9 +2,7 @@
 When the relay could not be reached.
 
 ## Description
-Bondy could not establish a usable connection to the relay: the connection was refused, timed out, or the TLS handshake failed.
-
-A TLS handshake failure is transient rather than permanent on purpose — a certificate chain being rotated is a temporary condition, and the relay may verify on the next attempt.
+Bondy raises this error when the last delivery attempt failed with a network failure, for example a refused connection. It also raises this error when no delivery worker of the relay is running, for example while the worker restarts. A timeout gives `bondy.error.request_timeout` instead.
 
 Repeated transient failures mark the relay down and raise the `mail_relay_down` alarm; see `mail.relay.$name.health.failure_threshold` in the [Mail Configuration Reference](/router/reference/configuration/mail).
 
@@ -24,12 +22,18 @@ Repeated transient failures mark the relay down and raise the `mail_relay_down` 
 />
 
 ##### Keyword Results
+The standard [error payload](/router/reference/errors#the-error-payload).
+
 <DataTreeView
 	:maxDepth="10"
 	:data="JSON.stringify({
-        'relay': {
+        'code': {
             'type': 'string',
-            'description': 'The configured NAME of the relay. Never its hostname, username or credential.'
+            'description': 'relay_unavailable'
+        },
+        'details': {
+            'type': 'object',
+            'description': 'Empty. The error names no relay.'
         }
 	})"
 />

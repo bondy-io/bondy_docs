@@ -123,7 +123,7 @@ HTTP Client                     Bondy API Gateway                    WAMP Servic
 
 ## Action Types
 
-The API Gateway supports three types of actions:
+The API Gateway supports four types of actions: `wamp_call`, `wamp_publish`, `static` and `forward`. This section shows `wamp_call`, `static` and `forward`; the [Specification Reference](/router/reference/api_gateway/specification) describes all four.
 
 ### WAMP Action
 
@@ -205,7 +205,7 @@ Provides OAuth2 token endpoints (token issuance and revocation) and protects API
 
 ### OIDC
 
-Integrates with external Identity Providers via [OpenID Connect](/router/concepts/oidc_authentication). It registers login, callback, logout and verify endpoints, and the login flow ends with a ticket cookie that authenticates WAMP sessions over the HTTP transports. It does not protect the version's own paths: Bondy refuses every request to them. To protect an HTTP API, use `oauth2`.
+Integrates with external Identity Providers via [OpenID Connect](/router/concepts/oidc_authentication). It registers login, callback, logout and verify endpoints, and the login flow ends with a ticket cookie that authenticates WAMP sessions over the HTTP transports. The version's own paths require that cookie, and a request other than `GET`, `HEAD` or `OPTIONS` must also send its CSRF token in `x-csrf-token`. See the [Security Object](/router/reference/api_gateway/specification#security-object).
 
 ```json
 {
@@ -228,6 +228,7 @@ API specifications are loaded, inspected, and deleted via the [Admin HTTP API](/
 | Load a spec | POST | `/api_specs` |
 | List all specs | GET | `/api_specs` |
 | Get a spec | GET | `/api_specs/:id` |
+| Delete a spec | DELETE | `/api_specs/:id` |
 
 ::: tip Cluster Deployments
 APIs are replicated, synchronised, and activated across the cluster automatically, so that each node serves all the defined APIs.

@@ -37,7 +37,7 @@ Bondy can accumulate a large number of open file handles during operation — th
 
 On most Linux distributions, the total limit for open files is controlled by `sysctl`.
 
-If you installed Bondy from a binary package, add the following settings to the `/etc/security/limits.conf` file for the `bondy` user:
+If Bondy runs as the `bondy` user, add the following settings to the `/etc/security/limits.conf` file:
 
 ```bash
 bondy soft nofile 65536

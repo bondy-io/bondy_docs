@@ -14,7 +14,7 @@ Bondy can write a logical export of its durable data — realms and their keys, 
 An export includes realm records and their key material, along with users, credentials, tickets and tokens. Store and transfer the file as you would the secrets themselves. Only the legacy pre-1.0.0 format skips realm records on import.
 :::
 
-`bondy.export.*` is the current API. The older `bondy.backup.*` procedures (`create`, `status`, `restore`) still work — they are deprecated aliases dispatching to the exact same operations — but new integrations should use `bondy.export.*`. An import also transparently reads the legacy file format written by the former `bondy_backup` module, translating what it can (users, groups, grants, sources, API Gateway specs, OAuth refresh tokens) and skipping the rest (realm records, the long-dead `security_status` flag) without misapplying it.
+`bondy.export.*` is the current API. The older `bondy.backup.*` procedures (`create`, `status`, `restore`) still work — they are deprecated aliases dispatching to the exact same operations. Use `bondy.export.*` in new integrations. An import also transparently reads the legacy file format written by the former `bondy_backup` module, translating what it can (users, groups, grants, sources, API Gateway specs, OAuth refresh tokens) and skipping the rest (realm records, the long-dead `security_status` flag) without misapplying it.
 
 ::: warning AUTHORIZATION
 Only available to sessions attached to the **Master Realm**. Unlike most `bondy.*` admin procedures, these don't take a realm URI as their first argument — export and import act on the whole node, not one realm, so there is nothing to authorize per-realm against.
@@ -65,7 +65,7 @@ None.
 None.
 
 #### Errors
-Raises `bondy.error.export_in_progress` or `bondy.error.import_in_progress` if another export or import is already running — only one runs at a time, node-wide. Raises `bondy.error.missing_required_value` if `path` is absent.
+Raises `bondy.error.internal_error` if another export or import is already running: only one runs at a time, node-wide. The error does not name the running operation. Call [`bondy.export.status`](#check-status) with `{}` to read it. Raises `bondy.error.missing_required_value` if `path` is absent.
 
 ### Check status
 ##### bondy.export.status(info) -> status {.wamp-procedure}
@@ -103,7 +103,7 @@ None.
 
 Three shapes, depending on what was asked:
 
-- **Called with `{}`** — returns the bare node-wide status: the string `export_in_progress`, `import_in_progress`, or `undefined` (idle, nothing running).
+- **Called with `{}`** — returns the bare node-wide status: the string `export_in_progress` or `import_in_progress`, or `null` when nothing runs.
 - **Called with the `filename` of the operation currently running** — returns `{status, elapsed_time_secs}`, `status` being whichever of the two in-progress values applies.
 - **Called with any other `filename`** (including one whose export or import has already finished) — reads that file's own header directly: `{filename, format, vsn, node, mod_vsn, timestamp, status, bad_bytes}`, where this `status` is `ok`, `invalid_format`, `corrupt`, or `blocked` (the file's own integrity, not an in-progress state), and `recovered` is present when the log driver had to repair the file's tail on open.
 
@@ -149,7 +149,7 @@ None.
 None.
 
 #### Errors
-Raises `bondy.error.export_in_progress` or `bondy.error.import_in_progress` if another export or import is already running. Raises `bondy.error.missing_required_value` if `filename` is absent. Bondy replies before it opens the file, so a file that does not exist or cannot be read is not reported by this call: the import fails afterwards, and [`bondy.export.import_failed`](#topics) is published.
+Raises `bondy.error.internal_error` if another export or import is already running. Raises `bondy.error.missing_required_value` if `filename` is absent. Bondy replies before it opens the file, so a file that does not exist or cannot be read is not reported by this call: the import fails afterwards, and [`bondy.export.import_failed`](#topics) is published.
 
 ## Topics
 Bondy publishes these on the Master Realm as an export or import runs. Each carries only the filename — no elapsed time, record counts, or failure reason — so treat them as a notification to go check [`bondy.export.status`](#check-status) or the node's logs, not as the source of that detail.

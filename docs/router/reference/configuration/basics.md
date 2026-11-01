@@ -30,10 +30,11 @@ Bondy will use the following environment variables to configure the node identit
 |---|---|---|
 |`BONDY_ERL_NODENAME`|Name of the Bondy node.|`bondy`|
 |`BONDY_ERL_DISTRIBUTED_COOKIE`|Erlang distributed cookie to be used to connect a remote shell to a Bondy node|`bondy`|
-|`BONDY_ETC_DIR`|The directory where the `bondy.conf` will be located. The host should Bondy executable to READ and WRITE files on this directory|See [File Location](#file-location) section below|
+|`BONDY_ETC_DIR`|The directory that holds `bondy.conf`. The Bondy process needs read and write access to this directory.|See [File Location](#file-location) section below|
 |`BONDY_DATA_DIR`|The directory where Bondy will store its embedded database. Check the relevant requirements in the [Operating System Configuration](#operating-system-configuration) section below|`./data`|
 |`BONDY_LOG_DIR`|The directory where Bondy will write any defined logs|`./log`|
 |`BONDY_TMP_DIR`|The directory where Bondy will store any temporary data|`./tmp`|
+|`BONDY_RUNTIME_DIR`|The directory for runtime objects that need a filesystem with Unix domain socket support. It holds the internal admin socket. See [`platform_runtime_dir`](/router/reference/configuration/node#platform_runtime_dir).|`./run`|
 
 :::info Notice
 In previous version of Bondy these options where configured using the `bondy.conf` file but that introduced certain issues with the configuration system.
@@ -59,7 +60,7 @@ The default file location depends on the installation method you've used as show
 |Installation method|Default Location|
 |:---|:---|
 |Source tarball|`/etc/bondy.conf`|
-|[Official Docker image](https://hub.docker.com/r/leapsight/bondy)|`/bondy/etc/bondy.conf`|
+|[Official Docker image](https://hub.docker.com/r/leapsight/bondy-connect)|`/bondy/etc/bondy.conf`|
 
 The location can be overridden using the `BONDY_ETC_DIR` environment variable.
 
@@ -86,15 +87,14 @@ The following are the set of acceptable datatypes used in the documentation.
 |`bytesize()`|Work pretty much like duration but with three differences.<br>The units are `MB`, `KB` and `GB`<br>If not unit is specified, the value defaults to bytes<br>You can only use one unit.<br> Lowercase units (i.e. `gb`, `mb`, and `kb`) are ok, but mixed case are not. That's to avoid confusion with Megabits|`1KB`|
 |`flag()`|Equivalent to a boolean value| `on` \| `off`|
 |`time_duration_units()`|Durations are fixed intervals of time, the largest unit of which will be a one week. Anything larger will have to be expressed in terms of weeks, since larger units (month, year) are of variable duration. The following units are supported:<br>- `f`: fortnight<br>- `w`: week<br>- `d`: day<br>- `h`: hour<br>- `m`: minute<br>- `s`: second<br>- `ms`: millisecond<br>You can use any combination of these. | `1w2d`|
-|`ip()`|The IP datatype exists currently as an IP/Port combo|`127.0.0.1:8098`|
-|`path()`|file and directory are effectively strings. In the future they could allow for included validators like valid path and exists. Some files may need to exist, some may not. some may need to be writable.|`$(platform_etc_dir)/`<br>`cacert.pem`|
+|`ip()`|An IP address and port pair|`127.0.0.1:8098`|
+|`path()`|A file or directory path. The configuration system reads it as a string and does not check that the path exists or is writable.|`$(platform_etc_dir)/`<br>`cacert.pem`|
 
 
 #### Example
 
 ```text [bondy.conf]
-nodename = bondy@127.0.0.1
-distributed_cookie = bondy
+cluster.enabled = off
 security.allow_anonymous_user = off
 ```
 
@@ -106,7 +106,7 @@ For every option not provided by your configuration, Bondy might define a defaul
 
 Take the following snippet of the [Cluster section](/router/reference/configuration/cluster) as an example.
 
-@[config](cluster.peer_port,integer,18086,v0.8.8)
+@[config](cluster.peer_port,integer,18086,v0.8.5)
 
 <br>It defines the key `cluster.peer_port`, which takes an `integer` value and defaults to `18086`. The entry's description then states which values are acceptable.
 :::
@@ -144,8 +144,6 @@ Notice the `BONDY_*` variables mentioned above will always be used by Bondy.
 
 
 ```text [bondy.conf.template]
-nodename = ${BONDY_NODENAME}
-distributed_cookie = bondy
 security.allow_anonymous_user = off
 security.config_file = ${BONDY_SECURITY_CONF_FILE}
 ```

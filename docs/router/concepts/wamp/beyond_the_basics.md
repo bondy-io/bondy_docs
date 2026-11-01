@@ -473,10 +473,11 @@ wampy.register('com.myapp.restricted.operation', {
         // Log for audit purposes
 
         return performOperation(args, kwargs);
-    },
-    disclose_caller: true  // Request caller disclosure
+    }
 });
 ```
+
+Bondy discloses the caller by default. It omits the caller only when the registration sets `disclose_caller: false` and the call sets `disclose_me: false`. See [Caller Identification](/router/concepts/wamp/advanced/rpc#caller-identification).
 
 Useful for:
 - Audit logging
@@ -494,10 +495,11 @@ wampy.subscribe('com.myapp.events', {
         // details.publisher contains publisher's session ID
         console.log('Published by session:', details.publisher);
         console.log('Event data:', args, kwargs);
-    },
-    get_publisher: true  // Request publisher disclosure
+    }
 });
 ```
+
+The subscriber does not ask for this information. Bondy discloses the publisher unless the publisher sets `disclose_me: false`. See [Publisher Identification](/router/concepts/wamp/advanced/pubsub#publisher-identification).
 
 ## Best Practices
 
@@ -536,7 +538,7 @@ Track key metrics:
 - Load distribution across instances
 - Error rates and types
 
-Use WAMP meta events to build monitoring:
+Use WAMP meta events to build monitoring. Bondy publishes `wamp.registration.on_register` and `wamp.registration.on_unregister`, but not `on_create` or `on_delete`:
 
 ```javascript
 // Subscribe to registration changes
@@ -591,5 +593,5 @@ WAMP's beyond-the-basics features enable production-ready distributed systems:
 These capabilities are built into the protocol — Bondy provides all of them without a separate load balancer, service registry, or other external infrastructure.
 
 Explore the deep dives for more details:
-- [Advanced RPC](/router/concepts/wamp/advanced/rpc) - Progressive calls, cancellation, trust levels
-- [Advanced PubSub](/router/concepts/wamp/advanced/pubsub) - Event history, retention, sharding
+- [Advanced RPC](/router/concepts/wamp/advanced/rpc) - Progressive calls, cancellation, call retries
+- [Advanced PubSub](/router/concepts/wamp/advanced/pubsub) - Event retention, subscriber lists, Payload Passthru Mode

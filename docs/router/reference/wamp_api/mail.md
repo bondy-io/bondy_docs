@@ -31,7 +31,7 @@ So the two shapes below are equivalent for an ordinary session, and the second
 is what you write:
 
 ```erlang
-bondy.mail.send("com.acme.app", Request)   % explicit; must match the session
+bondy.mail.send("com.acme.app", Request)   % explicit; the session's own realm
 bondy.mail.send(Request)                   % realm taken from the session
 ```
 
@@ -62,7 +62,7 @@ and whether it may claim the sender it asked for
         'relay': {
             'type': 'string',
             'required': false,
-            'description': 'Relay name. Defaults to mail.default_relay. Must be a relay the calling realm is permitted to use.'
+            'description': 'Relay name. Defaults to mail.default_relay. Bondy refuses a relay the calling realm may not use.'
         },
         'from': {
             'type': 'string',
@@ -128,8 +128,8 @@ and whether it may claim the sender it asked for
 />
 
 **Unknown keys are rejected, not ignored.** A misspelled `subjcet` produces
-[`bondy.error.invalid_data`](/router/reference/wamp_api/errors/invalid_data) rather
-than an email with no subject.
+[`bondy.error.invalid_request`](/router/reference/errors#client-and-request), whose
+`details.keys` names the unknown keys, rather than an email with no subject.
 
 ## Procedures
 
@@ -146,7 +146,7 @@ Send a message and wait until the relay has taken responsibility for it.
         0: {
             'type': 'string',
             'required': false,
-            'description': 'The realm uri. Supplied from the session when absent; must equal the session realm when present.'
+            'description': 'The realm uri. Supplied from the session when absent. When present, it is the session realm, or the session is in the master realm.'
         },
         1: {
             'type': 'map',
@@ -400,8 +400,9 @@ None.
 Other errors a mail call can raise, all of them in the
 [Error Reference](/router/reference/errors):
 
-- [`bondy.error.invalid_data`](/router/reference/wamp_api/errors/invalid_data) —
-  a malformed request, or a key the request contract does not recognise.
+- [`bondy.error.invalid_request`](/router/reference/errors#client-and-request) —
+  a malformed request, a refused header, or a key the request contract does
+  not recognise. Permanent.
 - `bondy.error.too_large_payload` — the message, or its recipient count,
   exceeds what the relay accepts. Permanent.
 - `bondy.error.rate_limit_exceeded` — the relay's rate limit refused it.

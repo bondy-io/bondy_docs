@@ -22,6 +22,10 @@ Bondy raises this error instead of `wamp.error.no_such_procedure` for a reserved
         'message': {
             'type': 'string',
             'description': 'The error message'
+        },
+        'details': {
+            'type': 'object',
+            'description': 'Holds procedure_uri, the URI that the caller called. procedure_uri also appears at the top level.'
         }
 	})"
 />

@@ -3,7 +3,7 @@ When the resource that you're trying to create already exists.
 
 ## Description
 Normally this is caused by an operation trying to create a resource with an identifier that is already in use.
-The error is raised when you're trying to created a "duplicated" resource such as realm or user or even according to the provided policies, a registration or subscription.
+Bondy raises the error when a request creates a resource that already exists, such as a realm, a user, a group or a user alias.
 
 ##### Positional Results
 <DataTreeView

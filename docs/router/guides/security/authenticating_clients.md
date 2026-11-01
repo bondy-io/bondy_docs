@@ -55,7 +55,7 @@ Choose one password method:
 - **`wampcra`.** List `wampcra`, as above.
 - **`wamp-scram`.** List `wamp-scram` in place of `wampcra`.
 
-Bondy hashes a password for one protocol, and each method accepts only its own: `wampcra` needs a CRA password, and `wamp-scram` needs a SCRAM password. The realm picks the protocol for new passwords from its `authmethods`. When the list includes `wamp-scram`, new passwords are hashed for SCRAM. Otherwise Bondy uses the `security.password.protocol` setting, which defaults to `cra`. Passwords set before you change `authmethods` keep their protocol. Set them again with [`bondy.user.update`](/router/reference/wamp_api/user#update-a-user-in-a-realm) to switch them over.
+Bondy hashes a password for one protocol, and each method accepts only its own: `wampcra` needs a CRA password, and `wamp-scram` needs a SCRAM password. The realm picks the protocol for new passwords from its `authmethods`. When the list includes `wamp-scram`, new passwords are hashed for SCRAM. Otherwise Bondy uses the `security.password.protocol` setting, which defaults to `cra`. Passwords set before you change `authmethods` keep their protocol. To switch a password over, set it again with `bondy.user.change_password`, passing the realm URI, the username and the new password. `bondy.user.update` does not change a password. See [User](/router/reference/wamp_api/user).
 
 Leave out the other methods unless your clients need them:
 
@@ -267,7 +267,7 @@ To authenticate with the ticket, the client sends `HELLO` with:
 {"authmethods": ["ticket"], "authid": "alice"}
 ```
 
-Bondy replies with `CHALLENGE`, and the client answers with `AUTHENTICATE`, putting the `ticket` string in the signature field. The `authid` must be the user the ticket was issued to. Present tickets only over TLS: anyone who reads one can use it until it expires.
+Bondy replies with `CHALLENGE`, and the client answers with `AUTHENTICATE`, putting the `ticket` string in the signature field. The `authid` has to be the user the ticket was issued to. Present tickets only over TLS: anyone who reads one can use it until it expires.
 
 Verify as in step 6. `bondy.session.self` now reports `"authmethod": "ticket"`.
 

@@ -2,7 +2,7 @@
 When the data values are invalid.
 
 ## Description
-Normally this is caused when there are request or input data validation failures.
+Bondy raises this error when a request fails validation on more than one property. `errors` holds one entry for each failure. Bondy also raises this error when it cannot decode request data in its declared format. In that case, `details.format` names the format.
 
 ##### Positional Results
 <DataTreeView
@@ -67,28 +67,43 @@ Normally this is caused when there are request or input data validation failures
 
 ```json
 {
-    "code":"invalid_data",
-    "description":"There were 3 validation errors.",
-    "errors":[
+    "uri": "bondy.error.invalid_data",
+    "code": "invalid_data",
+    "handle": "C014",
+    "nature": "permanent",
+    "message": "Invalid data.",
+    "description": "There were 2 validation errors.",
+    "details": {
+        "errors": [
+            {
+                "code": "missing_required_value",
+                "description": "A value for 'roles' is required.",
+                "key": "roles",
+                "message": "Missing required value."
+            },
+            {
+                "code": "missing_required_value",
+                "description": "A value for 'permissions' is required.",
+                "key": "permissions",
+                "message": "Missing required value."
+            }
+        ]
+    },
+    "errors": [
         {
-            "code":"missing_required_value",
-            "description":"A value for 'uri' is required.",
-            "key":"uri",
-            "message":"Missing required value."
+            "code": "missing_required_value",
+            "description": "A value for 'roles' is required.",
+            "key": "roles",
+            "message": "Missing required value."
         },
         {
-            "code":"missing_required_value",
-            "description":"A value for 'roles' is required.",
-            "key":"roles",
-            "message":"Missing required value."
-        },
-        {
-            "code":"missing_required_value",
-            "description":"A value for 'permissions' is required.",
-            "key":"permissions",
-            "message":"Missing required value"
-        },
-        "message":"Invalid data."
-    ]
+            "code": "missing_required_value",
+            "description": "A value for 'permissions' is required.",
+            "key": "permissions",
+            "message": "Missing required value."
+        }
+    ],
+    "causes": [],
+    "doc_uri": "/errors/C014"
 }
 ```

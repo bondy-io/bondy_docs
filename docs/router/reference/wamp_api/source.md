@@ -7,7 +7,7 @@ Source is an access control rule used to restrict access based for a user based 
 ## Description
 While user management enables you to control authorization with regard to users, security sources provide you with an interface for managing means of authentication. If you create users and grant them access to some or all of Bondy's functionality, you will then need to define security sources required for authentication.
 
-Sources are used to define authentication mechanisms. A user cannot be authenticated to Bondy until on or more sources are assigned to it.
+Sources are used to define authentication mechanisms. A user cannot be authenticated to Bondy until one or more sources are assigned to it.
 
 Bondy security sources may be applied to a specific user, multiple users, or all users (using the keyword `all`).
 
@@ -98,13 +98,13 @@ The representation of the source returned by the read or write operations e.g. `
 |[List all sources from a realm](#list-all-sources-from-a-realm)|`bondy.source.list`|
 |[Find sources from a realm](#find-sources-from-a-realm)|`bondy.source.match`|
 
+Bondy does not publish an event when a source is added or removed.
+
 ## Creating and removing
 
 ### Add a source to a realm
 #### bondy.source.add(realm_uri(), input_data()) -> source() {.wamp-procedure}
 Creates a new source and adds it to the provided realm uri. This operation is **idempotent** and also works as an update.
-
-Publishes an event under topic [bondy.source.added](#bondy-source-added){.uri} after the source has been created.
 
 #### Call
 
@@ -125,10 +125,10 @@ None.
 #### Errors
 
 * [bondy.error.missing_required_value](/router/reference/wamp_api/errors/missing_required_value): when a required value is not provided
-* [bondy.error.invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype): when the data type is invalid
+* [bondy.error.unknown_error](/router/reference/wamp_api/errors/unknown_error) with `code` `invalid_datatype`: when the data type is invalid. See [invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype).
 * [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the data value is invalid
 * [bondy.error.invalid_data](/router/reference/wamp_api/errors/invalid_data): when the data values are invalid.
-* [bondy.error.no_such_users](/router/reference/wamp_api/errors/no_such_users): when any of the provided usernames doesn't exist.
+* [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when any of the provided usernames doesn't exist. Bondy 1.0.0 returns this URI in place of [`bondy.error.no_such_users`](/router/reference/wamp_api/errors/no_such_users).
 * [bondy.error.not_found](/router/reference/wamp_api/errors/not_found): when the provided realm uri is not found.
 
 #### Examples
@@ -159,10 +159,8 @@ call bondy.source.add \
 :::
 
 ### Remove a source from a realm
-#### bondy.source.delete(realm_uri(), [username()] | all | anonymous, cidr()) -> source() {.wamp-procedure}
+#### bondy.source.delete(realm_uri(), [username()] | all | anonymous, cidr()) {.wamp-procedure}
 Removes an existing source from the provided realm uri.
-
-Publishes an event under topic [bondy.source.deleted](#bondy-source-deleted){.uri} after the source has been removed.
 
 #### Call
 
@@ -408,20 +406,6 @@ call bondy.source.match "com.leapsight.test_creation_1" "user_1" | jq
 ```
 :::
 
-## Topics
-
-::: warning Not Yet Implemented
-The following topics are not currently implemented. Bondy does not publish events for source lifecycle changes at this time.
-
-Future releases may include these events to allow applications to react to source configuration changes in real-time.
-:::
-
-#### bondy.source.added{.wamp-topic}
-This topic would be published when a new source is added to a realm.
-
-#### bondy.source.deleted{.wamp-topic}
-This topic would be published when a source is deleted from a realm.
-
 <script>
 const sourceData = {
 	"usernames": {
@@ -467,6 +451,11 @@ export default {
             source: JSON.stringify(source),
 			createArgs: JSON.stringify({
 				0: {
+					"type": "string",
+					"required": true,
+					"description": "The URI of the realm you want to add the source to."
+				},
+				1: {
 					"type": "object",
 					"description": "The source configuration data",
 					"mutable": true,

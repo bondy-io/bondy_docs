@@ -42,6 +42,7 @@ A specification that fails validation answers with the error as the JSON body, w
 | Error | Status |
 |---|---|
 | `bondy.error.missing_required_value` | `400` |
+| `wamp.error.invalid_argument` | `400` |
 | `bondy.error.invalid_value` | `400` |
 | `bondy.error.http_gateway.invalid_expression` | `500` |
 | `bondy.error.internal_error` | `500` |
@@ -52,7 +53,7 @@ The [load errors](/router/reference/wamp_api/api_gateway#load-an-api-spec) say w
 
 `GET /api_specs/:id` answers with the stored specification. `GET /api_specs` answers with an array of every stored specification.
 
-`GET /api_specs/:id/info` answers with a summary of the stored specification: the properties `id`, `name`, `host` and `realm_uri`, and `meta` when the specification has it, without the versions and paths.
+`GET /api_specs/:id/info` answers with a summary of the stored specification: the properties `id`, `name`, `host` and `realm_uri`, and `meta` and `ts` when the specification has them. The summary leaves out the versions and paths.
 
 ```bash
 curl "http://localhost:18081/api_specs/com.market.demo/info"

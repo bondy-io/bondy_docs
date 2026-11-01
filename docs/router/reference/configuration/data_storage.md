@@ -361,17 +361,17 @@ In each case the value and its meaning are unchanged — only the key name moved
 
 ### Removed
 
-These keys have no replacement. Setting them in a pre-1.0.0-rc.65 `bondy.conf` did nothing in any released version; they are listed here only so their disappearance isn't mistaken for an oversight.
+These keys have no replacement. A 1.0.0 node ignores each of them without reporting it, because the release generates its configuration with `cuttlefish --allow_extra`. They are listed here so that their disappearance is not mistaken for an oversight.
 
 @[configRemoved](oplog.catalog,Never had a consumer,v1.0.0)
 
 @[configRemoved](oplog.core.scan_max_concurrency,Never wired to any code path,v1.0.0)
 
-@[configRemoved](store.*,RocksDB tuning; RocksDB was replaced by leveled,v1.0.0)
+@[configRemoved](store.*,PlumDB and RocksDB tuning; bondy_db on leveled replaced both,v1.0.0)
 
-The `leveled` backend that replaced RocksDB has its own tuning keys, `db.leveled.*` (see [Storage Engine (leveled)](#storage-engine-leveled)), which are not one-to-one replacements for `store.*`.
+In 1.0.0-rc.65 and earlier, the `store.*` keys configured PlumDB and its RocksDB backend. The `leveled` backend that replaced RocksDB has its own tuning keys, `db.leveled.*` (see [Storage Engine (leveled)](#storage-engine-leveled)), which are not one-to-one replacements for `store.*`.
 
-One removed key differs from those above: it took effect in the 1.0.0 pre-releases that carry `bondy_db`.
+The key below took effect only in the 1.0.0 pre-releases that carry `bondy_db`.
 
 @[configRemoved](db.compaction.peer_timeout,Compaction waits for every cluster member and has no timeout,v1.0.0)
 

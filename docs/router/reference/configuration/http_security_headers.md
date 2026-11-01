@@ -165,7 +165,7 @@ certain XSS attacks.
 
 The value for the `Content-Security-Policy` header — a defence-in-depth
 mechanism against XSS and data injection that declares which content
-sources the browser should trust. Not emitted by default.
+sources the browser trusts. Not emitted by default.
 
 ```
 listeners.public_http.security_headers.content_security_policy = default-src 'self'; script-src 'self'; frame-ancestors 'none'

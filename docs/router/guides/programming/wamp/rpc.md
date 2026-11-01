@@ -24,6 +24,7 @@ This guide shows the practical, Python side of RPC programming against Bondy —
 ```Python
 import os
 import signal
+import sys
 
 from autobahn.asyncio.component import Component
 from autobahn.asyncio.component import run
@@ -90,7 +91,7 @@ A registration binds a procedure URI to your session on the router; Bondy routes
 
 ## Basic Registrations
 
-Typically, you will place you procedure registration on the session's `on_join` callback, that way as soon as the session has been established your component will register the procedures it offers.
+Typically, you will place your procedure registration on the session's `on_join` callback, that way as soon as the session has been established your component will register the procedures it offers.
 
 In the following snippet we register the procedure `com.example.add` which takes two integers as arguments.
 
@@ -137,7 +138,7 @@ else:
 
 ## Call Timeouts
 
-Pass `timeout` (in seconds) via `CallOptions` to bound how long you'll wait for a result:
+Pass `timeout` in `CallOptions` to bound how long the call can run. Bondy reads `timeout` in milliseconds, as WAMP defines it, and accepts only a non-negative integer. Autobahn|Python sends the value unchanged, so pass milliseconds:
 
 ::: code-group
 ```Python
@@ -146,26 +147,27 @@ from autobahn.wamp.types import CallOptions
 try:
     z = await self._session.call(
         "com.example.add", x, y,
-        options=CallOptions(timeout=5)
+        options=CallOptions(timeout=5000)  # 5 seconds
     )
 except Exception as error:
     print(f"Call timed out or failed: {error.args[0]}")
 ```
 :::
 
-A timed-out call raises `wamp.error.timeout`. This is the client-requested timeout; see [Call Timeout](/router/reference/configuration/wamp#call-timeout) for the node-wide default and maximum Bondy enforces regardless of what a caller requests.
+A timed-out call raises `wamp.error.timeout`. Without `timeout`, Bondy applies the node default; with `timeout=0`, it applies the node maximum. See [Call Timeout](/router/reference/configuration/wamp#call-timeout).
 
 ## Caller Identification
 
-A callee that wants to know who's calling it requests disclosure with `RegisterOptions(details_arg=...)`, reading `details.caller` on invocation; the caller must separately opt in with `CallOptions(disclose_me=True)`, or nothing is disclosed:
+Bondy discloses the caller to the callee by default. To read the caller's identity, register with `RegisterOptions(details_arg=...)` and read `details.caller`, `details.caller_authid` and `details.caller_authrole`:
 
 ::: code-group
 ```Python
-from autobahn.wamp.types import RegisterOptions, CallOptions
+from autobahn.wamp.types import RegisterOptions
 
-# Callee: request caller disclosure and read it
+# Callee: read the caller's identity
 def handle_sensitive_op(x, y, details=None):
     print("Called by session:", details.caller)
+    print("Authenticated as:", details.caller_authid)
     return x + y
 
 self._session.register(
@@ -173,15 +175,12 @@ self._session.register(
     options=RegisterOptions(details_arg="details")
 )
 
-# Caller: consent to being identified
-await self._session.call(
-    "com.example.sensitive_op", x, y,
-    options=CallOptions(disclose_me=True)
-)
+# Caller: no option is needed
+await self._session.call("com.example.sensitive_op", x, y)
 ```
 :::
 
-Both sides must agree — a callee that requests disclosure still sees nothing if the caller didn't set `disclose_me`. See [Caller Identification](/router/concepts/wamp/advanced/rpc#caller-identification) for how Bondy's RBAC can use this for authorization beyond the basic grant check.
+Bondy omits the caller only when the registration sets `disclose_caller` to `false` and the call sets `disclose_me` to `false`. See [Caller Identification](/router/concepts/wamp/advanced/rpc#caller-identification).
 
 ## Progressive Call Results
 
@@ -216,7 +215,7 @@ result = await self._session.call(
 ```
 :::
 
-Bondy always offers this feature, and negotiates it silently — if either side didn't opt in, the callee just sees a plain call and returns once. See [Progressive Call Results](/router/concepts/wamp/advanced/rpc#progressive-call-results) for the cluster-wide ordering and timeout semantics, and the [`bondy_connect` reference](/router/reference/clients/bondy_connect_sdk) for the equivalent Erlang API.
+Bondy always offers this feature and negotiates it silently. The feature is active only when the caller announced `progressive_call_results` and the callee announced both `progressive_call_results` and `call_canceling`. Otherwise the callee sees a plain call and returns once. See [Progressive Call Results](/router/concepts/wamp/advanced/rpc#progressive-call-results) for the cluster-wide ordering and timeout semantics, and the [`bondy_connect` reference](/router/reference/clients/bondy_connect_sdk) for the equivalent Erlang API.
 
 ## Pattern-based Registrations
 
@@ -277,8 +276,8 @@ await self._session.subscribe(
     on_unregistered, "wamp.registration.on_unregister"
 )
 
-# Look up who currently serves a procedure
-info = await self._session.call("wamp.registration.match", "com.example.users.get")
+# Find the registration that serves calls to a procedure URI
+reg_id = await self._session.call("wamp.registration.match", "com.example.users.get")
 ```
 :::
 

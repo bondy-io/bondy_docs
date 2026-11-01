@@ -33,7 +33,7 @@ A token request authenticates the resource owner, and the API client, with the `
 1. One for `oauth2`, used when the token is presented
 2. One for `password`, used when the token is requested
 
-Every token, refresh and revoke request also carries the API client's credentials as `Authorization: Basic`, and a revoke request must name the token type in `token_type_hint`. See [Protecting an HTTP API with OAuth2](/router/guides/security/protecting_an_http_api) for complete requests.
+Every token, refresh and revoke request also carries the API client's credentials as `Authorization: Basic`, and a revoke request names the token type in `token_type_hint`. See [Protecting an HTTP API with OAuth2](/router/guides/security/protecting_an_http_api) for complete requests.
 
 ## HTTP Endpoints
 
@@ -45,12 +45,15 @@ OAuth2 tokens are managed through the following HTTP endpoints:
 - **Methods**: POST
 - **Grant Types Supported**:
   - `password` - Resource Owner Password Credentials flow
+  - `client_credentials` - Client Credentials flow
   - `refresh_token` - Token refresh flow
 
 ### Revoke Endpoint
 - **Default Path**: `/oauth/revoke`
-- **Purpose**: Revoke an existing OAuth2 token
+- **Purpose**: Revoke an existing OAuth2 refresh token
 - **Methods**: POST
+
+The endpoint revokes refresh tokens only. A request with `token_type_hint=access_token` gets a `200` response and revokes nothing. An access token stays valid until it expires.
 
 ## Configuration
 
@@ -96,6 +99,7 @@ curl --location --request GET 'http://localhost:18080/api/resource' \
 ```bash
 curl --location --request POST 'http://localhost:18080/oauth/token' \
   --header 'Content-Type: application/x-www-form-urlencoded' \
+  --header 'Authorization: Basic <base64_encoded_client_credentials>' \
   --data-urlencode 'refresh_token=<refresh_token>' \
   --data-urlencode 'grant_type=refresh_token'
 ```
@@ -105,7 +109,9 @@ curl --location --request POST 'http://localhost:18080/oauth/token' \
 ```bash
 curl --location --request POST 'http://localhost:18080/oauth/revoke' \
   --header 'Content-Type: application/x-www-form-urlencoded' \
-  --data-urlencode 'token=<access_token>'
+  --header 'Authorization: Basic <base64_encoded_client_credentials>' \
+  --data-urlencode 'token=<refresh_token>' \
+  --data-urlencode 'token_type_hint=refresh_token'
 ```
 
 ## Token Structure
@@ -122,7 +128,6 @@ The tokens are cryptographically signed and can be verified by the HTTP API Gate
 2. **Token Storage**: Store tokens securely on the client side
 3. **Token Expiration**: Tokens have a configurable expiration time; implement token refresh logic
 4. **Token Revocation**: Implement token revocation for logout and security incidents
-5. **Scope Limitation**: Request only the scopes your application needs
 
 ## See Also
 

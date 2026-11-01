@@ -1,35 +1,7 @@
 # bondy.error.unknown_group
-When the group that you're trying to retrieve doesn't exist.
+Bondy 1.0.0 does not return this error URI.
 
 ## Description
-Normally this is caused by an operation trying to retrieve a group that not exist.
+The condition is a group operation, such as [`bondy.group.update`](/router/reference/wamp_api/group) or [`bondy.group.delete`](/router/reference/wamp_api/group), on a group that does not exist in the realm.
 
-##### Positional Results
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-        0: {
-            'type': 'string',
-            'description': 'The error message'
-        }
-	})"
-/>
-
-##### Keyword Results
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-        'code': {
-            'type': 'string',
-            'description': 'unknown_group'
-        },
-        'description': {
-            'type': 'string',
-            'description': 'The error description'
-        },
-        'message': {
-            'type': 'string',
-            'description': 'The error message'
-        }
-	})"
-/>
+The caller of a procedure that meets this condition receives [`bondy.error.internal_error`](/router/reference/wamp_api/errors/internal_error) instead. The error carries a `trace_id` and no detail about the condition.

@@ -184,7 +184,7 @@ Both patterns support advanced features:
 - **Publisher identification** - Know who published each event
 - **Publisher exclusion** - Don't receive own publications
 - **Subscriber blacklisting/whitelisting** - Control event delivery
-- **Event history** - Retrieve missed events when reconnecting
+- **Event retention** - Deliver the last event of a topic to a new subscriber
 
 ### Shared Features
 - **Authentication** - All actions authenticated per session

@@ -35,8 +35,13 @@ The following endpoints are registered under the API version's `base_path`:
 | [Login](#login) | GET | `<base_path>/oidc/login` |
 | [Callback](#callback) | GET | `<base_path>/oidc/<provider>/callback` |
 | [Logout](#logout) | GET, POST | `<base_path>/oidc/logout` |
+| Verify | GET, HEAD | `<base_path>/oidc/verify`, or the scheme's `verify_path` |
 
-All endpoints support `OPTIONS` for CORS preflight. The `Access-Control-Allow-Origin` header is set to the request's `Origin` header value.
+`<provider>` is the value of the security scheme's `provider` key. The verify endpoint checks a Bondy credential for a reverse proxy, for example an NGINX `auth_request`. It answers `200` with the identity when the credential is valid, and `401` otherwise. See the [HTTP API Gateway Specification](/router/reference/api_gateway/specification).
+
+The login, callback and logout endpoints support `OPTIONS` for CORS preflight. The `Access-Control-Allow-Origin` header is set to the request's `Origin` header value.
+
+An error response from the login or callback endpoint has a JSON body. The body holds `error`, the error name that the examples below show. The body also holds the standard [error payload](/router/reference/errors#the-error-payload). In that payload, `uri` is `bondy.error.<error>`, `code` is the error name, `handle` is `S002` and `nature` is `transient`. The examples show only the `error` key. A method that an endpoint does not accept answers `405` with an empty body.
 
 
 ## Login
@@ -49,11 +54,12 @@ Initiates the OIDC Authorization Code flow by redirecting the user to the Identi
 GET <base_path>/oidc/login
 ```
 
+The route always uses the provider that the security scheme names in its `provider` key.
+
 #### Query Parameters
 
 | Parameter | Type | Default | Description |
 |:---|:---|:---|:---|
-| `provider` | string | Route's configured provider, or `"default"` | The OIDC provider name (must match a key in the realm's `oidc_providers`) |
 | `redirect_uri` | string | `"/"` | The SPA URL to redirect to after successful authentication |
 | `client_id` | string | `"all"` | Scopes the Bondy ticket to a specific client application |
 | `device_id` | string | `"all"` | Scopes the Bondy ticket to a specific device |
@@ -89,9 +95,9 @@ Redirects to the IdP's authorization endpoint with `state`, `nonce`, PKCE `code_
 ### Example
 
 ```bash
-# Redirect user to login with the "azure" provider
+# Redirect user to login with the provider of the route's security scheme
 # After authentication, redirect back to /app/dashboard
-curl -v "https://api.example.com/v1.0/oidc/login?provider=azure&redirect_uri=/app/dashboard"
+curl -v "https://api.example.com/v1.0/oidc/login?redirect_uri=/app/dashboard"
 
 # Response:
 # HTTP/2 302
@@ -104,7 +110,7 @@ curl -v "https://api.example.com/v1.0/oidc/login?provider=azure&redirect_uri=/ap
 Receives the authorization callback from the IdP, exchanges the authorization code for tokens, issues a Bondy ticket, and redirects to the SPA.
 
 ::: warning
-This endpoint is called by the IdP, not directly by the SPA. The `redirect_uri` configured in the OIDC provider must point to this endpoint.
+This endpoint is called by the IdP, not directly by the SPA. The `redirect_uri` configured in the OIDC provider has to point to this endpoint.
 :::
 
 ### Request
@@ -118,7 +124,7 @@ GET <base_path>/oidc/<provider>/callback
 | Parameter | Required | Description |
 |:---|:---|:---|
 | `code` | Yes | The authorization code from the IdP |
-| `state` | Yes | The state token (must match the value generated during login) |
+| `state` | Yes | The state token. It has to match the value generated during login. |
 
 ### Responses
 
@@ -130,7 +136,7 @@ Sets two cookies and redirects to the SPA `redirect_uri` that was stored during 
 ```
 HTTP/2 302
 Location: /app/dashboard
-Set-Cookie: bondy_ticket_com.example.myrealm=eyJhbG...; Path=/; Max-Age=2592000; SameSite=Lax; Secure
+Set-Cookie: bondy_ticket_com.example.myrealm=eyJhbG...; Path=/; Max-Age=2592000; SameSite=Lax; Secure; HttpOnly
 Set-Cookie: bondy_csrf_com.example.myrealm=a1b2c3d4-...; Path=/; Max-Age=2592000; SameSite=Lax; Secure
 ```
 
@@ -211,12 +217,13 @@ POST <base_path>/oidc/logout
 | `realm` | string | Route's `realm_uri` | The realm whose cookies should be cleared |
 | `redirect_uri` | string | `"/"` | Where to redirect after logout |
 | `cookie_domain` | string | From provider config | Override the cookie domain for clearing |
+| `cookie_same_site` | string | From provider config, or `lax` | Override the `SameSite` attribute for clearing: `none`, `lax` or `strict` |
 
 ### Responses
 
 #### Success — 302 Found
 
-Always redirects. If the IdP supports RP-Initiated Logout and the ticket contains OIDC claims (provider name and ID token), the redirect goes to the IdP's `end_session_endpoint`:
+Always redirects. When the ticket names an OIDC provider and the IdP supports RP-Initiated Logout, the redirect goes to the IdP's `end_session_endpoint`. The redirect carries the ticket's ID token as `id_token_hint` when the ticket has one:
 
 ```
 HTTP/2 302
@@ -261,4 +268,5 @@ The Bondy ticket issued during the callback is a signed JWT with the following c
 | `kid` | string | Key ID used for signing |
 | `oidc_provider` | string | Provider name |
 | `oidc_id_token` | string | Raw ID token JWT from the IdP (optional) |
-| `oidc_access_token_expires_at` | integer | Access token expiry timestamp (optional) |
+| `oidc_refresh_token` | string | Refresh token from the IdP (optional) |
+| `oidc_access_token_expires_in` | integer | Access token expiry, as the IdP token response gives it (optional) |

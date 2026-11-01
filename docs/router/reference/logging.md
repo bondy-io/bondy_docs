@@ -68,7 +68,7 @@ The destination of a `console` handler: standard output, standard error, or the 
 The log file path when `config.type` is `file`. A relative path is resolved against the node's working directory. Because `config.type` always has a value (`standard_io` unless set), setting `config.file` alone is not enough: OTP Logger rejects a `standard_io` or `standard_error` handler that names a file. Set `config.type = file` together with this key.
 
 ::: tip Running under a supervisor
-When Bondy runs attached to a terminal (e.g. `bondy console`) or under a process supervisor that captures standard output (Docker, systemd), leave the default handler on `standard_io` and let the supervisor own log capture and rotation, rather than pointing Bondy at a file it would then need to rotate itself.
+When Bondy runs attached to a terminal (e.g. `bondy-connect console`) or under a process supervisor that captures standard output (Docker, systemd), leave the default handler on `standard_io` and let the supervisor own log capture and rotation, rather than pointing Bondy at a file it would then need to rotate itself.
 :::
 
 The default handler accepts the same keys under `log.handlers.default`.
@@ -470,6 +470,27 @@ description => "Node removed from the cluster"
 **Level:** notice.
 
 **Emitted:** by the node that serves [`bondy.cluster.leave`](/router/reference/wamp_api/cluster), after the survey finds every remaining member answering and ready. When the survey refuses a removal, Bondy does not log this record.
+
+### Authentication
+
+#### WAMP authentication failed
+
+```text
+description => "WAMP authentication failed"
+```
+
+| Field | Value |
+|---|---|
+| `reason` | Why the authentication was refused, for example `bad_signature`, `invalid_nonce`, `{no_such_user, Authid}`, or `temporarily_unavailable` when the authentication freshness fence refused. |
+| `authid` | The authid the client presented, or `undefined`. |
+| `authmethod` | The method being answered, or `undefined` when the refusal came before a method was chosen. |
+| `authmethods` | The methods the client requested in its `HELLO`. |
+
+The logger metadata carries `realm`, when the realm exists, and `peername`.
+
+**Level:** info.
+
+**Emitted:** whenever a session refuses a WAMP authentication. The client receives only the generic `wamp.error.authentication_failed`, or `wamp.error.unavailable` for a fence refusal, so this record is the only place the reason is kept.
 
 ### Listeners and connections
 

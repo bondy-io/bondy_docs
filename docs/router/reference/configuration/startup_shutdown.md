@@ -12,6 +12,6 @@ A node shuts down in this order:
 5. It closes its client-facing listeners, which terminates every connection still open. As each connection closes, Bondy removes its session along with the session's registrations and subscriptions.
 6. It closes the listeners that serve liveness, readiness and metrics.
 
-@[config](shutdown.grace_period,time_duration_units,30s,v0.8.8)
+@[config](shutdown.grace_period,time_duration_units,30s,v1.0.0-rc.1)
 
 How long a shutting-down node waits, after sending `GOODBYE` to every session, before it closes the connections that remain. The node waits for the full period even when every client has already left, so a process supervisor must allow longer than this before it kills the node. On Kubernetes, set the pod's `terminationGracePeriodSeconds` above this value.

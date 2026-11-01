@@ -85,7 +85,10 @@ None.
 />
 
 #### Errors
-None — denial is reported as a `false` result (with an explanatory `message`), never a WAMP error. This lets a caller distinguish "not authorized" from every other failure mode without a try/catch around a real attempt at the action.
+A denial is reported as a `false` result (with an explanatory `message`), never a WAMP error. This lets a caller distinguish "not authorized" from every other failure mode without a try/catch around a real attempt at the action.
+
+* `wamp.error.not_authorized`: when a session outside the master realm names a realm other than its own.
+* [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when the call has fewer than three or more than four positional arguments.
 
 ## See also
 - [Grant](/router/reference/wamp_api/grant) — create, revoke, and list the grants this check evaluates.

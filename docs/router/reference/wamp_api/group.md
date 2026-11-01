@@ -8,7 +8,7 @@ Group is a named collection of user or group identifiers. It can have permission
 You can use user groups to specify permissions for a collection of users, which makes permissions easier to manage for those users. When you grant a permission to a group, all of the users (and groups) in the group are granted that permission (by transitive rule).
 
 ::: warning Reserved Names
-The following names are reserved and Bondy will not allow them to be used as a value for the groups's `name` property: `all` and `anonymous`.
+The following names are reserved and Bondy will not allow them to be used as a value for the group's `name` property: `all`, `anonymous`, `any`, `from`, `on`, `to`.
 :::
 
 <ZoomImg src="/assets/rbac.png"/>
@@ -68,10 +68,10 @@ None.
 
 * [bondy.error.already_exists](/router/reference/wamp_api/errors/already_exists): when the provided name already exists.
 * [bondy.error.missing_required_value](/router/reference/wamp_api/errors/missing_required_value): when a required value is not provided
-* [bondy.error.invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype): when the data type is invalid
+* [bondy.error.unknown_error](/router/reference/wamp_api/errors/unknown_error) with `code` `invalid_datatype`: when the data type is invalid. See [invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype).
 * [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the data value is invalid
 * [bondy.error.invalid_data](/router/reference/wamp_api/errors/invalid_data): when the data values are invalid
-* [bondy.error.no_such_groups](/router/reference/wamp_api/errors/no_such_groups): when any of the provided group name doesn't exist.
+* [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when any of the provided group name doesn't exist. Bondy 1.0.0 returns this URI in place of [`bondy.error.no_such_groups`](/router/reference/wamp_api/errors/no_such_groups).
 * [bondy.error.not_found](/router/reference/wamp_api/errors/not_found): when the provided realm uri is not found.
 
 #### Examples
@@ -142,11 +142,11 @@ None.
 #### Errors
 
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
-* [bondy.error.invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype): when the data type is invalid
+* [bondy.error.unknown_error](/router/reference/wamp_api/errors/unknown_error) with `code` `invalid_datatype`: when the data type is invalid. See [invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype).
 * [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the data value is invalid
 * [bondy.error.invalid_data](/router/reference/wamp_api/errors/invalid_data): when the data values are invalid
-* [bondy.error.no_such_groups](/router/reference/wamp_api/errors/no_such_groups): when any of the provided group name doesn't exist.
-* [bondy.error.unknown_group](/router/reference/wamp_api/errors/unknown_group): when the provided realm uri is not found.
+* [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when any of the provided group name doesn't exist. Bondy 1.0.0 returns this URI in place of [`bondy.error.no_such_groups`](/router/reference/wamp_api/errors/no_such_groups).
+* [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when the provided group name is not found. Bondy 1.0.0 returns this URI in place of [`bondy.error.unknown_group`](/router/reference/wamp_api/errors/unknown_group).
 
 #### Examples
 
@@ -210,7 +210,7 @@ None.
 
 #### Errors
 
-* [bondy.error.unknown_group](/router/reference/wamp_api/errors/unknown_group): when the provided group name is not found.
+* [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when the provided group name is not found. Bondy 1.0.0 returns this URI in place of [`bondy.error.unknown_group`](/router/reference/wamp_api/errors/unknown_group).
 
 #### Examples
 
@@ -402,7 +402,7 @@ None.
 #### Errors
 
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
-* [bondy.error.no_such_groups](/router/reference/wamp_api/errors/no_such_groups): when the provided group name doesn't exist.
+* [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when the provided group name doesn't exist. Bondy 1.0.0 returns this URI in place of [`bondy.error.no_such_groups`](/router/reference/wamp_api/errors/no_such_groups).
 
 #### Examples
 
@@ -468,7 +468,7 @@ None.
 #### Errors
 
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
-* [bondy.error.no_such_groups](/router/reference/wamp_api/errors/no_such_groups): when any of the provided group names doesn't exist.
+* [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when any of the provided group names doesn't exist. Bondy 1.0.0 returns this URI in place of [`bondy.error.no_such_groups`](/router/reference/wamp_api/errors/no_such_groups).
 
 #### Examples
 
@@ -531,7 +531,7 @@ None.
 #### Errors
 
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
-* [bondy.error.no_such_groups](/router/reference/wamp_api/errors/no_such_groups): when the provided group name doesn't exist.
+* [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when the provided group name doesn't exist. Bondy 1.0.0 returns this URI in place of [`bondy.error.no_such_groups`](/router/reference/wamp_api/errors/no_such_groups).
 * [bondy.error.not_found](/router/reference/wamp_api/errors/not_found): when the provided group name is not found.
 
 #### Examples
@@ -598,7 +598,7 @@ None.
 #### Errors
 
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
-* [bondy.error.no_such_groups](/router/reference/wamp_api/errors/no_such_groups): when any of the provided group names doesn't exist.
+* [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when any of the provided group names doesn't exist. Bondy 1.0.0 returns this URI in place of [`bondy.error.no_such_groups`](/router/reference/wamp_api/errors/no_such_groups).
 
 #### Examples
 

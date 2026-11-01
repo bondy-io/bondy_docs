@@ -174,7 +174,7 @@ Tokens are cached per-service with:
 
 ## Secret Management
 
-For production deployments, you can store credentials in an external secrets provider instead of the `bondy.conf` file. The HTTP Connector currently supports **AWS Secrets Manager**.
+For production deployments, you can store credentials in an external secrets provider instead of the `bondy.conf` file. The HTTP Connector supports **AWS Secrets Manager**.
 
 Secrets are resolved at startup and mapped into the auth variable bindings (`auth.vars`), overriding any static values. Each secret variable specifies:
 

@@ -45,7 +45,7 @@ It's important to note that since realms are globally replicated, the smallest n
 
 A realm can be seen as a self-contained Identity and Access Management (IAM) service.
 
-Realms currently implement a Role-based Access Control (RBAC) approach to restricting access and to allow operations to authorized users. RBAC is a policy-neutral access-control mechanism defined around roles and privileges. All operations on a realm are authorized using RBAC.
+Realms implement a Role-based Access Control (RBAC) approach to restricting access and to allow operations to authorized users. RBAC is a policy-neutral access-control mechanism defined around roles and privileges. All operations on a realm are authorized using RBAC.
 
 Realms provides this capability internally, without the need for an external IAM system. User identities (whether human or automated agents), credentials, metadata, group definitions, role assignments, and role permissions are stored in the realm's local storage.
 
@@ -141,18 +141,8 @@ To perform these actions, users must have been granted the correct permissions. 
 Unlike the WAMP specification, which only allows a single active role (group) per session, Bondy allows for multiple active groups. To achieve this, pass a comma-separated string of the desired groups in the `authrole` session request details or simply leave the property undefined.
 :::
 
-### Accounting/Auditing
-::: info
-To be implemented.
-
-Records the action ("operation") taken on a URI or URI pattern for a Realm, as well as the Principal ("user") who requested it, and whether the action was allowed or denied.
-
-:::
-
-
-
 ## Master Realm
-When you start Bondy for the first time it creates and stores the Bondy Master realm identified with the uri `bondy` (also the now deprecated `com.leapsight.bondy`).
+When you start Bondy for the first time it creates and stores the Bondy Master realm identified with the uri `com.leapsight.bondy`.
 
 This realm is the root realm, which allows administrative users to create, list, modify, and delete other realms, among other administrative capabilities.
 
@@ -161,6 +151,7 @@ The master realm can be customised either through the `bondy.conf` file or dynam
 
 * Sessions attached to the realm are not permitted to register procedures or publish events
 * It cannot be deleted
+* Its security cannot be disabled
 * It cannot use [Prototype Inheritance](#prototype-inheritance)
 * It cannot use [Same Sign-on](#same-sign-on-sso) or [Single Sign-on](#single-sign-on)
 

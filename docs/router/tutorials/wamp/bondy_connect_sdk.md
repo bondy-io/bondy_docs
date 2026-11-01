@@ -29,7 +29,7 @@ Bondy Connect SDK (`bondy_connect`) is Bondy's own WAMP client for the BEAM — 
 
 You need:
 
-- **Erlang/OTP 28 or later** and **rebar3**.
+- **Erlang/OTP 29 or later** and **rebar3**.
 - **A running Bondy node** reachable over raw TCP on `127.0.0.1:18082` (Bondy's default `wamp_tcp` listener). If you don't have one yet, follow [Get Bondy](/router/tutorials/getting_started/get_bondy) first.
 - **A realm your client can attach to.** This tutorial uses anonymous authentication against a realm named `com.example.realm`. The realm must permit the `anonymous` user and grant `wamp.call`, `wamp.register`, `wamp.subscribe` and `wamp.publish`. See [Realms](/router/concepts/realms) and the [Realm reference](/router/reference/wamp_api/realm) if you need to create one.
 
@@ -42,12 +42,12 @@ Everything below is plain Erlang, typed into a `rebar3 shell` (or a project's ow
 ```erlang
 {deps, [
     {bondy_connect_sdk,
-        {git_subdir, "https://github.com/bondy-io/bondy.git",
-            {branch, "develop-bdb"}, "apps/bondy_connect_sdk"}}
+        {git_subdir, "https://github.com/bondy-io/bondy-connect.git",
+            {tag, "1.0.0"}, "apps/bondy_connect_sdk"}}
 ]}.
 ```
 
-The application is `bondy_connect_sdk`. It declares its sibling applications (`bondy_connect_lib`, `bondy_wamp`, `bondy_regulator`) as dependencies of its own, fetched from the same branch, so you declare only this one. Use the branch or tag of the Bondy release your router runs.
+The application is `bondy_connect_sdk`. It declares its sibling applications (`bondy_connect_lib`, `bondy_wamp`, `bondy_regulator`) as dependencies of its own, fetched from the same release tag, so you declare only this one. Use the tag of the Bondy release your router runs.
 
 It is an ordinary OTP application, so start it (and the applications it depends on) before opening a connection:
 
@@ -130,13 +130,15 @@ end,
 {ok, _SubId} = bondy_connect_client:subscribe(Conn, <<"com.example.ticks">>, OnTick).
 ```
 
-Now publish an event to that topic:
+Now publish an event to that topic. By default Bondy does not deliver an event to the session that published it, so this publication sets `exclude_me => false`:
 
 ```erlang
-ok = bondy_connect_client:publish(Conn, <<"com.example.ticks">>, [<<"tock">>]).
+ok = bondy_connect_client:publish(
+    Conn, <<"com.example.ticks">>, [<<"tock">>], #{}, #{exclude_me => false}
+).
 ```
 
-`publish/3` is fire-and-forget by default — it returns as soon as the event is on the wire, without waiting for the router. The subscriber's handler runs in its own worker process and forwards the event to your shell process as an ordinary message:
+`publish/5` is fire-and-forget — it returns as soon as the event is on the wire, without waiting for the router. The subscriber's handler runs in its own worker process and forwards the event to your shell process as an ordinary message:
 
 ```erlang
 receive
@@ -146,7 +148,7 @@ after 5000 ->
 end.
 ```
 
-> **You should see:** `[<<"tock">>]`. If you need to know the event actually reached the router before moving on, use `publish_ack/3` instead, which returns `{ok, PublicationId}` — the [reference](/router/reference/clients/bondy_connect_sdk#publishing-events) covers the acknowledged form and the rest of the publish options (excluding or targeting specific recipients, retained events).
+> **You should see:** `[<<"tock">>]`. If you need to know the event actually reached the router before moving on, use `publish_ack/5` instead, which returns `{ok, PublicationId}` — the [reference](/router/reference/clients/bondy_connect_sdk#publishing-events) covers the acknowledged form and the rest of the publish options (excluding or targeting specific recipients, retained events).
 
 ## What you built
 

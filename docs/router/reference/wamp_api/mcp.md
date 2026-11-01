@@ -40,14 +40,14 @@ Each entry names one tool, resource or resource template:
 
 | Field | Required | Meaning |
 |---|---|---|
-| `realm` | yes | The realm the entry belongs to. Must exist at load time. |
+| `realm` | yes | The realm the entry belongs to. Bondy rejects the document if the realm does not exist at load time. |
 | `kind` | yes | `tool`, `resource` or `resource_template`. |
 | `name` | yes | The MCP-facing name: 1–256 bytes, printable ASCII, no whitespace. |
 | `wamp_procedure` | tools & templates | The exact-match WAMP procedure the entry fronts. |
 | `wamp_topic` | resources | The exact-match WAMP topic a `resource` entry fronts; its payload schemas from the interface layer become the resource's output shape. |
 | `description`, `annotations`, `wamp_options`, `args_schema`, `kwargs_schema`, `result_args_schema`, `result_kwargs_schema`, `version` | no | MCP-facing detail; an absent field falls through to the interface entry of the WAMP binding (the tool's procedure, or the resource's topic). |
 | `redaction` | no | `{"fields": [...]}` — fields removed before audit digests are computed. |
-| `uri_template`, `uri_vars_schema`, `wamp_args`, `wamp_kwargs`, `update_topic` | resource templates | The RFC 6570 template contract — every template variable must appear in `uri_vars_schema` and vice versa. |
+| `uri_template`, `uri_vars_schema`, `wamp_args`, `wamp_kwargs`, `update_topic` | resource templates | The RFC 6570 template contract. Bondy rejects the entry unless the variables of `uri_template` and the keys of `uri_vars_schema` are the same set. Each `{{var}}` reference in `wamp_args`, `wamp_kwargs` and `update_topic` names a template variable. A template entry also declares `result_args_schema`, `result_kwargs_schema`, or both. |
 
 Under the default `curated`
 [manifest mode](/router/reference/configuration/mcp#mcp.manifest.mode)
@@ -60,15 +60,19 @@ collision.
 
 ## Procedures
 
-All five require admin authority, exactly like `bondy.interface.*`: an
-overlay document may target any realm, so managing one is an operator act.
-Call them from the master realm.
+All five are master realm only, like `bondy.interface.*`: an overlay
+document may target any realm, so managing one is an operator act. A call
+from any other realm fails with `wamp.error.not_authorized`.
 
 #### bondy.mcp.overlay.load(document) -> [] {.wamp-procedure}
 
 Loads (or replaces) an overlay document. Errors name the first violation —
 an invalid name, an unknown realm, a duplicate `(realm, name)` inside the
 document, or a name another document owns.
+
+Supports `dry_run: true` as a keyword argument. A dry run runs every check of
+the real call and writes nothing. Its result carries `dry_run` (`true`),
+`would`, `id` and `entry_count`.
 
 #### bondy.mcp.overlay.get(id) -> [document] {.wamp-procedure}
 
@@ -96,7 +100,7 @@ the document outside the build. Load one by passing it to
 `bondy.mcp.overlay.load` unchanged, or edit it first — it is an ordinary
 document once you hold it.
 
-One document ships today, `bondy_sre_read`: the four
+Bondy ships one document, `bondy_sre_read`: the four
 [alarm](/router/reference/wamp_api/alarm) and two
 [task](/router/reference/wamp_api/task) read procedures as tools, and the three
 alarm event topics as resources, all naming the master realm. See

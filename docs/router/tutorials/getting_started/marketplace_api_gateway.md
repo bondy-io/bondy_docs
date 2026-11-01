@@ -36,81 +36,53 @@ The architecture remains the same as the one discussed in [Marketplace tutorial]
 
 <ZoomImg src="/assets/tutorials/marketplace_api_gateway/marketplace.png"/>
 
-The [Marketplace](/router/tutorials/getting_started/marketplace) offers the following WAMP API procedures registered on the `com.example.demo` realm:
+The [Marketplace](/router/tutorials/getting_started/marketplace) offers the following WAMP API procedures registered on the `com.market.demo` realm:
 
-- `com.market.bidder.add` - Add a user as bidder. Takes a single positional argument, the bidder name
-- `com.market.bidder.gone` - Remove a user as bidder. Takes a single positional argument, the bidder name
-- `com.market.get` - List all the items for sale
-- `com.market.item.bid` - Place a bid on a listed item. Takes three positional arguments:
+- `com.market.bidder.add` - Bind a bidder name to the caller's session. Takes a single positional argument, the bidder name
+- `com.market.bidder.gone` - Release the caller's bidder name. Takes no arguments
+- `com.market.get` - List the items still open for bidding
+- `com.market.settled` - List the items that sold or expired and are still retained
+- `com.market.item.bid` - Place a bid on a listed item. Takes two positional arguments:
     - item name
     - item new price
-    - bidder name
-- `com.market.item.get` - Return an item's details. Takes single positional argument, the item name
+- `com.market.item.bids` - List the accepted bids on an item. Takes a single positional argument, the item name
+- `com.market.item.get` - Return an item's details. Takes a single positional argument, the item name
 - `com.market.item.sell` - List a new item for sale. Takes three positional arguments:
     - item name
     - item price
     - item deadline (in minutes)
 
 :::::: warning Note
-Since we wrote the Marketplace tutorial we have updated the [Marketplace Demo repository](https://github.com/bondy-io/bondy-demo-marketplace) so that the `com.example.demo` realm is already configured to support for OAuth2 authentication.
+The [Marketplace Demo repository](https://github.com/bondy-io/bondy-demo-marketplace) configures the `com.market.demo` realm for OAuth2 authentication. The realm definition is in `bondy/etc/security_config.json.template`. It:
 
-These changes include:
-
-* adding `oauth2` and `password` to the realm's `authmethods`
-* adding users, groups and grants to be able to perform the OAuth2 flow, including:
+* adds `oauth2` and `password` to the realm's `authmethods`
+* adds the users, groups and grants that the OAuth2 flow needs, including:
     - `postman`: Postman app user for testing purposes that belongs to the `api_clients` group
     - `victor`: An end user for testing purposes that belongs to the `resource_owners` group
 
+`make` generates the passwords of `postman` and `victor` on your machine and writes them to the `.env` file, as `POSTMAN_APP_PASSWORD` and `VICTOR_USER_PASSWORD`.
+
 Make sure you update your local copy of the Marketplace repository to the latest.
 
-::: details Check the changes we made to the realm
+::: details Check the realm's authentication methods
 
-As you can see in the lines highlighted below we added `oauth2` and `password` authmethods.
+The lines highlighted below add the `oauth2` and `password` authmethods.
 
-```json 5-6
-{
-    "authmethods": [
-        "cryptosign",
-        "anonymous",
-        "oauth2",
-        "password"
-    ],
-    "description": "The market realm",
-    "is_prototype": false,
-    "is_sso_realm": false,
-    "password_opts": {
-        "params": {
-            "iterations": 10000,
-            "kdf": "pbkdf2"
-        },
-        "protocol": "cra"
-    },
-    "public_keys": [
-        {
-            "crv": "P-256",
-            "kid": "11116844",
-            "kty": "EC",
-            "x": "-wc2zdqixwOixJ45Bi_bmr5WknFyUibrQMWkLXbL3Kg",
-            "y": "YBWzCcHCGMDAmUfx84J3O53L7QcZl_Be4zEMsjQmq8g"
-        },
-        {
-            "crv": "P-256",
-            "kid": "119815566",
-            "kty": "EC",
-            "x": "ce3F2nAqePIAgJawlupqUE3gjVmTSYLrAc76wyToBPc",
-            "y": "a0WppYd2m_7UpXbb1SfW0O3i7USuxbUokl48Uk6GARQ"
-        },
-        {
-            "crv": "P-256",
-            "kid": "129179117",
-            "kty": "EC",
-            "x": "0XSBmbwcOTKxR14Ic8Nr9LMAjgOz_3FYfg7wJCaEdl4",
-            "y": "TU9ji-7AelCmwrOu0fNfVN0G8o6LeNf-rNqjDspq2lM"
-        }
-    ],
-    "security_status": "enabled",
-    "uri": "com.market.demo"
-}
+```json 8-9
+[
+    {
+        "uri": "com.market.demo",
+        "description": "The market realm",
+        "authmethods": [
+            "cryptosign",
+            "anonymous",
+            "oauth2",
+            "password"
+        ],
+        "security_enabled": true,
+        ...
+    }
+]
 ```
 :::
 
@@ -134,6 +106,7 @@ Make sure Docker is running and run the demo by using `make`.
 make
 ```
 
+The demo publishes Bondy's ports on the host with an offset of 10000, so that it can run beside another Bondy node. The API Gateway listener is on `localhost:28080` and the Admin API listener on `localhost:28081`.
 
 
 ### Defining an API Gateway Spec
@@ -184,7 +157,7 @@ Lets start defining a value for `versions`.
 {
     ...
     "versions": {
-        "v1.0":{
+        "1.0.0":{
             "base_path":"/[v1.0]",
             "variables":{
                 "host":"http://localhost:8080"
@@ -197,7 +170,7 @@ Lets start defining a value for `versions`.
 }
 ```
 
-Here we have defined a single version called `v1.0`.
+Here we have defined a single version called `1.0.0`, with the base path segment `v1.0`.
 
 As it is the only version we want the API Gateway to default to this version every time it handles a request with a path not containing a specific version.
 So what we want is for request `GET /path/to/resource` to be equivalent to `GET /v1.0/path/to/resource`. We achieve that by using the expression `/[v1.0]` where the brackets mean "optional" as you can see in line 5.
@@ -267,39 +240,44 @@ In line 8 you will notice the property `is_collection` is given the value `true`
 
 ### Loading the API Gateway Spec
 
-Load the defined api spec using the [Bondy Administrative API](/router/reference/http_api/index)
+The demo repository holds the complete specification in `bondy/etc/api_gateway_config.json`, and Bondy loads it at boot through the `api_gateway.config_file` key of `bondy/etc/bondy.conf`. To load the specification again after you change it, use the [Bondy Administrative API](/router/reference/http_api/index). Run this command from the root of the demo repository:
 
 ```bash
-curl -X "POST" "http://localhost:18081/services/load_api_spec" \
+curl -X "POST" "http://localhost:28081/services/load_api_spec" \
 -H 'Content-Type: application/json; charset=utf-8' \
 -H 'Accept: application/json; charset=utf-8' \
---data-binary "@api_gateway_config.json"
+--data-binary "@bondy/etc/api_gateway_config.json"
 ```
 
-If the loading and applying was OK, th curl hasn’t result; detailed response with code and message in failure cases.
+When Bondy loads the specification, the response has an empty body. When the load fails, the response body is an error payload that names the error.
 
 From the Bondy side, you can see in the logs the following lines:
 
 ```erlang
-2022-12-06 10:48:11 bondy | when=2022-12-06T13:48:11.600576+00:00 level=notice pid=<0.1855.0> at=bondy_http_gateway:rebuild_dispatch_tables/0:223 description="Rebuilding HTTP Gateway dispatch tables" node=bondy@127.0.0.1 router_vsn=1.0.0-rc.4
-2022-12-06 10:48:11 bondy | when=2022-12-06T13:48:11.604499+00:00 level=info pid=<0.1855.0> at=bondy_http_gateway:load_dispatch_tables/0:830 description="Loading and parsing API Gateway specification from store" node=bondy@127.0.0.1 router_vsn=1.0.0-rc.4 name="Marketplace Demo API" id=com.market.demo
+2022-12-06 10:48:11 bondy | when=2022-12-06T13:48:11.600576+00:00 level=notice pid=<0.1855.0> at=bondy_http_gateway:rebuild_dispatch_tables/0:225 description="Rebuilding HTTP Gateway dispatch tables" node=bondy@127.0.0.1 router_vsn=1.0.0
+2022-12-06 10:48:11 bondy | when=2022-12-06T13:48:11.604499+00:00 level=info pid=<0.1855.0> at=bondy_http_gateway:load_stored_spec/2:722 description="Loading and parsing API Gateway specification from store" node=bondy@127.0.0.1 router_vsn=1.0.0 name="Marketplace Demo API" id=com.market.demo
 ```
 
 
 ### Execution and test
 
 1. Getting an oauth token ([JWT](https://jwt.io/)) using password method
-    - Request
+    - Request. Run it from the root of the demo repository, so that the shell reads the generated passwords from `.env`. The `postman` client authenticates with HTTP Basic, and `victor` is the resource owner.
 
         ```bash
-        curl --location --request POST 'http://localhost:18080/oauth/token' \
+        source .env
+        curl --location --request POST 'http://localhost:28080/oauth/token' \
+        --user "postman:${POSTMAN_APP_PASSWORD}" \
         --header 'Content-Type: application/x-www-form-urlencoded' \
-        --header 'Authorization: Basic cG9zdG1hbjpQb3N0bWFuMTIzNDU2IQ==' \
         --data-urlencode 'username=victor' \
-        --data-urlencode 'password=Victor123456!' \
+        --data-urlencode "password=${VICTOR_USER_PASSWORD}" \
         --data-urlencode 'grant_type=password'
+        ```
 
-        # where 'cG9zdG1hbjpQb3N0bWFuMTIzNDU2IQ==' is the base64 encoding of postman:Postman123456!
+        Copy the `access_token` value of the response into a shell variable. The requests below send it as a Bearer token:
+
+        ```bash
+        TOKEN='<access_token>'
         ```
 
     - Response example
@@ -319,8 +297,8 @@ From the Bondy side, you can see in the logs the following lines:
         - Request executing a POST method
 
             ```bash
-            curl --location --request POST 'http://localhost:18080/market/item' \
-            --header 'Authorization: Bearer eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20ubWFya2V0LmRlbW8iLCJleHAiOjkwMCwiZ3JvdXBzIjpbInJlc291cmNlX293bmVycyJdLCJpYXQiOjE2NzAzMzQ2ODAsImlkIjoxMjEwNjU1ODA2NTU3MzIsImlzcyI6InBvc3RtYW4iLCJraWQiOiI4MzMwOTAxMSIsIm1ldGEiOnsiZGVzY3JpcHRpb24iOiJWaWN0b3IgZW5kIHVzZXIgZm9yIHRlc3RpbmcgcHVycG9zZXMifSwic3ViIjoidmljdG9yIn0.fQ0Ctl9RV4TYzfcusHy1f6aDuqIVuMkffx08vJ9dFq-x8at3fdZR3alCrF1I2lYT5vJFA7YJqjHPb-rbDB2Y1A' \
+            curl --location --request POST 'http://localhost:28080/market/item' \
+            --header "Authorization: Bearer ${TOKEN}" \
             --header 'Content-Type: application/json' \
             --data-raw '{
                 "name": "first item",
@@ -339,8 +317,8 @@ From the Bondy side, you can see in the logs the following lines:
         - Request executing a GET method
 
             ```bash
-            curl --location --request GET 'http://localhost:18080/market' \
-            --header 'Authorization: Bearer eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20ubWFya2V0LmRlbW8iLCJleHAiOjkwMCwiZ3JvdXBzIjpbInJlc291cmNlX293bmVycyJdLCJpYXQiOjE2NzAzMzQ2ODAsImlkIjoxMjEwNjU1ODA2NTU3MzIsImlzcyI6InBvc3RtYW4iLCJraWQiOiI4MzMwOTAxMSIsIm1ldGEiOnsiZGVzY3JpcHRpb24iOiJWaWN0b3IgZW5kIHVzZXIgZm9yIHRlc3RpbmcgcHVycG9zZXMifSwic3ViIjoidmljdG9yIn0.fQ0Ctl9RV4TYzfcusHy1f6aDuqIVuMkffx08vJ9dFq-x8at3fdZR3alCrF1I2lYT5vJFA7YJqjHPb-rbDB2Y1A'
+            curl --location --request GET 'http://localhost:28080/market' \
+            --header "Authorization: Bearer ${TOKEN}"
             ```
 
         - Response
@@ -356,69 +334,47 @@ From the Bondy side, you can see in the logs the following lines:
             ]
             ```
 
-    - Example of `/market/bidder` endpoint trying to add a new bidder
-        - Request executing a POST method
+    The API has no endpoint for bidding or for bidder names. A bidder name belongs to the WAMP session that claims it, and the API Gateway uses one session for each authenticated user. Bid over WAMP, as the bots and the Web App do.
 
-            ```bash
-            curl --location --request POST 'http://localhost:18080/market/bidder' \
-            --header 'Authorization: Bearer eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20ubWFya2V0LmRlbW8iLCJleHAiOjkwMCwiZ3JvdXBzIjpbInJlc291cmNlX293bmVycyJdLCJpYXQiOjE2NzAzMzU3OTMsImlkIjo2NDI1NTI3ODE5NTYxMTQsImlzcyI6InBvc3RtYW4iLCJraWQiOiIyMDkxODg3MSIsIm1ldGEiOnsiZGVzY3JpcHRpb24iOiJWaWN0b3IgZW5kIHVzZXIgZm9yIHRlc3RpbmcgcHVycG9zZXMifSwic3ViIjoidmljdG9yIn0.6Cm25Hs9lCMP4OwXPeRei6kYc1E2YuGjj4yaQ1bP9D5_LI0VeUny0c2AMyYOO76MyCvXGFRJjM3uVhREvA1obw' \
-            --header 'Content-Type: application/json' \
-            --data-raw '{
-                "name": "ale"
-            }'
-            ```
-
-            From the Market side, you can see in the logs the following lines:
-
-            ```python
-            2022-12-06 11:14:27 market  | New bidder: ale
-            ```
-
-    - Example of `/market/bidder/:name` trying to delete a registered bidder
-        - Request executing a DELETE method
-
-            ```bash
-            curl --location --request DELETE 'http://localhost:18080/market/bidder/ale' \
-            --header 'Authorization: Bearer eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjb20ubWFya2V0LmRlbW8iLCJleHAiOjkwMCwiZ3JvdXBzIjpbInJlc291cmNlX293bmVycyJdLCJpYXQiOjE2NzAzMzU3OTMsImlkIjo2NDI1NTI3ODE5NTYxMTQsImlzcyI6InBvc3RtYW4iLCJraWQiOiIyMDkxODg3MSIsIm1ldGEiOnsiZGVzY3JpcHRpb24iOiJWaWN0b3IgZW5kIHVzZXIgZm9yIHRlc3RpbmcgcHVycG9zZXMifSwic3ViIjoidmljdG9yIn0.6Cm25Hs9lCMP4OwXPeRei6kYc1E2YuGjj4yaQ1bP9D5_LI0VeUny0c2AMyYOO76MyCvXGFRJjM3uVhREvA1obw' \
-            --header 'Content-Type: application/json' \
-            --data-raw '{
-                "name": "ale"
-            }'
-            ```
-
-            From the Market side, you can see in the logs the following lines:
-
-            ```python
-            2022-12-06 11:17:31 market  | ale left, cancel their bids.
-            ```
-
-3. Invoking an endpoint with invalid credentials
+3. Invoking an endpoint with invalid credentials. Bondy answers with HTTP status `401` and an error payload in the body.
     1. Using an old token with an inexistent user we have the following response:
 
         ```json
         {
+            "uri": "wamp.error.no_such_principal",
             "code": "wamp.error.no_such_principal",
+            "handle": "A007",
+            "nature": "permanent",
+            "message": "The request failed because the authid provided does not exist.",
             "description": "",
-            "message": "The request failed because the authid provided does not exist."
+            "details": {},
+            "causes": [],
+            "doc_uri": "/errors/A007"
         }
         ```
 
-2. Using an expired token we have the following response:
+    2. Using an expired token we have the following response:
 
-```json
-{
-    "code": "invalid_grant",
-    "description": "The provided authorization grant (e.g., authorization code, resource owner credentials) or refresh token is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client. The client MAY request a new access token and retry the protected resource request.",
-    "message": "The access or refresh token provided is expired, revoked, malformed, or invalid."
-}
-```
+        ```json
+        {
+            "uri": "bondy.error.invalid_grant",
+            "code": "invalid_grant",
+            "handle": "G003",
+            "nature": "permanent",
+            "message": "The access or refresh token provided is expired, revoked, malformed, or invalid.",
+            "description": "The provided authorization grant (e.g., authorization code, resource owner credentials) or refresh token is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client. The client MAY request a new access token and retry the protected resource request.",
+            "details": {},
+            "causes": [],
+            "doc_uri": "/errors/G003"
+        }
+        ```
 
 
 ## Conclusion
 
 It is very easy to configure and expose an HTTP/REST API on top of an existing WAMP API. We can do it by using a declarative specification language based on JSON and without any coding.
 
-As a reference, you can see the resulting HTTP API Specification file at [api_gateway_config.json](https://github.com/bondy-io/bondy-demo-marketplace/blob/main/resources/api_gateway_config.json).
+As a reference, you can see the resulting HTTP API Specification file at [api_gateway_config.json](https://github.com/bondy-io/bondy-demo-marketplace/blob/main/bondy/etc/api_gateway_config.json).
 
 Finally, you can check the complete [Marketplace Postman Collection](/assets/tutorials/Bondy_Marketplace_demo.postman_collection.json).
 

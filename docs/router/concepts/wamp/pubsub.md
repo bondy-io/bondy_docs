@@ -7,7 +7,7 @@ related:
     - text: Advanced Publish/Subscribe
       type: concepts
       link: /router/concepts/wamp/advanced/pubsub
-      description: Advanced PubSub features like subscriber lists, publisher exclusion, and event history.
+      description: Advanced PubSub features like event retention, subscriber lists and publisher exclusion.
     - text: Introduction to WAMP
       type: concepts
       link: /router/concepts/wamp/introduction
@@ -248,7 +248,7 @@ This "fire-and-forget" model is appropriate for:
 - High-frequency data streams
 - Notifications where occasional loss is acceptable
 
-For stronger guarantees, see [Advanced PubSub](/router/concepts/wamp/advanced/pubsub) for event history and retention features.
+To give a late subscriber the last event of a topic, see [event retention](/router/concepts/wamp/advanced/pubsub#event-retention). Bondy does not implement event history.
 
 ## Best Practices
 
@@ -334,12 +334,12 @@ PubSub operations are authorized per topic URI:
 - **Subscribe permission** - Who can subscribe to topics
 - **Publish permission** - Who can publish to topics
 
-Permissions can use URI patterns:
+A grant names a URI and a match policy (`exact`, `prefix` or `wildcard`):
 ```
-# Allow subscribe to all user events
-com.myapp.users.user.*
+# Allow subscribe to all user events (match: prefix)
+com.myapp.users.user.
 
-# Allow publish only to specific topics
+# Allow publish only to specific topics (match: exact)
 com.myapp.admin.system.alert
 ```
 
@@ -352,7 +352,7 @@ Within a Realm, topics can be protected:
 
 ## See Also
 
-- [Advanced Publish/Subscribe](/router/concepts/wamp/advanced/pubsub) - Event history, subscriber lists, and more
+- [Advanced Publish/Subscribe](/router/concepts/wamp/advanced/pubsub) - Event retention, subscriber lists, and more
 - [Communication Patterns](/router/concepts/wamp/communication_patterns) - RPC vs PubSub
 - [Routed RPC](/router/concepts/wamp/rpc) - Request-response pattern
 - [Security](/router/concepts/wamp/security) - Authentication and authorization

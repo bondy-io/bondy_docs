@@ -170,7 +170,7 @@ The settings that need a decision:
   name that does not resolve stops the node from starting, and a DNS change
   takes effect only after a restart. With `tls.verify = verify_peer` the edge
   then checks the remote router's certificate against that IP address, not the
-  host name, so the certificate must list the address as an IP
+  host name, so the certificate has to list the address as an IP
   `subjectAltName`. A certificate that names only the host fails with
   `hostname_check_failed`, and `bridge.$name.tls.hostname_verification = none`
   does not change that.
@@ -179,7 +179,7 @@ The settings that need a decision:
   `bridge.$name.tls.certfile` and `bridge.$name.tls.keyfile`. The bridge sends
   no client certificate unless both are set.
 
-- **Private key.** `cryptosign.privkey_env_var` must name a variable holding
+- **Private key.** `cryptosign.privkey_env_var` has to name a variable holding
   the 32-byte Ed25519 seed as 64 hexadecimal characters. A 64-byte value
   (seed and public key together, 128 characters) fails with
   `Couldn't get EDDSA private key`. Of the other signing keys,
@@ -263,12 +263,10 @@ procedures, and calls to them return `wamp.error.no_such_procedure`.
 
 To remove it:
 
-1. Call `bondy.router.bridge.stop` with the name. Removing a running bridge
-   fails; in this release the error is `bondy.error.internal_error`.
-2. Call `bondy.router.bridge.remove` with the name. It returns an empty result
-   on success, and also for a name the edge does not know, so a typo is not
-   reported.
-3. Delete the bridge's keys from the edge's `bondy.conf`, or set
+1. Call `bondy.router.bridge.remove` with the name. Bondy stops a running
+   bridge before it removes it. The call returns an empty result on success,
+   and also for a name the edge does not know, so a typo is not reported.
+2. Delete the bridge's keys from the edge's `bondy.conf`, or set
    `bridge.<name> = off`. Bondy reloads the bridges declared in `bondy.conf`
    every time the node starts, so a bridge removed only at runtime comes back
    on the next restart.

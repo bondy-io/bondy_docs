@@ -312,7 +312,9 @@ class MyComponent(ApplicationSession):
     async def onJoin(self, details):
         try:
             result = await self.call('com.billing.get_invoice', id='INV-001')
-            print(f"Status: {result['status']}, Body: {result['body']}")
+            # The connector returns keyword results, so Autobahn
+            # returns a CallResult.
+            print(f"Status: {result.kwargs['status']}, Body: {result.kwargs['body']}")
         except Exception as e:
             # e.error contains the WAMP error URI
             # e.kwargs contains {"status": <http_code>, "body": <response>}

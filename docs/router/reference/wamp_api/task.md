@@ -48,8 +48,8 @@ procedure families deliberately left out.
 The vocabularies are returned alongside the entries because an agent policy is
 a bound on `impact` ("never above `recoverable` without a human"), and a bound
 needs the *order* of the vocabulary — not just the values that happen to appear
-in today's rows. A grade with no entry today must not become an unknown word
-the moment one is added.
+in today's rows. The vocabulary also lists grades that no entry uses, so a
+policy already knows a grade before an entry carries it.
 
 #### bondy.task.describe(uri) -> [result] {.wamp-procedure}
 
@@ -79,8 +79,8 @@ Making it an error would put the question on a caller's exception path.
 rather than "declared unsafe". A `true` is written only where a test pins it —
 an unpinned `true` would be exactly the sanction nobody checked.
 
-`observe_with` says *where to look*, not what to expect. A condition language
-is a separate mechanism and does not exist yet.
+`observe_with` says *where to look*, not what to expect. It does not state a
+condition to test.
 
 `args` describes the call for a caller building it. Bondy does not validate a
 call against these schemas; what is verified is that each list has one entry

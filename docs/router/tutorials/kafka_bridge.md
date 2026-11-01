@@ -29,7 +29,7 @@ The following snippet provides an example subscriptions specification file.
             },
             "action": {
                 "type": "produce_sync",
-                "topic": "{{kafka.topics |> get(com.magenta.wamp_events)}}",
+                "topic": "{{kafka.topics.wamp_events}}",
                 "key": "\"{{event.topic}}/{{event.publication_id}}\"",
                 "value": "{{event}}",
                 "options" : {
@@ -64,9 +64,10 @@ broker_bridge.kafka.clients.default.producer.required_acks = 1
 broker_bridge.kafka.clients.default.producer.topic_restart_delay_seconds = 10s
 broker_bridge.kafka.clients.default.reconnect_cool_down_seconds = 10s
 broker_bridge.kafka.clients.default.restart_delay_seconds = 10s
-broker_bridge.kafka.topics.account_events = ${ACCOUNT_EVENTS_TOPIC}
-broker_bridge.kafka.topics.user_events = ${USER_EVENTS_TOPIC}
+broker_bridge.kafka.topics.wamp_events = com.example.wamp_events
 ```
+
+The `broker_bridge.kafka.topics.wamp_events` key names the Kafka topic. The expression `{{kafka.topics.wamp_events}}` in the specification file reads it.
 
 
 ## Event Object
@@ -86,4 +87,4 @@ broker_bridge.kafka.topics.user_events = ${USER_EVENTS_TOPIC}
 
 ## Dynamically configuring subscriptions
 
-There is currently no WAMP or HTTP API for adding or removing a subscription at runtime — the specification file, loaded at startup as shown above, is the only supported way to configure the Kafka Bridge today.
+Bondy has no WAMP or HTTP API for adding or removing a subscription at runtime. The specification file, loaded at startup as shown above, is the only way to configure the Kafka Bridge.

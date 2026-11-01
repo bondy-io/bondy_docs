@@ -50,7 +50,7 @@ With discovery on, Bondy joins every peer a lookup reports. There is no separate
 
 ### 2. Secure the peer plane
 
-A node with discovery on refuses to start until the connections between nodes use TLS with certificate verification on both sides. Give every node a certificate signed by a private cluster CA (the source tree's [`deployment/cluster-ca-bootstrap.sh`](https://github.com/bondy-io/bondy/blob/develop/deployment/cluster-ca-bootstrap.sh) creates the CA and one certificate per node hostname), and in each node's `bondy.conf`:
+A node with discovery on refuses to start until the connections between nodes use TLS with certificate verification on both sides. Give every node a certificate signed by a private cluster CA (the source tree's [`deployment/cluster-ca-bootstrap.sh`](https://github.com/bondy-io/bondy-connect/blob/develop/deployment/cluster-ca-bootstrap.sh) creates the CA and one certificate per node hostname), and in each node's `bondy.conf`:
 
 ```text
 cluster.tls.enabled = on
@@ -108,12 +108,11 @@ For a small, fixed cluster where every node's address is already known and won't
 ```text
 cluster.peer_discovery.enabled = on
 cluster.peer_discovery.type = list
-cluster.peer_discovery.config.name = bondy
 cluster.peer_discovery.config.addresses._ = bondy1@10.0.0.1:18086
 cluster.peer_discovery.config.addresses._ = bondy2@10.0.0.2:18086
 ```
 
-`addresses` is the fixed peer list — either a bare `ip:port` (combined with `name`, this node's own Erlang basename, to build a full nodename) or an explicit `nodename@ip:port` per entry. There's nothing to poll or resolve — the list itself is the membership. This trades the flexibility of DNS (a node can be replaced without touching every other node's config) for simplicity in deployments where the node set is genuinely static.
+`addresses` is the fixed peer list. Write each entry as `nodename@host:port`, or as `nodename@host` to use this node's own peer port. When an entry has no nodename, the list strategy fails to start with `badarg`, so a bare `ip:port` does not work. A node skips its own entry, so every node can use the same list. There's nothing to poll or resolve — the list itself is the membership. This trades the flexibility of DNS (a node can be replaced without touching every other node's config) for simplicity in deployments where the node set is genuinely static.
 
 ## Result
 

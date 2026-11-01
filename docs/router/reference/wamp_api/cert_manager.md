@@ -114,9 +114,9 @@ None.
 
 #### bondy.cert_manager.rotate_all() -> result() {.wamp-procedure}
 
-Re-reads certificate files from disk for all known TLS listeners (`api_gateway_https`, `admin_api_https`, `wamp_tls`, `bridge_relay_tls`) and updates the in-memory certificate store.
+Re-reads certificate files from disk for every listener whose [`listeners.$name.transport`](/router/reference/configuration/listeners) is `tls`, and updates the in-memory certificate store.
 
-Listeners that do not have certificates configured are silently skipped.
+When Bondy cannot rotate the certificate of a listener, it logs a warning and continues with the next listener. The call does not return an error.
 
 #### Call
 
@@ -177,6 +177,8 @@ Sets the client certificate verification configuration for a listener. This enab
 
 Updates take effect for new connections. Existing connections are not affected.
 
+The options replace the current mTLS configuration of the listener. They are not merged into it, so an option you omit is absent from the new configuration.
+
 #### Call
 
 ##### Positional Args
@@ -231,7 +233,7 @@ const listener_arg = {
     0: {
         type: "string",
         required: true,
-        description: "The listener reference. One of: api_gateway_https, admin_api_https, wamp_tls, bridge_relay_tls."
+        description: "The listener name: the `$name` of a `listeners.$name.*` block in the node configuration."
     }
 };
 
@@ -274,7 +276,7 @@ const set_client_auth_args_data = {
     0: {
         type: "string",
         required: true,
-        description: "The listener reference. One of: api_gateway_https, admin_api_https, wamp_tls, bridge_relay_tls."
+        description: "The listener name: the `$name` of a `listeners.$name.*` block in the node configuration."
     },
     1: {
         type: "object",
@@ -308,13 +310,13 @@ const mtls_config_data = {
         properties: {
             verify: {
                 type: "string",
-                required: true,
-                description: "The verification mode: verify_peer or verify_none."
+                required: false,
+                description: "The verification mode: verify_peer or verify_none. Absent when the last set_client_auth call did not set it."
             },
             fail_if_no_peer_cert: {
                 type: "boolean",
-                required: true,
-                description: "Whether connections without a client certificate are rejected."
+                required: false,
+                description: "Whether connections without a client certificate are rejected. Absent when the last set_client_auth call did not set it."
             },
             cacerts: {
                 type: "array",

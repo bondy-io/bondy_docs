@@ -14,7 +14,7 @@ The node enters the busy state when the sampled run queue length reaches this fa
 
 @[config](load_regulation.load_monitor.run_queue_low_watermark,integer,4,v1.0.0)
 
-The node returns to the normal state when the sampled run queue length falls to this factor times the number of online schedulers. Must be below the high watermark: the gap is the hysteresis that stops the status flapping at the boundary. A wider gap makes the node slower to recover but steadier; a narrower one does the reverse.
+The node returns to the normal state when the sampled run queue length falls to this factor times the number of online schedulers. The value has to be below the high watermark: the gap is the hysteresis that stops the status flapping at the boundary. A wider gap makes the node slower to recover but steadier; a narrower one does the reverse.
 
 @[config](load_regulation.load_monitor.sample_interval,duration_time_units,100ms,v1.0.0)
 
@@ -32,7 +32,7 @@ The node enters the memory-high state when its sampled use reaches this percenta
 
 @[config](load_regulation.memory_monitor.low_watermark,integer,75,v1.0.0)
 
-The node returns to normal when its sampled use falls to this percentage of its limit. Must be below the high watermark: the gap is the hysteresis that stops the status flapping at the boundary.
+The node returns to normal when its sampled use falls to this percentage of its limit. The value has to be below the high watermark: the gap is the hysteresis that stops the status flapping at the boundary.
 
 @[config](load_regulation.memory_monitor.sample_interval,duration_time_units,1s,v1.0.0)
 
@@ -57,22 +57,22 @@ Enables the admission gate at the OAuth2 token and revocation endpoints, the HTT
 ## Load Regulation
 
 
-@[config](load_regulation.enabled,on|off,on,v0.8.8)
+@[config](load_regulation.enabled,on|off,on,v0.5.2)
 
-Reserved for future overload-protection tuning. The value is currently accepted but not consulted by any code path — changing it has no effect.
+Has no effect. Bondy accepts the key, but no code reads it.
 
-@[config](load_regulation.router.pool.type,permanent|transient,transient,v0.8.8)
+@[config](load_regulation.router.pool.type,permanent|transient,transient,v0.5.2)
 
 Whether router pool workers are `permanent` (pre-spawned and kept alive between requests) or `transient` (spawned as needed and torn down once idle). This affects worker churn under bursty load, not the pool's steady-state capacity — see [load_regulation.router.pool.size](#load_regulation.router.pool.size) below for that.
 
-@[config](load_regulation.router.pool.size,pos_integer,16,v0.8.8)
+@[config](load_regulation.router.pool.size,pos_integer,16,v0.5.2)
 
 The size of the router process pool. The configured value is used verbatim; sizing it at or above the number of Erlang schedulers (by default the number of CPU cores available to the host or assigned by the virtualization/container layer) is recommended.
 
 This value also divides [load_regulation.router.flow_pool.capacity](#load_regulation.router.flow_pool.capacity) into each flow worker's share.
 
 
-@[config](load_regulation.router.pool.capacity,pos_integer,2000000,v0.8.8)
+@[config](load_regulation.router.pool.capacity,pos_integer,2000000,v0.5.2)
 
 The capacity of the router process pool, i.e. the maximum number of
 active erlang processes handling router events.
@@ -106,18 +106,18 @@ triggered as anti-entropy syncs land. Events are sharded by cell key, so
 increasing this only helps when reactions for many distinct cells are in
 flight concurrently.
 
-@[config](load_regulation.session_manager.pool.size,pos_integer,32,v1.0.0)
+@[config](load_regulation.session_manager.pool.size,pos_integer,32,v1.0.0-rc.1)
 
 The capacity of the session manager process pool, i.e. the maximum
 number of active erlang processes handling session events (default = 32).
 
-@[config](load_regulation.job_manager.pool.size,pos_integer,16,v1.0.0)
+@[config](load_regulation.job_manager.pool.size,pos_integer,16,v1.0.0-rc.36)
 
 The number of job manager workers. The job manager runs background work off the request path: the WAMP meta events for registrations and subscriptions, the WAMP events Bondy publishes for its own events (realm, session, cluster connection and alarm changes), and the [token and ticket reclamation](/router/reference/configuration/security#token-and-ticket-reclamation) sweeps.
 
 Each worker owns one FIFO queue and runs its jobs one at a time, in queue order. A job goes to the worker chosen by hashing its partition key, so jobs that share a key — the meta events of one session, for example — run in the order they were queued.
 
-@[config](load_regulation.job_manager.queue.size,pos_integer,160000,v1.0.0)
+@[config](load_regulation.job_manager.queue.size,pos_integer,160000,v1.0.0-rc.36)
 
 The total capacity of the job queues, split evenly across the workers: each worker's queue holds `queue.size / pool.size` jobs, rounded.
 
@@ -126,7 +126,7 @@ When a worker's queue is full, a new job for it is refused. Jobs already queued 
 - A meta event or a Bondy event is dropped. The drop is counted in `bondy_wamp_dropped_total` with `reason="shed"` and logged as a warning at most once per window. Subscribers to those topics miss the event.
 - A reclamation round is logged as a warning and retried after about five minutes.
 
-@[config](load_regulation.job_manager.queue.ttl,duration_time_units,1m,v1.0.0)
+@[config](load_regulation.job_manager.queue.ttl,duration_time_units,1m,v1.0.0-rc.36)
 
 Bondy sets this value as the maximum waiting time of each worker queue.
 
@@ -135,7 +135,7 @@ The worker queues are passive queues of the `jobs` library, and that library che
 :::
 
 
-@[config](registry.partitions,pos_integer,32,v1.0.0)
+@[config](registry.partitions,pos_integer,32,v1.0.0-rc.1)
 
 The number of registry partitions — the stores that hold registrations and
 subscriptions, each owned by one Erlang process.

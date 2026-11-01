@@ -2,13 +2,13 @@
 
 ## WAMP URIs
 
-@[config](wamp.uri.strictness,loose|strict,loose,v0.9.0)
+@[config](wamp.uri.strictness,loose|strict,loose,v1.0.0-rc.1)
 
 The validation applied to every WAMP URI Bondy accepts, in realm names, procedure and topic registrations, and calls. `loose` allows any non-empty dot-separated component; `strict` additionally restricts each component to the WAMP specification's stricter character set. Set to `strict` to catch malformed URIs from a client early, at the router, rather than downstream in application code.
 
 ## Call Timeout
 
-@[config](wamp.call_timeout,duration_time_units,30s,v0.1.0)
+@[config](wamp.call_timeout,duration_time_units,30s,v0.8.3)
 
 The default timeout for WAMP (RPC) Calls when the `CALL.Options.timeout`
 property is not used. This value will be restricted by the
@@ -16,7 +16,7 @@ property is not used. This value will be restricted by the
 
 
 
-@[config](wamp.max_call_timeout,duration_time_units,10m,v0.1.0)
+@[config](wamp.max_call_timeout,duration_time_units,10m,v1.0.0-rc.1)
 
 The maximum timeout value for WAMP (RPC) Calls for the `CALL.Options.
 timeout` or the [`wamp.call_timeout`](#wamp.call_timeout) default.
@@ -30,27 +30,27 @@ The WAMP specification treats an unspecified timeout, or a value of `0`, as disa
 
 WAMP's message retention feature lets a publisher mark an event to be retained, so a subscriber that joins later can still receive the last (or last few) events on a topic instead of only ones published after it subscribed.
 
-@[config](wamp.message_retention.enabled,on|off,on,v0.9.0)
+@[config](wamp.message_retention.enabled,on|off,on,v1.0.0-rc.1)
 
 Has no effect. Bondy accepts the key, but retention is controlled per publication: an event is retained when its publisher sets `retain: true`, whatever this key says.
 
-@[config](wamp.message_retention.storage_type,ram|disk|ram_disk,ram,v0.9.0)
+@[config](wamp.message_retention.storage_type,ram|disk|ram_disk,ram,v1.0.0-rc.1)
 
 Has no effect. Bondy always stores retained events in a durable table, so they survive a node restart, whatever this key says.
 
-@[config](wamp.message_retention.max_messages,integer,1000000,v0.9.0)
+@[config](wamp.message_retention.max_messages,integer,1000000,v1.0.0-rc.1)
 
 Maximum number of retained messages held on a single node. Once reached, no further events are retained until space frees up (e.g. via TTL expiry). `0` means no limit.
 
-@[config](wamp.message_retention.max_memory,byte_size_units,1GB,v0.9.0)
+@[config](wamp.message_retention.max_memory,byte_size_units,1GB,v1.0.0-rc.1)
 
 Maximum memory a node spends on retained messages. Once reached, no further events are retained. `0` means no limit.
 
-@[config](wamp.message_retention.max_message_size,byte_size_units,64KB,v0.9.0)
+@[config](wamp.message_retention.max_message_size,byte_size_units,64KB,v1.0.0-rc.1)
 
 Per-event size ceiling. An event larger than this is not retained, regardless of the limits above — it is still delivered live to current subscribers, only excluded from retention.
 
-@[config](wamp.message_retention.default_ttl,time_duration_units,0,v0.9.0)
+@[config](wamp.message_retention.default_ttl,time_duration_units,0,v1.0.0-rc.1)
 
 Default time-to-live applied to a retained event when the publisher doesn't specify one. `0` means a retained event never expires on its own (it can still be evicted by the `max_messages`/`max_memory` limits above).
 
@@ -82,7 +82,7 @@ This is the session's deadline. It is not the listener's connection idle timeout
 
 @[config](wamp.http_transport.queue.max_messages,integer,1000,v1.0.0)
 
-The maximum number of messages held for one transport session. Must be a positive integer. When a new message arrives and the queue already holds this many, Bondy drops the oldest messages for that session (up to 100 at a time) and then stores the new one. Neither the client nor the publisher is told that messages were dropped.
+The maximum number of messages held for one transport session, as a positive integer. When a new message arrives and the queue already holds this many, Bondy drops the oldest messages for that session (up to 100 at a time) and then stores the new one. Neither the client nor the publisher is told that messages were dropped.
 
 The bound applies to all output for the session, including replies Bondy produces directly, such as an inline `ERROR`.
 
@@ -102,29 +102,29 @@ How often the sweep that removes expired messages (see `message_ttl`) runs acros
 
 @[config](wamp.http_transport.queue.partitions,integer,schedulers,v1.0.0)
 
-The number of ETS partitions the queue is sharded across. Must be a positive integer. All messages for one transport session live in a single partition. More partitions reduce table contention between sessions, and make each sweep visit more tables. The schema has no default value; when the key is unset, Bondy uses the number of Erlang schedulers on the node, which is normally the number of CPU cores. The value is read once, when the queue is created at node start.
+The number of ETS partitions the queue is sharded across, as a positive integer. All messages for one transport session live in a single partition. More partitions reduce table contention between sessions, and make each sweep visit more tables. The schema has no default value; when the key is unset, Bondy uses the number of Erlang schedulers on the node, which is normally the number of CPU cores. The value is read once, when the queue is created at node start.
 
 ## Serializers
 
-@[config](serializers.json.float_format,string,[&#123;decimals&#44;16&#125;],v1.0.0)
+@[config](serializers.json.float_format,string,[&#123;decimals&#44;16&#125;],v1.0.0-rc.27)
 
-Intended to control how floating-point numbers are written in JSON. The value is a string holding an Erlang list of [`erlang:float_to_binary/2`](https://www.erlang.org/doc/apps/erts/erlang.html#float_to_binary/2) options, for example:
+Controls how Bondy writes floating-point numbers in WAMP messages serialised as JSON. The value is a string holding an Erlang list of [`erlang:float_to_binary/2`](https://www.erlang.org/doc/apps/erts/erlang.html#float_to_binary/2) options, for example:
 
 ```ini
 serializers.json.float_format = [{decimals, 16}]
 ```
 
-Bondy checks at startup that the value parses as an Erlang term. In the current release no code reads the resulting setting, so changing it has no effect. Bondy always encodes floats in JSON with `[{decimals, 16}]`, which writes 16 digits after the decimal point: `1.5` is encoded as `1.5000000000000000`.
+Configuration generation fails when the value does not parse as an Erlang term. The WAMP JSON encoder uses the configured options. The default, `[{decimals, 16}]`, writes 16 digits after the decimal point: `1.5` is encoded as `1.5000000000000000`.
 
 The [WAMP RawSocket](https://wamp-proto.org/wamp_latest_ietf.html) handshake names the serializer by a number from 1 to 15. Bondy fixes slot 1 to JSON, slot 2 to MessagePack and slot 3 to CBOR. The two keys below assign slots to the Erlang-specific serializers. They exist because some clients expect a given serializer in a given slot.
 
-@[config](wamp.serializers.erl,integer,15,v1.0.0)
+@[config](wamp.serializers.erl,integer,15,v1.0.0-rc.1)
 
 The RawSocket slot for the `erl` serializer, which encodes WAMP messages in the Erlang External Term Format. Bondy decodes it with `binary_to_term/2` and the `safe` option, so a client cannot create new atoms on the node. Use a value from 4 to 15. Slots 1 to 3 are already taken by JSON, MessagePack and CBOR, and those always win. The value is not validated.
 
 On WebSocket, the same serializer is negotiated by the `wamp.2.erl` subprotocol, and this key does not apply.
 
-@[config](wamp.serializers.bert,integer,4,v1.0.0)
+@[config](wamp.serializers.bert,integer,4,v1.0.0-rc.1)
 
 Has no effect. Bondy accepts the key, but it does not accept the BERT serializer on any transport. A RawSocket handshake that asks for this slot is refused with "serializer unsupported", and the `wamp.2.bert` WebSocket subprotocol is not offered. BERT is disabled because its decoder can create atoms from untrusted input before the client authenticates, which can exhaust the node's atom table.
 

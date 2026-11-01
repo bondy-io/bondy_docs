@@ -11,71 +11,71 @@ A bridge relay (Bondy Edge) connects one Bondy node, as a client, to a remote Bo
 
 ## Enabling a bridge
 
-@[config](bridge.$name,on|off,off,v1.0.0)
+@[config](bridge.$name,on|off,off,v1.0.0-rc.1)
 
 Enables or disables the named bridge.
 
-@[config](bridge.$name.endpoint,string,'127.0.0.1:18092',v1.0.0)
+@[config](bridge.$name.endpoint,string,'127.0.0.1:18092',v1.0.0-rc.1)
 
 The `host:port` of the remote Bondy router's bridge relay listener (see [Accepting bridges](#accepting-bridges) below for the listener side).
 
-@[config](bridge.$name.transport,tcp&#124;tls,tcp,v1.0.0)
+@[config](bridge.$name.transport,tcp&#124;tls,tcp,v1.0.0-rc.1)
 
 The transport for the connection to the remote router.
 
 ## TLS
 
-@[config](bridge.$name.tls.certfile,path,'{{platform_etc_dir}}/client/keycert.pem',v1.0.0)
+@[config](bridge.$name.tls.certfile,path,'{{platform_etc_dir}}/client/keycert.pem',v1.0.0-rc.1)
 
 Client certificate for the bridge connection, when `bridge.$name.transport = tls`.
 
-@[config](bridge.$name.tls.keyfile,path,'{{platform_etc_dir}}/client/key.pem',v1.0.0)
+@[config](bridge.$name.tls.keyfile,path,'{{platform_etc_dir}}/client/key.pem',v1.0.0-rc.1)
 
 Client private key for the bridge connection.
 
-@[config](bridge.$name.tls.cacertfile,path,'{{platform_etc_dir}}/client/cacert.pem',v1.0.0)
+@[config](bridge.$name.tls.cacertfile,path,'{{platform_etc_dir}}/client/cacert.pem',v1.0.0-rc.1)
 
 CA certificate used to verify the remote router, when `bridge.$name.tls.verify = verify_peer`.
 
-@[config](bridge.$name.tls.verify,verify_peer&#124;verify_none,verify_none,v1.0.0)
+@[config](bridge.$name.tls.verify,verify_peer&#124;verify_none,verify_none,v1.0.0-rc.1)
 
 Whether the bridge verifies the remote router's certificate against `bridge.$name.tls.cacertfile`.
 
-@[config](bridge.$name.tls.hostname_verification,wildcard&#124;none,wildcard,v1.0.0)
+@[config](bridge.$name.tls.hostname_verification,wildcard&#124;none,wildcard,v1.0.0-rc.1)
 
 Whether hostname verification accepts a wildcard certificate matching `bridge.$name.endpoint`'s host.
 
-@[config](bridge.$name.tls.versions,string,1.3,v1.0.0)
+@[config](bridge.$name.tls.versions,string,1.3,v1.0.0-rc.1)
 
-Comma-separated TLS protocol version(s) — currently `1.2` and/or `1.3`.
+Comma-separated TLS protocol versions: `1.2`, `1.3` or both.
 
 ## Connection behaviour
 
-@[config](bridge.$name.parallelism,integer,1,v1.0.0)
+@[config](bridge.$name.parallelism,integer,1,v1.0.0-rc.1)
 
 Number of TCP connections to open to the remote router for this bridge.
 
-@[config](bridge.$name.connect_timeout,duration_time_units,5s,v1.0.0)
+@[config](bridge.$name.connect_timeout,duration_time_units,5s,v1.0.0-rc.1)
 
 How long to wait for the initial connection to the remote router before giving up.
 
-@[config](bridge.$name.network_timeout,duration_time_units,30s,v1.0.0)
+@[config](bridge.$name.network_timeout,duration_time_units,30s,v1.0.0-rc.1)
 
 Drops the connection once the bridge has been waiting this long for the local network to come back up, checked by counting the host's non-loopback IPv4 interfaces. Set to `infinity` to disable — useful for local development with no real network connection, where this check would otherwise fire spuriously.
 
-@[config](bridge.$name.idle_timeout,duration_time_units,24h,v1.0.0)
+@[config](bridge.$name.idle_timeout,duration_time_units,24h,v1.0.0-rc.1)
 
 Drops the connection once it has carried no message, in either direction, for this long. PING and PONG messages do not count. The bridge client logs "Shutting down client due to inactivity." with reason `idle_timeout`, and its supervisor starts a new client. Set to `infinity` to keep a silent connection open.
 
 When this value is not longer than [`bridge.$name.ping.idle_timeout`](#bridge.$name.ping.idle_timeout), the connection is dropped this long after it becomes idle, so `ping.idle_timeout` plus this value after the last message.
 
-@[config](bridge.$name.hibernate,never&#124;idle&#124;always,idle,v1.0.0)
+@[config](bridge.$name.hibernate,never&#124;idle&#124;always,idle,v1.0.0-rc.1)
 
 Controls when the bridge connection process hibernates to reclaim memory: `idle` hibernates after a period of inactivity, `always` after every message, `never` disables it.
 
-@[config](bridge.$name.max_frame_size,integer&#124;infinity,4194304,v1.0.0)
+@[config](bridge.$name.max_frame_size,integer&#124;infinity,4194304,v1.0.0-rc.1)
 
-The largest frame, in bytes, the bridge is meant to accept. The value must be a positive integer or `infinity`. The default, 4194304 (4 MiB), matches the frame limits of Bondy's other carriers.
+The largest frame, in bytes, the bridge is meant to accept. The value is a positive integer or `infinity`. The default, 4194304 (4 MiB), matches the frame limits of Bondy's other carriers.
 
 `0` is rejected. Use `infinity` for no limit.
 
@@ -85,29 +85,29 @@ Bondy validates and stores this value, but the bridge connection does not apply 
 
 ## Keepalive
 
-@[config](bridge.$name.ping,on|off,on,v1.0.0)
+@[config](bridge.$name.ping,on|off,on,v1.0.0-rc.1)
 
 Whether the edge probes a silent connection with PING control messages. This affects client (edge) initiated pings only; the remote router's pings are always answered regardless.
 
-@[config](bridge.$name.ping.idle_timeout,duration_time_units,20s,v1.0.0)
+@[config](bridge.$name.ping.idle_timeout,duration_time_units,20s,v1.0.0-rc.1)
 
 How long the connection may carry no message before it becomes idle. An idle connection is probed with PING when `bridge.$name.ping` is on. It is dropped at `bridge.$name.idle_timeout`, whether `ping` is on or off.
 
-@[config](bridge.$name.ping.timeout,duration_time_units,10s,v1.0.0)
+@[config](bridge.$name.ping.timeout,duration_time_units,10s,v1.0.0-rc.1)
 
 How long a probe waits for its answer before counting as a failed attempt.
 
-@[config](bridge.$name.ping.max_attempts,integer,3,v1.0.0)
+@[config](bridge.$name.ping.max_attempts,integer,3,v1.0.0-rc.1)
 
 How many unanswered probes mean a dead connection. After this many, the bridge client closes the connection and stops. Its supervisor then starts a new client, which dials again with a fresh retry budget. The supervisor restarts the client whether or not `bridge.$name.reconnect` is on.
 
 ## Reconnection
 
-@[config](bridge.$name.reconnect,on|off,on,v1.0.0)
+@[config](bridge.$name.reconnect,on|off,on,v1.0.0-rc.1)
 
 Whether the bridge retries after a failed attempt, waiting the next backoff delay each time. A failed attempt is a connect error such as `econnrefused`, `timeout` or `ehostunreach`, a connection lost before a session opens, or a session the remote router refuses with an ABORT. The bridge retries an ABORT whatever its reason, such as a realm not yet provisioned on the remote router or a key it does not know, so the bridge connects once the remote router accepts it. Any other connect error stops the bridge. With `off`, the first failed attempt stops it. A stopped bridge reports `stopped` in [`bondy.router.bridge.status`](/router/reference/wamp_api/bridge_relay#check-status-of-a-bridge) and stays stopped until `bondy.router.bridge.start` starts it again.
 
-@[config](bridge.$name.reconnect.max_retries,integer,100,v1.0.0)
+@[config](bridge.$name.reconnect.max_retries,integer,100,v1.0.0-rc.1)
 
 The retry budget: the number of failed attempts after which the bridge client exits. The budget has no time limit. Its supervisor then starts a new client, which dials again with a fresh budget.
 
@@ -118,15 +118,15 @@ These events count against the budget:
 
 When a connection that had an open session is lost, the client closes the socket and dials again at once, with a fresh budget. When the budget is spent, or when `bridge.$name.reconnect` is `off`, the client stops. Each bridge client is a permanent child of its supervisor, so the supervisor starts a new client with a new connection and a new budget. When its clients restart more than 20 times within 60 seconds, the supervisor itself stops, together with every bridge client on the node.
 
-@[config](bridge.$name.reconnect.backoff.type,jitter&#124;normal,jitter,v1.0.0)
+@[config](bridge.$name.reconnect.backoff.type,jitter&#124;normal,jitter,v1.0.0-rc.1)
 
 Backoff strategy between reconnection attempts: `jitter` randomises the delay to avoid many bridges reconnecting in lockstep, `normal` doesn't.
 
-@[config](bridge.$name.reconnect.backoff.min,duration_time_units,5s,v1.0.0)
+@[config](bridge.$name.reconnect.backoff.min,duration_time_units,5s,v1.0.0-rc.1)
 
 Initial (and minimum) delay between reconnection attempts.
 
-@[config](bridge.$name.reconnect.backoff.max,duration_time_units,60s,v1.0.0)
+@[config](bridge.$name.reconnect.backoff.max,duration_time_units,60s,v1.0.0-rc.1)
 
 Maximum delay between reconnection attempts, once backoff has grown.
 
@@ -134,11 +134,11 @@ Maximum delay between reconnection attempts, once backoff has grown.
 
 Each bridge shares one or more realms with the remote router; `$id` names one such mapping within the bridge.
 
-@[config](bridge.$name.realm.$id.uri,string,N/A,v1.0.0)
+@[config](bridge.$name.realm.$id.uri,string,N/A,v1.0.0-rc.1)
 
 The realm URI, matching on both this node and the remote router.
 
-@[config](bridge.$name.realm.$id.authid,string,N/A,v1.0.0)
+@[config](bridge.$name.realm.$id.authid,string,N/A,v1.0.0-rc.1)
 
 The identity the bridge authenticates as on the remote router for this realm, using `cryptosign` — see below for where the signing itself happens.
 
@@ -146,23 +146,23 @@ The identity the bridge authenticates as on the remote router for this realm, us
 
 The bridge never holds the realm's private key directly (except for local testing — see the warning below). Instead, signing a `cryptosign` challenge is delegated to one of:
 
-@[config](bridge.$name.realm.$id.cryptosign.pubkey,string,N/A,v1.0.0)
+@[config](bridge.$name.realm.$id.cryptosign.pubkey,string,N/A,v1.0.0-rc.1)
 
 The public key the remote router verifies the challenge signature against.
 
-@[config](bridge.$name.realm.$id.cryptosign.procedure,string,N/A,v1.0.0)
+@[config](bridge.$name.realm.$id.cryptosign.procedure,string,N/A,v1.0.0-rc.1)
 
 Not implemented. A bridge configured with this key fails to start. Use `cryptosign.exec` or `cryptosign.privkey_env_var`.
 
-@[config](bridge.$name.realm.$id.cryptosign.exec,string,N/A,v1.0.0)
+@[config](bridge.$name.realm.$id.cryptosign.exec,string,N/A,v1.0.0-rc.1)
 
-An external executable that performs the signing. Bondy runs it directly, never through a shell, with two arguments: the public key and the raw challenge bytes. It sends the program's standard output, unchanged, as the signature, and the remote router decodes that signature as hexadecimal, so the program must print the hex-encoded Ed25519 signature and nothing else. The program must answer within 10 seconds. Bondy also runs it once when the bridge starts, to check that it works.
+An external executable that performs the signing. Bondy runs it directly, never through a shell, with two arguments: the public key and the raw challenge bytes. It sends the program's standard output, unchanged, as the signature, and the remote router decodes that signature as hexadecimal, so the program has to print the hex-encoded Ed25519 signature and nothing else. The program has to answer within 10 seconds. Bondy also runs it once when the bridge starts, to check that it works.
 
-@[config](bridge.$name.realm.$id.cryptosign.privkey_env_var,string,N/A,v1.0.0)
+@[config](bridge.$name.realm.$id.cryptosign.privkey_env_var,string,N/A,v1.0.0-rc.1)
 
 Name of an environment variable holding the hex-encoded Ed25519 private key (the 32-byte seed). Bondy reads the variable when the bridge starts and signs with that key; the bridge fails to start if the variable is unset.
 
-@[config](bridge.$name.realm.$id.cryptosign.privkey,string,N/A,v1.0.0)
+@[config](bridge.$name.realm.$id.cryptosign.privkey,string,N/A,v1.0.0-rc.1)
 
 ::: warning Testing only
 Embeds the hex-encoded private key directly in `bondy.conf`. This exists for local testing only — use `cryptosign.privkey_env_var` or `cryptosign.exec` for anything else, so the private key never has to live in a configuration file.
@@ -170,31 +170,31 @@ Embeds the hex-encoded private key directly in `bondy.conf`. This exists for loc
 
 ### Sharing procedures and topics
 
-@[config](bridge.$name.realm.$id.procedure.$pid,string,N/A,v1.0.0)
+@[config](bridge.$name.realm.$id.procedure.$pid,string,N/A,v1.0.0-rc.1)
 
 The value is a match spec: `<uri> <match-type> <direction>`, where `<match-type>` is `exact`, `prefix`, or `wildcard`, and `<direction>` is `in`, `out` (the default), or `both`.
 
-::: warning Accepted but not yet enforced
-This key is validated but the running bridge does not currently filter procedure sharing by it: every local registration on the realm is proxied to the remote unconditionally, regardless of what (or whether) anything is configured here. Treat it as reserved for a future release rather than as an access control — do not rely on it to keep a procedure off the remote router.
+::: warning Accepted but not enforced
+Bondy validates this key, but the running bridge does not filter procedure sharing by it. The bridge proxies every local registration on the realm to the remote router, whatever this key says and whether or not it is set. Do not rely on it to keep a procedure off the remote router.
 :::
 
-@[config](bridge.$name.realm.$id.topic.$tid,string,N/A,v1.0.0)
+@[config](bridge.$name.realm.$id.topic.$tid,string,N/A,v1.0.0-rc.1)
 
 Shares a topic URI pattern between the two routers for this realm, using the same match-spec syntax as above. `out` subscribes locally and forwards matching events to the remote router, so remote subscribers can receive them; `in` would do the reverse (subscribing on the remote so local subscribers receive its events).
 
-::: warning direction: in is not yet implemented
-Only `out` currently does anything — `in` (and the `in` half of `both`) is accepted by the schema but logs a warning and has no effect; the edge does not yet subscribe on the remote router's side.
+::: warning direction: in has no effect
+Only `out` has an effect. The schema accepts `in`, and the `in` half of `both`, but the bridge logs a warning and does not subscribe on the remote router's side.
 :::
 
 ## Forwarding guarantees
 
 These two keys apply to every bridge on the node. They mirror the cluster's [`router.forward.*`](/router/reference/configuration/cluster#cross-node-forwarding) keys.
 
-@[config](bridge.forward.ack,on|off,off,v1.0.0)
+@[config](bridge.forward.ack,on|off,off,v1.0.0-rc.15)
 
 Meant to request acknowledged delivery for messages forwarded over bridges. Bondy accepts and stores this value, but no part of Bondy reads it in this release, so it has no effect.
 
-@[config](bridge.forward.retransmission,on|off,off,v1.0.0)
+@[config](bridge.forward.retransmission,on|off,off,v1.0.0-rc.15)
 
 Meant to control retransmission of unacknowledged bridge messages. Accepted and stored, not read: it has no effect in this release.
 

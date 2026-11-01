@@ -15,7 +15,7 @@ related:
 ---
 # Naming Best Practices
 
-In WAMP, both RPC procedures and PubSub topics are identified by URIs. Choosing good URI naming conventions is crucial for building maintainable, scalable distributed applications. This guide provides best practices for naming your WAMP resources.
+In WAMP, both RPC procedures and PubSub topics are identified by URIs. Consistent URI naming conventions make an application easier to maintain and to secure. This guide provides best practices for naming your WAMP resources.
 
 ## URI Structure
 
@@ -145,19 +145,21 @@ com.myapp.services.api.degraded
 Design topics to allow flexible subscription patterns:
 
 ```
-# Subscribe to all order events
-com.myapp.orders.order.*
+# Subscribe to all order events (match: prefix)
+com.myapp.orders.order.
 
-# Subscribe to specific order events
+# Subscribe to specific order events (match: exact)
 com.myapp.orders.order.created
 com.myapp.orders.order.updated
 
-# Subscribe to all events for a service
-com.myapp.orders.*
+# Subscribe to all events for a service (match: prefix)
+com.myapp.orders.
 
-# Subscribe to everything for an application
-com.myapp.*
+# Subscribe to everything for an application (match: prefix)
+com.myapp.
 ```
+
+WAMP has no `*` glob. A prefix subscription matches every URI that starts with the given string, and a wildcard subscription uses an empty component, as in `com.myapp..created`. See [Pattern Matching](#pattern-matching).
 
 ### Data vs. Notification Topics
 

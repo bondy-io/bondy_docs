@@ -1,21 +1,13 @@
 # Contributors
 
-Bondy is released under the [Apache 2 license](https://github.com/bondy-io/bondy/blob/develop/LICENSE)
+Bondy is released under the [Apache 2 license](https://github.com/bondy-io/bondy-connect/blob/develop/LICENSE)
 
 If you don't know Erlang you can still contribute to the project, specially if you are interested in Bondy as a WAMP router, an important area of development is in the WAMP clients.
-
-## Coding guidelines
-:::: column 1
-::: button https://github.com/bondy-io/bondy/blob/develop/CODING_GUIDELINES.md
-Read the Coding Guidelines
-:::
-::::
-
 
 ## Github Repositories
 
 |Project|Description|Repository|
 |---|---|---|
-|Bondy|Bondy source code|[https://github.com/bondy-io/bondy](https://github.com/bondy-io/bondy)|
+|Bondy|Bondy source code|[https://github.com/bondy-io/bondy-connect](https://github.com/bondy-io/bondy-connect)|
 |Bondy Docs|The source code for this website|[https://github.com/bondy-io/bondy_docs](https://github.com/bondy-io/bondy_docs)|
 |Partisan|The underlying Erlang distribution library used by Bondy for clustering and anti-entropy replication|[https://partisan.dev](https://partisan.dev)|

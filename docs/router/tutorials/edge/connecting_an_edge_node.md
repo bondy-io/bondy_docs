@@ -35,7 +35,7 @@ building the two releases.
 You need:
 
 - **The Bondy source repository**, cloned from
-  [github.com/bondy-io/bondy](https://github.com/bondy-io/bondy), with the
+  [github.com/bondy-io/bondy-connect](https://github.com/bondy-io/bondy-connect), with the
   build requirements listed in its README under *Building from source*:
   Erlang/OTP, Rebar3, `just`, and the native libraries.
 - **Node.js and npm**, for the command-line WAMP client.

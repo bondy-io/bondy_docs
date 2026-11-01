@@ -1,35 +1,7 @@
 # bondy.error.running
-When an operation cannot proceed because the resource it targets is currently running (or restarting).
+Bondy 1.0.0 does not return this error URI.
 
 ## Description
-Some operations require a resource to be stopped first — for example, removing a [Bridge](/router/reference/wamp_api/bridge_relay) definition while it is actively running would silently orphan a live connection. The call is refused instead; stop the resource first, then retry. A resource that is `restarting` (mid-transition, neither fully stopped nor fully up) is refused for the same reason and surfaces this same error.
+The condition is a call to [`bondy.router.bridge.remove`](/router/reference/wamp_api/bridge_relay) for a bridge relay that runs or restarts. Stop the bridge relay first, then remove it.
 
-##### Positional Results
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-        0: {
-            'type': 'string',
-            'description': 'The error message'
-        }
-	})"
-/>
-
-##### Keyword Results
-<DataTreeView
-	:maxDepth="10"
-	:data="JSON.stringify({
-        'code': {
-            'type': 'string',
-            'description': 'running (or restarting)'
-        },
-        'description': {
-            'type': 'string',
-            'description': 'The error description'
-        },
-        'message': {
-            'type': 'string',
-            'description': 'The error message'
-        }
-	})"
-/>
+The caller of a procedure that meets this condition receives [`bondy.error.internal_error`](/router/reference/wamp_api/errors/internal_error) instead. The error carries a `trace_id` and no detail about the condition.

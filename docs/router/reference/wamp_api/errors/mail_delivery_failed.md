@@ -1,10 +1,16 @@
 # bondy.error.mail_delivery_failed
-When delivery failed after exhausting its retries or its deadline.
+When delivery failed and the relay's retry budget ran out.
 
 ## Description
-A transient failure — a `4xx` reply, a timeout, a dropped connection, a failed TLS handshake — that did not succeed within the relay's `retry.max_attempts` or the request's own deadline, whichever ran out first.
+Bondy raises this error when the last delivery attempt failed with a transient failure and the relay's retry budget ran out. `mail.relay.$name.retry.max_attempts` sets that budget. The last failure is one of these:
 
-Transient means the *nature* of the failure, not that Bondy is still trying: it has stopped. The message may well succeed if sent again later, which is what distinguishes this from [`bondy.error.mail_rejected`](/router/reference/wamp_api/errors/mail_rejected).
+- A `4xx` reply from the relay.
+- A response that the SMTP client did not expect.
+- A failure that the SMTP client did not classify.
+
+Other transient failures give other errors. A timeout on the last attempt, or a request deadline that runs out first, gives `bondy.error.request_timeout`. A network failure on the last attempt gives [`bondy.error.relay_unavailable`](/router/reference/wamp_api/errors/relay_unavailable).
+
+Transient is the nature of the failure. Bondy has stopped trying. The same message can succeed when it is sent again later. That is the difference from [`bondy.error.mail_rejected`](/router/reference/wamp_api/errors/mail_rejected).
 
 For a message sent with [`bondy.mail.send_async`](/router/reference/wamp_api/mail) there is no caller to receive this error; the failure is recorded in the message's status, counted as a dead letter, and logged.
 
@@ -24,16 +30,18 @@ For a message sent with [`bondy.mail.send_async`](/router/reference/wamp_api/mai
 />
 
 ##### Keyword Results
+The standard [error payload](/router/reference/errors#the-error-payload). The top-level `code` is `mail_delivery_failed`. The SMTP reply code is in `details.code` only.
+
 <DataTreeView
 	:maxDepth="10"
 	:data="JSON.stringify({
-        'relay': {
-            'type': 'string',
-            'description': 'The configured NAME of the relay.'
-        },
         'code': {
             'type': 'string',
-            'description': 'The three-digit SMTP reply code, and nothing else from the reply. A relay banner is written by someone other than Bondy and may say anything at all; the code is the part a caller can act on.'
+            'description': 'mail_delivery_failed'
+        },
+        'details': {
+            'type': 'object',
+            'description': 'Holds code, the three-digit SMTP reply code of the last attempt, when the relay answered with a 4xx reply. Nothing else from the reply reaches the caller. Empty otherwise.'
         }
 	})"
 />

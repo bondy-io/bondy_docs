@@ -23,8 +23,8 @@ related:
 
 A **relay** is an SMTP endpoint plus the policy governing who may use it and
 what they may claim as a sender. Declaring one is an operator task: relays live
-in `bondy.conf`, not in realm state, because a realm administrator must never
-be able to grant their own realm access to a relay or read its credential.
+in `bondy.conf`, not in realm state, because a realm administrator can never
+be allowed to grant their own realm access to a relay or read its credential.
 
 This guide takes one from nothing to verified.
 
@@ -48,7 +48,7 @@ point at it:
 mail.relay.transactional.tls.cacertfile = /etc/bondy/relay-ca.pem
 ```
 
-That must be the **authority** that signed the relay's certificate, not the
+That file has to be the **authority** that signed the relay's certificate, not the
 certificate itself — a self-signed leaf is refused however trusted it is.
 
 ## 2. Wire up the credential
@@ -138,26 +138,23 @@ mail.default_relay = transactional
 ```
 
 With exactly one relay configured this is unnecessary. With several and no
-default, a caller must name one — Bondy does not guess, because guessing is how
+default, a caller has to name one — Bondy does not guess, because guessing is how
 mail goes out through the wrong relay.
 
 ## 6. Verify it
 
-Restart the node and check the relay came up:
-
-```bash
-bondy attach
-```
-
-From a master-realm session, list the relays and send yourself a test message:
+Restart the node. From a master-realm session, list the relays and send
+yourself a test message:
 
 ```erlang
 bondy.mail.relay.list()
-bondy.mail.test("you@example.com")
+bondy.mail.test("com.leapsight.bondy", "you@example.com")
 ```
 
-`bondy.mail.test` is master-realm only and sends a fixed message, so nothing
-about its content can be the reason it fails. Pass `relay` as a keyword
+`bondy.mail.test` is master-realm only. Its first argument is the realm whose
+relay sends the message; when you leave it out, Bondy uses the caller's realm.
+The procedure sends a fixed message, so nothing about its content can be the
+reason it fails. Pass `relay` as a keyword
 argument to test a specific one.
 
 If it does not arrive, the error tells you which layer refused it:
@@ -178,7 +175,7 @@ session still needs the ordinary `wamp.call` permission on the procedure, which
 is granted like any other:
 
 ```erlang
-bondy.grant("com.acme.app", {
+bondy.grant.create("com.acme.app", {
     "permissions": ["wamp.call"],
     "uri": "bondy.mail.",
     "match": "prefix",
@@ -206,7 +203,7 @@ application for weeks.
 :::
 
 The relay's `realms` list still applies: the subscription names a realm, and
-that realm must be permitted to use the relay it names. See the [Broker Bridge
+that realm has to be permitted to use the relay it names. See the [Broker Bridge
 Configuration Reference](/router/reference/configuration/broker_bridge#smtp).
 
 ## Watching it in production

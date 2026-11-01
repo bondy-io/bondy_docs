@@ -124,10 +124,10 @@ See [Running a Cluster](/router/guides/deployment/running_a_cluster) for the con
 When a new node starts:
 
 1. **Discovery** - Node queries configured discovery mechanism for peers
-2. **Connection** - Node establishes connections to discovered peers
-3. **Handshake** - Nodes exchange cluster membership and version information
-4. **State Sync** - New node receives full state replication from existing nodes
-5. **Join Complete** - Node begins accepting client connections and routing messages
+2. **Connection** - Node establishes connections to discovered peers and joins their membership
+3. **State Sync** - Anti-entropy pulls the replicated state the new node does not hold from its peers
+
+The node accepts client connections as soon as its own boot finishes; it does not wait for state sync to complete. See [Node Lifecycle](/router/concepts/node_lifecycle#what-ready-means). Under the default policy of the [authentication freshness fence](/router/reference/configuration/data_storage#active-anti-entropy) (`db.aae.fence.on_isolation = refuse`), the new node refuses authentication until its first sync round with a peer completes.
 
 ::: warning Version Compatibility
 All nodes in a cluster must run the same Bondy release. Rolling upgrades are not supported: upgrade a cluster by stopping every node and starting them all on the new release. See [Upgrading to 1.0.0](/router/guides/deployment/upgrading_to_1_0_0).
@@ -214,15 +214,15 @@ For optimal performance, use **session affinity** (sticky sessions) at your load
 
 Key metrics to monitor:
 
-- **Cluster membership** - Number of connected nodes
-- **Inter-node latency** - Network round-trip time between nodes
-- **AAE queue depth** - State repair backlog
-- **Message routing hops** - Cross-node routing overhead
-- **State divergence** - Detected inconsistencies between nodes
+- **Cluster membership** - Members and connected peers (`bondy_cluster_members`, `bondy_cluster_connected_peers`, `bondy_cluster_all_members_connected`)
+- **Anti-entropy recency** - Time since the last completed sync with each peer (`bondy_oplog_peer_last_sync_age_seconds`)
+- **State divergence** - The applied frontier on each node (`bondy_oplog_instance_frontier_hash`) and the gaps that sync rounds detect (`bondy_oplog_frontier_gap_verdicts_total`)
+
+See the [Metrics Reference](/router/reference/metrics) for the labels of each series.
 
 ### Best Practices
 
-1. **Use odd-numbered clusters** - Provides clear majority for conflict resolution
+1. **Use odd-numbered clusters with the `quorum` fence policy** - Bondy resolves conflicts by CRDT merge, not by majority vote. A majority matters only when `db.aae.fence.on_isolation = quorum`, where a node authenticates only while it reaches a majority of the membership
 2. **Co-locate with clients** - Deploy nodes in same regions as your applications
 3. **Size appropriately** - Start with 3-5 nodes, scale based on actual load
 4. **Monitor network health** - Low latency and high bandwidth between nodes is critical

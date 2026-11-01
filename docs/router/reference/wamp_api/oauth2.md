@@ -166,7 +166,7 @@ None.
 None.
 
 #### Errors
-None documented — the underlying user removal is not conditioned on the client existing first.
+* [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when no user with the given name exists in the realm.
 
 ### Add a resource owner
 ##### bondy.oauth2.resource_owner.add(realm_uri, data) -> user {.wamp-procedure}
@@ -286,7 +286,7 @@ None.
 None.
 
 #### Errors
-None documented — the underlying user removal is not conditioned on the resource owner existing first.
+* [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when no user with the given name exists in the realm.
 
 ### Revoke a refresh token
 ##### bondy.oauth2.token.revoke(realm_uri, client_id, refresh_token) -> ok {.wamp-procedure}

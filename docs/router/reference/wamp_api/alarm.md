@@ -108,15 +108,13 @@ ring recorded it.
 `limit` and `cursor` are keyword arguments, not `CALL.Options`: they are
 arguments to the procedure, and Bondy is the callee for `bondy.*`.
 `receive_progress` and `_deadline` stay options because they are instructions
-to the router about how the reply is delivered and how long it may take. `limit`
-and `cursor` were `CALL.Options` extension keys (`_limit` / `_cursor`) until
-2026-09-01; the option form is no longer read.
+to the router about how the reply is delivered and how long it may take.
+Bondy does not read the `_limit` and `_cursor` options.
 
-Raises [`bondy.error.stale`](/router/reference/wamp_api/errors/stale) if
-`cursor` was minted under an incompatible cursor schema or walk shape, or
-[`bondy.error.malformed`](/router/reference/wamp_api/errors/malformed) if
-`cursor` isn't a decodable cursor at all. Either way, restart from the first
-page by omitting it — a resume position cannot be guessed.
+Raises [`wamp.error.invalid_argument`](/router/reference/wamp_api/errors/wamp_invalid_argument)
+if this procedure did not mint `cursor`, or if an incompatible release minted it.
+The error `details.reason` is `stale` or `malformed`. In both cases, restart from
+the first page: omit `cursor`. A resume position cannot be guessed.
 
 **The walk is node-at-a-time**, starting with the node serving the call and
 reaching its peers only when that node's ring does not fill the page. That is
