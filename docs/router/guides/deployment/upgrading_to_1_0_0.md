@@ -222,6 +222,10 @@ Recreate each realm from your configuration or with `bondy.realm.create` calls, 
 The import writes the old deployment's master-realm `admin` user, old password included, over the one the new node created at first boot. `security.admin_user.password` does not change it: Bondy reads that key only when it creates the master realm, at a node's first boot. Change the password with `bondy.user.change_password` on `com.leapsight.bondy` once the import has finished. While it is still the former default, `bondy-admin`, every boot logs a warning.
 :::
 
+::: warning Old passwords authenticate with the `password` method only
+The import keeps each password in the format it was stored in. A password stored in a format older than 1.2 (a `1.0` or `1.1` record) authenticates with the `password` method and the OAuth2 password grant. Bondy does not offer such a user `wampcra` or `wamp-scram`, because a challenge needs data that the old record does not hold. Change the password with `bondy.user.change_password` to store it in the current format, which both challenge methods accept.
+:::
+
 When the import finishes, the node logs one `notice`, `"Import skipped some legacy records by reason"`, whose `skipped` field counts each record it did not write, by reason:
 
 | Reason | Record |

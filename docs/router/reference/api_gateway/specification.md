@@ -547,8 +547,8 @@ The Security Object defines how requests to an API version authenticate. The rou
 | (empty object) | Served without authentication. | None. |
 | `oauth2` | Require a valid Bondy OAuth2 access token. | The token and revoke paths, `/oauth/jwks`, and a [verify route](#verify-route). |
 | `oidc` | Require the realm's OIDC ticket cookie, `bondy_ticket_<realm_uri>`. A request other than `GET`, `HEAD` or `OPTIONS` must also send the value of the `bondy_csrf_<realm_uri>` cookie in `x-csrf-token`. | `/oidc/login`, `/oidc/<provider>/callback`, `/oidc/logout`, and a [verify route](#verify-route). See [OIDC Authentication](/router/concepts/oidc_authentication). |
-| `basic` | **Refused.** | None. |
-| `api_key` | **Refused.** | None. |
+| `basic` | **Refused** with `401`. | None. |
+| `api_key` | **Refused** with `401`. | None. |
 
 Each scheme accepts only the keys listed for it below. The parser refuses any other key, including `scopes`: the gateway checks no OAuth2 scope.
 
@@ -556,7 +556,7 @@ Each scheme accepts only the keys listed for it below. The parser refuses any ot
 A specification using one of these schemes loads, but Bondy refuses every request to the version's own paths. It never serves them without authentication. Use `oauth2` or `oidc` to protect an HTTP API.
 :::
 
-An `oidc` path authenticates the cookie the way a WAMP session opened with it authenticates: the realm's `authmethods` must include `cookie`, the ticket's scope must cover the realm, and its issuer must be trusted by the realm. A ticket issued for an identity Bondy does not store takes its roles from the ticket.
+An `oidc` path authenticates the cookie the way a WAMP session opened with it authenticates: the realm must admit `cookie` and the ticket's own method (`oidcrp` for a ticket the OIDC login flow issued, `ticket` for any other), the ticket's scope must cover the realm, and its issuer must be trusted by the realm. A ticket issued for an identity Bondy does not store takes its roles from the ticket.
 
 ### OAuth2 Authentication
 
@@ -585,6 +585,8 @@ The route accepts `GET` and `HEAD`. It reads the credential from the first of th
 3. The `bondy_ticket_<realm_uri>` cookie set by the OIDC login flow
 
 It checks the credential's signature, expiry and revocation; that its scope covers the realm and its issuer is trusted by the realm; that the user is enabled and still exists; and that the realm still allows connections. A credential issued by the OIDC login flow for an identity Bondy does not store locally passes without a local user.
+
+The route also applies the realm's `authmethods` and [sources](/router/reference/wamp_api/source) to the credential's own method: `oidcrp` for a ticket the OIDC login flow issued, `ticket` for any other ticket, `oauth2` for an access token. A credential sent in the ticket cookie also needs `cookie`. The caller's address is the listener's source IP. Behind a reverse proxy that is the proxy's address, unless the listener [trusts the proxy's forwarding headers](/router/reference/configuration/listeners#trusted-proxies).
 
 | Outcome | Status | Response |
 |---|---|---|

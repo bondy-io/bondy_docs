@@ -146,6 +146,8 @@ Updates an existing user.
 Publishes an event under topic [bondy.user.updated](#bondy-user-updated){.uri} after the user has been updated.
 Optionally, publishes an event under topic [bondy.user.credentials_changed](#bondy-user-credentials-changed){.uri} if the user's authorized_keys have been changed.
 
+The update cannot set a password. When the data carries `password`, the call fails with `wamp.error.invalid_argument` and changes nothing. To set a password, call [bondy.user.change_password](#change-the-user-password){.uri}.
+
 #### Call
 
 ##### Positional Args
@@ -166,11 +168,11 @@ None.
 
 * [bondy.error.missing_required_value](/router/reference/wamp_api/errors/missing_required_value): when a required value is not provided
 * [bondy.error.unknown_error](/router/reference/wamp_api/errors/unknown_error) with `code` `invalid_datatype`: when the data type is invalid. See [invalid_datatype](/router/reference/wamp_api/errors/invalid_datatype).
-* [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the data value is invalid
+* [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the data value is invalid, or when the username is reserved
 * [bondy.error.invalid_data](/router/reference/wamp_api/errors/invalid_data): when the data values are invalid
 * [bondy.error.internal_error](/router/reference/wamp_api/errors/internal_error): when any of the provided group name doesn't exist. Bondy 1.0.0 returns this URI in place of [`bondy.error.no_such_groups`](/router/reference/wamp_api/errors/no_such_groups).
-* [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
-* [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): for example when the provided `sso_realm_uri` property value doesn't exist.
+* [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist, or when the user links to an SSO realm that no longer holds it.
+* [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when the data carries `password`, or when the provided `sso_realm_uri` property value doesn't exist.
 
 #### Examples
 
@@ -290,6 +292,7 @@ None.
 
 * [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
 * [bondy.error.conflict](/router/reference/wamp_api/errors/conflict): when the realm is an SSO realm and other realms hold a local user of the same name that links to this realm as its SSO realm. The error's `details.realms` lists the URIs of those realms. The router removes nothing. Delete the user from the listed realms first.
+* [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the username is reserved.
 
 #### Examples
 
@@ -338,6 +341,10 @@ None.
 
 #### Errors
 
+* [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
+* [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
+* [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the username is reserved.
+
 #### Examples
 
 ::: code-group
@@ -382,6 +389,10 @@ None.
 None.
 
 #### Errors
+
+* [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
+* [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
+* [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the username is reserved.
 
 #### Examples
 
@@ -754,9 +765,9 @@ None.
 #### Errors
 
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
-* [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
+* [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist, or when the user links to an SSO realm that no longer holds it.
 * [bondy.error.property_range_limit](/router/reference/wamp_api/errors/property_range_limit): when the value for property 'alias' already contains the maximum number of values allowed (5).
-* [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the alias is not a valid username.
+* [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the alias is not a valid username, or when the username is `anonymous`.
 * [bondy.error.already_exists](/router/reference/wamp_api/errors/already_exists): when a user or another alias in the realm already uses the name.
 
 #### Examples
@@ -830,7 +841,7 @@ Removes an existing alias from an existing user.
 
 If the user is an SSO user, the alias is removed from the SSO Realm only.
 
-Removing an alias that the user does not hold succeeds.
+Removing an alias that the user does not hold succeeds and changes nothing. A name that another user holds, as an alias or as a username, stays with that user.
 
 #### Call
 
@@ -870,7 +881,7 @@ None.
 #### Errors
 
 * [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when there is an invalid number of positional arguments.
-* [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist.
+* [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when the provided username does not exist, or when the user links to an SSO realm that no longer holds it.
 * [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the alias is not a valid username.
 
 #### Examples

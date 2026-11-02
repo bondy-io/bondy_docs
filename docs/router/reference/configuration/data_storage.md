@@ -197,6 +197,10 @@ A single node that keeps the default `cluster.enabled = on` has no peer to confi
 - **`proceed`** — treat unreachable peers as vacuously fresh and keep authenticating. Most available, but during a partition a stale minority node could accept a token revoked elsewhere until it heals. Not recommended for a security fence.
 - **`quorum`** — certify freshness, and so authenticate, only while connected to a majority of the expected cluster membership; a minority partition refuses even if it can still sync internally. Secure and available for the majority side. Requires a Partisan cluster.
 
+@[config](db.aae.fence.alarm,duration_time_units,5m,v1.0.1)
+
+How long the fence may refuse every new authentication before the node raises the [`bondy_auth_fence_closed`](/router/reference/alarms#bondy-auth-fence-closed) alarm. The node checks the fence every 10 seconds. It raises the alarm when the fence refuses and no anti-entropy round has refreshed the users and grants within this time. It clears the alarm when the fence admits again. The fence is closed at every boot until the first anti-entropy round, so the node does not raise the alarm until it has been up for this long. `0` disables the alarm. Only relevant when `db.aae` is on.
+
 ## Storage Engine (leveled)
 
 The `db.leveled.*` keys are passed to every durable leveled store this node starts. They are advanced tuning keys, and most deployments leave them at their defaults. Each default is leveled's own, except `db.leveled.cache_size`, which keeps the 2000 Bondy has always used. The keys are global, like `db.wal.*`. The ephemeral `registry` database keeps its projection in memory and starts no leveled store, so none of them apply to it.

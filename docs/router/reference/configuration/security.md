@@ -126,6 +126,8 @@ Lifetime of a refresh token. A client uses a still-valid refresh token to obtain
 
 Maximum number of refresh tokens held concurrently per user. Issuing beyond this limit retires the oldest outstanding token for that user.
 
+The value is a whole number of tokens, 1 or more. A value with a unit suffix, such as `25KB`, or `0` stops configuration generation at boot with an error that names the key. Before 1.0.1 the key accepted a size, so `25KB` meant 25600 tokens.
+
 @[config](oauth2.refresh_token.length,bytesize,40,v0.6.7)
 
 ::: warning Deprecated
@@ -207,31 +209,23 @@ stored.
 
 OIDC providers are configured per realm, in the realm's `oidc_providers` property, and the login, callback and logout routes come from an `oidc` security scheme in an API Gateway specification. Those routes are served by every listener that exposes the `api_gateway` service. See [OIDC Authentication](/router/concepts/oidc_authentication) for both.
 
-The `security.oidc.providers.*` keys below are accepted by the configuration schema, but this release does not read them. Setting them registers no provider and mounts no route.
-
-@[config](security.oidc.providers.enabled,on|off,off,v1.0.0-rc.50)
-
-Accepted and stored in the node configuration. Nothing reads it.
+The `security.oidc.providers.<provider_id>.*` keys are reserved for a node registry of OIDC providers. This release checks them and does not use them: setting them registers no provider and mounts no route. An entry without `issuer` or `client_id` is left out, with a warning naming it when the configuration is generated.
 
 @[config](security.oidc.providers.$provider_id.issuer,string,none,v1.0.0-rc.50)
 
-The provider's issuer URL. Do not set this key: the schema translation for `security.oidc.providers` has no case for `issuer`, so setting it makes configuration generation fail. The realm-level `issuer` property is the one that works.
+The provider's issuer URL. It must be an `http` or `https` URL with a host.
 
 @[config](security.oidc.providers.$provider_id.client_id,string,none,v1.0.0-rc.50)
 
-The OAuth2 client ID registered with the provider. Accepted and stored, not read.
+The OAuth2 client ID registered with the provider.
 
 @[config](security.oidc.providers.$provider_id.client_secret,string,none,v1.0.0-rc.50)
 
-The OAuth2 client secret. Accepted and stored, not read.
+The OAuth2 client secret registered with the provider.
 
-@[config](security.oidc.providers.$provider_id.login_path,string,none,v1.0.0-rc.50)
+@[config](security.oidc.providers.$provider_id.allow_unsafe_http,on|off,off,v1.0.1)
 
-A login path for the provider, for example `/oidc/aws_cognito/login`. Accepted and stored, not read. The login route that works is `<base_path>/oidc/login`, built from the API Gateway specification.
-
-@[config](security.oidc.providers.$provider_id.redirect_path,string,none,v1.0.0-rc.50)
-
-A callback path for the provider, for example `/oidc/aws_cognito/callback`. Accepted and stored, not read. The callback route that works is `<base_path>/oidc/<provider>/callback`, built from the API Gateway specification.
+Whether the provider may be reached over plain HTTP.
 
 ## Token and Ticket Reclamation
 

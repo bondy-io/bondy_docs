@@ -285,12 +285,13 @@ request without an `Authorization` header that carries the master realm's
 ticket cookie, `bondy_ticket_com.leapsight.bondy`, authenticates with it,
 checked as on an API Gateway path with the `oidc` scheme:
 
-- add `cookie` to the master realm's `authmethods`, and an OIDC provider to its
-  `oidc_providers`;
-- add a `cookie` source for the network your administrators connect from. An
-  OIDC user without a local user record is matched only by sources assigned
-  to `all`, because a source that names users requires them to exist; the
-  provider's `auto_provision` creates the record;
+- add `oidcrp` and `cookie` to the master realm's `authmethods`, and an OIDC
+  provider to its `oidc_providers`. `oidcrp` admits the OIDC credential, and
+  `cookie` admits it arriving in a cookie;
+- add an `oidcrp` source and a `cookie` source for the network your
+  administrators connect from. An OIDC user without a local user record is
+  matched only by sources assigned to `all`, because a source that names users
+  requires them to exist; the provider's `auto_provision` creates the record;
 - load an API Gateway specification bound to `com.leapsight.bondy` whose
   security is `oidc` with that provider: it serves the login, callback and
   logout endpoints that set the cookie;
@@ -464,6 +465,8 @@ peer yield no address. On a raw socket, it happens when the PROXY header is
 missing or malformed. `relaxed` falls back to the socket peer. `strict`
 refuses the connection or the request. The API Gateway
 answers a refused request with `403` and `bondy.error.proxy_protocol_error`.
+The MCP endpoint answers it with `403` and JSON-RPC code `-32000`,
+`Proxy protocol error`.
 
 @[config](listeners.$name.proxy_protocol.trusted_proxies,string,,v1.0.0)
 

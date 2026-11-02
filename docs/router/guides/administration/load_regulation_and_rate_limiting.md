@@ -165,8 +165,8 @@ Five classes apply token buckets at five points in a connection's life. Each cla
 |---|---|---|---|
 | `connection` | source IP | transport handler, before any per-connection work | TCP: socket closed. WebSocket: HTTP `429` |
 | `handshake` | source IP | `HELLO`, after the load admission gate | `ABORT` with `wamp.error.unavailable` |
-| `auth` | source IP | `AUTHENTICATE`, before credential verification | `ABORT` with `wamp.error.unavailable` |
-| `http` | source IP | every HTTP request — API Gateway, Admin API and MCP endpoints | HTTP `429` with a `retry-after` header |
+| `auth` | source IP | `AUTHENTICATE`, before credential verification; the OAuth2 endpoints (`/oauth/token`, `/oauth/revoke`, `/oauth/jwks`), before any credential check | `ABORT` with `wamp.error.unavailable`; HTTP `429` with a `retry-after` header on the OAuth2 endpoints |
+| `http` | source IP | API Gateway, Admin API and MCP requests, before authentication, so refused requests count too | HTTP `429` with a `retry-after` header |
 | `message` | session | `CALL` / `PUBLISH` / `SUBSCRIBE` / `REGISTER` | `ERROR` with `wamp.error.unavailable`, or a silent drop |
 
 The `auth` limit applies *before* verification, which is the point: verification is the expensive step a credential-stuffing run is trying to make you perform.

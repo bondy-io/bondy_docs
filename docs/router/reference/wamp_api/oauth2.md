@@ -109,7 +109,7 @@ Updates an existing API client.
         },
         '2':{
             'type': 'dict',
-            'description' : 'The fields to update. `client_secret` (the password) and `groups` are both optional here; when `groups` is given, `api_clients` is re-added to it regardless of what is passed, the same as on creation. Omitting `groups` entirely leaves the client\'s current groups untouched.'
+            'description' : 'The fields to update. `client_secret` is refused: the call fails with `wamp.error.invalid_argument` and changes nothing. Set it with [`bondy.user.change_password`](/router/reference/wamp_api/user#change-the-user-password). `groups` is optional; when it is given, `api_clients` is re-added to it regardless of what is passed, the same as on creation. Omitting `groups` entirely leaves the client\'s current groups untouched.'
         }
     })"
 />
@@ -134,6 +134,8 @@ None.
 
 #### Errors
 * [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when `client_id` does not exist.
+* [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when the data carries `client_secret`.
+* [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when `client_id` is a reserved name.
 
 ### Delete an API client
 ##### bondy.oauth2.client.delete(realm_uri, client_id) -> ok {.wamp-procedure}
@@ -167,6 +169,7 @@ None.
 
 #### Errors
 * [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when no user with the given name exists in the realm.
+* [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the name is a reserved name.
 
 ### Add a resource owner
 ##### bondy.oauth2.resource_owner.add(realm_uri, data) -> user {.wamp-procedure}
@@ -229,7 +232,7 @@ Updates an existing resource owner.
         },
         '2':{
             'type': 'dict',
-            'description' : 'The fields to update. `groups` is optional; when given, `resource_owners` is re-added to it regardless of what is passed. Omitting `groups` entirely leaves the current groups untouched.'
+            'description' : 'The fields to update. `password` is refused: the call fails with `wamp.error.invalid_argument` and changes nothing. Set it with [`bondy.user.change_password`](/router/reference/wamp_api/user#change-the-user-password). `groups` is optional; when given, `resource_owners` is re-added to it regardless of what is passed. Omitting `groups` entirely leaves the current groups untouched.'
         }
     })"
 />
@@ -254,6 +257,8 @@ None.
 
 #### Errors
 * [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when `username` does not exist.
+* [wamp.error.invalid_argument](/router/reference/wamp_api/errors/wamp_invalid_argument): when the data carries `password`.
+* [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when `username` is a reserved name.
 
 ### Delete a resource owner
 ##### bondy.oauth2.resource_owner.delete(realm_uri, username) -> ok {.wamp-procedure}
@@ -287,6 +292,7 @@ None.
 
 #### Errors
 * [wamp.error.no_such_principal](/router/reference/wamp_api/errors/wamp_no_such_principal): when no user with the given name exists in the realm.
+* [bondy.error.invalid_value](/router/reference/wamp_api/errors/invalid_value): when the name is a reserved name.
 
 ### Revoke a refresh token
 ##### bondy.oauth2.token.revoke(realm_uri, client_id, refresh_token) -> ok {.wamp-procedure}

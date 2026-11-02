@@ -232,6 +232,8 @@ Any other annotation key passes through unchanged. Each overlay field left out f
 
 Authentication is Bondy's own and runs on every request, in both eras. On a realm with security disabled every request is anonymous.
 
+The realm's sources match the request's source IP. Behind a proxy that the listener trusts, that is the client address the proxy forwards. Otherwise it is the socket peer. See [Proxy protocol and forwarded headers](/router/reference/configuration/listeners#trusted-proxies).
+
 |`Authorization` header|Method|
 |---|---|
 |`Bearer` with a JWT that carries `sub`|OAuth2, validated against the realm's OAuth2 configuration.|
@@ -244,6 +246,7 @@ Authentication is Bondy's own and runs on every request, in both eras. On a real
 |---|---|---|
 |`401`|Authentication fails.|Empty. The response carries `WWW-Authenticate: Bearer`.|
 |`403`|The request carries an `Origin` that the listener does not allow.|Code `-32600`, `Origin not allowed`.|
+|`403`|The listener's `proxy_protocol.mode` is `strict` and a trusted proxy forwards no client address.|Code `-32000`, `Proxy protocol error`.|
 |`413`|The body exceeds [`listeners.$name.mcp.max_body_size`](/router/reference/configuration/mcp#listeners.$name.mcp.max_body_size).|Code `-32600`.|
 |`429`|The source IP has exhausted the `http` rate-limit bucket (`security.rate_limit.*`).|Code `-32000`, `Too many requests`. The response carries `Retry-After: 1`.|
 

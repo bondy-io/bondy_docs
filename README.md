@@ -85,15 +85,29 @@ The site is versioned: a small dropdown in the navbar lets readers switch betwee
 - **`docs/versions.json`** is the single source of truth. It lists the `current` version and every `archived` version (each with the git tag that produced it). `docs/.vitepress/config.mjs` reads this file at build time to populate the navbar version picker and the `bondyVersion` site metadata — nothing about the version list is hardcoded in `config.mjs` itself.
 - **Archived versions are built exactly once, ever.** Tagging a commit `docs-<version>` (e.g. `docs-1.0.0-rc`) triggers `.github/workflows/release-docs.yml`, which builds that snapshot with its base path set to `/v<version>/` and publishes the output as a GitHub Release asset. That build is never repeated.
 - **Every push to `main`** triggers `.github/workflows/deploy.yml`, which builds only the *current* version fresh, downloads each archived version's already-built package from GitHub Releases (per `docs/versions.json`, no rebuild), combines them into one directory (current at `/`, each archive at `/v<version>/`), and pushes the result to Netlify as a production deploy via the Netlify CLI.
+- **Every push to `develop`** runs the same workflow, but deploys the result as a Netlify preview at `https://develop--<site>.netlify.app` instead of production. Each push replaces the previous preview.
 - **`.github/workflows/ci.yml`** runs on every push/PR: build check, broken-link check, spellcheck. It doesn't deploy anything.
+
+### How docs versions follow Bondy Connect
+
+A docs version describes one Bondy Connect `major.minor` release line, such as `1.0` or `1.1`. The version picker then tells a reader which docs match the Bondy they run.
+
+- **`main` documents the latest released Bondy Connect only.** Do not merge docs for an unreleased feature into `main`. The production site would describe behaviour that no released Bondy has.
+- **`develop` documents the next Bondy Connect release.** Write docs for unreleased features here, and review them on the `develop` preview.
+- **A patch release does not create a docs version.** Fix the docs on `main`. Mark a configuration parameter that a patch release adds or changes with the `since` argument of `@[config](...)`, or with `@[configDeprecated](...)` for a rename.
+- **A new minor or major release archives the previous line.** Follow the steps below as part of the Bondy Connect release.
+- **Name each docs tag after the Bondy Connect version it describes.** Use `docs-1.0` for the `1.0` line. For a release candidate, use the Bondy Connect tag name, such as `docs-1.1.0-rc.quince`.
 
 ### Cutting a new archived version
 
-When a future rewrite needs the same treatment:
+Do this when Bondy Connect releases a new minor or major version. The example archives `1.0` and makes `1.1` current.
 
-1. Update `docs/versions.json`: move the current entry into `archived` (giving it a `tag`), and set a new `current`.
-2. Tag the commit you want frozen: `git tag -a docs-<version> -m "..."` and `git push origin docs-<version>`. This triggers `release-docs.yml`, which builds and publishes it once.
-3. Push the `versions.json` update to `main`. The next `deploy.yml` run picks up the new archived entry automatically — no further workflow changes needed.
+1. On `main`, tag the last commit that documents `1.0`: `git tag -a docs-1.0 -m "Docs for Bondy Connect 1.0"` and `git push origin docs-1.0`. This triggers `release-docs.yml`, which builds and publishes the snapshot once.
+2. Merge `develop` into `main`.
+3. On `main`, update `docs/versions.json`: move the current entry into `archived` with `"tag": "docs-1.0"`, and set `current` to `1.1`.
+4. Push `main`. The next `deploy.yml` run picks up the new archived entry automatically — no further workflow changes needed.
+
+Tag before you merge. A tag on a later commit freezes `1.1` content under the `1.0` label.
 
 **The `version` field is the URL path, and it must equal the tag minus its `docs-` prefix.** `release-docs.yml` derives the base path a snapshot is built with from the tag name, while `deploy.yml` mounts that snapshot at `/v<version>/` from `versions.json`. If the two disagree the archived version still loads, but every stylesheet and script in it 404s. Use `label` for what the navbar should display when it differs from the path — e.g. the entry below is served at `/v1.0.0-rc.65.1/` and shown as `v1.0.0-rc`:
 

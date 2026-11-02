@@ -108,6 +108,8 @@ OIDC providers are configured per-realm in the realm's `info.oidc_providers` map
 | `cookie_domain` | string | No | — | The `Domain` attribute for cookies (e.g. `.example.com`). Enables cookie sharing across subdomains. |
 | `cookie_same_site` | string | Yes | `"lax"` | The `SameSite` attribute for both cookies: `"lax"`, `"strict"` or `"none"`. |
 
+Each node fetches a provider's OpenID configuration and signing keys the first time the provider is used, and keeps them refreshed. A change to the provider's `issuer` or `allow_unsafe_http` takes effect on each node at its next use of the provider. Deleting the realm stops this work on every node.
+
 ::: warning Important
 The `redirect_uri` must exactly match the redirect URI registered with the IdP. A mismatch will cause the IdP to reject the authorization request with an `invalid_request` error.
 :::
@@ -148,11 +150,15 @@ The `sources` entry lets OIDC users authenticate with the ticket cookie from any
 
 ### Sources
 
-Bondy applies the realm's [sources](/router/reference/wamp_api/source) to an OIDC user as it does to any other user. The ticket cookie authenticates only when a source allows the `cookie` method from the client's address. This holds for a WAMP session opened with the cookie, for a path the `oidc` scheme protects, and for the Admin API.
+Bondy applies the realm's [sources](/router/reference/wamp_api/source) to an OIDC user as it does to any other user. The OIDC ticket authenticates only when the realm admits the `oidcrp` method from the client's address, in its `authmethods` and a source. When the ticket arrives in the cookie, the realm must also admit `cookie`, the method for credentials carried in a cookie. This holds for a WAMP session opened with the cookie, for a path the `oidc` scheme protects, for the Admin API, and for the [verify route](/router/reference/api_gateway/specification#verify-route).
+
+The login applies the same check. After the provider authenticates the user, the callback issues the ticket only when the realm admits `oidcrp` for that user from the client's address, and otherwise answers `403` with `no_authmethod`. With `auto_provision`, a refused login creates no user record.
+
+::: warning Deprecated
+A realm that admits `cookie` but not `oidcrp` still accepts the OIDC ticket, and Bondy logs a warning once per realm on each node. A later release removes this. Add `oidcrp` to the realm's `authmethods` and a source that allows it.
+:::
 
 It holds whether or not Bondy keeps a user record for the subject. Without `auto_provision` there is no record, so only sources assigned to `all` can match: a source that names users requires those users to exist.
-
-The [verify route](/router/reference/api_gateway/specification#verify-route) does not check sources.
 
 
 ## API Gateway Security Scheme
@@ -189,7 +195,7 @@ This automatically registers four HTTP routes under the version's `base_path`:
 | `<base_path>/oidc/logout` | GET, POST | Terminates the session |
 | `<base_path>/oidc/verify` | GET, HEAD | Tells a reverse proxy whether a request carries a valid ticket. See [Verify route](/router/reference/api_gateway/specification#verify-route). |
 
-The version's own paths require the ticket cookie. The realm's `authmethods` must include `cookie`, and a [source](#sources) must allow it from the client's address. See [CSRF Protection](#csrf-protection) for requests that change state.
+The version's own paths require the ticket cookie. The realm's `authmethods` must include `oidcrp` and `cookie`, and [sources](#sources) must allow both from the client's address. See [CSRF Protection](#csrf-protection) for requests that change state.
 
 
 ## Cookies
@@ -276,5 +282,5 @@ The logout endpoint (`GET` or `POST <base_path>/oidc/logout`) performs the follo
 | `cookie_same_site` | From provider config | Override the cookies' `SameSite` attribute for clearing |
 
 ::: warning Important
-The logout handler is designed to be resilient. If the realm or provider no longer exists on this Bondy node, it will still clear the cookies and redirect. Ticket revocation is best-effort.
+The logout handler is designed to be resilient. If the realm or provider no longer exists on this Bondy node, or the realm has no OIDC providers configured, it still clears the cookies and redirects. Ticket revocation is best-effort.
 :::

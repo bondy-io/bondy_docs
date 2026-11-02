@@ -77,6 +77,11 @@ grant, a source rule admitting the callers' network, and grants covering
 exactly the procedures that should be callable. A tool whose procedure the
 caller may not call is simply absent from the client's `tools/list`.
 
+Behind a reverse proxy, the source rule matches the client's address only
+when the listener trusts the proxy
+([`proxy_protocol.trusted_proxies`](/router/reference/configuration/listeners#trusted-proxies)).
+Otherwise it matches the proxy's address.
+
 Nothing MCP-specific happens here; see
 [Security](/router/reference/configuration/security) and the RBAC
 references.

@@ -55,7 +55,7 @@ Choose one password method:
 - **`wampcra`.** List `wampcra`, as above.
 - **`wamp-scram`.** List `wamp-scram` in place of `wampcra`.
 
-Bondy hashes a password for one protocol, and each method accepts only its own: `wampcra` needs a CRA password, and `wamp-scram` needs a SCRAM password. The realm picks the protocol for new passwords from its `authmethods`. When the list includes `wamp-scram`, new passwords are hashed for SCRAM. Otherwise Bondy uses the `security.password.protocol` setting, which defaults to `cra`. Passwords set before you change `authmethods` keep their protocol. To switch a password over, set it again with `bondy.user.change_password`, passing the realm URI, the username and the new password. `bondy.user.update` does not change a password. See [User](/router/reference/wamp_api/user).
+Bondy hashes a password for one protocol, and each method accepts only its own: `wampcra` needs a CRA password, and `wamp-scram` needs a SCRAM password. The realm picks the protocol for new passwords from its `authmethods`. When the list includes `wamp-scram`, new passwords are hashed for SCRAM. Otherwise Bondy uses the `security.password.protocol` setting, which defaults to `cra`. Passwords set before you change `authmethods` keep their protocol. To switch a password over, set it again with `bondy.user.change_password`, passing the realm URI, the username and the new password. `bondy.user.update` refuses a password with `wamp.error.invalid_argument`. See [User](/router/reference/wamp_api/user).
 
 Leave out the other methods unless your clients need them:
 

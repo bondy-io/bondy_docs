@@ -41,7 +41,9 @@ The following endpoints are registered under the API version's `base_path`:
 
 The login, callback and logout endpoints support `OPTIONS` for CORS preflight. The `Access-Control-Allow-Origin` header is set to the request's `Origin` header value.
 
-An error response from the login or callback endpoint has a JSON body. The body holds `error`, the error name that the examples below show. The body also holds the standard [error payload](/router/reference/errors#the-error-payload). In that payload, `uri` is `bondy.error.<error>`, `code` is the error name, `handle` is `S002` and `nature` is `transient`. The examples show only the `error` key. A method that an endpoint does not accept answers `405` with an empty body.
+An error response from the login or callback endpoint has a JSON body. The body holds `error`, the error name that the examples below show. The body also holds the standard [error payload](/router/reference/errors#the-error-payload). In that payload, `uri` is `bondy.error.<error>`, `code` is the error name, `handle` is `S002` and `nature` is `transient`. The `no_such_realm` error is the exception: it carries the payload of [`wamp.error.no_such_realm`](/router/reference/wamp_api/errors/wamp_no_such_realm), with `handle` `W001`, `nature` `permanent` and the realm URI in `realm_uri`. The examples show only the `error` key.
+
+The login and callback endpoints answer `404` with `unknown_provider` when the realm has no OIDC provider of that name. This includes a realm whose providers a realm update removed. They answer `404` with `no_such_realm` when the route's realm no longer exists. A method that an endpoint does not accept answers `405` with an empty body.
 
 
 ## Login
@@ -76,6 +78,12 @@ Redirects to the IdP's authorization endpoint with `state`, `nonce`, PKCE `code_
 ```json [404 — unknown_provider]
 {
     "error": "unknown_provider"
+}
+```
+
+```json [404 — no_such_realm]
+{
+    "error": "no_such_realm"
 }
 ```
 
@@ -185,6 +193,12 @@ Set-Cookie: bondy_csrf_com.example.myrealm=a1b2c3d4-...; Path=/; Max-Age=2592000
 }
 ```
 
+```json [404 — no_such_realm]
+{
+    "error": "no_such_realm"
+}
+```
+
 ```json [500 — provider_unavailable]
 {
     "error": "provider_unavailable"
@@ -235,7 +249,7 @@ Set-Cookie: bondy_csrf_com.example.myrealm=; Path=/; Max-Age=0; SameSite=Lax; Se
 Otherwise, redirects directly to `redirect_uri`.
 
 ::: info Resilient Logout
-The logout handler is designed to never crash. If the realm or OIDC provider no longer exists on this Bondy node, it will still clear the cookies and redirect. Ticket revocation is best-effort.
+The logout handler is designed to never crash. If the realm or OIDC provider no longer exists on this Bondy node, it still clears the cookies and redirects. The same holds when the realm has no OIDC providers configured. Ticket revocation is best-effort.
 :::
 
 ### Example

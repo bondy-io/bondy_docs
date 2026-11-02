@@ -161,10 +161,10 @@ You should get the following output:
 Run the official image with `docker run`. The image is `leapsight/bondy-connect:{TAG}`, also published as `ghcr.io/bondy-io/bondy-connect:{TAG}`, where `{TAG}` is one of:
 
 - a release version, such as <SiteMeta k="bondyVersion"/>;
-- `latest`, the most recent stable release (Docker Hub only);
+- `latest`, the most recent stable release;
 - `main` or `develop`, a build of that branch.
 
-The published image is the Debian build of `deployment/Dockerfile`, for `linux/amd64` and `linux/arm64`. To run on Alpine, build `deployment/alpine.Dockerfile` yourself.
+These tags name the Debian build of `deployment/Dockerfile`. The Alpine build of `deployment/alpine.Dockerfile` takes the same tags with an `-alpine` suffix, such as `1.0.1-alpine` or `develop-alpine`. It has no `latest` tag. Both builds are published for `linux/amd64` and `linux/arm64`.
 
 To run the <SiteMeta k="bondyVersion"/> release:
 

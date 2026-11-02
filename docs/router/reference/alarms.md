@@ -151,6 +151,29 @@ this severe must survive a crash of the handler reporting it, so it is recorded
 outside the alarm state and only mirrored as an alarm. Durable operations fail
 while this holds.
 
+### `bondy_auth_fence_closed`
+
+The node has refused every new authentication for longer than the alarm
+threshold.
+
+- **Severity** `critical` · **Readiness** unaffected
+- **Details** `namespaces`, `threshold_ms`
+- **Configuration** `db.aae.fence.alarm`, `db.aae.fence.max_lag`,
+  `db.aae.fence.on_isolation`
+- **Observe with** none · **Tasks** none
+
+The [authentication freshness fence](/router/reference/configuration/data_storage#authentication-freshness-fence)
+refuses new authentication while no anti-entropy round has refreshed this
+node's users and grants. Under `db.aae.fence.on_isolation = refuse`, a node
+that reaches no peer stays in this state. `namespaces` names the security
+tables that are stale. The alarm clears on the next check after the fence admits again, within
+10 seconds.
+
+The alarm does not take the node out of readiness. The fence is closed at
+every boot until the first anti-entropy round. A readiness alarm would
+therefore stop a StatefulSet from starting the peer that the node needs to
+reopen the fence.
+
 ### `{bondy_oplog_instance_down, _}`
 
 A storage shard instance is not running, so its tables are unavailable on this

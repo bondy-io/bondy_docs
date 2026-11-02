@@ -270,7 +270,7 @@ When a client opens a transport session (`/open`) and the request includes a val
 4. On subsequent `/send` and `/receive` requests, Bondy re-validates the ticket cookie to ensure the session remains authorized.
 
 ::: warning Important
-The realm's `authmethods` configuration has to include both `"oidcrp"` and `"cookie"` for the OIDC-to-WAMP flow to work, and a [source](/router/concepts/oidc_authentication#sources) must allow `cookie` from the client's address:
+The realm's `authmethods` configuration has to include both `"oidcrp"` and `"cookie"` for the OIDC-to-WAMP flow to work, and [sources](/router/concepts/oidc_authentication#sources) must allow both from the client's address:
 
 ```json
 {
