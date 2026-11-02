@@ -139,7 +139,17 @@ Place the file on the node you will call, at a path the Bondy OS user can read.
 
 Call `bondy.export.status` with `{}` as in the export procedure. The result has to be `null`.
 
-#### 4. Start the import
+#### 4. Check the file with a dry run
+
+Start the import as in the next step, with `"dry_run": true` added to the object. A dry run reads the whole file as an import does and writes nothing. When it finishes, call `bondy.export.status` with the filename. The `import` object in the result counts the records read, the records the import would write per table, the records it would skip per reason, and the unreadable bytes (`bad_bytes`). A dry run converts every record as the import does, so it reports the records the import cannot convert. It cannot see a refusal that happens only at write time, such as a refresh token the token store rejects.
+
+```bash
+./wick --url ws://localhost:18080/ws --realm com.leapsight.bondy \
+  call bondy.export.import \
+  '{"filename": "/data/imports/bondy_export.1774598400.bondy", "dry_run": true}' | jq
+```
+
+#### 5. Start the import
 
 ::: code-group
 
@@ -158,13 +168,15 @@ curl -X POST http://localhost:18081/services/restore_backup \
 
 The call returns as soon as the import has started, with the filename and the start time. It does not check that the file exists or is valid first: a missing file or an unrecognised header fails after the reply.
 
-#### 5. Wait for the import to finish
+#### 6. Wait for the import to finish
 
-Watch for `bondy.export.import_finished` or `bondy.export.import_failed` on the master realm. Both carry only the filename. The node log carries the detail: `Import finished` with `read_count` and `written_count`, or `Import failed` with the reason.
+Watch for `bondy.export.import_finished` or `bondy.export.import_failed` on the master realm. Both carry only the filename. Call `bondy.export.status` with the filename: its `import` object has `outcome` (`in_progress`, `finished` or `failed`) and the counts of what the import has written so far, per table. The node log carries the reason for a failure (`Import failed`).
 
-The importer reads two file formats. A file whose header says `bondy_db_export` with version `2.0.0` or later imports record for record. A file written by the `bondy_backup` module of a release older than 1.0.0 (header format `dvvset_log`) is translated as it is read: users, groups, grants, sources, API Gateway specs and the latest unexpired OAuth2 refresh token per user carry over, and realm records are skipped. The node logs `Import skipped some legacy records by reason` with a count per reason. Any other header fails the import. See [Upgrading to 1.0.0](/router/guides/deployment/upgrading_to_1_0_0) for the full legacy procedure.
+Bytes the importer cannot read, such as a last record cut short when the file was copied, are skipped and counted in `bad_bytes`; the import carries on with the records after them. A `bad_bytes` above 0 means records were lost: get a complete copy of the file if you can.
 
-#### 6. Verify the data
+The importer reads two file formats. A file whose header says `bondy_db_export` with version `2.0.0` or later imports record for record. A file written by the `bondy_backup` module of a release older than 1.0.0 (header format `dvvset_log`) is translated as it is read: users, groups, grants, sources, API Gateway specs and the latest unexpired OAuth2 refresh token per user carry over, and realm records are skipped. The `skipped` object of the import report counts the skipped records per reason, and the node logs the same counts as `Import skipped some legacy records by reason`. Any other header fails the import. See [Upgrading to 1.0.0](/router/guides/deployment/upgrading_to_1_0_0) for the full legacy procedure.
+
+#### 7. Verify the data
 
 Spot-check that realms, users and API Gateway specs are present, on the importing node and on one other member of the cluster.
 
@@ -172,7 +184,7 @@ Spot-check that realms, users and API Gateway specs are present, on the importin
 
 * **Not an atomic snapshot.** The export reads one table and band at a time while the node keeps serving writes. A write made during the export can appear for one table and be absent for another.
 * **Full exports only.** Every export writes the whole database. There is no incremental format.
-* **No progress counts over the API.** The status call and the topics report the filename and state. Record counts appear only in the node log.
+* **An import is not atomic.** What an import wrote before it failed stays written. The status of the file shows what that was.
 
 ### Result
 

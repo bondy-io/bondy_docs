@@ -206,6 +206,8 @@ Run the import on one node only. Every table it writes is replicated, so the imp
   call bondy.export.import '{"filename": "/data/imports/bondy_backup.1774598400.bak"}' | jq
 ```
 
+To check the file before you write anything, run the same call with `"dry_run": true` added to the object first, as described in [Backup and Restore](/router/guides/administration/backup_and_restore#_4-check-the-file-with-a-dry-run).
+
 This returns immediately; the import itself runs asynchronously. Watch for `bondy.export.import_finished` or `bondy.export.import_failed` (filename-bearing events on the master realm), or poll `bondy.export.status`, to confirm it actually completed. Writes are batched (500 records per transaction) rather than fsynced individually, so a large dataset imports in a fraction of the time a naive per-record write would take.
 
 The import is a set of fresh writes, not a byte-for-byte restore: replication metadata (clocks, causal history) from the old deployment is not — and should not be — preserved. From an old-format backup, the importer translates only these domains: users, groups, user and group grants, sources, API Gateway specifications, and OAuth2 refresh tokens. It skips every other record and counts it by reason. These rules apply to the translated domains:
@@ -226,7 +228,7 @@ The import writes the old deployment's master-realm `admin` user, old password i
 The import keeps each password in the format it was stored in. A password stored in a format older than 1.2 (a `1.0` or `1.1` record) authenticates with the `password` method and the OAuth2 password grant. Bondy does not offer such a user `wampcra` or `wamp-scram`, because a challenge needs data that the old record does not hold. Change the password with `bondy.user.change_password` to store it in the current format, which both challenge methods accept.
 :::
 
-When the import finishes, the node logs one `notice`, `"Import skipped some legacy records by reason"`, whose `skipped` field counts each record it did not write, by reason:
+The import counts each record it did not write, by reason. The `skipped` object of the [import report](/router/reference/wamp_api/export#import-report) holds the counts, and the node logs them in one `notice`, `"Import skipped some legacy records by reason"`, when the import finishes:
 
 | Reason | Record |
 | --- | --- |
@@ -237,6 +239,7 @@ When the import finishes, the node logs one `notice`, `"Import skipped some lega
 | `token_expired` | An OAuth2 refresh token that has expired. |
 | `oauth_token_unparsable` | An OAuth2 refresh token in a shape the importer does not recognise. |
 | `{token_import, Reason}` | A refresh token the importer recognised but could not store. |
+| `{user_import, Reason}` | A user cell the importer recognised but could not store. |
 | `{table_not_provisioned, Table}` | A record for a table this node does not provision. |
 | `{unsupported_prefix, Prefix}` | A record of a domain the importer does not translate (see the list above). |
 | `import_error` | A record the importer failed to translate. Each one is also logged at `warning` as `"Skipping a legacy record that could not be imported"`. |

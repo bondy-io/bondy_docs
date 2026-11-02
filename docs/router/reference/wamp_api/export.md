@@ -104,12 +104,34 @@ None.
 Three shapes, depending on what was asked:
 
 - **Called with `{}`** — returns the bare node-wide status: the string `export_in_progress` or `import_in_progress`, or `null` when nothing runs.
-- **Called with the `filename` of the operation currently running** — returns `{status, elapsed_time_secs}`, `status` being whichever of the two in-progress values applies.
-- **Called with any other `filename`** (including one whose export or import has already finished) — reads that file's own header directly: `{filename, format, vsn, node, mod_vsn, timestamp, status, bad_bytes}`, where this `status` is `ok`, `invalid_format`, `corrupt`, or `blocked` (the file's own integrity, not an in-progress state), and `recovered` is present when the log driver had to repair the file's tail on open.
+- **Called with the `filename` of the operation currently running** — returns `{status, elapsed_time_secs}`, `status` being whichever of the two in-progress values applies. For an import, the result also has the [import report](#import-report).
+- **Called with any other `filename`** (including one whose export or import has already finished) — reads that file's own header directly: `{filename, format, vsn, node, mod_vsn, timestamp, status, bad_bytes}`, where this `status` is `ok`, `invalid_format`, `corrupt`, or `blocked` (the file's own integrity, not an in-progress state), and `recovered` is present when the log driver had to repair the file's tail on open. The header's `bad_bytes` covers the first chunk of the file only. For the file of the last import, the result also has the [import report](#import-report).
 
-::: tip Per-record counts aren't queryable over WAMP
-How many records were read, written, or skipped during an import is logged server-side (at `notice` level) and is not returned by `bondy.export.status` or published on [`bondy.export.import_finished`](#topics) — both only ever report the filename. Check the node's logs for those counts.
-:::
+#### Import report
+The `import` key holds an object with these keys:
+
+|Key|Meaning|
+|:---|:---|
+|`outcome`|`in_progress`, `finished` or `failed`.|
+|`dry_run`|`true` for a dry run, which counts under `written` what the import would write.|
+|`read_count`|Records read from the file.|
+|`written_count`|Records written.|
+|`written`|Records written per table, for example `{"security_users": 27656}`.|
+|`skipped`|Records skipped per reason, for example `{"tombstone": 3, "{table_not_provisioned,bondy_ticket}": 12}`. Each key is the reason written as an Erlang term.|
+|`bad_bytes`|Bytes that could not be read and were skipped.|
+
+An import of the current format skips a record for one of these reasons:
+
+|Reason|Record|
+|:---|:---|
+|`unknown_term`|A term in the file that is not a record.|
+|`{table_not_provisioned,<table>}`|A record for a table this node does not provision.|
+|`retracted_fact`|A retracted fact. The absence of the fact is what the import reproduces.|
+|`{unsupported_fold,<fold>}`|A record of a table whose merge rule the importer does not replay.|
+
+The reasons for a legacy file are listed in [Upgrading to 1.0.0](/router/guides/deployment/upgrading_to_1_0_0#_7-import-the-backup-file).
+
+Bondy updates the report after every write, so the report of a failed import shows what it wrote before failing. Bondy returns the report only for the `filename` string that started the import: another path to the same file returns the header alone. The node keeps the report of its last import only, and loses it on restart; a new export or import replaces it.
 
 #### Errors
 Raises `bondy.error.not_found` if `filename` names a file that doesn't exist.
@@ -125,13 +147,15 @@ Starts reading `info`'s `filename` and re-applying its records, asynchronously, 
     :data="JSON.stringify({
         '0':{
             'type': 'dict',
-            'description' : 'An object with a required `filename` key — the export file to import.'
+            'description' : 'An object with a required `filename` key — the export file to import — and an optional `dry_run` boolean (default `false`). With `dry_run` set to `true`, Bondy reads the whole file and writes nothing; the [import report](#import-report) counts what the import would write and skip.'
         }
     })"
 />
 
 ##### Keyword Args
-None.
+None. `dry_run` is a key of the positional object. This procedure does not follow the [`dry_run` convention](/router/reference/wamp_api/task#the-dry-run-convention): a `dry_run` keyword argument is refused with `wamp.error.invalid_argument`.
+
+A dry run is an import in every other respect. It runs alone on the node, publishes the same [topics](#topics), and reports through [`bondy.export.status`](#check-status). The reply does not say that the call was a dry run; the `dry_run` key of the import report does.
 
 #### Result
 ##### Positional Results
