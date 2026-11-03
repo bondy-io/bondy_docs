@@ -23,7 +23,7 @@ import Layout from './Layout.vue'
 // not part of the shared component set.
 import Badge from './Badge.vue'
 
-// The Diataxis directory for one documentation set, used by docs/router.md
+// The Diataxis directory for one documentation set, used by docs/connect.md
 // and docs/wamp.md.
 import DocsSet from './DocsSet.vue'
 

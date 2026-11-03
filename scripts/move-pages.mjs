@@ -30,27 +30,15 @@ const DOCS = 'docs'
 const DRY = process.argv.includes('--dry-run')
 
 /**
- * The WAMP set is folded into Bondy Connect. Protocol is a facet of the
- * developer's work on the platform, not a documentation set of its own:
- * realms, URIs, authentication and RBAC are shared by every interface
- * (WAMP, HTTP/REST, MCP, and BAMP when it ships).
+ * The Bondy Connect set is served under the product's name, /connect, not
+ * under /router. Earlier moves (the WAMP set folded into Bondy Connect) are
+ * carried by the existing redirects, whose targets pass through this table.
  */
 const MOVES = [
-  ['/wamp/concepts/compliance', '/router/reference/protocols/wamp'],
-  ['/wamp/concepts', '/router/concepts/wamp'],
-  ['/wamp/guides/programming', '/router/guides/programming/wamp'],
-  ['/wamp/tutorials/wampy', '/router/tutorials/wamp/wampy'],
-  ['/wamp/tutorials/bondy_connect_sdk', '/router/tutorials/wamp/bondy_connect_sdk'],
-  ['/wamp/reference/clients', '/router/reference/clients']
+  ['/router', '/connect']
 ]
 
-/** Section indexes whose content the Bondy Connect indexes already carry. */
-const RETIRE = [
-  ['/wamp', '/router'],
-  ['/wamp/guides/index', '/router/guides/index'],
-  ['/wamp/tutorials/index', '/router/tutorials/index'],
-  ['/wamp/reference/index', '/router/reference/index']
-]
+const RETIRE = []
 
 const RULES = [...MOVES].sort((a, b) => b[0].length - a[0].length)
 const RETIRED = new Map(RETIRE)

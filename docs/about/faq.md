@@ -6,13 +6,13 @@
 
 Bondy is an open-source application networking platform that connects the elements of a distributed application — web and mobile apps, IoT devices, and backend microservices — combining event mesh and service mesh capabilities in a single protocol.
 
-Read more about Bondy in the [What is Bondy](/router/concepts/what_is_bondy) section.
+Read more about Bondy in the [What is Bondy](/connect/concepts/what_is_bondy) section.
 
 ### What is WAMP?
 
 The Web Application Messaging Protocol (WAMP) is an open, routed protocol for polyglot distributed applications with all application agents connecting to a WAMP Router that performs message routing between them. WAMP unifies the two most important communication patterns under a single protocol: Publish-Subscribe and Routed Remote Procedure Calls.
 
-Read more about WAMP in the [What is WAMP](/router/concepts/wamp/what_is_wamp) section.
+Read more about WAMP in the [What is WAMP](/connect/concepts/wamp/what_is_wamp) section.
 
 ### How is WAMP different than other messaging technologies?
 
@@ -22,17 +22,17 @@ In general, WAMP differs from other messaging platforms in that it natively (and
 
 As its name implies, Publish & Subscribe offers at most once semantics a.k.a fire-and-forget, whereas other messaging platforms provide stronger message delivery guarantees e.g. at least once and exactly once semantics.
 
-For a further comparison with other products and technologies we invite you to review the [How is Bondy different](/router/concepts/how_is_bondy_different) section and the [WAMP Compared article](https://wamp-proto.org/comparison.html) in the protocol specification website.
+For a further comparison with other products and technologies we invite you to review the [How is Bondy different](/connect/concepts/how_is_bondy_different) section and the [WAMP Compared article](https://wamp-proto.org/comparison.html) in the protocol specification website.
 
 ### How is Bondy different than other WAMP routers?
 
-See [How is Bondy Different](/router/concepts/how_is_bondy_different) for a full comparison, covering scalability, availability, and operational simplicity.
+See [How is Bondy Different](/connect/concepts/how_is_bondy_different) for a full comparison, covering scalability, availability, and operational simplicity.
 
 ## Protocol Support
 
 ### Is Bondy multi-protocol?
 
-At its core Bondy implements the Web Application Messaging Protocol (WAMP). Learn why this is important in [Why Bondy](/router/concepts/why_bondy).
+At its core Bondy implements the Web Application Messaging Protocol (WAMP). Learn why this is important in [Why Bondy](/connect/concepts/why_bondy).
 
 Bondy is also a multi-protocol router:
 
@@ -42,7 +42,7 @@ Bondy is also a multi-protocol router:
 
 ### How compliant is Bondy to WAMP?
 
-Please find the answers to this question in the [WAMP Compliance](/router/reference/protocols/wamp.md) page.
+Please find the answers to this question in the [WAMP Compliance](/connect/reference/protocols/wamp.md) page.
 
 
 ## Architecture
@@ -69,7 +69,7 @@ All messages within Bondy are routed within a realm. A client with a session att
 
 ### Does Bondy depend on an external database server?
 
-No, Bondy does not depend on any external database server. Every Bondy node embeds `bondy_db`, a purpose-built storage and replication stack: durable tables are backed by a `leveled` LSM-tree store, with per-table CRDT convergence replicated across the cluster via `bondy_oplog`'s anti-entropy protocol. See [Data Storage & Replication](/router/concepts/architecture) for details.
+No, Bondy does not depend on any external database server. Every Bondy node embeds `bondy_db`, a purpose-built storage and replication stack: durable tables are backed by a `leveled` LSM-tree store, with per-table CRDT convergence replicated across the cluster via `bondy_oplog`'s anti-entropy protocol. See [Data Storage & Replication](/connect/concepts/architecture) for details.
 
 ### Why does Bondy use its own embedded database?
 
