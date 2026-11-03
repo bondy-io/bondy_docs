@@ -1,7 +1,7 @@
 <!-- The documentation portal: developer.bondy.io's index.
 
      One card per product. Each card links to that product's documentation
-     set, whose own landing page (a DocsSet, e.g. /router) organises it by
+     set, whose own landing page (a DocsSet, e.g. /connect) organises it by
      Diataxis mode.
 
      The list comes from DOC_SETS in @bondy/site-chrome, so adding a product

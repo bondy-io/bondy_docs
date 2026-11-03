@@ -6,7 +6,7 @@
  * how Layout.vue knows to render no context row at all.
  *
  * Section names are controlled vocabulary: they are the words the sidebar
- * groups (config.mjs), the set landing page (docs/router.md) and the footer
+ * groups (config.mjs), the set landing page (docs/connect.md) and the footer
  * use for the same thing. Change one, change all.
  */
 const SECTIONS = [
@@ -17,7 +17,7 @@ const SECTIONS = [
 ]
 
 const SETS = {
-  router: { text: 'Bondy Connect', link: '/router', sections: SECTIONS },
+  connect: { text: 'Bondy Connect', link: '/connect', sections: SECTIONS },
   about: { text: 'About', link: null, sections: [] }
 }
 
