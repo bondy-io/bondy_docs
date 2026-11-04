@@ -1,5 +1,5 @@
 // Sitemap
-import { createWriteStream, cpSync, readFileSync } from 'node:fs'
+import { createWriteStream, cpSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { SitemapStream } from 'sitemap'
 import mdCustomBlock from 'markdown-it-custom-block'
@@ -21,6 +21,19 @@ const versionsManifest = JSON.parse(
 // archived version snapshots under /v<version>/, see the deploy
 // workflow).
 const base = process.env.DOCS_BASE ?? '/'
+
+// The picker's entries. The current version is deployed at the site root,
+// not at /v<version>/, so it needs an explicit link: <NavbarVersion>
+// otherwise falls back to /v<version>/ and sends readers to a 404.
+const pickerVersions = [
+  { ...versionsManifest.current, current: true, link: '/' },
+  ...versionsManifest.archived.map(({ tag, ...v }) => v)
+]
+
+// The version this build documents. An archived build is made with base
+// /v<version>/ (release-docs.yml), and README requires that path to equal
+// the version, so the base names it; any other build is the current one.
+const thisVersion = base.match(/^\/v(.+)\/$/)?.[1] ?? versionsManifest.current.version
 
 export default withThemeDefaults(
   {
@@ -259,13 +272,14 @@ export default withThemeDefaults(
         // linking at /v<version>/, which is where the deploy workflow
         // unpacks that version's released package (see
         // .github/workflows/deploy.yml and release-docs.yml).
-        // The current version is deployed at the site root, not at
-        // /v<version>/, so it needs an explicit link: <NavbarVersion>
-        // otherwise falls back to /v<version>/ and sends readers to a 404.
-        versions: [
-          { ...versionsManifest.current, current: true, link: '/' },
-          ...versionsManifest.archived.map(({ tag, ...v }) => v)
-        ],
+        //
+        // `versions` is only this build's list. Every build also writes it
+        // to versions.json (buildEnd), and the picker fetches the one at
+        // the site root, which the current deployment serves. An archived
+        // build therefore lists the versions released after it.
+        versions: pickerVersions,
+        version: thisVersion,
+        versionsUrl: '/versions.json',
 
         // Arbitrary site metadata, readable in markdown via <SiteMeta k="..."/>.
         metadata: {
@@ -286,6 +300,10 @@ export default withThemeDefaults(
         })
     },
     buildEnd: async ({ outDir }) => {
+      // The version list the picker fetches at /versions.json (see
+      // themeConfig.versionsUrl).
+      writeFileSync(resolve(outDir, 'versions.json'), JSON.stringify(pickerVersions))
+
       // Copy assets directory to build output
       const assetsSource = resolve(__dirname, '../assets')
       const assetsDest = resolve(outDir, 'assets')
