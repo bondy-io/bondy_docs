@@ -83,7 +83,9 @@ The site is versioned: a small dropdown in the navbar lets readers switch betwee
 ### How it works
 
 - **`docs/versions.json`** is the single source of truth. It lists the `current` version and every `archived` version (each with the git tag that produced it). `docs/.vitepress/config.mjs` reads this file at build time to populate the navbar version picker and the `bondyVersion` site metadata — nothing about the version list is hardcoded in `config.mjs` itself.
-- **Archived versions are built exactly once, ever.** Tagging a commit `docs-<version>` (e.g. `docs-1.0.0-rc`) triggers `.github/workflows/release-docs.yml`, which builds that snapshot with its base path set to `/v<version>/` and publishes the output as a GitHub Release asset. That build is never repeated.
+- **The picker reads the version list from the live site.** Each build writes its list to `versions.json` in its output. When a page opens, the picker fetches `/versions.json` from the site root, which is always the current deployment's list. An archived version therefore lists the versions released after it, with no rebuild. If the fetch fails, the picker keeps the list from its own build. Archives built before `@leapsight/vitepress-template` v0.1.22 do not fetch the list: `v1.0.0-rc.65.1` shows only the versions that existed when it was built.
+- **A build knows which version it documents from its base path.** A base of `/v<version>/` names that version; any other base is the current version. The picker shows this version on its button and marks it in the menu. This is one more reason the `version` field must equal the tag minus its `docs-` prefix (see below).
+- **Each archived version is built once per tag.** Tagging a commit `docs-<version>` (e.g. `docs-1.0`) triggers `.github/workflows/release-docs.yml`, which builds that snapshot with its base path set to `/v<version>/` and publishes the output as a GitHub Release asset. Deploys never rebuild it. To fix a defect in an archived version, rebuild it on purpose — see [Rebuilding an archived version](#rebuilding-an-archived-version).
 - **Every push to `main`** triggers `.github/workflows/deploy.yml`, which builds only the *current* version fresh, downloads each archived version's already-built package from GitHub Releases (per `docs/versions.json`, no rebuild), combines them into one directory (current at `/`, each archive at `/v<version>/`), and pushes the result to Netlify as a production deploy via the Netlify CLI.
 - **Every push to `develop`** runs the same workflow, but deploys the result as a Netlify preview at `https://develop--<site>.netlify.app` instead of production. Each push replaces the previous preview.
 - **`.github/workflows/ci.yml`** runs on every push/PR: build check, broken-link check, spellcheck. It doesn't deploy anything.
@@ -116,6 +118,21 @@ Do step 2 only after step 1 has published the asset. Before that, each `develop`
 ```json
 { "version": "1.0.0-rc.65.1", "label": "1.0.0-rc", "tag": "docs-1.0.0-rc.65.1" }
 ```
+
+A mismatch also breaks the picker in that archive: the version its base path names is not in the list, so the picker marks no entry as the one you are reading.
+
+### Rebuilding an archived version
+
+Rebuild an archived version only to fix a defect in it, such as a broken link or an old version picker. Keep the tag name, so the version keeps its URL. The example rebuilds `1.0`.
+
+1. Create a branch from the tag: `git switch -c support/1.0 'docs-1.0^{commit}'`. Commit only the fix. Do not merge content from later versions.
+2. Build it with the archive's base path and check the result: `DOCS_BASE=/v1.0/ npm run docs:build`.
+3. On GitHub, delete the `docs-1.0` release. Then delete the tag: `git push origin :refs/tags/docs-1.0`. Delete the release first, so that the new build cannot meet an old asset with the same name.
+4. Tag the fix and push the tag: `git tag -fa docs-1.0 support/1.0 -m "Docs for Bondy Connect 1.0"` and `git push origin docs-1.0`. GitHub sometimes rejects a tag push with `Internal Server Error`. Run `git ls-remote --tags origin docs-1.0` to see the result, and push again if the tag is not there.
+5. Wait until `release-docs.yml` publishes `docs-1.0.tar.gz`. Then deploy `main` again, for example by re-running its last Deploy workflow. Until a deploy succeeds, the site keeps the old snapshot.
+6. Delete `.cache/docs-releases/docs-1.0.tar.gz`, so that `just site` downloads the new package.
+
+From step 3 until step 5 finishes, every deploy fails, because `deploy.yml` cannot download `docs-1.0.tar.gz`. Do not push `main` or `develop` during that time.
 
 ### Previewing the combined site locally
 
