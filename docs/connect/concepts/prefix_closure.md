@@ -95,7 +95,7 @@ A node's own operations are never held: its local write-ahead log delivers
 them in sequence order already.
 
 A hole that persists longer than
-[`db.frontier.hole_alarm`](/connect/reference/configuration/data_storage#db.frontier.hole_alarm)
+[`db.oplog.frontier.hole_alarm`](/connect/reference/configuration/data_storage#db.oplog.frontier.hole_alarm)
 raises the
 [`{bondy_oplog_frontier_hole, _}`](/connect/reference/alarms) alarm, and
 `bondy_oplog_instance_frontier_holes` reports the holes a shard carries now.

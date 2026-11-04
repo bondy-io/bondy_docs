@@ -61,7 +61,7 @@ count by (instance_id) (
 ) > 1
 ```
 
-with a `for:` at least a few multiples of `db.aae.interval`, so ordinary
+with a `for:` at least a few multiples of `db.oplog.aae.interval`, so ordinary
 replication lag does not fire it.
 
 ## 2. Find which node is behind
@@ -87,7 +87,7 @@ An age growing without bound means rounds are not completing at all — the peer
 is unreachable, or the scheduler is not dispatching. Check
 `bondy_oplog_sync_scheduler_enabled` and `bondy_oplog_aae_enabled` are `1` on
 both nodes before looking further; anti-entropy can be turned off by
-configuration (`db.aae`), and a node with it off will never converge.
+configuration (`db.oplog.aae`), and a node with it off will never converge.
 
 ## 3. Decide whether it is repairing itself
 
@@ -206,7 +206,7 @@ stages, and each costs more than the one before it:
 
 | Situation | What has to happen | Roughly bounded by |
 |---|---|---|
-| Ordinary lag | One sync round for that instance | `db.aae.interval`, times how many ticks the instance waits for a slot under `db.aae.max_concurrency`, + transfer |
+| Ordinary lag | One sync round for that instance | `db.oplog.aae.interval`, times how many ticks the instance waits for a slot under `db.oplog.aae.max_concurrency`, + transfer |
 | Standing gap | Two complete rounds to strike twice, then the remedy | Two rounds + settle |
 | Re-bootstrap | Full projection transfer for the instance | Size of the instance |
 

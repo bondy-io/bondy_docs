@@ -66,7 +66,7 @@ reclamation trust only those.
 ## How a replica catches up: the sync round
 
 Replication is **pull-based anti-entropy**, not broadcast. On each tick — every
-`db.aae.interval` — a node picks peers and runs a **sync round** against each:
+`db.oplog.aae.interval` — a node picks peers and runs a **sync round** against each:
 
 1. **Ask for the peer's frontier.** The peer answers only after draining what it
    has installed, so the frontier it reports counts operations it can actually
@@ -264,7 +264,7 @@ Convergence is not instantaneous and Bondy does not pretend otherwise. After a
 node returns from a fault, the path back has a shape you can reason about:
 
 - Ordinary lag closes on the **next round that instance gets** — the scheduler
-  ticks every `db.aae.interval`, but `db.aae.max_concurrency` caps how many
+  ticks every `db.oplog.aae.interval`, but `db.oplog.aae.max_concurrency` caps how many
   sessions run at once, and instances rotate for the free slots so none is
   starved. On a node with many shards, a given instance is reached every few
   ticks rather than every tick.
@@ -306,4 +306,4 @@ grants, sources, and API Gateway specifications. It does not apply to:
 - [Deletion and Reclamation](/connect/concepts/deletion_and_reclamation) — the
   other decision causal stability licenses.
 - [Data Storage & AAE Configuration Reference](/connect/reference/configuration/data_storage#active-anti-entropy)
-  — `db.aae.interval`, fanout, concurrency and the freshness fence.
+  — `db.oplog.aae.interval`, fanout, concurrency and the freshness fence.

@@ -158,13 +158,13 @@ threshold.
 
 - **Severity** `critical` · **Readiness** unaffected
 - **Details** `namespaces`, `threshold_ms`
-- **Configuration** `db.aae.fence.alarm`, `db.aae.fence.max_lag`,
-  `db.aae.fence.on_isolation`
+- **Configuration** `db.oplog.aae.fence.alarm`, `db.oplog.aae.fence.max_lag`,
+  `db.oplog.aae.fence.on_isolation`
 - **Observe with** none · **Tasks** none
 
 The [authentication freshness fence](/connect/reference/configuration/data_storage#authentication-freshness-fence)
 refuses new authentication while no anti-entropy round has refreshed this
-node's users and grants. Under `db.aae.fence.on_isolation = refuse`, a node
+node's users and grants. Under `db.oplog.aae.fence.on_isolation = refuse`, a node
 that reaches no peer stays in this state. `namespaces` names the security
 tables that are stale. The alarm clears on the next check after the fence admits again, within
 10 seconds.
@@ -230,7 +230,7 @@ than the alarm threshold.
 
 - **Severity** `major` · **Readiness** unaffected
 - **Details** `instance_id`, `held_for_ms`, `holes`, `origins`
-- **Configuration** `db.frontier.hole_alarm` (default `5m`)
+- **Configuration** `db.oplog.frontier.hole_alarm` (default `5m`)
 - **Observe with** none · **Tasks** none
 
 `origins` carries, per origin, the sequence number the gap starts at and how
@@ -276,7 +276,7 @@ A write-ahead-log drain is processing frames without committing a new position.
 
 - **Severity** `major` · **Readiness** unaffected
 - **Details** `instance_id`, `stalled_for_ms`, `committed_position`
-- **Configuration** `db.drain.stall_alarm`
+- **Configuration** `db.oplog.drain.stall_alarm`
 - **Observe with** none · **Tasks** none
 
 ## Cluster — convergence is affected
@@ -287,7 +287,7 @@ The origin retirement set cannot be read or written; frontier reaping is
 disabled cluster-wide.
 
 - **Severity** `major` · **Readiness** unaffected
-- **Details** none · **Configuration** `db.origin_retirement.path`
+- **Details** none · **Configuration** `db.oplog.origin_retirement.path`
 - **Observe with** none · **Tasks** none
 
 Replication continues. What stops is the reclamation of retired origins, so

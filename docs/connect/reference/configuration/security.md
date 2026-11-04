@@ -233,7 +233,7 @@ Each node periodically deletes security state that can no longer be used: expire
 
 Each node sweeps only the realms it owns under Rendezvous hashing. The work spreads across the cluster with no coordination, and each realm has exactly one node deleting from it. The sweeps run as jobs on the [job manager](/connect/reference/configuration/overload_protection#load_regulation.job_manager.pool.size), off the request path. If the job queue is full, the round is logged as a warning and retried after about five minutes, or after `security.reclamation.interval` if that is shorter.
 
-This is not the same as [`db.reclaim`](/connect/reference/configuration/reclamation). This sweep decides which tokens and tickets are dead and deletes them. `db.reclaim` later frees the storage the deleted entries occupy, once every node has seen the deletion.
+This is not the same as [`db.oplog.reclaim`](/connect/reference/configuration/reclamation). This sweep decides which tokens and tickets are dead and deletes them. `db.oplog.reclaim` later frees the storage the deleted entries occupy, once every node has seen the deletion.
 
 @[config](security.reclamation.enabled,on|off,on,v1.0.0)
 

@@ -136,7 +136,7 @@ cluster.enabled = off
 ```
 
 ::: warning `cluster.enabled = off` is required for a single node
-This guide runs one node, so it turns clustering off. A node left on the default `cluster.enabled = on` with no other member never compacts its history. Under the default fence policy, it also refuses every authentication, anonymous included, once its security tables stay unconfirmed for longer than `db.aae.fence.max_lag`. To run a cluster instead, follow [Running a Cluster](/connect/guides/deployment/running_a_cluster) and see [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering).
+This guide runs one node, so it turns clustering off. A node left on the default `cluster.enabled = on` with no other member never compacts its history. Under the default fence policy, it also refuses every authentication, anonymous included, once its security tables stay unconfirmed for longer than `db.oplog.aae.fence.max_lag`. To run a cluster instead, follow [Running a Cluster](/connect/guides/deployment/running_a_cluster) and see [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering).
 :::
 
 ### 4. Verify your setup
@@ -164,7 +164,7 @@ Run the official image with `docker run`. The image is `leapsight/bondy-connect:
 - `latest`, the most recent stable release;
 - `main` or `develop`, a build of that branch.
 
-These tags name the Debian build of `deployment/Dockerfile`. The Alpine build of `deployment/alpine.Dockerfile` takes the same tags with an `-alpine` suffix, such as `1.0.1-alpine` or `develop-alpine`. It has no `latest` tag. Both builds are published for `linux/amd64` and `linux/arm64`.
+These tags name the Debian build of `deployment/Dockerfile`. The Alpine build of `deployment/alpine.Dockerfile` takes the same tags with an `-alpine` suffix, such as `1.1.0-alpine` or `develop-alpine`. It has no `latest` tag. Both builds are published for `linux/amd64` and `linux/arm64`.
 
 To run the <SiteMeta k="bondyVersion"/> release:
 

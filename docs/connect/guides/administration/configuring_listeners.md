@@ -302,8 +302,9 @@ kill it mid-drain. Drain with `normal`.
 ## Migrating a pre-1.0 configuration
 
 The fixed per-scheme keys (`api_gateway.http.*`, `wamp.tcp.*`, the global
-`wamp.websocket.*` carrier keys, and the rest) are gone, and a file still
-setting them loses those settings silently. The
+`wamp.websocket.*` carrier keys, and the rest) are gone. From 1.1.0, a node
+refuses to start on a file that still sets them; a 1.0.x node loses those
+settings silently. The
 [migration table](/connect/reference/configuration/listeners#migrating-from-the-pre-1-0-keys)
 maps every removed key to its `listeners.$name.*` spelling, and
 `scripts/migrate_conf.escript` (shipped with the Bondy source) rewrites a

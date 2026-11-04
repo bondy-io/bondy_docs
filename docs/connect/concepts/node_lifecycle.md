@@ -73,10 +73,10 @@ The log is the source of truth. After a crash, any frame that survives log recov
 
 ### When a write is acknowledged
 
-[`db.wal.fsync_mode`](/connect/reference/configuration/data_storage#db.wal.fsync_mode) decides when an appended event is on disk.
+[`db.oplog.wal.fsync_mode`](/connect/reference/configuration/data_storage#db.oplog.wal.fsync_mode) decides when an appended event is on disk.
 
 - `per_write`, the default, fsyncs before the append returns. Concurrent appends share one fsync, so throughput scales with concurrency up to the device's fsync rate.
-- `batched` returns before the fsync and fsyncs at a time or size boundary ([`db.wal.batched_fsync_interval`](/connect/reference/configuration/data_storage#db.wal.batched_fsync_interval), [`db.wal.batched_fsync_bytes`](/connect/reference/configuration/data_storage#db.wal.batched_fsync_bytes)). A crash can lose the events appended inside that window.
+- `batched` returns before the fsync and fsyncs at a time or size boundary ([`db.oplog.wal.batched_fsync_interval`](/connect/reference/configuration/data_storage#db.oplog.wal.batched_fsync_interval), [`db.oplog.wal.batched_fsync_bytes`](/connect/reference/configuration/data_storage#db.oplog.wal.batched_fsync_bytes)). A crash can lose the events appended inside that window.
 
 A write through `bondy_db` returns once its event is in the log and the applier has installed it in the projection, so the writer reads its own write on the next read. A write the applier refuses stays in the log but never reaches the projection, and the caller is told so.
 
@@ -121,7 +121,7 @@ Recovery checks the head segment, which the writer is still appending to. Sealed
 
 In `head_only` mode leveled writes every projection write twice: the cell into its ledger, and the same data into a journal that exists only to recover the ledger after an unclean stop. Leveled never reclaims that journal in this mode, so without help it would hold every version of every cell ever written.
 
-Bondy trims each journal on a timer, [`db.journal_trim_interval`](/connect/reference/configuration/data_storage#db.journal_trim_interval). A trim drops only the journal files older than the one holding the ledger's highest persisted sequence number, which is history a clean restart would not replay. After each trim Bondy fsyncs the ledger's directories, because leveled does not fsync a directory after renaming a ledger file into it. That fsync is intended to finish before leveled deletes the dropped journal files, which it does after a poll of about ten seconds; nothing else orders the two.
+Bondy trims each journal on a timer, [`db.leveled.journal.trim_interval`](/connect/reference/configuration/data_storage#db.leveled.journal.trim_interval). A trim drops only the journal files older than the one holding the ledger's highest persisted sequence number, which is history a clean restart would not replay. After each trim Bondy fsyncs the ledger's directories, because leveled does not fsync a directory after renaming a ledger file into it. That fsync is intended to finish before leveled deletes the dropped journal files, which it does after a poll of about ten seconds; nothing else orders the two.
 
 Two windows remain inside leveled itself: a ledger merge can delete replaced files before the new names reach disk, and closing a store deletes its pending journal files at once.
 

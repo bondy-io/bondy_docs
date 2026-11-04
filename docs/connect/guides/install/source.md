@@ -39,7 +39,7 @@ tar -zxvf _build/prod/rel/bondy-connect/bondy-connect-1.0.0.tar.gz -C ~/tmp/bond
 ### 2. Running
 
 ::: warning Set `cluster.enabled = off` to run a single node
-Before starting a node meant to run alone, set `cluster.enabled = off` in the release's `etc/bondy.conf`. A node left on the default `cluster.enabled = on` with no other member never compacts its history. Under the default fence policy, it also refuses every authentication once its security tables stay unconfirmed for longer than `db.aae.fence.max_lag`. See [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering).
+Before starting a node meant to run alone, set `cluster.enabled = off` in the release's `etc/bondy.conf`. A node left on the default `cluster.enabled = on` with no other member never compacts its history. Under the default fence policy, it also refuses every authentication once its security tables stay unconfirmed for longer than `db.oplog.aae.fence.max_lag`. See [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering).
 :::
 
 To run Bondy, cd to the location where you installed it e.g. ~/tmp/bondy and run the following command which will print all the options.

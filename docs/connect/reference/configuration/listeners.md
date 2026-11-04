@@ -50,8 +50,9 @@ just the one being changed.
 The per-scheme keys that configured Bondy's fixed listeners —
 `admin_api.{http,https}.*`, `api_gateway.{http,https}.*`, `wamp.{tcp,tls}.*`,
 `bridge.listener.{tcp,tls}.*` and the global `wamp.{websocket,sse,longpoll}.*`
-carrier keys — have been **removed**. Nothing reads them, and a file that
-still sets them loses every one of those settings silently. See
+carrier keys — have been **removed**. Nothing reads them. From 1.1.0, a node
+refuses to start on a file that still sets them; a 1.0.x node loses every one
+of those settings silently. See
 [Migrating from the pre-1.0 keys](#migrating-from-the-pre-1-0-keys) below.
 :::
 
@@ -1074,9 +1075,10 @@ disabled listener too.
 ## Migrating from the pre-1.0 keys
 
 The per-scheme keys that configured Bondy's fixed listeners **have been
-removed**. Nothing reads them: a file that still sets them loses every one
-of those settings silently, because an unknown key is dropped rather than
-refused. The global carrier keys `wamp.websocket.*`, `wamp.sse.*` and
+removed**. Nothing reads them. From 1.1.0, a node refuses to start on a file
+that still sets them, and names each one. A 1.0.x node drops an unknown key
+rather than refusing it, so it loses every one of those settings silently. The
+global carrier keys `wamp.websocket.*`, `wamp.sse.*` and
 `wamp.longpoll.*` are removed for the same reason; a single global key
 covered every listener at once, so moving one means choosing **which**
 listeners it applies to — restate it under
