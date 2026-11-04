@@ -102,12 +102,14 @@ A docs version describes one Bondy Connect `major.minor` release line, such as `
 
 Do this when Bondy Connect releases a new minor or major version. The example archives `1.0` and makes `1.1` current.
 
-1. On `main`, tag the last commit that documents `1.0`: `git tag -a docs-1.0 -m "Docs for Bondy Connect 1.0"` and `git push origin docs-1.0`. This triggers `release-docs.yml`, which builds and publishes the snapshot once.
-2. Merge `develop` into `main`.
-3. On `main`, update `docs/versions.json`: move the current entry into `archived` with `"tag": "docs-1.0"`, and set `current` to `1.1`.
-4. Push `main`. The next `deploy.yml` run picks up the new archived entry automatically — no further workflow changes needed.
+1. On `main`, tag the last commit that documents `1.0`: `git tag -a docs-1.0 -m "Docs for Bondy Connect 1.0"` and `git push origin docs-1.0`. This triggers `release-docs.yml`, which builds and publishes the snapshot once. Wait until the release has the asset `docs-1.0.tar.gz`. Every later deploy downloads it.
+2. On `develop`, update `docs/versions.json`: move the current entry into `archived` with `"tag": "docs-1.0"`, and set `current` to `1.1`. Push `develop`.
+3. Examine the `develop` preview. It shows `1.1` as current and the `1.0` snapshot at `/v1.0/`. To do the same check locally, run `just verify-versions`.
+4. Create the release branch from `develop` (for example `release/1.1.0`) and finish it into `main`. Push `main`. The next `deploy.yml` run picks up the new archived entry automatically — no further workflow changes needed.
 
 Tag before you merge. A tag on a later commit freezes `1.1` content under the `1.0` label.
+
+Do step 2 only after step 1 has published the asset. Before that, each `develop` deploy fails, because `deploy.yml` cannot download `docs-1.0.tar.gz`.
 
 **The `version` field is the URL path, and it must equal the tag minus its `docs-` prefix.** `release-docs.yml` derives the base path a snapshot is built with from the tag name, while `deploy.yml` mounts that snapshot at `/v<version>/` from `versions.json`. If the two disagree the archived version still loads, but every stylesheet and script in it 404s. Use `label` for what the navbar should display when it differs from the path — e.g. the entry below is served at `/v1.0.0-rc.65.1/` and shown as `v1.0.0-rc`:
 

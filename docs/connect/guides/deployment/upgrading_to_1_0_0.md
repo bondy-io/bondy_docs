@@ -110,7 +110,7 @@ If you're moving to new hosts instead, there's nothing to do here — just point
 
 Install the 1.0.0 release (see [Install from Source](/connect/guides/install/source), [Install using Docker](/connect/guides/install/docker), or your usual packaging) on each new node and carry over your `bondy.conf`. Do not start the node yet.
 
-Check the file before the first start, because a wrong `bondy.conf` does not stop the boot. The release's pre-start hook runs cuttlefish with `--allow_extra --silent`. With `--allow_extra`, cuttlefish skips a key that no schema maps, so an old key is dropped without a message and its subsystem runs on the default. With `--silent`, a value that cuttlefish cannot parse prints nothing; cuttlefish then generates no configuration for the whole file, so none of its settings apply.
+Check the file before the first start, because on 1.0.x a wrong `bondy.conf` does not stop the boot; from 1.1.0, a node refuses to start on an unknown key. The release's pre-start hook runs cuttlefish with `--allow_extra --silent`. With `--allow_extra`, cuttlefish skips a key that no schema maps, so an old key is dropped without a message and its subsystem runs on the default. A value that cuttlefish cannot parse stops the boot: cuttlefish generates no configuration for the whole file, and the error names the key and the reason.
 
 The check tool is `scripts/migrate_conf.escript` in the Bondy source tree; the release does not ship it. It needs `escript` (Erlang/OTP) on the `PATH` and finds cuttlefish and the schemas relative to the current directory, so run it from one of two places:
 
@@ -135,7 +135,7 @@ The check tool is `scripts/migrate_conf.escript` in the Bondy source tree; the r
      is dropped in silence at boot and the setting does not apply.
 
      RENAME -- same setting, new key (2)
-       oplog.aae.interval                             = 1m             ->  db.aae.interval
+       oplog.aae.interval                             = 1m             ->  db.oplog.aae.interval
        oplog.core.shard_count                         = 16             ->  db.main.shard_count
 
      DROP -- no equivalent on this release (1)
@@ -144,7 +144,7 @@ The check tool is `scripts/migrate_conf.escript` in the Bondy source tree; the r
 
      INVALID VALUE (1) -- this release reads this key, but cannot parse the value.
      ...
-       db.wal.fsync_mode                              = sometimes
+       db.oplog.wal.fsync_mode                              = sometimes
            not a valid one of per_write, batched. Generation stops at phase
            transform_datatypes.
 
@@ -188,7 +188,7 @@ Start each node.
 If you're running (or moving to) more than one node, join them into a cluster now, before importing — see [Running a Cluster](/connect/guides/deployment/running_a_cluster).
 
 ::: warning Set `cluster.enabled = off` on a single node
-`cluster.enabled` defaults to `on`. A node that runs alone with clustering on never compacts its history. Under the default fence policy (`db.aae = on`, `db.aae.fence.on_isolation = refuse`), it also refuses every authentication, anonymous included, once its security tables stay unconfirmed for longer than `db.aae.fence.max_lag`. Set `cluster.enabled = off` in the `bondy.conf` of a node meant to run alone, and keep the default `on` on every member of a cluster. See [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering), which also explains why a node that ran with `off` can later join only nodes with empty data directories.
+`cluster.enabled` defaults to `on`. A node that runs alone with clustering on never compacts its history. Under the default fence policy (`db.oplog.aae = on`, `db.oplog.aae.fence.on_isolation = refuse`), it also refuses every authentication, anonymous included, once its security tables stay unconfirmed for longer than `db.oplog.aae.fence.max_lag`. Set `cluster.enabled = off` in the `bondy.conf` of a node meant to run alone, and keep the default `on` on every member of a cluster. See [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering), which also explains why a node that ran with `off` can later join only nodes with empty data directories.
 :::
 
 ::: warning Auto-clustering nodes with an insecure Partisan peer plane
@@ -289,32 +289,32 @@ The check in [step 5](#_5-install-1-0-0-and-check-bondy-conf-against-its-schema)
 
 ### Storage and AAE key renames
 
-Every storage-related `bondy.conf` key changed name as part of the storage-engine replacement. Bondy does not refuse to boot on a key it doesn't recognise: the release's pre-start hook runs cuttlefish with `--allow_extra`, so an old key carried over unchanged is dropped without a message and its setting does not apply. The check in [step 5](#_5-install-1-0-0-and-check-bondy-conf-against-its-schema) reports every such key and its replacement.
+Every storage-related `bondy.conf` key changed name as part of the storage-engine replacement. Bondy 1.0.x does not refuse to boot on a key it doesn't recognise: the release's pre-start hook runs cuttlefish with `--allow_extra`, so an old key carried over unchanged is dropped without a message and its setting does not apply. The check in [step 5](#_5-install-1-0-0-and-check-bondy-conf-against-its-schema) reports every such key and its replacement.
 
 The `oplog.` prefix is now `db.`, unconditionally. If you didn't customise any of these, there's nothing to do — the defaults are unchanged:
 
 | Old key (≤ 1.0.0-rc.65) | New key |
 |---|---|
-| `oplog.aae` | `db.aae` |
-| `oplog.aae.interval` | `db.aae.interval` |
-| `oplog.aae.live_sync` | `db.aae.live_sync` |
-| `oplog.aae.live_sync.max` | `db.aae.live_sync.max` |
-| `oplog.aae.max_concurrency` | `db.aae.max_concurrency` |
-| `oplog.aae.max_pages_in_flight` | `db.aae.max_pages_in_flight` |
-| `oplog.aae.load_adaptive` | `db.aae.load_adaptive` |
-| `oplog.aae.load_run_queue_threshold` | `db.aae.load_run_queue_threshold` |
-| `oplog.aae.fanout` | `db.aae.fanout` |
-| `oplog.aae.fence.max_lag` | `db.aae.fence.max_lag` |
-| `oplog.aae.fence.on_isolation` | `db.aae.fence.on_isolation` |
+| `oplog.aae` | `db.oplog.aae` |
+| `oplog.aae.interval` | `db.oplog.aae.interval` |
+| `oplog.aae.live_sync` | `db.oplog.aae.live_sync` |
+| `oplog.aae.live_sync.max` | `db.oplog.aae.live_sync.max` |
+| `oplog.aae.max_concurrency` | `db.oplog.aae.max_concurrency` |
+| `oplog.aae.max_pages_in_flight` | `db.oplog.aae.max_pages_in_flight` |
+| `oplog.aae.load_adaptive` | `db.oplog.aae.load_adaptive` |
+| `oplog.aae.load_run_queue_threshold` | `db.oplog.aae.load_run_queue_threshold` |
+| `oplog.aae.fanout` | `db.oplog.aae.fanout` |
+| `oplog.aae.fence.max_lag` | `db.oplog.aae.fence.max_lag` |
+| `oplog.aae.fence.on_isolation` | `db.oplog.aae.fence.on_isolation` |
 
 Four more keys move from `oplog.core.*` to a bare `db.*` — the `core.` segment drops because these settings were never specific to one database; they govern every replicated table node-wide:
 
 | Old key | New key |
 |---|---|
-| `oplog.core.gc_interval` | `db.gc_interval` |
-| `oplog.core.gc_heap_delta` | `db.gc_heap_delta` |
-| `oplog.core.pack_auto_seal_bytes` | `db.pack_auto_seal_bytes` |
-| `oplog.core.pack_seal_mode` | `db.pack_seal_mode` |
+| `oplog.core.gc_interval` | `db.oplog.heap_gc.interval` |
+| `oplog.core.gc_heap_delta` | `db.oplog.heap_gc.delta` |
+| `oplog.core.pack_auto_seal_bytes` | `db.oplog.pack.auto_seal_bytes` |
+| `oplog.core.pack_seal_mode` | `db.oplog.pack.seal_mode` |
 
 Bondy's durable database itself is renamed: `core` is now `main`, to stop it being confused with the unrelated `bondy_oplog_core` substrate module. If your `bondy.conf` sets any of the durable database's topology, rename these too:
 
@@ -370,7 +370,7 @@ See the [API Gateway Specification Reference](/connect/reference/api_gateway/spe
 
 ### New optional keys
 
-None of these existed at 1.0.0-rc.65 in any form — there's nothing to migrate, and the defaults are safe to run with unchanged, but they're worth knowing about: `db.registry.shard_count` (the ephemeral registry's shard count); `db.wal.fsync_mode`, `db.wal.max_segment_bytes`, `db.wal.batched_fsync_interval`, `db.wal.batched_fsync_bytes` (write-ahead log durability and batching); `db.reclaim`, `db.reclaim.interval`, `db.reclaim.batch_cells`, `db.origin_retirement`, `db.origin_retirement.interval`, `db.gc_max_concurrency` (previously internal-only reclamation/retirement tuning, now real `bondy.conf` keys — see the [Reclamation Configuration Reference](/connect/reference/configuration/reclamation)); `cluster.max_message_size` (Partisan inter-node frame size cap); and `load_regulation.aae_reactor.pool.size`, `load_regulation.router.flow_pool.capacity` (see the [Overload Protection](/connect/reference/configuration/overload_protection) reference).
+None of these existed at 1.0.0-rc.65 in any form — there's nothing to migrate, and the defaults are safe to run with unchanged, but they're worth knowing about: `db.registry.shard_count` (the ephemeral registry's shard count); `db.oplog.wal.fsync_mode`, `db.oplog.wal.max_segment_bytes`, `db.oplog.wal.batched_fsync_interval`, `db.oplog.wal.batched_fsync_bytes` (write-ahead log durability and batching); `db.oplog.reclaim`, `db.oplog.reclaim.interval`, `db.oplog.reclaim.batch_cells`, `db.oplog.origin_retirement`, `db.oplog.origin_retirement.interval`, `db.oplog.compaction.max_concurrency` (previously internal-only reclamation/retirement tuning, now real `bondy.conf` keys — see the [Reclamation Configuration Reference](/connect/reference/configuration/reclamation)); `cluster.max_message_size` (Partisan inter-node frame size cap); and `load_regulation.aae_reactor.pool.size`, `load_regulation.router.flow_pool.capacity` (see the [Overload Protection](/connect/reference/configuration/overload_protection) reference).
 
 ### Other changes
 
@@ -391,7 +391,7 @@ Follow these steps for a cluster that runs a 1.0.0 pre-release that already carr
 
 2. **Remove `db.compaction.peer_timeout`.** The key does not exist in 1.0.0. Compaction on every database, the in-memory registry included, waits for every cluster member however long it stays silent. A member stops holding compaction only when it leaves the cluster. A `bondy.conf` that still sets the key boots, because the release ignores keys that no schema maps, and the key has no effect. See [Convergence](/connect/concepts/convergence#the-compaction-witnesses-and-the-truncation-cap).
 
-3. **Set `cluster.enabled = off` on a node that runs alone.** The key is new in 1.0.0 and defaults to `on`. A single node left on `on` never compacts its history, and it logs a ["GC stalled"](/connect/reference/logging#gc-stalled) warning with reason `no_members`. With the defaults `db.aae = on` and `db.aae.fence.on_isolation = refuse`, the node also refuses every authentication with `temporarily_unavailable` once its security tables have gone uncertified for longer than `db.aae.fence.max_lag` (default `60s`). Keep the default on every member of a cluster. See [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering).
+3. **Set `cluster.enabled = off` on a node that runs alone.** The key is new in 1.0.0 and defaults to `on`. A single node left on `on` never compacts its history, and it logs a ["GC stalled"](/connect/reference/logging#gc-stalled) warning with reason `no_members`. With the defaults `db.oplog.aae = on` and `db.oplog.aae.fence.on_isolation = refuse`, the node also refuses every authentication with `temporarily_unavailable` once its security tables have gone uncertified for longer than `db.oplog.aae.fence.max_lag` (default `60s`). Keep the default on every member of a cluster. See [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering).
 
 4. **Stop every node, then start them all on 1.0.0.** Rolling upgrades are not supported. The registry is held in memory, so it starts empty on every node; clients reconnect, and register and subscribe again.
 

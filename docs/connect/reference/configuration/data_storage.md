@@ -45,15 +45,15 @@ Boot behaviour when the on-disk topology manifest disagrees with the configured 
 
 ## Pack Store and Durability
 
-@[config](db.pack_auto_seal_bytes,bytesize,2MB,v1.0.0)
+@[config](db.oplog.pack.auto_seal_bytes,bytesize,2MB,v1.1.0)
 
-Byte threshold at which a durable shard's pack-store MST seals its incoming pack into a sealed pack. The seal rewrites the whole incoming pack in one fsync'd pass; its cost scales linearly with this threshold. The pack store's native 16MB behaviour produces seal freezes of 600ms or more — large enough to push read-after-write freshness lag toward the authentication fence's default window (`db.aae.fence.max_lag`, 1s) and trigger spurious authentication refusals. The 2MB default keeps each freeze to tens of milliseconds at no throughput or hot-read cost, since reads are served from the projection and cache, never the MST directly. A smaller value seals more often into more sealed packs, adding only anti-entropy/compaction/cold-boot work. Global — applies to every durable shard node-wide, not a specific database.
+Byte threshold at which a durable shard's pack-store MST seals its incoming pack into a sealed pack. The seal rewrites the whole incoming pack in one fsync'd pass; its cost scales linearly with this threshold. The pack store's native 16MB behaviour produces seal freezes of 600ms or more — large enough to push read-after-write freshness lag toward the authentication fence's default window (`db.oplog.aae.fence.max_lag`, 1s) and trigger spurious authentication refusals. The 2MB default keeps each freeze to tens of milliseconds at no throughput or hot-read cost, since reads are served from the projection and cache, never the MST directly. A smaller value seals more often into more sealed packs, adding only anti-entropy/compaction/cold-boot work. Global — applies to every durable shard node-wide, not a specific database.
 
-@[config](db.pack_seal_mode,async&#124;sync,async,v1.0.0)
+@[config](db.oplog.pack.seal_mode,async&#124;sync,async,v1.1.0)
 
-Seal driver for the durable shard pack-store MST. `async` rolls the incoming pack aside at the commit barrier and rewrites it into a sealed pack on a monitored worker, keeping the (multi-hundred-millisecond) rewrite off the write path entirely — measured roughly 44% lower p99 apply latency versus the inline alternative. It does not change durable write throughput, which is bounded by disk fsync bandwidth regardless of where the seal runs. `sync` restores the historical inline behaviour (the store seals on `put` at the threshold). Affects only durable shards — ephemeral instances never seal. Global, like `db.pack_auto_seal_bytes`.
+Seal driver for the durable shard pack-store MST. `async` rolls the incoming pack aside at the commit barrier and rewrites it into a sealed pack on a monitored worker, keeping the (multi-hundred-millisecond) rewrite off the write path entirely — measured roughly 44% lower p99 apply latency versus the inline alternative. It does not change durable write throughput, which is bounded by disk fsync bandwidth regardless of where the seal runs. `sync` restores the historical inline behaviour (the store seals on `put` at the threshold). Affects only durable shards — ephemeral instances never seal. Global, like `db.oplog.pack.auto_seal_bytes`.
 
-@[config](db.journal_trim_interval,duration_time_units,1h,v1.0.0)
+@[config](db.leveled.journal.trim_interval,duration_time_units,1h,v1.1.0)
 
 Interval at which Bondy trims each durable leveled store's journal back to the files still needed to recover the ledger. Bondy opens every durable store in leveled's `head_only` mode. In that mode each write lands twice: the whole cell in the ledger, and the same object specs, payload included, in the journal. The journal exists only to recover the ledger after an unclean stop; no read path reads it. Leveled never reclaims this journal on its own in `head_only` mode.
 
@@ -63,15 +63,74 @@ A trim drops the journal files strictly older than the one holding the ledger's 
 `0` disables the trim. The journal then keeps every version of every cell ever written, while the ledger holds only the live set, so disk use grows with cumulative writes for as long as the node runs.
 :::
 
+## Pack Collection
+
+A durable shard never changes a Merkle Search Tree page in place. Each write adds new copies of the pages on its path to the root, and each [compaction](/connect/concepts/convergence#the-watermark-door) truncation unlinks subtrees. A page that the current root no longer reaches stays in the sealed packs until a **pack collection** removes it.
+
+A pack collection rewrites the sealed packs of one shard. It keeps every page that the current root reaches, and every page of a root that a running sync session has [pinned](/connect/concepts/convergence#pinned-roots). It writes the kept pages to one new sealed pack, then deletes the packs it replaced. The incoming pack is not touched.
+
+The garbage in the sealed packs grows with the number of writes, not with the size of the live data. A write burst, such as a restore from a backup, can therefore make the pack store many times larger than the data it holds. A pack collection cannot remove history that compaction has not yet truncated. A member that is down holds that history on every shard, as [The compaction witnesses and the truncation cap](/connect/concepts/convergence#the-compaction-witnesses-and-the-truncation-cap) describes.
+
+### When a collection runs
+
+Each shard checks on its compaction tick, at most once per second. A collection is due when either trigger holds:
+
+- **Time trigger:** `db.oplog.pack.gc.interval` has passed since the last collection.
+- **Volume trigger:** the sealed packs hold at least `db.oplog.pack.gc.growth_factor` × *B* page records. *B* is the record count that the last collection left, or `db.oplog.pack.gc.min_records` if that is larger.
+
+When a seal is in flight, the shard retries on its next tick. After every collection, including one that dropped nothing, the shard resets the clock and *B*.
+
+The first tick after a node starts records the clock and *B* and does not collect. A shard that reopens with many sealed packs would otherwise stall on a full rewrite while it comes up. The volume trigger applies from the second tick, so a write burst after a start is collected before the interval ends.
+
+A collection is the most expensive operation a shard runs. The shard's oplog instance runs it in its own process, so the instance handles no other request, a write included, until the collection finishes. The time trigger is coarse for that reason. The volume trigger spreads the cost over the writes that made it due: the shard rewrites once for each `db.oplog.pack.gc.growth_factor`-fold growth of the sealed packs.
+
+::: warning A collection needs free disk space
+A collection writes the new sealed pack before it deletes the packs it replaces, so it needs free space for every page it keeps. A shard on a full disk cannot collect. Size the volume for the largest write burst you expect, a restore included.
+:::
+
+### Settings
+
+Each setting applies to every durable shard on the node.
+
+@[config](db.oplog.pack.gc.interval,duration_time_units,1h,v1.1.0)
+
+The time trigger: the longest time between two collections of a shard. The value has to be greater than zero.
+
+@[config](db.oplog.pack.gc.growth_factor,integer,2,v1.1.0)
+
+The volume trigger: a collection is due once the sealed packs hold this many times the page records that the last collection left. The value has to be at least 2. With 1, the record count that a collection leaves would make the next collection due at once.
+
+@[config](db.oplog.pack.gc.min_records,integer,10000,v1.1.0)
+
+The smallest base that the volume trigger multiplies, in page records. A shard with few sealed records therefore does not collect on every small burst of writes. The value has to be at least 1.
+
+A shard reads these settings on every compaction tick. To change one on a running node without a restart, attach a shell with `bondy-connect remote_console` and set the application environment key that it maps to:
+
+| `bondy.conf` key | Application environment key | Unit |
+| --- | --- | --- |
+| `db.oplog.pack.gc.interval` | `bondy_oplog.durable_gc_interval_ms` | milliseconds |
+| `db.oplog.pack.gc.growth_factor` | `bondy_oplog.durable_gc_growth_factor` | integer |
+| `db.oplog.pack.gc.min_records` | `bondy_oplog.durable_gc_min_records` | page records |
+
+```erlang
+application:set_env(bondy_oplog, durable_gc_interval_ms, 600000).
+```
+
+The change applies from the next tick. A restart restores the value from `bondy.conf`.
+
+The volume trigger is new in v1.0.2. In earlier releases, only the time trigger ran, and the first collection of a shard came one hour after the node started. In v1.0.2, the settings exist only as the application environment keys in the table above, so set them in `advanced.config` or on a running node. The `bondy.conf` keys are new in v1.1.0.
+
+`bondy_mst_page_store_gc_runs_total`, `bondy_mst_page_store_gc_packs_retired_total` and `bondy_mst_page_store_gc_freed_bytes_total` count the collections and what they freed. See [Metrics](/connect/reference/metrics).
+
 ## Instance Memory Management
 
-@[config](db.gc_interval,duration_time_units,2s,v1.0.0)
+@[config](db.oplog.heap_gc.interval,duration_time_units,2s,v1.1.0)
 
-Interval at which each oplog instance checks its own heap and fullsweep-hibernates it if growth has exceeded `db.gc_heap_delta` over its post-GC baseline. This reclaims transient apply/anti-entropy garbage that a long-lived instance would otherwise retain until the next major GC — most visibly during a solo import with no peers, where the anti-entropy-driven hibernate never fires. `0` disables the monitor. Global — applies to every oplog instance node-wide, not a specific database.
+Interval at which each oplog instance checks its own heap and fullsweep-hibernates it if growth has exceeded `db.oplog.heap_gc.delta` over its post-GC baseline. This reclaims transient apply/anti-entropy garbage that a long-lived instance would otherwise retain until the next major GC — most visibly during a solo import with no peers, where the anti-entropy-driven hibernate never fires. `0` disables the monitor. Global — applies to every oplog instance node-wide, not a specific database.
 
-@[config](db.gc_heap_delta,bytesize,16MB,v1.0.0)
+@[config](db.oplog.heap_gc.delta,bytesize,16MB,v1.1.0)
 
-Heap-growth threshold above an instance's post-GC baseline that triggers the periodic monitor above. Keying on growth over the live baseline, rather than absolute heap size, avoids GC-thrashing an instance with a large live MST: it fires once per roughly this many bytes of accumulated garbage, capping the transient peak at approximately `live + this`. Lower trades a touch more fullsweep work for a tighter memory ceiling. Global, like `db.gc_interval`.
+Heap-growth threshold above an instance's post-GC baseline that triggers the periodic monitor above. Keying on growth over the live baseline, rather than absolute heap size, avoids GC-thrashing an instance with a large live MST: it fires once per roughly this many bytes of accumulated garbage, capping the transient peak at approximately `live + this`. Lower trades a touch more fullsweep work for a tighter memory ceiling. Global, like `db.oplog.heap_gc.interval`.
 
 ### Registry History Retention
 
@@ -87,37 +146,37 @@ Event-count bound, per shard, for `registry` history. When a shard's live histor
 
 ## Write-Ahead Log
 
-@[config](db.wal.fsync_mode,per_write&#124;batched,per_write,v1.0.0)
+@[config](db.oplog.wal.fsync_mode,per_write&#124;batched,per_write,v1.1.0)
 
-Fsync driver for the durable write-ahead log. `per_write` fsyncs every append, bounding the writer to the storage device's fsync rate (roughly 6,000 ops/s on typical NVMe) but guaranteeing each write is durable before it returns — required for security-class namespaces (grants, tickets, users). `batched` defers fsync to a size or time boundary (`db.wal.batched_fsync_bytes` / `db.wal.batched_fsync_interval`) and exposes durability via an explicit wait instead of the append call returning; it reaches roughly two orders of magnitude higher throughput at the cost of a bounded durability window. Global — affects every durable oplog instance node-wide; the ephemeral `registry` in-memory WAL never fsyncs and ignores this.
+Fsync driver for the durable write-ahead log. `per_write` fsyncs every append, bounding the writer to the storage device's fsync rate (roughly 6,000 ops/s on typical NVMe) but guaranteeing each write is durable before it returns — required for security-class namespaces (grants, tickets, users). `batched` defers fsync to a size or time boundary (`db.oplog.wal.batched_fsync_bytes` / `db.oplog.wal.batched_fsync_interval`) and exposes durability via an explicit wait instead of the append call returning; it reaches roughly two orders of magnitude higher throughput at the cost of a bounded durability window. Global — affects every durable oplog instance node-wide; the ephemeral `registry` in-memory WAL never fsyncs and ignores this.
 
-@[config](db.wal.max_segment_bytes,bytesize,64MB,v1.0.0)
+@[config](db.oplog.wal.max_segment_bytes,bytesize,64MB,v1.1.0)
 
-Rotation threshold for the durable WAL's head segment. The writer rotates to a fresh segment once the next frame would push the head past this size; rotation fsyncs the sealed segment and advances the durable position. Global, like `db.wal.fsync_mode`.
+Rotation threshold for the durable WAL's head segment. The writer rotates to a fresh segment once the next frame would push the head past this size; rotation fsyncs the sealed segment and advances the durable position. Global, like `db.oplog.wal.fsync_mode`.
 
-@[config](db.wal.batched_fsync_interval,duration_time_units,50ms,v1.0.0)
+@[config](db.oplog.wal.batched_fsync_interval,duration_time_units,50ms,v1.1.0)
 
-Batched-mode fsync time trigger: the writer fsyncs at most this long after the first un-fsynced append. Only consulted when `db.wal.fsync_mode = batched`. Global, like `db.wal.fsync_mode`.
+Batched-mode fsync time trigger: the writer fsyncs at most this long after the first un-fsynced append. Only consulted when `db.oplog.wal.fsync_mode = batched`. Global, like `db.oplog.wal.fsync_mode`.
 
-@[config](db.wal.batched_fsync_bytes,bytesize,1MB,v1.0.0)
+@[config](db.oplog.wal.batched_fsync_bytes,bytesize,1MB,v1.1.0)
 
-Batched-mode fsync size trigger: the writer fsyncs once accumulated un-fsynced bytes exceed this threshold. Only consulted when `db.wal.fsync_mode = batched`. Global, like `db.wal.fsync_mode`.
+Batched-mode fsync size trigger: the writer fsyncs once accumulated un-fsynced bytes exceed this threshold. Only consulted when `db.oplog.wal.fsync_mode = batched`. Global, like `db.oplog.wal.fsync_mode`.
 
-@[config](db.drain.stall_alarm,duration_time_units,1m,v1.0.0)
+@[config](db.oplog.drain.stall_alarm,duration_time_units,1m,v1.1.0)
 
 How long a per-shard WAL drain may actively process frames without committing any new consumer position before Bondy raises a `bondy_oplog_drain_stalled` alarm (visible via `/metrics` and cleared automatically once the drain progresses again). This guards against a wedged or endlessly-re-reading log consumer on a node that anti-entropy would otherwise still report as converged. `0` disables the detector.
 
-@[config](db.frontier.hole_alarm,duration_time_units,5m,v1.0.0)
+@[config](db.oplog.frontier.hole_alarm,duration_time_units,5m,v1.1.0)
 
 How long a shard may carry a hole in its applied frontier before Bondy raises a `bondy_oplog_frontier_hole` alarm. A hole is a run of one origin's sequence numbers that this replica never received, while later sequences from the same origin are already applied. The replica holds its reported frontier below the hole. Peers therefore keep re-offering that origin, and the shard's Merkle Search Tree cannot truncate past the hole.
 
-Short-lived holes are routine: a local WAL commit lands out of sequence order, or a missing sequence is one anti-entropy round away. The alarm therefore fires on the age of a hole, not on its occurrence. Keep this value well above `db.aae.interval`. The `bondy_oplog_instance_frontier_holes` gauge shows current holes without waiting for the alarm. `0` disables the detector and clears any alarm it raised.
+Short-lived holes are routine: a local WAL commit lands out of sequence order, or a missing sequence is one anti-entropy round away. The alarm therefore fires on the age of a hole, not on its occurrence. Keep this value well above `db.oplog.aae.interval`. The `bondy_oplog_instance_frontier_holes` gauge shows current holes without waiting for the alarm. `0` disables the detector and clears any alarm it raised.
 
-The detector runs whether `db.aae` is on or off. A node with anti-entropy off is more likely to carry a standing hole, not less.
+The detector runs whether `db.oplog.aae` is on or off. A node with anti-entropy off is more likely to carry a standing hole, not less.
 
 ## Index Reads
 
-@[config](db.primary_scan_limit,integer,1000000,v1.0.0)
+@[config](db.index.primary_scan_limit,integer,1000000,v1.1.0)
 
 Maximum number of primary cells one stale-index fallback read may enumerate. When a secondary index is stale, Bondy answers the query by scanning every primary cell in the realm and recomputing each value's index terms. This limit stops that scan from running unbounded. Size it to the number of cells in your largest realm. Global — applies to every database node-wide.
 
@@ -131,47 +190,47 @@ Bondy's storage layer converges leaderlessly: peers compare Merkle Search Tree r
 
 > **Concept:** see [Convergence](/connect/concepts/convergence) for what a sync round does, how a replica that is genuinely behind is detected, and what the repair costs; and [Clustering](/connect/concepts/clustering) for how this fits into cluster formation.
 
-@[config](db.aae,on|off,on,v1.0.0)
+@[config](db.oplog.aae,on|off,on,v1.1.0)
 
 Master switch for active anti-entropy. The sync scheduler process always runs, but with this off, no Partisan peer source is wired in, so the scheduler has no peers and stays inert. A node with [`cluster.enabled = off`](/connect/reference/configuration/cluster#cluster.enabled) never wires a peer source, and the authentication freshness fence (below) always certifies it.
 
-@[config](db.aae.interval,duration_time_units,500ms,v1.0.0)
+@[config](db.oplog.aae.interval,duration_time_units,500ms,v1.1.0)
 
-Interval between sync scheduler ticks. Each tick, the scheduler asks the peer source for peers and dispatches sync sessions. Only relevant when `db.aae` is on.
+Interval between sync scheduler ticks. Each tick, the scheduler asks the peer source for peers and dispatches sync sessions. Only relevant when `db.oplog.aae` is on.
 
 ### Live-Sync Throttling
 
-@[config](db.aae.live_sync,on|off,on,v1.0.0)
+@[config](db.oplog.aae.live_sync,on|off,on,v1.1.0)
 
-Adaptively throttles live (post-bootstrap) syncs. A converged shard only re-syncs to discover divergence; once its data has settled it has nothing to pull, yet a naive scheduler would still dispatch a session against every peer every tick — the dominant steady-state cost of running anti-entropy across many shards. When on, each shard syncs at the tick interval while its data is actively changing, and backs off geometrically up to `db.aae.live_sync.max` once it goes quiescent, resetting to the fast cadence the moment its data moves again. Shards backing the authentication freshness fence are exempt and always sync every tick, so this never affects auth availability. When off, every live shard syncs every peer every tick (the historical behaviour).
+Adaptively throttles live (post-bootstrap) syncs. A converged shard only re-syncs to discover divergence; once its data has settled it has nothing to pull, yet a naive scheduler would still dispatch a session against every peer every tick — the dominant steady-state cost of running anti-entropy across many shards. When on, each shard syncs at the tick interval while its data is actively changing, and backs off geometrically up to `db.oplog.aae.live_sync.max` once it goes quiescent, resetting to the fast cadence the moment its data moves again. Shards backing the authentication freshness fence are exempt and always sync every tick, so this never affects auth availability. When off, every live shard syncs every peer every tick (the historical behaviour).
 
-@[config](db.aae.live_sync.max,duration_time_units,5s,v1.0.0)
+@[config](db.oplog.aae.live_sync.max,duration_time_units,5s,v1.1.0)
 
-Upper bound on the adaptive live-sync poll interval: once a shard goes quiescent, its sync cadence doubles each round up to this cap. Because `bondy_db` propagates changes pull-only (no eager push), this cap is also the steady-state cross-node convergence latency for a quiescent shard — set it below the convergence SLA you need. The first poll that pulls anything resets the shard to the fast cadence. Only relevant when `db.aae` and `db.aae.live_sync` are both on.
+Upper bound on the adaptive live-sync poll interval: once a shard goes quiescent, its sync cadence doubles each round up to this cap. Because `bondy_db` propagates changes pull-only (no eager push), this cap is also the steady-state cross-node convergence latency for a quiescent shard — set it below the convergence SLA you need. The first poll that pulls anything resets the shard to the fast cadence. Only relevant when `db.oplog.aae` and `db.oplog.aae.live_sync` are both on.
 
 ### Concurrency and Memory
 
-@[config](db.aae.max_concurrency,integer,3,v1.0.0)
+@[config](db.oplog.aae.max_concurrency,integer,3,v1.1.0)
 
-Maximum number of anti-entropy sync sessions allowed to run concurrently on this node. Anti-entropy is background work subordinate to routing — this cap keeps it from saturating the node. It governs speed and fairness, never the memory ceiling: the per-round page batch is `db.aae.max_pages_in_flight` divided by this value, so raising concurrency shrinks each session's batch while the node-wide page budget stays fixed. More concurrency means more peers/shards make progress at once — no shard starves behind a single serial sync — each running slower, not using more RAM. `1` serialises anti-entropy entirely.
+Maximum number of anti-entropy sync sessions allowed to run concurrently on this node. Anti-entropy is background work subordinate to routing — this cap keeps it from saturating the node. It governs speed and fairness, never the memory ceiling: the per-round page batch is `db.oplog.aae.max_pages_in_flight` divided by this value, so raising concurrency shrinks each session's batch while the node-wide page budget stays fixed. More concurrency means more peers/shards make progress at once — no shard starves behind a single serial sync — each running slower, not using more RAM. `1` serialises anti-entropy entirely.
 
-@[config](db.aae.max_pages_in_flight,integer,2048,v1.0.0)
+@[config](db.oplog.aae.max_pages_in_flight,integer,2048,v1.1.0)
 
 Node-wide budget, in MST pages, for anti-entropy reconciliation in flight at any instant. This is the lever that bounds anti-entropy's peak memory: a sync session pulls missing pages in bounded rounds of `max_pages_in_flight / max_concurrency` pages, so total in-flight pages stay near this budget regardless of dataset size or concurrency. Larger means faster sync with a higher peak; smaller is gentler on RAM but slower.
 
 ### Load-Adaptive Yielding
 
-@[config](db.aae.load_adaptive,on|off,off,v1.0.0)
+@[config](db.oplog.aae.load_adaptive,on|off,off,v1.1.0)
 
-Yields anti-entropy's throttleable dispatches while the node is busy. The concurrency cap bounds anti-entropy in aggregate; this adds a temporal dimension — even within the cap, a routing load spike transiently defers anti-entropy so background reconciliation never steals scheduler time from the node's real job. When on, the scheduler samples a node-load signal each tick and, while the node is backlogged past `db.aae.load_run_queue_threshold`, skips throttleable dispatches (bootstrap snapshot ships and non-fence live syncs) for that tick — in-flight sessions are never aborted, and deferred shards retry on the next quiet tick. Shards backing the authentication freshness fence are exempt and always sync, so this can never affect auth availability, only convergence latency under load. Off by default, since the concurrency cap and live-sync throttle already keep anti-entropy subordinate; enable it where routing latency is sensitive to anti-entropy scheduler pressure under load.
+Yields anti-entropy's throttleable dispatches while the node is busy. The concurrency cap bounds anti-entropy in aggregate; this adds a temporal dimension — even within the cap, a routing load spike transiently defers anti-entropy so background reconciliation never steals scheduler time from the node's real job. When on, the scheduler samples a node-load signal each tick and, while the node is backlogged past `db.oplog.aae.load_run_queue_threshold`, skips throttleable dispatches (bootstrap snapshot ships and non-fence live syncs) for that tick — in-flight sessions are never aborted, and deferred shards retry on the next quiet tick. Shards backing the authentication freshness fence are exempt and always sync, so this can never affect auth availability, only convergence latency under load. Off by default, since the concurrency cap and live-sync throttle already keep anti-entropy subordinate; enable it where routing latency is sensitive to anti-entropy scheduler pressure under load.
 
-@[config](db.aae.load_run_queue_threshold,float,2.0,v1.0.0)
+@[config](db.oplog.aae.load_run_queue_threshold,float,2.0,v1.1.0)
 
-Run-queue length per online scheduler — EWMA-smoothed across ticks — at or above which anti-entropy yields its throttleable dispatches (only consulted when `db.aae.load_adaptive` is also on). The signal is `erlang:statistics(run_queue)` divided by the online scheduler count: the average number of ready processes queued per scheduler. A healthy node hovers near 0–1; a sustained 2 or more means work is queuing faster than the schedulers drain it. Lower yields anti-entropy sooner (more protective of routing latency, slower convergence under load); higher lets it work closer to saturation.
+Run-queue length per online scheduler — EWMA-smoothed across ticks — at or above which anti-entropy yields its throttleable dispatches (only consulted when `db.oplog.aae.load_adaptive` is also on). The signal is `erlang:statistics(run_queue)` divided by the online scheduler count: the average number of ready processes queued per scheduler. A healthy node hovers near 0–1; a sustained 2 or more means work is queuing faster than the schedulers drain it. Lower yields anti-entropy sooner (more protective of routing latency, slower convergence under load); higher lets it work closer to saturation.
 
 ### Peer Sampling
 
-@[config](db.aae.fanout,integer,3,v1.0.0)
+@[config](db.oplog.aae.fanout,integer,3,v1.1.0)
 
 Number of peers the sync scheduler samples from the Partisan cluster membership each tick.
 
@@ -179,13 +238,13 @@ Number of peers the sync scheduler samples from the Partisan cluster membership 
 
 Because Bondy's storage layer has no consensus round, a partitioned node could otherwise authenticate against a stale view of the security tables. The freshness fence closes that gap.
 
-@[config](db.aae.fence.max_lag,duration_time_units,60s,v1.0.0)
+@[config](db.oplog.aae.fence.max_lag,duration_time_units,60s,v1.1.0)
 
-The freshness bound for the fence. A node refuses new authentication when its view of the security tables (users/grants) has not been confirmed within this window — bounding how stale a credential or permission change a node may authenticate against. A completed anti-entropy round confirms freshness. A local write does not, so a node cut off from its peers stops authenticating under `db.aae.fence.on_isolation = refuse`, however much it writes. Lower is tighter security (a lagging node refuses sooner); higher favours availability under partition or lag. Only relevant when `db.aae` is on — the fence is otherwise a no-op, since local writes are synchronous.
+The freshness bound for the fence. A node refuses new authentication when its view of the security tables (users/grants) has not been confirmed within this window — bounding how stale a credential or permission change a node may authenticate against. A completed anti-entropy round confirms freshness. A local write does not, so a node cut off from its peers stops authenticating under `db.oplog.aae.fence.on_isolation = refuse`, however much it writes. Lower is tighter security (a lagging node refuses sooner); higher favours availability under partition or lag. Only relevant when `db.oplog.aae` is on — the fence is otherwise a no-op, since local writes are synchronous.
 
 Do not set this near the anti-entropy tick period. The anti-entropy rounds that confirm freshness are background work, and their completion stretches whenever the node is busy. A bound of about 1s therefore refuses authentication in bulk during a burst of session opens, with no actual staleness involved. Revocation of a single user's credentials does not depend on this bound: it is handled separately, by the per-user token version and by invalidating cached RBAC state when replicated changes arrive.
 
-@[config](db.aae.fence.on_isolation,refuse&#124;proceed&#124;quorum,refuse,v1.0.0)
+@[config](db.oplog.aae.fence.on_isolation,refuse&#124;proceed&#124;quorum,refuse,v1.1.0)
 
 What the fence does on a node with clustering enabled that currently cannot confirm freshness with any peer — partitioned into a minority, cold-started before its first anti-entropy round completes, or running with no other member at all. A node with [`cluster.enabled = off`](/connect/reference/configuration/cluster#cluster.enabled) is **not** governed by this policy: it has no peer to lag, so it always authenticates.
 
@@ -197,15 +256,15 @@ A single node that keeps the default `cluster.enabled = on` has no peer to confi
 - **`proceed`** — treat unreachable peers as vacuously fresh and keep authenticating. Most available, but during a partition a stale minority node could accept a token revoked elsewhere until it heals. Not recommended for a security fence.
 - **`quorum`** — certify freshness, and so authenticate, only while connected to a majority of the expected cluster membership; a minority partition refuses even if it can still sync internally. Secure and available for the majority side. Requires a Partisan cluster.
 
-@[config](db.aae.fence.alarm,duration_time_units,5m,v1.0.1)
+@[config](db.oplog.aae.fence.alarm,duration_time_units,5m,v1.1.0)
 
-How long the fence may refuse every new authentication before the node raises the [`bondy_auth_fence_closed`](/connect/reference/alarms#bondy-auth-fence-closed) alarm. The node checks the fence every 10 seconds. It raises the alarm when the fence refuses and no anti-entropy round has refreshed the users and grants within this time. It clears the alarm when the fence admits again. The fence is closed at every boot until the first anti-entropy round, so the node does not raise the alarm until it has been up for this long. `0` disables the alarm. Only relevant when `db.aae` is on.
+How long the fence may refuse every new authentication before the node raises the [`bondy_auth_fence_closed`](/connect/reference/alarms#bondy-auth-fence-closed) alarm. The node checks the fence every 10 seconds. It raises the alarm when the fence refuses and no anti-entropy round has refreshed the users and grants within this time. It clears the alarm when the fence admits again. The fence is closed at every boot until the first anti-entropy round, so the node does not raise the alarm until it has been up for this long. `0` disables the alarm. Only relevant when `db.oplog.aae` is on.
 
 ## Storage Engine (leveled)
 
 The `db.leveled.*` keys are passed to every durable leveled store this node starts. They are advanced tuning keys, and most deployments leave them at their defaults. Each default is leveled's own, except `db.leveled.cache_size`, which keeps the 2000 Bondy has always used. The keys are global, like `db.wal.*`. The ephemeral `registry` database keeps its projection in memory and starts no leveled store, so none of them apply to it.
 
-A leveled store has two parts. The **ledger** is an LSM tree of keys and their current values, maintained by the **penciller**. The **journal** is an append-only log of writes, used only to recover the ledger after an unclean stop. Bondy opens every store in leveled's `head_only` mode, in which leveled never compacts the journal; `db.journal_trim_interval` is what bounds it.
+A leveled store has two parts. The **ledger** is an LSM tree of keys and their current values, maintained by the **penciller**. The **journal** is an append-only log of writes, used only to recover the ledger after an unclean stop. Bondy opens every store in leveled's `head_only` mode, in which leveled never compacts the journal; `db.leveled.journal.trim_interval` is what bounds it.
 
 ### Caches
 
@@ -235,7 +294,7 @@ Maximum number of ledger files a single file may be merged into. With fewer over
 
 Maximum size of one journal file, in bytes (the default is 10^9 bytes). Leveled starts a new file when the current one reaches this size or `db.leveled.max_journal_objects`, whichever comes first. The absolute ceiling is 4GB, set by leveled's 4-byte file pointers. The value applies only to files started after a change; existing files are not rewritten.
 
-This key bounds the size of each file, not the number of files. In `head_only` mode the journal records the payload of every write, so it holds every version ever written. `db.journal_trim_interval` bounds the total.
+This key bounds the size of each file, not the number of files. In `head_only` mode the journal records the payload of every write, so it holds every version ever written. `db.leveled.journal.trim_interval` bounds the total.
 
 @[config](db.leveled.max_journal_objects,integer,200000,v1.0.0)
 
@@ -245,7 +304,7 @@ Maximum number of objects in one journal file. This is the companion bound to `d
 
 Whether leveled flushes to disk after every write. `none` lets the operating system schedule the flush. `sync` forces a flush per write, which is markedly slower unless the hardware absorbs it (a battery-backed write cache).
 
-This key governs the durable projection, not the write-ahead log. A write is already durable in the WAL before it reaches leveled; `db.wal.fsync_mode` governs that. With `none`, Bondy fsyncs the leveled journal itself before it truncates the log or checkpoints anything a write was claimed to cover.
+This key governs the durable projection, not the write-ahead log. A write is already durable in the WAL before it reaches leveled; `db.oplog.wal.fsync_mode` governs that. With `none`, Bondy fsyncs the leveled journal itself before it truncates the log or checkpoints anything a write was claimed to cover.
 
 #### Journal Compaction
 
@@ -317,41 +376,109 @@ How often leveled logs its accumulated timing statistics.
 
 ## Deprecated and Removed Keys
 
-Every storage-related `bondy.conf` key was renamed or removed when this release replaced the storage engine — see [Upgrading to 1.0.0](/connect/guides/deployment/upgrading_to_1_0_0) for the full migration procedure. The old keys are kept here, greyed out, so a key you remember from an earlier release is still findable on this page rather than silently gone.
+Every storage-related `bondy.conf` key was renamed or removed when 1.0.0 replaced the storage engine — see [Upgrading to 1.0.0](/connect/guides/deployment/upgrading_to_1_0_0) for the full migration procedure. The old keys are kept here, greyed out, so a key you remember from an earlier release is still findable on this page rather than silently gone.
 
-### Renamed
+### Renamed in 1.1.0
 
-The `oplog.` prefix is now `db.`. Four keys additionally drop their `core.` segment, since they were never specific to one database, and four more move from `oplog.core.*` to `db.main.*`, since the durable database itself was renamed from `core` to `main`.
+The keys of the operation log moved under `db.oplog.`, grouped by the component they configure: anti-entropy, write-ahead log, pack store, heap collection, compaction, the frontier and drain alarms, reclamation and origin retirement. The journal trim moved under `db.leveled.journal.`, and the primary scan limit under `db.index.`. A 1.1.0 node refuses to start on an old name, and the error names the new key. Run `scripts/migrate_conf.escript check` from the Bondy repository on your `bondy.conf` before you upgrade: it lists each old key with its new name.
 
-@[configDeprecated](oplog.aae,db.aae,v1.0.0)
+@[configDeprecated](db.primary_scan_limit,db.index.primary_scan_limit,v1.1.0)
 
-@[configDeprecated](oplog.aae.interval,db.aae.interval,v1.0.0)
+@[configDeprecated](db.journal_trim_interval,db.leveled.journal.trim_interval,v1.1.0)
 
-@[configDeprecated](oplog.aae.live_sync,db.aae.live_sync,v1.0.0)
+@[configDeprecated](db.aae,db.oplog.aae,v1.1.0)
 
-@[configDeprecated](oplog.aae.live_sync.max,db.aae.live_sync.max,v1.0.0)
+@[configDeprecated](db.aae.fanout,db.oplog.aae.fanout,v1.1.0)
 
-@[configDeprecated](oplog.aae.max_concurrency,db.aae.max_concurrency,v1.0.0)
+@[configDeprecated](db.aae.fence.alarm,db.oplog.aae.fence.alarm,v1.1.0)
 
-@[configDeprecated](oplog.aae.max_pages_in_flight,db.aae.max_pages_in_flight,v1.0.0)
+@[configDeprecated](db.aae.fence.max_lag,db.oplog.aae.fence.max_lag,v1.1.0)
 
-@[configDeprecated](oplog.aae.load_adaptive,db.aae.load_adaptive,v1.0.0)
+@[configDeprecated](db.aae.fence.on_isolation,db.oplog.aae.fence.on_isolation,v1.1.0)
 
-@[configDeprecated](oplog.aae.load_run_queue_threshold,db.aae.load_run_queue_threshold,v1.0.0)
+@[configDeprecated](db.aae.interval,db.oplog.aae.interval,v1.1.0)
 
-@[configDeprecated](oplog.aae.fanout,db.aae.fanout,v1.0.0)
+@[configDeprecated](db.aae.live_sync,db.oplog.aae.live_sync,v1.1.0)
 
-@[configDeprecated](oplog.aae.fence.max_lag,db.aae.fence.max_lag,v1.0.0)
+@[configDeprecated](db.aae.live_sync.max,db.oplog.aae.live_sync.max,v1.1.0)
 
-@[configDeprecated](oplog.aae.fence.on_isolation,db.aae.fence.on_isolation,v1.0.0)
+@[configDeprecated](db.aae.load_adaptive,db.oplog.aae.load_adaptive,v1.1.0)
 
-@[configDeprecated](oplog.core.gc_interval,db.gc_interval,v1.0.0)
+@[configDeprecated](db.aae.load_run_queue_threshold,db.oplog.aae.load_run_queue_threshold,v1.1.0)
 
-@[configDeprecated](oplog.core.gc_heap_delta,db.gc_heap_delta,v1.0.0)
+@[configDeprecated](db.aae.max_concurrency,db.oplog.aae.max_concurrency,v1.1.0)
 
-@[configDeprecated](oplog.core.pack_auto_seal_bytes,db.pack_auto_seal_bytes,v1.0.0)
+@[configDeprecated](db.aae.max_pages_in_flight,db.oplog.aae.max_pages_in_flight,v1.1.0)
 
-@[configDeprecated](oplog.core.pack_seal_mode,db.pack_seal_mode,v1.0.0)
+@[configDeprecated](db.gc_max_concurrency,db.oplog.compaction.max_concurrency,v1.1.0,/connect/reference/configuration/reclamation)
+
+@[configDeprecated](db.drain.stall_alarm,db.oplog.drain.stall_alarm,v1.1.0)
+
+@[configDeprecated](db.frontier.hole_alarm,db.oplog.frontier.hole_alarm,v1.1.0)
+
+@[configDeprecated](db.gc_heap_delta,db.oplog.heap_gc.delta,v1.1.0)
+
+@[configDeprecated](db.gc_interval,db.oplog.heap_gc.interval,v1.1.0)
+
+@[configDeprecated](db.origin_retirement,db.oplog.origin_retirement,v1.1.0,/connect/reference/configuration/reclamation)
+
+@[configDeprecated](db.origin_retirement.interval,db.oplog.origin_retirement.interval,v1.1.0,/connect/reference/configuration/reclamation)
+
+@[configDeprecated](db.origin_retirement.path,db.oplog.origin_retirement.path,v1.1.0,/connect/reference/configuration/reclamation)
+
+@[configDeprecated](db.pack_auto_seal_bytes,db.oplog.pack.auto_seal_bytes,v1.1.0)
+
+@[configDeprecated](db.pack_seal_mode,db.oplog.pack.seal_mode,v1.1.0)
+
+@[configDeprecated](db.reclaim,db.oplog.reclaim,v1.1.0,/connect/reference/configuration/reclamation)
+
+@[configDeprecated](db.reclaim.batch_cells,db.oplog.reclaim.batch_cells,v1.1.0,/connect/reference/configuration/reclamation)
+
+@[configDeprecated](db.reclaim.interval,db.oplog.reclaim.interval,v1.1.0,/connect/reference/configuration/reclamation)
+
+@[configDeprecated](db.wal.batched_fsync_bytes,db.oplog.wal.batched_fsync_bytes,v1.1.0)
+
+@[configDeprecated](db.wal.batched_fsync_interval,db.oplog.wal.batched_fsync_interval,v1.1.0)
+
+@[configDeprecated](db.wal.fsync_mode,db.oplog.wal.fsync_mode,v1.1.0)
+
+@[configDeprecated](db.wal.max_segment_bytes,db.oplog.wal.max_segment_bytes,v1.1.0)
+
+In each case the value and its meaning are unchanged; only the key name moved.
+
+### Renamed in 1.0.0
+
+The `oplog.` prefix became `db.`. Four keys additionally drop their `core.` segment, since they were never specific to one database, and four more move from `oplog.core.*` to `db.main.*`, since the durable database itself was renamed from `core` to `main`. Each entry links to the key's current name, after the 1.1.0 renames above.
+
+@[configDeprecated](oplog.aae,db.oplog.aae,v1.0.0)
+
+@[configDeprecated](oplog.aae.interval,db.oplog.aae.interval,v1.0.0)
+
+@[configDeprecated](oplog.aae.live_sync,db.oplog.aae.live_sync,v1.0.0)
+
+@[configDeprecated](oplog.aae.live_sync.max,db.oplog.aae.live_sync.max,v1.0.0)
+
+@[configDeprecated](oplog.aae.max_concurrency,db.oplog.aae.max_concurrency,v1.0.0)
+
+@[configDeprecated](oplog.aae.max_pages_in_flight,db.oplog.aae.max_pages_in_flight,v1.0.0)
+
+@[configDeprecated](oplog.aae.load_adaptive,db.oplog.aae.load_adaptive,v1.0.0)
+
+@[configDeprecated](oplog.aae.load_run_queue_threshold,db.oplog.aae.load_run_queue_threshold,v1.0.0)
+
+@[configDeprecated](oplog.aae.fanout,db.oplog.aae.fanout,v1.0.0)
+
+@[configDeprecated](oplog.aae.fence.max_lag,db.oplog.aae.fence.max_lag,v1.0.0)
+
+@[configDeprecated](oplog.aae.fence.on_isolation,db.oplog.aae.fence.on_isolation,v1.0.0)
+
+@[configDeprecated](oplog.core.gc_interval,db.oplog.heap_gc.interval,v1.0.0)
+
+@[configDeprecated](oplog.core.gc_heap_delta,db.oplog.heap_gc.delta,v1.0.0)
+
+@[configDeprecated](oplog.core.pack_auto_seal_bytes,db.oplog.pack.auto_seal_bytes,v1.0.0)
+
+@[configDeprecated](oplog.core.pack_seal_mode,db.oplog.pack.seal_mode,v1.0.0)
 
 @[configDeprecated](oplog.core.shard_count,db.main.shard_count,v1.0.0)
 
@@ -365,7 +492,7 @@ In each case the value and its meaning are unchanged — only the key name moved
 
 ### Removed
 
-These keys have no replacement. A 1.0.0 node ignores each of them without reporting it, because the release generates its configuration with `cuttlefish --allow_extra`. They are listed here so that their disappearance is not mistaken for an oversight.
+These keys have no replacement. A 1.0.x node ignores each of them without reporting it, because the release generates its configuration with `cuttlefish --allow_extra`. From 1.1.0, a node refuses to start on any of them. They are listed here so that their disappearance is not mistaken for an oversight.
 
 @[configRemoved](oplog.catalog,Never had a consumer,v1.0.0)
 

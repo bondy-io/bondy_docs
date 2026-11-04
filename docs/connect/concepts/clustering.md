@@ -127,7 +127,7 @@ When a new node starts:
 2. **Connection** - Node establishes connections to discovered peers and joins their membership
 3. **State Sync** - Anti-entropy pulls the replicated state the new node does not hold from its peers
 
-The node accepts client connections as soon as its own boot finishes; it does not wait for state sync to complete. See [Node Lifecycle](/connect/concepts/node_lifecycle#what-ready-means). Under the default policy of the [authentication freshness fence](/connect/reference/configuration/data_storage#active-anti-entropy) (`db.aae.fence.on_isolation = refuse`), the new node refuses authentication until its first sync round with a peer completes.
+The node accepts client connections as soon as its own boot finishes; it does not wait for state sync to complete. See [Node Lifecycle](/connect/concepts/node_lifecycle#what-ready-means). Under the default policy of the [authentication freshness fence](/connect/reference/configuration/data_storage#active-anti-entropy) (`db.oplog.aae.fence.on_isolation = refuse`), the new node refuses authentication until its first sync round with a peer completes.
 
 ::: warning Version Compatibility
 All nodes in a cluster must run the same Bondy release. Rolling upgrades are not supported: upgrade a cluster by stopping every node and starting them all on the new release. See [Upgrading to 1.0.0](/connect/guides/deployment/upgrading_to_1_0_0).
@@ -222,7 +222,7 @@ See the [Metrics Reference](/connect/reference/metrics) for the labels of each s
 
 ### Best Practices
 
-1. **Use odd-numbered clusters with the `quorum` fence policy** - Bondy resolves conflicts by CRDT merge, not by majority vote. A majority matters only when `db.aae.fence.on_isolation = quorum`, where a node authenticates only while it reaches a majority of the membership
+1. **Use odd-numbered clusters with the `quorum` fence policy** - Bondy resolves conflicts by CRDT merge, not by majority vote. A majority matters only when `db.oplog.aae.fence.on_isolation = quorum`, where a node authenticates only while it reaches a majority of the membership
 2. **Co-locate with clients** - Deploy nodes in same regions as your applications
 3. **Size appropriately** - Start with 3-5 nodes, scale based on actual load
 4. **Monitor network health** - Low latency and high bandwidth between nodes is critical

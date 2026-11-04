@@ -7,7 +7,7 @@ Bondy configuration options controlling cluster formation including automatic pe
 
 Whether the node clusters. Every part of Bondy that needs to know whether other members exist (compaction, reclamation, origin retirement and the authentication freshness fence) reads this setting rather than counting the members it can currently see.
 
-With `on`, the node starts the cluster peer service and replicates its data to the other members through anti-entropy ([`db.aae`](/connect/reference/configuration/data_storage)).
+With `on`, the node starts the cluster peer service and replicates its data to the other members through anti-entropy ([`db.oplog.aae`](/connect/reference/configuration/data_storage)).
 
 With `off`, the node runs on its own:
 
@@ -19,7 +19,7 @@ With `off`, the node runs on its own:
 ::: warning A single-node deployment must set `cluster.enabled = off`
 A node left on the default `on` with no other member does **not** behave as a single node. Bondy does not persist the cluster membership, so a member that has just restarted lists only itself until it rejoins; with clustering on, a membership of one is treated exactly like that restarted member, and it licenses nothing:
 
-* **authentication is refused.** Under the default [`db.aae.fence.on_isolation = refuse`](/connect/reference/configuration/data_storage), a node with no reachable peer is never certified fresh, so every authentication attempt, anonymous included, fails with `temporarily_unavailable`;
+* **authentication is refused.** Under the default [`db.oplog.aae.fence.on_isolation = refuse`](/connect/reference/configuration/data_storage), a node with no reachable peer is never certified fresh, so every authentication attempt, anonymous included, fails with `temporarily_unavailable`;
 * **history is never compacted and deleted data is never reclaimed.** Compaction, reclamation and origin retirement hold, and the node logs a rate-limited "GC stalled" warning with reason `no_members`.
 
 Set `cluster.enabled = off` on every node meant to run alone.
@@ -307,7 +307,7 @@ Selects the discovery strategy: `dns` resolves peer addresses from a DNS record 
 
 How long the discovery agent waits after startup before its first lookup.
 
-Bondy keeps no cluster membership across a restart, so a restarted node that finds its peers through discovery reaches none before this delay has passed. Under the default [`db.aae.fence.on_isolation = refuse`](/connect/reference/configuration/data_storage), the node refuses new authentication until its first sync round with a peer, so this delay adds to the time it refuses.
+Bondy keeps no cluster membership across a restart, so a restarted node that finds its peers through discovery reaches none before this delay has passed. Under the default [`db.oplog.aae.fence.on_isolation = refuse`](/connect/reference/configuration/data_storage), the node refuses new authentication until its first sync round with a peer, so this delay adds to the time it refuses.
 
 @[config](cluster.peer_discovery.polling_interval,duration_time_units,10s,v0.8.6)
 

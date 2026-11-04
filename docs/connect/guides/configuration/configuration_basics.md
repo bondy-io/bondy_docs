@@ -32,7 +32,7 @@ A value in `bondy.conf` can contain `$(key)`, where `key` is another key of the 
 broker_bridge.config_file = $(platform_data_dir)/broker_bridge_config.json
 ```
 
-`platform_etc_dir` is not a `bondy.conf` key, so `$(platform_etc_dir)` does not work. When a substitution names a key that does not exist, cuttlefish rejects the whole file without a message. The node then starts on the configuration that the last successful generation wrote, so none of your changes apply.
+`platform_etc_dir` is not a `bondy.conf` key, so `$(platform_etc_dir)` does not work. When a substitution names a key that does not exist, cuttlefish rejects the whole file and the node does not start. The error names the key that holds the substitution and the key it needs.
 
 ::: warning OS environment variables
 `$(key)` does not read OS environment variables. To use them, write the file as `etc/bondy.conf.template` and write each variable as `${VARNAME}`. On every start, the pre-start hook writes `etc/bondy.conf` from each `*.template` file in `etc`. If a variable named in a template is unset, the node does not start.

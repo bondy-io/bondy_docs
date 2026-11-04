@@ -10,7 +10,7 @@ occupied is physically reclaimed.
 
 ## Enabling Reclamation
 
-@[config](db.reclaim,on|off,on,v1.0.0)
+@[config](db.oplog.reclaim,on|off,on,v1.1.0)
 
 Whether the reclamation scheduler ticks. Deletion (`bondy_db:delete/3`)
 always converges and is unaffected by this setting: turning reclamation off
@@ -19,7 +19,7 @@ every node has certified it causally stable. With it off,
 tombstones are retained indefinitely, exactly as if reclamation did not
 exist.
 
-@[config](db.reclaim.interval,duration_time_units,1m,v1.0.0)
+@[config](db.oplog.reclaim.interval,duration_time_units,1m,v1.1.0)
 
 Interval between reclamation passes. Deliberately much larger than the
 compaction cadence: reclamation is a space concern, not a liveness one, and
@@ -27,7 +27,7 @@ each pass re-derives stability from peer state that only changes as
 anti-entropy rounds complete. `0` disables periodic passes — an operator can
 still trigger one explicitly.
 
-@[config](db.reclaim.batch_cells,integer,500,v1.0.0)
+@[config](db.oplog.reclaim.batch_cells,integer,500,v1.1.0)
 
 Cells scanned per pass batch. The sweep runs inside the applier — the one
 process on each node that writes to that node's local projection for a
@@ -36,7 +36,7 @@ A pass loops batches to completion; writes interleave between batches.
 
 ## Origin Retirement
 
-@[config](db.origin_retirement,on|off,on,v1.0.0)
+@[config](db.oplog.origin_retirement,on|off,on,v1.1.0)
 
 Whether the origin-retirement pass runs. When enabled, each node reacts to
 an observed membership removal — and reconciles once at boot, covering
@@ -50,7 +50,7 @@ learned and nothing is reaped, and the pass retries on the next trigger. It
 never retires an origin on its own — see
 [Retiring a decommissioned node](#retiring-a-decommissioned-node).
 
-@[config](db.origin_retirement.path,file,origin_retirement,v1.0.0)
+@[config](db.oplog.origin_retirement.path,file,origin_retirement,v1.1.0)
 
 Where this node stores its retirement set, relative to `platform_data_dir`
 unless absolute. A retirement is permanent, so it has to survive a restart: a
@@ -73,7 +73,7 @@ path that cannot be read or written therefore raises the
 once per episode. An unconfigured path is a deployment choice, announced
 once at info and never alarmed.
 
-@[config](db.origin_retirement.interval,duration_time_units,10m,v1.0.0)
+@[config](db.oplog.origin_retirement.interval,duration_time_units,10m,v1.1.0)
 
 Interval between periodic retirement passes, in addition to the
 membership-event trigger. The periodic pass covers origin-epoch turnover
@@ -132,11 +132,11 @@ retired are named in a notice log, but retirement cannot be undone.
 The reclamation scheduler is an instance of the same scheduler that drives
 compaction. One option is shared between them.
 
-@[config](db.gc_max_concurrency,integer,4,v1.0.0)
+@[config](db.oplog.compaction.max_concurrency,integer,4,v1.1.0)
 
 Cap on concurrently running trigger workers, per scheduler instance —
 shared between the compaction scheduler and the reclamation scheduler. This
-is a distinct subsystem from `db.gc_interval`/`db.gc_heap_delta`, the
+is a distinct subsystem from `db.oplog.heap_gc.interval`/`db.oplog.heap_gc.delta`, the
 per-instance BEAM heap monitor that happens to share the "gc" name; see
 [Instance Memory Management](/connect/reference/configuration/data_storage#instance-memory-management).
 
