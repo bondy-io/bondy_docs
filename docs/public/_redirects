@@ -154,7 +154,6 @@
 /reference/wamp_api/user  /connect/reference/wamp_api/user  301!
 /reference/wamp_clients/bondy_connect  /connect/reference/clients/bondy_connect_sdk  301!
 /reference/wamp_clients/index  /connect/reference/clients/index  301!
-/router  /connect  301!
 /router/concepts/alarms  /connect/concepts/alarms  301!
 /router/concepts/api_gateway  /connect/concepts/api_gateway  301!
 /router/concepts/application_networks  /connect/concepts/application_networks  301!
