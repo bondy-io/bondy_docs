@@ -11,13 +11,19 @@
 
      A set marked `released: false` still gets a card, but not a link:
      resolveDocSets drops it so that no site links to a host that does not
-     answer yet, and this page shows it as coming soon instead. -->
+     answer yet, and this page shows it as coming soon instead.
+
+     Own-host hrefs go through withBase. An archived version is built with
+     base /v<version>/, so its card must open that version's set, not the
+     current one at the site root. withBase leaves the other hosts' absolute
+     URLs unchanged (vitepress 1.6.4, client/app/utils.js). -->
 <script setup>
+import { withBase } from 'vitepress'
 import { DOC_SETS, DOC_GROUPS, resolveDocSets } from '@bondy/site-chrome'
 
 const lineOf = (set) => DOC_GROUPS.find((g) => g.id === set.group)?.text
 
-const released = resolveDocSets('docs')
+const released = resolveDocSets('docs').map((s) => ({ ...s, href: withBase(s.href) }))
 const upcoming = DOC_SETS.filter((s) => s.released === false)
 
 // Released products first, then the ones still to come; each in DOC_SETS order.
