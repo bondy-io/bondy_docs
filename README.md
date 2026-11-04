@@ -142,7 +142,11 @@ No secret is needed for installing `@leapsight/vitepress-template` (it's a publi
 
 1. Get an **Auth Token**: User settings → Applications → Personal access tokens.
 2. Get the **Site ID**: this site → Site settings → General → Site details.
-3. **Stop auto-publishing**: Site settings → Build & deploy → Continuous deployment → "Stop auto publishing". This is required — otherwise Netlify's own git-triggered build races with (and can overwrite) the versioned deploy pushed by `deploy.yml`. Once stopped, the CLI's `--dir` flag is what controls what gets published; any build command/publish directory still configured in the dashboard is unused.
+3. **Stop builds**: Project configuration → Developer settings → Continuous deployment → Build settings → Configure → set Build status to "Stopped builds". This is required. Otherwise Netlify's own git-triggered build races with the deploy that `deploy.yml` pushes, and it can publish the current version without the archived versions. With builds stopped, Netlify does not build on a push, but deploys made with the CLI still publish ([Netlify: Stop or activate builds](https://docs.netlify.com/build/configure-builds/stop-or-activate-builds/)). The CLI's `--dir` then controls what is published, and the build command and publish directory in the dashboard are not used.
+
+   Do not use "Lock to stop auto publishing" on the Deploys page for this. A locked site does not publish new deploys, so it can also hold back the deploys from `deploy.yml`.
+
+The repository has no `netlify.toml`. Redirects and headers ship as `docs/public/_redirects` and `docs/public/_headers` inside the deployed directory. The dashboard keeps only what belongs to the site, not the build: the domain, HTTPS, and the token and site ID above.
 
 **Algolia:** search is a single hosted DocSearch crawler/index shared across all versions. Its crawl config lives in Algolia's dashboard, not this repo. Versioned paths must be excluded from the crawl (otherwise archived-version pages pollute current-version search results with no way to tell them apart):
 
