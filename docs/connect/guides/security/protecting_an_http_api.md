@@ -189,7 +189,7 @@ curl "http://localhost:18080/orders/1234" \
   -H 'Authorization: Bearer <access_token>'
 ```
 
-A request without a valid token gets `401` and a `WWW-Authenticate: Bearer realm="com.example.realm", error="..."` header naming the cause.
+A request without a token gets `401` and `WWW-Authenticate: Bearer realm="com.example.realm"`. A request with a token that Bondy refuses gets `401` and `WWW-Authenticate: Bearer realm="com.example.realm", error="invalid_token"`. The JSON body names the cause.
 
 ## 8. Revoke the refresh token
 
@@ -234,7 +234,7 @@ The verify route answers *who* the caller is, not what the caller may do. Decide
 
 Every route of the specification now requires a Bondy access token. To confirm:
 
-1. `curl -i http://localhost:18080/orders/1234` answers `401` with a `WWW-Authenticate: Bearer` header.
+1. `curl -i http://localhost:18080/orders/1234` answers `401` with `WWW-Authenticate: Bearer realm="com.example.realm"`.
 2. The same request with `Authorization: Bearer <access_token>` reaches `com.example.order.get`.
 3. After step 8, a `grant_type=refresh_token` request with the revoked refresh token fails.
 

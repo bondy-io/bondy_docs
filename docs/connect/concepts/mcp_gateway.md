@@ -58,7 +58,7 @@ The endpoint mounts two paths on that listener, on every virtual host:
 - `/mcp/realm/:realm` — the MCP endpoint itself. The realm is a path
   segment, not a listener property: one listener serves every realm, and
   which realm a request addresses is part of its URL.
-- `/.well-known/oauth-protected-resource/realm/:realm` — reserved for the
+- `/.well-known/oauth-protected-resource/mcp/realm/:realm` — reserved for the
   OAuth protected-resource metadata document. It answers `501 Not
   Implemented`.
 

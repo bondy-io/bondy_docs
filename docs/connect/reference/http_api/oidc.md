@@ -62,7 +62,7 @@ The route always uses the provider that the security scheme names in its `provid
 
 | Parameter | Type | Default | Description |
 |:---|:---|:---|:---|
-| `redirect_uri` | string | `"/"` | The SPA URL to redirect to after successful authentication |
+| `redirect_uri` | string | `"/"` | Where the callback sends the browser after authentication. See [Redirect targets](#redirect-targets). |
 | `client_id` | string | `"all"` | Scopes the Bondy ticket to a specific client application |
 | `device_id` | string | `"all"` | Scopes the Bondy ticket to a specific device |
 
@@ -75,6 +75,12 @@ Redirects to the IdP's authorization endpoint with `state`, `nonce`, PKCE `code_
 #### Errors
 
 ::: code-group
+```json [400 — invalid_redirect_uri]
+{
+    "error": "invalid_redirect_uri"
+}
+```
+
 ```json [404 — unknown_provider]
 {
     "error": "unknown_provider"
@@ -229,7 +235,7 @@ POST <base_path>/oidc/logout
 | Parameter | Type | Default | Description |
 |:---|:---|:---|:---|
 | `realm` | string | Route's `realm_uri` | The realm whose cookies should be cleared |
-| `redirect_uri` | string | `"/"` | Where to redirect after logout |
+| `redirect_uri` | string | `"/"` | Where to redirect after logout. See [Redirect targets](#redirect-targets). |
 | `cookie_domain` | string | From provider config | Override the cookie domain for clearing |
 | `cookie_same_site` | string | From provider config, or `lax` | Override the `SameSite` attribute for clearing: `none`, `lax` or `strict` |
 
@@ -237,7 +243,7 @@ POST <base_path>/oidc/logout
 
 #### Success — 302 Found
 
-Always redirects. When the ticket names an OIDC provider and the IdP supports RP-Initiated Logout, the redirect goes to the IdP's `end_session_endpoint`. The redirect carries the ticket's ID token as `id_token_hint` when the ticket has one:
+Redirects when `redirect_uri` is an allowed [redirect target](#redirect-targets). When the ticket names an OIDC provider and the IdP supports RP-Initiated Logout, the redirect goes to the IdP's `end_session_endpoint`. The redirect carries the ticket's ID token as `id_token_hint` when the ticket has one:
 
 ```
 HTTP/2 302
@@ -251,6 +257,21 @@ Otherwise, redirects directly to `redirect_uri`.
 ::: info Resilient Logout
 The logout handler is designed to never crash. If the realm or OIDC provider no longer exists on this Bondy node, it still clears the cookies and redirects. The same holds when the realm has no OIDC providers configured. Ticket revocation is best-effort.
 :::
+
+#### Error — 400 invalid_redirect_uri
+
+When `redirect_uri` is not an allowed [redirect target](#redirect-targets), Bondy answers `400` with the error `invalid_redirect_uri`. It does not revoke the ticket and does not clear the cookies.
+
+### Redirect targets
+
+The login and logout endpoints redirect the browser only to one of these:
+
+- A path that starts with a single `/`, for example `/app/dashboard`. It stays on the origin that served the request.
+- An absolute `http` or `https` URL whose origin is in the provider's [`allowed_redirect_origins`](/connect/concepts/oidc_authentication). The origin is the scheme, the host and the port; case and a default port do not matter.
+
+Any other value gets `400` with the error `invalid_redirect_uri`. Bondy also refuses a value that holds a character other than visible ASCII, or a `\`. Browsers read `//host`, `/\host` and a path with a tab or a newline as a link to another host.
+
+Both endpoints use the `allowed_redirect_origins` of the provider that the route's security scheme names. The logout `realm` parameter does not change them, and they apply whether or not the ticket cookie is still valid.
 
 ### Example
 

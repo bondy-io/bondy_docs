@@ -107,6 +107,7 @@ OIDC providers are configured per-realm in the realm's `info.oidc_providers` map
 | `allow_unsafe_http` | boolean | Yes | `false` | Allow plain HTTP issuer URLs. Only use for development or testing. |
 | `cookie_domain` | string | No | — | The `Domain` attribute for cookies (e.g. `.example.com`). Enables cookie sharing across subdomains. |
 | `cookie_same_site` | string | Yes | `"lax"` | The `SameSite` attribute for both cookies: `"lax"`, `"strict"` or `"none"`. |
+| `allowed_redirect_origins` | list | Yes | `[]` | The origins, such as `"https://app.example.com"`, that the login and logout endpoints may redirect to. Each entry is a scheme, a host and an optional port, with no path. A path on the request's own origin is always allowed. See [Redirect targets](/connect/reference/http_api/oidc#redirect-targets). |
 
 Each node fetches a provider's OpenID configuration and signing keys the first time the provider is used, and keeps them refreshed. A change to the provider's `issuer` or `allow_unsafe_http` takes effect on each node at its next use of the provider. Deleting the realm stops this work on every node.
 
@@ -229,9 +230,9 @@ Bondy sets two cookies after a successful OIDC callback:
 | **Max-Age** | Same as ticket expiry |
 
 ::: info Cookie Domain
-If your SPA and Bondy are served from different subdomains of the same parent domain (e.g. `app.example.com` and `api.example.com`), set `cookie_domain` to `.example.com` so both subdomains can access the cookies.
+If your SPA and Bondy are served from different subdomains of the same parent domain (e.g. `app.example.com` and `api.example.com`), set `cookie_domain` to `.example.com` so both subdomains can access the cookies. Also add the SPA's origin, `https://app.example.com`, to `allowed_redirect_origins`, so that login and logout can send the browser back to it.
 
-If the SPA and Bondy share the same origin, you do not need to set `cookie_domain`.
+If the SPA and Bondy share the same origin, you do not need to set `cookie_domain` or `allowed_redirect_origins`.
 :::
 
 
@@ -277,7 +278,7 @@ The logout endpoint (`GET` or `POST <base_path>/oidc/logout`) performs the follo
 | Parameter | Default | Description |
 |:---|:---|:---|
 | `realm` | Route's realm | Override which realm's cookies to clear |
-| `redirect_uri` | `/` | Where to redirect after logout |
+| `redirect_uri` | `/` | Where to redirect after logout. See [Redirect targets](/connect/reference/http_api/oidc#redirect-targets). |
 | `cookie_domain` | From provider config | Override cookie domain for clearing |
 | `cookie_same_site` | From provider config | Override the cookies' `SameSite` attribute for clearing |
 

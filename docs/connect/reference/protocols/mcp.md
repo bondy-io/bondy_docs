@@ -15,7 +15,7 @@ A listener that declares the `mcp` service mounts two paths, on every virtual ho
 |Path|Implemented|Notes|
 |---|---|---|
 |`/mcp/realm/:realm`|Yes|The MCP endpoint. An unknown realm answers `404` with JSON-RPC code `-32000` and message `no_such_realm`.|
-|`/.well-known/oauth-protected-resource/realm/:realm`|No|Mounted, but answers `501` with the body `{"error":"mcp_not_implemented"}`. See [D1](#d1).|
+|`/.well-known/oauth-protected-resource/mcp/realm/:realm`|No|Mounted, but answers `501` with the body `{"error":"mcp_not_implemented"}`. See [D1](#d1).|
 
 ### Protocol revisions
 
@@ -244,7 +244,7 @@ The realm's sources match the request's source IP. Behind a proxy that the liste
 
 |Status|When|Body|
 |---|---|---|
-|`401`|Authentication fails.|Empty. The response carries `WWW-Authenticate: Bearer`.|
+|`401`|Authentication fails.|Empty. The response carries `WWW-Authenticate: Bearer realm="<realm_uri>"`. When the request presented a bearer token, the header adds `error="invalid_token"`.|
 |`403`|The request carries an `Origin` that the listener does not allow.|Code `-32600`, `Origin not allowed`.|
 |`403`|The listener's `proxy_protocol.mode` is `strict` and a trusted proxy forwards no client address.|Code `-32000`, `Proxy protocol error`.|
 |`413`|The body exceeds [`listeners.$name.mcp.max_body_size`](/connect/reference/configuration/mcp#listeners.$name.mcp.max_body_size).|Code `-32600`.|
@@ -296,7 +296,7 @@ Bondy is also an MCP client. Each enabled [`mcp.upstreams.$upstream`](/connect/r
 
 **Requirement — protected-resource metadata.** An MCP server that uses OAuth publishes an OAuth 2.0 Protected Resource Metadata document (RFC 9728) and names it in the `WWW-Authenticate` header of a `401`, so a client can discover the authorization server.
 
-**Behaviour.** The metadata path is mounted and answers `501`. A `401` carries `WWW-Authenticate: Bearer` with no `resource_metadata` parameter. A client must be configured with its credentials, or with the authorization server, out of band.
+**Behaviour.** The metadata path is mounted and answers `501`. A `401` carries `WWW-Authenticate: Bearer` with `realm` and, for a refused token, `error`, but no `resource_metadata` parameter. A client must be configured with its credentials, or with the authorization server, out of band.
 
 ### D2
 

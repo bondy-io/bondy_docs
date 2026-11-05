@@ -117,7 +117,7 @@ API Gateway, WAMP-over-WebSocket, SSE and long-poll all on port 18080.
 | `bamp_ws`      | WebSocket  | BAMP     | Mounts `/ws` restricted to the `bamp` subprotocol. Bondy 1.0.0 has no BAMP wire implementation, so no session can be carried over it. |
 | `wamp_sse`     | SSE        | WAMP     | |
 | `wamp_longpoll`| Long-poll  | WAMP     | |
-| `mcp`          | MCP        | MCP      | The [MCP Gateway](/connect/concepts/mcp_gateway) endpoint. Mounts `/mcp/realm/:realm` and `/.well-known/oauth-protected-resource/realm/:realm`. Cannot share a listener with `admin_api`. |
+| `mcp`          | MCP        | MCP      | The [MCP Gateway](/connect/concepts/mcp_gateway) endpoint. Mounts `/mcp/realm/:realm` and `/.well-known/oauth-protected-resource/mcp/realm/:realm`. Cannot share a listener with `admin_api`. |
 
 **An HTTP listener has to declare at least one service.** Both a missing
 `services` key and an empty one are refused at boot, naming the listener.
@@ -265,8 +265,12 @@ user, the way the official images do.
 
 On every listener that carries `admin_api` except the internal socket, each
 Admin API request needs an `Authorization: Bearer` access token issued by the
-master realm, `com.leapsight.bondy`. A request without a valid token gets
-`401`. The check is the `oauth2` scheme of an API Gateway specification, so the
+master realm, `com.leapsight.bondy`. A request without a token gets `401`,
+the error `bondy.error.token_invalid` and
+`WWW-Authenticate: Bearer realm="com.leapsight.bondy"`. A refused token gets
+`401` and `error="invalid_token"` in that header as well; the
+[OAuth2 refusals](/connect/reference/api_gateway/specification#oauth2-authentication)
+list each case. The check is the `oauth2` scheme of an API Gateway specification, so the
 master realm's own configuration decides who can get and present a token:
 
 - add `oauth2` to the master realm's `authmethods`, and an `oauth2`

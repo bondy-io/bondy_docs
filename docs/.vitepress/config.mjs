@@ -746,6 +746,12 @@ function guidesSidebar() {
           description: 'Migrate an existing deployment to the new storage and replication stack.'
         },
         {
+          text: 'Migrating from a Release Candidate',
+          link: '/connect/guides/deployment/migrating_from_a_release_candidate',
+          isFeature: true,
+          description: 'Convert bondy.conf, update WAMP and HTTP clients, and review realm authentication when you leave a 1.0.0 release candidate.'
+        },
+        {
           text: 'Linking an Edge Node to a Remote Router',
           link: '/connect/guides/deployment/linking_an_edge_node',
           isFeature: true,

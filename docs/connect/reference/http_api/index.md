@@ -4,8 +4,8 @@ The Admin HTTP API exposes Bondy's administration procedures over HTTP. Each rou
 
 The routes are served by the `admin_api` service. Bondy's default `admin` listener carries it on port `18081`, bound to loopback. See [Network Listeners](/connect/reference/configuration/listeners#the-reserved-admin-listener).
 
-::: warning Protect the listener, not the route
-The Admin HTTP API declares no authentication scheme. Anyone who can reach a listener carrying the `admin_api` service can administer every realm. Keep that listener on loopback or a private network, and never mount `admin_api` on a listener that serves the public.
+::: warning Every request needs a master-realm token
+Each request needs an OAuth2 bearer token that the master realm, `com.leapsight.bondy`, issued. A request without one gets `401`. The internal socket `<platform_runtime_dir>/bondy_admin.sock` needs no token, and RBAC does not apply to it. See [Authenticating to the Admin API](/connect/reference/configuration/listeners#authenticating-to-the-admin-api). A token holder with grants on the master realm can administer every realm, so keep the listener on loopback or a private network, and never mount `admin_api` on a listener that serves the public.
 :::
 
 ## Request and response mapping

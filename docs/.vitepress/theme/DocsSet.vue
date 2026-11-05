@@ -25,7 +25,14 @@ defineProps({
    * `kicker` names the reader's orientation — that is what teaches an
    * arriving reader which quadrant they are in.
    */
-  groups: { type: Array, default: () => [] }
+  groups: { type: Array, default: () => [] },
+  /**
+   * An optional notice above the groups: { kicker, heading, href, blurb,
+   * links: [{text, href}] }. A version's landing page uses it for "What's
+   * New". Each version is built from its own tag, so a highlight set here
+   * appears in this version only, never in an archived one.
+   */
+  highlight: { type: Object, default: null }
 })
 </script>
 
@@ -37,6 +44,17 @@ defineProps({
         <h1>{{ title }}</h1>
         <p v-if="stand" class="stand">{{ stand }}</p>
       </header>
+
+      <aside v-if="highlight" class="dh-highlight">
+        <p v-if="highlight.kicker" class="kicker">{{ highlight.kicker }}</p>
+        <h2><a :href="withBase(highlight.href)">{{ highlight.heading }}</a></h2>
+        <p v-if="highlight.blurb" class="dh-blurb">{{ highlight.blurb }}</p>
+        <ul v-if="highlight.links && highlight.links.length">
+          <li v-for="l in highlight.links" :key="l.text">
+            <a :href="withBase(l.href)">{{ l.text }}</a>
+          </li>
+        </ul>
+      </aside>
 
       <div class="dh-grid">
         <section v-for="g in groups" :key="g.heading">

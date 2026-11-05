@@ -24,7 +24,7 @@ related:
 
 Bondy 1.0.0 replaces the storage and replication engine end to end: PlumDB and its RocksDB backend are gone, replaced by `bondy_db`, `bondy_oplog`, and `bondy_mst` (see [Architecture](/connect/concepts/architecture)). The on-disk format changed with it, and there is no in-place migration — a node running a pre-1.0.0 release cannot simply be upgraded and restarted; its data directory is unreadable by 1.0.0.
 
-This guide covers the supported migration path: back up your data using the backup mechanism your current release already has, stand up a fresh 1.0.0 deployment, and import that backup — 1.0.0's importer recognises the old file format and translates it automatically. It ends with a checklist of the other breaking changes in this release worth reviewing before you cut over.
+This guide covers the supported migration path: back up your data using the backup mechanism your current release already has, stand up a fresh 1.0.0 deployment, and import that backup — 1.0.0's importer recognises the old file format and translates it automatically. The configuration and API changes that the upgrade also needs are in [Migrating from a Release Candidate](/connect/guides/deployment/migrating_from_a_release_candidate).
 
 ::: warning No in-place upgrade
 Starting a 1.0.0 node against a pre-1.0.0 data directory does not migrate it and does not fail loudly — the new storage engine simply doesn't recognise the old files and starts with an empty database. Follow the migration procedure below instead.
@@ -253,135 +253,9 @@ Spot-check that realms, users, and API gateway specs are present on the new depl
 
 ## Other breaking changes to check
 
-Review these before you finalise your `bondy.conf` and cutover plan — none of them are part of the export/import procedure above, but each can stop the new release from starting or behaving as your existing configuration or clients expect. If you upgrade from a `bondy_db` pre-release, review them as well: your pre-release might not carry all of them.
+The data procedure above is one part of the upgrade. Release 1.0.0 also renames and removes configuration keys, changes the arguments of several WAMP procedures, adds authentication to the Admin HTTP API and makes the API Gateway refuse unknown specification keys. Each one can stop a node from starting, or a client from working, after the cut-over.
 
-### Release, image and repository names
-
-The release and its start script are named `bondy-connect`.
-
-- Run `bin/bondy-connect` in place of `bin/bondy`. The tarball is `bondy-connect-1.0.0.tar.gz`.
-- Pull `leapsight/bondy-connect` from Docker Hub or `ghcr.io/bondy-io/bondy-connect` from GHCR. The images start `bondy-connect foreground`. The `leapsight/bondy` and `ghcr.io/bondy-io/bondy` images get no new tags.
-- Point your git remotes at `github.com/bondy-io/bondy-connect`.
-
-The `/bondy` paths, the node names, the `BONDY_*` environment variables and `etc/bondy.conf` keep their names.
-
-### Listeners
-
-The fixed per-scheme listener keys are removed: `admin_api.{http,https}.*`, `api_gateway.{http,https}.*`, `wamp.{tcp,tls}.*` and `bridge.listener.{tcp,tls}.*`. Declare each listener by name under `listeners.$name.*`.
-
-- A file with no `listeners.*` key starts three plaintext listeners only: `admin` (18081), `api_gateway_http` (18080) and `wamp_tcp` (18082). Declare every other listener, TLS and bridge relay listeners included.
-- Every enabled `transport = tls` listener has to set `tls.certfile` and `tls.keyfile`. No default certificate path applies.
-- `listeners.$name.linger.timeout` is in seconds. A value written with a unit suffix used to be read as milliseconds.
-
-The check in [step 5](#_5-install-1-0-0-and-check-bondy-conf-against-its-schema) reports each of these, and `migrate` rewrites the old blocks. See [Migrating from the pre-1.0 keys](/connect/reference/configuration/listeners#migrating-from-the-pre-1-0-keys).
-
-### Other renamed and removed keys
-
-| Old key | In 1.0.0 |
-|---|---|
-| `wamp.transport_queue.*` | `wamp.http_transport.*`. See [HTTP Transports](/connect/reference/configuration/wamp#http-transports-long-poll-and-sse). |
-| `wamp.websocket.*`, `wamp.sse.*`, `wamp.longpoll.*` | Removed. Set carrier options on each listener. See [Carrier settings](/connect/reference/configuration/listeners#carrier-settings). |
-| `wamp.broker.*` and `wamp.dealer.*` feature flags | Removed. The WAMP features are build capabilities, not configuration. |
-| `wamp.dealer.pattern_based_registration`, `wamp.broker.pattern_based_subscription` | Removed. Pattern-based registration and subscription are always on. |
-| `rpc_gateway.*` | `http_connector.*`, with the same sub-keys. See the [HTTP Connector Configuration Reference](/connect/reference/configuration/http_connector). |
-
-`scripts/migrate_conf.escript` reports and rewrites each of these keys.
-
-### Storage and AAE key renames
-
-Every storage-related `bondy.conf` key changed name as part of the storage-engine replacement. Bondy 1.0.x does not refuse to boot on a key it doesn't recognise: the release's pre-start hook runs cuttlefish with `--allow_extra`, so an old key carried over unchanged is dropped without a message and its setting does not apply. The check in [step 5](#_5-install-1-0-0-and-check-bondy-conf-against-its-schema) reports every such key and its replacement.
-
-The `oplog.` prefix is now `db.`, unconditionally. If you didn't customise any of these, there's nothing to do — the defaults are unchanged:
-
-| Old key (≤ 1.0.0-rc.65) | New key |
-|---|---|
-| `oplog.aae` | `db.oplog.aae` |
-| `oplog.aae.interval` | `db.oplog.aae.interval` |
-| `oplog.aae.live_sync` | `db.oplog.aae.live_sync` |
-| `oplog.aae.live_sync.max` | `db.oplog.aae.live_sync.max` |
-| `oplog.aae.max_concurrency` | `db.oplog.aae.max_concurrency` |
-| `oplog.aae.max_pages_in_flight` | `db.oplog.aae.max_pages_in_flight` |
-| `oplog.aae.load_adaptive` | `db.oplog.aae.load_adaptive` |
-| `oplog.aae.load_run_queue_threshold` | `db.oplog.aae.load_run_queue_threshold` |
-| `oplog.aae.fanout` | `db.oplog.aae.fanout` |
-| `oplog.aae.fence.max_lag` | `db.oplog.aae.fence.max_lag` |
-| `oplog.aae.fence.on_isolation` | `db.oplog.aae.fence.on_isolation` |
-
-Four more keys move from `oplog.core.*` to a bare `db.*` — the `core.` segment drops because these settings were never specific to one database; they govern every replicated table node-wide:
-
-| Old key | New key |
-|---|---|
-| `oplog.core.gc_interval` | `db.oplog.heap_gc.interval` |
-| `oplog.core.gc_heap_delta` | `db.oplog.heap_gc.delta` |
-| `oplog.core.pack_auto_seal_bytes` | `db.oplog.pack.auto_seal_bytes` |
-| `oplog.core.pack_seal_mode` | `db.oplog.pack.seal_mode` |
-
-Bondy's durable database itself is renamed: `core` is now `main`, to stop it being confused with the unrelated `bondy_oplog_core` substrate module. If your `bondy.conf` sets any of the durable database's topology, rename these too:
-
-| Old key | New key |
-|---|---|
-| `oplog.core.shard_count` | `db.main.shard_count` |
-| `oplog.core.partition_strategy` | `db.main.partition_strategy` |
-| `oplog.core.realm_prefix_depth` | `db.main.realm_prefix_depth` |
-| `oplog.core.on_topology_mismatch` | `db.main.on_topology_mismatch` |
-
-The value and its meaning are identical for every rename above — only the key name moved. The on-disk directory for the durable database is also renamed, from `<platform_data_dir>/bondy_db/core` to `<platform_data_dir>/bondy_db/main` — irrelevant if you wiped the data directory per step 4 above, but worth knowing if you scripted anything against the old path. The [Data Storage & Active Anti-entropy Configuration Reference](/connect/reference/configuration/data_storage#deprecated-and-removed-keys) also lists every old key inline, greyed out, linking to its replacement.
-
-### Removed keys
-
-These keys have no replacement — remove them from your `bondy.conf` rather than renaming them:
-
-- `oplog.catalog` — never had a consumer; setting it did nothing in any released version.
-- `oplog.core.scan_max_concurrency` — same; never wired to any code path.
-- Any `store.*` key (RocksDB tuning) — RocksDB is gone, and 1.0.0 has no equivalent `bondy.conf` keys.
-
-### advanced.config application names
-
-Two application identifiers changed. Both are silently inert under the old name rather than a boot error, which makes them easy to miss — Erlang doesn't fail when configuring an application that isn't loaded, it just stops taking effect:
-
-- **`bondy` → `bondy_router`.** The router's OTP application changed name (source now lives under `apps/bondy_router`). This is transparent to normal operation — the release name, node name, `bondy.conf` file, and every WAMP URI are unchanged. It only matters if you reach into the application name directly: a custom `sys.config`/`advanced.config` stanza keyed on `{bondy, [...]}`, or a release hook or health check that calls `application:get_env(bondy, ...)`. Rename those stanzas to `{bondy_router, [...]}`.
-- **`plum_db` removed.** If you have an `advanced.config` with a `{plum_db, [...]}` stanza (for `store.*` settings that had no `bondy.conf` mapping, or anything else), delete it. The `plum_db` application no longer exists in 1.0.0, so the stanza does nothing — but it's dead weight and worth removing so it doesn't look like it's still taking effect.
-
-Module names changed as well. If you call Bondy modules from a remote console or a script, use the names in [step 6 of the pre-release upgrade](#upgrade-from-a-bondy-db-pre-release).
-
-A custom `bondy_oplog_cache_adapter` module has to implement `ticket/1` and `fill/5` in place of `put/4`.
-
-### WAMP procedures and options
-
-Update clients that call these procedures or set these options:
-
-- The `wamp.registration.*`, `wamp.subscription.*`, `wamp.session.get` and `wamp.reflection.*` procedures take the arguments that the WAMP specification gives, and read the caller's realm. Remove a leading realm argument from these calls.
-- A master-realm session that reads another realm calls the realm-first `bondy.*` procedure instead: `bondy.registration.get`, `bondy.registration.list_callees`, `bondy.registration.count_callees`, `bondy.subscription.get`, `bondy.subscription.list_subscribers` or `bondy.subscription.count_subscribers`.
-- `wamp.registration.match` returns one registration id. `wamp.registration.get` and `wamp.subscription.get` take no `details` argument.
-- `bondy.registration.callee.list`, `bondy.user.change_password` and `bondy.source.match` require the realm URI as their first argument.
-- `REGISTER.Options.invoke` accepts only `single`, `roundrobin`, `random`, `first` and `last`. The router refuses `jump_consistent_hash`, `queue_least_loaded`, `queue_least_loaded_sample`, `jch`, `qll` and `qlls`.
-- The `_routing_key` option of CALL, CANCEL and PUBLISH is removed. A partitioned CALL names its key with `rkey`.
-
-See the [WAMP API Reference](/connect/reference/wamp_api/index).
-
-### API Gateway and Admin API
-
-- The API Gateway refuses a specification that contains a key the parser does not know. This rule applies at the host, version, path, method, action and response levels, in `defaults`, and in a security scheme. Fix misspelt keys before you load the specification.
-- A security scheme refuses `scopes`. The API Gateway checks no OAuth2 scope.
-- The `wamp_call` action has no `retry_timeout`. When the action's `options` set no `_retries`, the action's `retries` becomes the CALL option `_retries`. The dealer retries only a registration that set `_idempotent`.
-- The Admin API endpoints `/realms/:realm_uri/registrations_summary` and `/realms/:realm_uri/subscriptions_summary` are removed. Use `/realms/:realm_uri/registrations` and `/realms/:realm_uri/subscriptions`, which list every id with its match policy.
-
-See the [API Gateway Specification Reference](/connect/reference/api_gateway/specification).
-
-### New optional keys
-
-None of these existed at 1.0.0-rc.65 in any form — there's nothing to migrate, and the defaults are safe to run with unchanged, but they're worth knowing about: `db.registry.shard_count` (the ephemeral registry's shard count); `db.oplog.wal.fsync_mode`, `db.oplog.wal.max_segment_bytes`, `db.oplog.wal.batched_fsync_interval`, `db.oplog.wal.batched_fsync_bytes` (write-ahead log durability and batching); `db.oplog.reclaim`, `db.oplog.reclaim.interval`, `db.oplog.reclaim.batch_cells`, `db.oplog.origin_retirement`, `db.oplog.origin_retirement.interval`, `db.oplog.compaction.max_concurrency` (previously internal-only reclamation/retirement tuning, now real `bondy.conf` keys — see the [Reclamation Configuration Reference](/connect/reference/configuration/reclamation)); `cluster.max_message_size` (Partisan inter-node frame size cap); and `load_regulation.aae_reactor.pool.size`, `load_regulation.router.flow_pool.capacity` (see the [Overload Protection](/connect/reference/configuration/overload_protection) reference).
-
-### Other changes
-
-- **Erlang/OTP 29 minimum.** Upgrade the Erlang runtime on every host that builds or runs a release from source before you install 1.0.0.
-- **The query-string/form-field cap.** Cowboy is upgraded from 2.13.0 to 2.18.0. Cowboy rejects any request that carries more than 100 query-string parameters or `application/x-www-form-urlencoded` form fields, and Bondy does not override that limit. This affects API Gateway routes that read query parameters, the OAuth2 token endpoint, and the OIDC login/callback endpoints. Audit any client that sends unusually wide query strings or large forms before cutting over.
-- **Partisan peer-plane TLS gate.** Covered in step 6 above — an auto-clustering node with an insecure peer plane now refuses to start instead of clustering insecurely. Only relevant if `cluster.peer_discovery.enabled = on`.
-- **HTTP/2 on every `http` listener.** Each listener offers `listeners.$name.http.versions = 2, 1.1` by default: a TLS listener negotiates `h2` through ALPN, and a plaintext listener accepts HTTP/2 prior-knowledge and Upgrade. Set `http.versions = 1.1` to switch HTTP/2 off on one listener. One HTTP/2 connection carries up to `http.max_concurrent_streams` requests at once (Cowboy's default is 100), so alarms that count connections undercount the request load. See [Listeners](/connect/reference/configuration/listeners).
-
-Not a breaking change, but worth considering while you're already re-provisioning nodes: realm private keys can now be encrypted at rest via `security.master_key.*`. See [Security Configuration Reference → Realm Signing Keys](/connect/reference/configuration/security#realm-signing-keys).
-
-If you're building from source rather than installing a packaged release, `config/bondy.conf.defaults` (regenerate it with `just conf`) lists every current key and its default, and is a useful diff target against your existing `bondy.conf`.
+Follow [Migrating from a Release Candidate](/connect/guides/deployment/migrating_from_a_release_candidate) before you put the new deployment in service. It also applies to an upgrade from a `bondy_db` pre-release.
 
 ## Upgrade from a `bondy_db` pre-release
 

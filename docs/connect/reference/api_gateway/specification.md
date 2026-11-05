@@ -562,6 +562,14 @@ An `oidc` path authenticates the cookie the way a WAMP session opened with it au
 
 <DataTreeView :data="oauth2" :maxDepth="10" />
 
+When the `oauth2` scheme refuses a request, Bondy answers `401` with the [error payload](/connect/reference/errors#the-error-payload). The `WWW-Authenticate` header follows [RFC 6750](https://www.rfc-editor.org/rfc/rfc6750#section-3). A request that presents no token gets the realm alone. A presented token that Bondy refuses gets `error="invalid_token"`.
+
+| Request | `WWW-Authenticate` | Error `uri` |
+|---|---|---|
+| No `Authorization` header, or a scheme other than `Bearer` | `Bearer realm="<realm_uri>"` | `bondy.error.token_invalid` |
+| A bearer value that is not a JWT | `Bearer realm="<realm_uri>", error="invalid_token"` | `bondy.error.token_invalid` |
+| A JWT that fails authentication | `Bearer realm="<realm_uri>", error="invalid_token"` | The error that authentication returns. |
+
 ### OIDC Authentication
 
 <DataTreeView :data="oidcSecurity" :maxDepth="10" />
@@ -591,7 +599,8 @@ The route also applies the realm's `authmethods` and [sources](/connect/referenc
 | Outcome | Status | Response |
 |---|---|---|
 | Valid credential | `200` | A JSON body with `active`, `authid`, `authrealm`, `realm`, `authroles`, `authmethod`, `scope`, `issued_at`, `expires_at` and `expires_in`, and the headers `x-bondy-authid`, `x-bondy-authrealm`, `x-bondy-realm`, `x-bondy-authroles` (comma-separated), `x-bondy-authmethod` and `x-bondy-expires-at`. |
-| Anything else | `401` | A JSON error body with `active: false`. |
+| No credential | `401` | A JSON error body with `active: false`, and `WWW-Authenticate: Bearer realm="<realm_uri>"`. |
+| Any other failure | `401` | A JSON error body with `active: false`, and `WWW-Authenticate: Bearer realm="<realm_uri>", error="invalid_token"`. |
 
 Every failure answers `401`, including server-side ones, because NGINX turns any other non-2xx status from `auth_request` into a `500`. The route answers *who* the caller is, not what they may do.
 

@@ -48,6 +48,32 @@
 .docs-home .dh-grid li a::before { content: '→'; color: var(--blue); font-size: 13px; }
 .docs-home .dh-grid li a:hover { color: var(--ink); }
 
+/* The optional highlight (DocsSet's `highlight` prop): a version's "What's
+   New". It sits between the header and the grid, framed like a portal card so
+   it reads as a notice and not as a fifth Diataxis quadrant. */
+.docs-home .dh-highlight {
+  margin-top: 56px; padding: 32px 36px 34px;
+  border: 1px solid var(--line); border-left: 3px solid var(--blue);
+  border-radius: 12px; background: var(--paper-2);
+}
+.docs-home .dh-highlight h2 {
+  font-size: clamp(26px, 3vw, 36px); font-weight: 500;
+  letter-spacing: -0.04em; line-height: 1; margin: 0 0 14px;
+  border: 0; padding: 0;
+}
+.docs-home .dh-highlight .dh-blurb { max-width: 70ch; }
+.docs-home .dh-highlight ul {
+  list-style: none; margin: 20px 0 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 10px 28px;
+}
+.docs-home .dh-highlight li a {
+  display: inline-flex; align-items: baseline; gap: 9px;
+  font-size: 15px; color: var(--ink-2);
+}
+.docs-home .dh-highlight li a::before { content: '→'; color: var(--blue); font-size: 13px; }
+.docs-home .dh-highlight li a:hover { color: var(--ink); }
+.docs-home .dh-highlight + .dh-grid { margin-top: 56px; }
+
 /* The same grid as the bar (see SiteNav's docs layout in @bondy/site-chrome),
    so a landing page's heading starts under the wordmark, as a doc page's
    sidebar does. */

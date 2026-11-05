@@ -9,6 +9,17 @@ description: Build on, deploy and operate Bondy Connect, whichever protocol your
   eyebrow="Platform"
   title="Bondy Connect"
   stand="Everything needed to build on, deploy and operate Bondy Connect, organised by what you came here to do. Components reach it over WAMP, HTTP/REST or MCP; each is covered in every section below."
+  :highlight="{
+    kicker: 'This version',
+    heading: 'What’s New in 1.1',
+    href: '/connect/whats_new',
+    blurb: 'Configuration keys grouped by component, a node that refuses unknown keys, a bearer token on the Admin API, and stricter OIDC and cookie authentication. Read this before you upgrade from 1.0.',
+    links: [
+      { text: 'What’s New in 1.1', href: '/connect/whats_new' },
+      { text: 'Migrating from a release candidate', href: '/connect/guides/deployment/migrating_from_a_release_candidate' },
+      { text: 'Upgrading to 1.0.0', href: '/connect/guides/deployment/upgrading_to_1_0_0' }
+    ]
+  }"
   :groups="[
     {
       kicker: 'Learning-oriented',
