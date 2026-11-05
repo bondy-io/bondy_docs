@@ -37,7 +37,7 @@ Every section below applies to both paths. A named pre-release already carries s
 - Your current `bondy.conf`, and your `advanced.config` if you have one.
 - A list of the clients that call `bondy.*` or `wamp.*` procedures, and of the clients that call the Admin HTTP API.
 - Your API Gateway specifications, as JSON files.
-- Erlang/OTP 29 or later on every host that builds or runs a release from source. The Docker images include their own runtime.
+- Erlang/OTP 29 or later on every host that builds a release. A release tarball and the Docker images include their own runtime.
 
 ## 1. Update release, image and repository names
 
@@ -53,7 +53,7 @@ The `/bondy` paths, the node names, the `BONDY_*` environment variables and `etc
 
 ## 2. Convert `bondy.conf`
 
-Most configuration keys that a release candidate used changed name, and many were removed. Since 1.1.0, a node refuses to start when `bondy.conf` sets a key that the release does not read. The error names each such key and the closest key that the release knows. Earlier releases ignored such a key, so its setting stayed at the default without a message.
+Most configuration keys that a release candidate used changed name, and many were removed. Since 1.1.0, a node refuses to start when `bondy.conf` sets a key that the release does not read. The error names each such key and up to three similar keys that the release knows. The node also refuses to start on a value that it cannot parse. Earlier releases ignored an unknown key, so its setting stayed at the default without a message.
 
 `scripts/migrate_conf.escript` in the Bondy source tree checks a file against the release's schemas and rewrites the renamed keys. Run it from the root of a source checkout of the release you move to, after `rebar3 compile`:
 
@@ -62,7 +62,7 @@ Most configuration keys that a release candidate used changed name, and many wer
 ./scripts/migrate_conf.escript migrate /etc/bondy/bondy.conf --out /etc/bondy/bondy.conf.new
 ```
 
-`migrate` never edits its input. In the new file, each key that needs a decision is commented out under a `## migrate_conf: needs a decision` line. Resolve each one, then run `check` on the new file until its `RESULT` line reads `clean`. [Step 5 of Upgrading to 1.0.0](/connect/guides/deployment/upgrading_to_1_0_0#_5-install-1-0-0-and-check-bondy-conf-against-its-schema) explains each section of the report.
+`migrate` never edits its input, and refuses an `--out` file that already exists. In the new file, each key that the tool cannot convert is commented out under a `## migrate_conf:` line that gives the reason: `dropped`, `NOT renamed to …` or `needs a decision`. Resolve each one, then run `check` on the new file until its `RESULT` line reads `clean`. [Step 5 of Upgrading to 1.0.0](/connect/guides/deployment/upgrading_to_1_0_0#_5-install-1-0-0-and-check-bondy-conf-against-its-schema) explains each section of the report.
 
 The tool applies the renames below. Read them to know what the converted file says and why.
 
@@ -79,9 +79,9 @@ listeners.api_gateway_http.port      = 18080
 listeners.api_gateway_http.services  = api_gateway, wamp_ws, wamp_sse, wamp_longpoll
 ```
 
-- A listener that you do not declare does not exist. A file with no `listeners.*` key starts three plaintext listeners only: `admin` (18081), `api_gateway_http` (18080) and `wamp_tcp` (18082). Declare every TLS listener and every bridge relay listener.
-- Every enabled `transport = tls` listener sets `tls.certfile` and `tls.keyfile`. No default certificate path applies. One refused listener stops every listener on the node.
-- `listeners.$name.linger.timeout` is in seconds. A release candidate read a value with a unit suffix as milliseconds.
+- A file with no `listeners.*` key starts three plaintext TCP listeners: `admin` (18081, on loopback), `api_gateway_http` (18080) and `wamp_tcp` (18082). The node always adds the internal `admin_local` socket, and adds `admin` when your file does not declare it. Any other listener that you do not declare does not exist, so declare every TLS listener and every bridge relay listener.
+- Every enabled `transport = tls` listener sets `tls.certfile` and `tls.keyfile`. No default certificate path applies. A disabled listener skips this check, but not the others. One refused listener stops the node from starting.
+- `listeners.$name.linger.timeout` is in seconds. A release candidate read a value with a unit suffix as milliseconds and passed the number on as seconds, so `1s` lingered for 1000 seconds.
 - `listeners.$name.ip` takes a literal IP address, not a host name.
 - The global `wamp.websocket.*`, `wamp.sse.*` and `wamp.longpoll.*` blocks are removed. Set these options on each listener that serves the carrier, as `listeners.$name.websocket.*`, `listeners.$name.sse.*` and `listeners.$name.longpoll.*`.
 
@@ -169,7 +169,7 @@ Files written for a release candidate before `1.0.0-rc.65` can also set `erlang.
 
 *Changed in 1.0.0.*
 
-A node that runs alone sets `cluster.enabled = off`. The key defaults to `on`. A single node left on `on` never compacts its history. Under the default fence settings, it also refuses every authentication once its security tables stay unconfirmed for longer than `db.oplog.aae.fence.max_lag`. Keep the default on every member of a cluster. See [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering).
+A node that runs alone sets `cluster.enabled = off`. The key defaults to `on`. A single node left on `on` never compacts its history. Under the default fence settings, it also refuses every authentication from its first boot: only an anti-entropy round that reaches a peer confirms its security tables, and a node with no peer never completes one. Keep the default on every member of a cluster. See [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering).
 
 A node with `cluster.peer_discovery.enabled = on` refuses to start on a peer plane without TLS and peer verification, unless you set `cluster.tls.allow_insecure = on`. See the [Cluster Configuration Reference](/connect/reference/configuration/cluster).
 
@@ -179,7 +179,7 @@ A node with `cluster.peer_discovery.enabled = on` refuses to start on a peer pla
 
 - Rename a `{bondy, [...]}` stanza to `{bondy_router, [...]}`. The router's OTP application is `bondy_router`. Erlang ignores a stanza for an application that it does not load, so the old name does not fail the boot. Its settings do not apply.
 - Delete a `{plum_db, [...]}` stanza. The `plum_db` application no longer exists.
-- A custom `bondy_oplog_cache_adapter` implements `ticket/1` and `fill/5` in place of `put/4`.
+- If you wrote a `bondy_oplog_cache_adapter` for a named pre-release, implement `ticket/1` and `fill/5` in place of `put/4`. Numbered release candidates had no such behaviour.
 - A remote-console call or a script uses the new module names. [Step 6 of the pre-release upgrade](/connect/guides/deployment/upgrading_to_1_0_0#upgrade-from-a-bondy-db-pre-release) lists them.
 
 `migrate_conf.escript check` also reports `advanced.config` stanzas that no longer apply when the file sits next to `bondy.conf`.
@@ -215,14 +215,14 @@ wick --realm com.example.app call bondy.user.change_password \
 
 *Changed in 1.0.0.*
 
-The `wamp.registration.*`, `wamp.subscription.*`, `wamp.session.get` and `wamp.reflection.*` procedures take the arguments that the WAMP specification gives. Each one reads the caller's realm and takes no realm argument. A call that still passes the realm as its first argument has one argument too many.
+The `wamp.registration.*`, `wamp.subscription.*`, `wamp.session.get` and `wamp.reflection.*` procedures take the arguments that the WAMP specification gives. Each one reads the caller's realm and takes no realm argument. A call that still passes the realm as its first argument has one argument too many, and fails with `wamp.error.invalid_argument`. `lookup` is the exception: it reads the realm as the URI and the URI as the options, and the call fails with `bondy.error.internal_error`.
 
 | Procedure | Arguments now |
 |---|---|
 | `wamp.registration.list`, `wamp.subscription.list` | none |
 | `wamp.registration.lookup`, `wamp.subscription.lookup` | `uri[, options]` |
-| `wamp.registration.match` | `uri`. The result is one registration id, the best match. |
-| `wamp.subscription.match` | `uri`. The result is a list of subscription ids. |
+| `wamp.registration.match` | `uri`. The result is one registration id, the best match, or no result when nothing matches. |
+| `wamp.subscription.match` | `uri`. The result is a list of subscription ids, or no result when nothing matches. |
 | `wamp.registration.get`, `wamp.subscription.get` | `id`. The `details` argument is removed. |
 | `wamp.registration.list_callees`, `wamp.registration.count_callees` | `registration_id` |
 | `wamp.subscription.list_subscribers`, `wamp.subscription.count_subscribers` | `subscription_id` |
@@ -245,7 +245,7 @@ The `on_create` and `on_delete` registration and subscription meta events are no
 
 *Changed in 1.0.1.*
 
-`bondy.user.update`, `bondy.oauth2.client.update` and `bondy.oauth2.resource_owner.update` refuse a `password` or `client_secret` with `wamp.error.invalid_argument`. A release candidate answered success, left the credential unchanged and closed the user's sessions. Set a password or a client secret with `bondy.user.change_password`.
+`bondy.user.update`, `bondy.oauth2.client.update` and `bondy.oauth2.resource_owner.update` refuse a `password` with `wamp.error.invalid_argument`. `bondy.oauth2.client.update` also refuses a `client_secret`. A release candidate answered success, left the credential unchanged and closed the user's sessions. Set a password or a client secret with `bondy.user.change_password`.
 
 ### Replace removed procedures
 
@@ -259,10 +259,10 @@ The `on_create` and `on_delete` registration and subscription meta events are no
 
 *Changed in 1.0.0.*
 
-- `REGISTER.Options.invoke` accepts only `single`, `roundrobin`, `random`, `first` and `last`. Bondy refuses `jump_consistent_hash`, `queue_least_loaded`, `queue_least_loaded_sample`, `jch`, `qll` and `qlls`.
+- `REGISTER.Options.invoke` accepts only `single`, `roundrobin`, `random`, `first` and `last`. For any other value, such as `jump_consistent_hash`, `queue_least_loaded`, `queue_least_loaded_sample`, `jch`, `qll` or `qlls`, Bondy ends the session with `ABORT` and `wamp.error.protocol_violation`.
 - The `_routing_key` option of `CALL`, `CANCEL` and `PUBLISH` is removed. A partitioned call sets `runmode = "partition"` and names its key with `rkey`. Bondy routes it by a consistent hash of `rkey`. Without `rkey`, the call fails with `wamp.error.invalid_argument`.
 - A peer announces `call_canceling` in `HELLO` to get it. Bondy no longer assumes a feature that the peer did not announce. A `CANCEL` in `kill` or `killnowait` mode to a callee that did not announce `call_canceling` acts as `skip`.
-- A `CANCEL` that the caller is not allowed to make gets no reply, and the call continues.
+- A `CANCEL` in `kill` mode that the caller is not allowed to make gets no reply, and the call continues.
 - `PUBLISH` applies `eligible_authid`, `eligible_authrole`, `exclude_authid` and `exclude_authrole`. An empty `eligible` list delivers to no subscriber.
 
 ### Check serialization and subprotocols
@@ -271,7 +271,7 @@ The `on_create` and `on_delete` registration and subscription meta events are no
 
 - The WebSocket listener does not negotiate the batched subprotocols, such as `wamp.2.json.batched`. A client that offers one of them gets its next offer, or a refused handshake.
 - Every serializer decodes nil as absent. A `null` option, such as `timeout`, is treated as if the client did not send it.
-- Over CBOR, Bondy sends strings as text strings, not byte strings.
+- Over CBOR, Bondy sends a valid UTF-8 string as a text string, not a byte string. Other binaries stay byte strings.
 - MessagePack is encoded by Bondy's own codec. Four behaviours change. See [Serialization](/connect/reference/serialization#messagepack).
 
 ### Check the error URIs your clients match
@@ -282,7 +282,7 @@ Some procedures answer with a different error. A client that matches on error UR
 |---|---|---|
 | `wamp.error.not_authorized` over HTTP | HTTP `403` | 1.0.0 |
 | `wamp.error.authorization_failed` over HTTP | HTTP `500` | 1.0.0 |
-| A meta API inconsistency | `bondy.error.inconsistency_error` | 1.0.0 |
+| Inconsistent values, such as a grant whose `uri` and `match` disagree, or a realm's `is_prototype` and `prototype_uri` | `bondy.error.inconsistency_error`. A release candidate answered `invalid_argument`. | 1.0.0 |
 | `bondy.user.enable` or `bondy.user.disable` for an unknown user | `wamp.error.no_such_principal` | 1.0.1 |
 | A user, group, client or resource owner call that names a reserved name, such as `all` or `anonymous` | `bondy.error.invalid_value` | 1.0.1 |
 | `bondy.user.remove_group`, `bondy.group.add_group`, `bondy.group.add_groups`, `bondy.group.remove_group` | An empty result. A release candidate stored the change and then answered `bondy.error.internal_error`. | 1.0.1 |
@@ -295,7 +295,7 @@ The [Error Reference](/connect/reference/errors) gives every error and its HTTP 
 
 *Changed in 1.0.1.*
 
-Every listener that carries `admin_api`, except the internal socket, needs an OAuth2 bearer token from the master realm on each request. A request without one gets `401`. To use the Admin API over the network:
+Every listener that carries `admin_api`, except the internal socket, needs an OAuth2 bearer token from the master realm on each request other than `OPTIONS`. A request without one gets `401`. To use the Admin API over the network:
 
 1. Add `oauth2` to the master realm's `authmethods`.
 2. Add an `oauth2` source for the network your administrators connect from.
@@ -309,11 +309,11 @@ The internal socket, `<platform_runtime_dir>/bondy_admin.sock`, needs no token. 
 
 | Route | Change |
 |---|---|
-| `GET /realms/:realm_uri/registrations_summary`, `GET /realms/:realm_uri/subscriptions_summary` | Removed. `GET /realms/:realm_uri/registrations` and `GET /realms/:realm_uri/subscriptions` answer with the first page of entries, each with its id and match policy. |
+| `GET /realms/:realm_uri/registrations_summary`, `GET /realms/:realm_uri/subscriptions_summary` | Removed. `GET /realms/:realm_uri/registrations` and `GET /realms/:realm_uri/subscriptions` answer with the first page, up to 100 entries, as `values`, `has_more` and `cursor`. Each entry has `id`, `uri`, `match` and `created`, and a registration also has `invoke`. |
 | `GET /realms/:realm_uri/registrations/:id` | Calls `bondy.registration.get`. |
 | `GET /realms/:realm_uri/registrations/:id/callees` | Calls `bondy.registration.list_callees`. |
 | `POST /services/create_backup`, `GET /services/backup_status`, `POST /services/restore_backup` | Call `bondy.export.create`, `bondy.export.status` and `bondy.export.import`. |
-| `PUT /realms/:realm_uri/users/:id`, `PUT /realms/:realm_uri/clients/:id`, `PUT /realms/:realm_uri/resource_owners/:id` | Refuse a `password` or `client_secret` with `400`. Use `POST /realms/:realm_uri/users/:id/change_password`. (1.0.1) |
+| `PUT /realms/:realm_uri/users/:id`, `PUT /realms/:realm_uri/clients/:id`, `PUT /realms/:realm_uri/resource_owners/:id` | Refuse a `password` with `400`. `PUT /realms/:realm_uri/clients/:id` also refuses a `client_secret`. Use `POST /realms/:realm_uri/users/:id/change_password`. (1.0.1) |
 
 See the [Admin HTTP API Reference](/connect/reference/http_api/index).
 
@@ -328,7 +328,7 @@ See the [Admin HTTP API Reference](/connect/reference/http_api/index).
 - An upstream that does not answer gets `bondy.error.gateway_timeout` (`504`). `bondy.error.bad_gateway` answers `502`, not `503`.
 - A path with the `oidc` scheme authenticates with the realm's OIDC ticket cookie. A request other than `GET`, `HEAD` or `OPTIONS` also sends the CSRF token in `x-csrf-token`. A release candidate answered `500` on such a path. (1.0.1)
 - A path with the `basic` or `api_key` scheme answers `401`. Bondy does not enforce these schemes. A release candidate answered `500`. (1.0.1)
-- The `status_codes` map of a specification overrides the built-in defaults at the host and version levels.
+- The `status_codes` map at the host and version levels overrides the built-in defaults. An `on_error` response uses it only when its `status_code` reads it. Otherwise the status comes from the error URI.
 
 Load each specification on a test node before the cut-over. See the [API Gateway Specification Reference](/connect/reference/api_gateway/specification).
 
@@ -336,9 +336,9 @@ Load each specification on a test node before the cut-over. See the [API Gateway
 
 *Changed in 1.0.0.*
 
-- A request with more than 100 query-string parameters or form fields is refused. This applies to API Gateway routes, the OAuth2 token endpoint and the OIDC endpoints.
+- A request with more than 100 query-string parameters or form fields gets `400`. The limit is Cowboy's default, and Bondy does not change it. It applies to API Gateway routes, the Admin API, the OAuth2 token endpoint and the OIDC endpoints.
 - Every `http` listener offers HTTP/2. Set `listeners.$name.http.versions = 1.1` to turn it off on one listener. One HTTP/2 connection carries many requests, so an alarm that counts connections counts fewer than the requests.
-- Bondy honours forwarding headers only from a trusted proxy, set in `listeners.$name.proxy_protocol.trusted_proxies`. See [Proxy protocol and forwarded headers](/connect/reference/configuration/listeners#trusted-proxies).
+- An `http` listener honours forwarding headers only when `listeners.$name.proxy_protocol = on` and the socket peer is inside `listeners.$name.proxy_protocol.trusted_proxies`. See [Proxy protocol and forwarded headers](/connect/reference/configuration/listeners#trusted-proxies).
 
 ## 5. Update realm authentication settings
 
@@ -347,12 +347,12 @@ Load each specification on a test node before the cut-over. See the [API Gateway
 On a realm with security enabled, Bondy now applies the realm's `authmethods` and sources everywhere a credential arrives. A release candidate skipped this check in several places. Review each realm that uses OIDC, tickets or cookies.
 
 - **`cookie` and `oidcrp` are separate methods.** `cookie` means that a credential may arrive in a cookie. `oidcrp` admits a ticket that the OIDC login flow issued. `ticket` admits a ticket from `bondy.ticket.issue`. A ticket sent in the ticket cookie needs `cookie` as well as its own method, each with a source that allows it.
-- **Sources apply to OIDC users without a user record.** This is the case when the provider does not set `auto_provision`. Such a user is matched only by a source assigned to `all`. Add sources such as `{"usernames": "all", "authmethod": "oidcrp", "cidr": "0.0.0.0/0"}` and the same with `cookie`, scoped to the networks your users connect from.
+- **Sources apply to OIDC users without a user record.** This is the case when the provider does not set `auto_provision`. Such a user is matched only by a source assigned to `all`, in the realm or in its prototype. Add sources such as `{"usernames": "all", "authmethod": "oidcrp", "cidr": "0.0.0.0/0"}` and the same with `cookie`, scoped to the networks your users connect from.
 - **The OIDC callback checks the realm first.** The realm must admit `oidcrp` for the user from the client's address. Otherwise the callback answers `403` with `no_authmethod`, and `auto_provision` creates no user.
 - **The verify route applies the realm's methods and sources.** See [Verify route](/connect/reference/api_gateway/specification#verify-route).
 - **MCP requests behind a trusted proxy match sources against the client's address**, not the proxy's address. Write sources for your clients' networks.
 
-For now, `cookie` still admits an OIDC ticket that `oidcrp` does not. Bondy logs the warning "The realm admitted an OIDC credential through the 'cookie' method" once per realm on each node. A later release removes this. Add `oidcrp` to the realm's `authmethods` now.
+For now, `cookie` still admits an OIDC ticket that `oidcrp` does not. Bondy logs a warning that starts "The realm admitted an OIDC credential through the 'cookie' method", once per realm on each node until the node restarts. A later release removes this. Add `oidcrp` to the realm's `authmethods` now.
 
 See [OIDC Authentication](/connect/concepts/oidc_authentication) and [Sources](/connect/reference/wamp_api/source).
 
@@ -360,12 +360,17 @@ See [OIDC Authentication](/connect/concepts/oidc_authentication) and [Sources](/
 
 *Changed in 1.0.0, unless marked.*
 
+These metrics and log messages existed only in the named pre-releases. A numbered release candidate, `1.0.0-rc.65` included, did not export them, so a dashboard built for one has nothing to change here.
+
 - `bondy_oplog_peer_exclusions_total` is removed.
-- `bondy_oplog_gc_scheduler_events_total` has a `scheduler` label. A query that selects by `event` without aggregation over `scheduler` returns one series for each scheduler.
-- `bondy_cluster_channel_connections` is labelled by `peer` and `channel`.
+- `bondy_oplog_gc_scheduler_events_total` has a `scheduler` label as well as `event`. A query that selects by `event` without aggregation over `scheduler` returns one series for each scheduler.
+- `bondy_cluster_channel_connections` is labelled by `peer` and `channel`, and is exported once per scrape.
 - The log message "Prefix-closure hold" is "Causal hold", and "Reclamation stalled" is "GC stalled".
-- The master-realm hardening warnings no longer contain the identifiers "(D-1)" and "(D-2)". (1.0.1)
-- New alarm `bondy_auth_fence_closed`. See [Alarms](/connect/reference/alarms#bondy-auth-fence-closed). (1.0.1)
+
+These changed in 1.0.1:
+
+- The master-realm hardening warnings no longer contain the identifiers "(D-1)" and "(D-2)". A log alert that matched them needs updating.
+- New alarm `bondy_auth_fence_closed`, severity critical. Bondy raises it when the authentication freshness fence refuses every new authentication for longer than `db.oplog.aae.fence.alarm` (default `5m`, `0` disables). See [Alarms](/connect/reference/alarms#bondy-auth-fence-closed).
 
 See the [Metrics Reference](/connect/reference/metrics) and the [Logging Reference](/connect/reference/logging).
 

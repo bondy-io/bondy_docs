@@ -136,7 +136,7 @@ cluster.enabled = off
 ```
 
 ::: warning `cluster.enabled = off` is required for a single node
-This guide runs one node, so it turns clustering off. A node left on the default `cluster.enabled = on` with no other member never compacts its history. Under the default fence policy, it also refuses every authentication, anonymous included, once its security tables stay unconfirmed for longer than `db.oplog.aae.fence.max_lag`. To run a cluster instead, follow [Running a Cluster](/connect/guides/deployment/running_a_cluster) and see [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering).
+This guide runs one node, so it turns clustering off. A node left on the default `cluster.enabled = on` with no other member never compacts its history. Under the default fence policy, it also refuses every authentication, anonymous included, from its first boot: only an anti-entropy round that reaches a peer confirms its security tables, and a node with no peer never completes one. To run a cluster instead, follow [Running a Cluster](/connect/guides/deployment/running_a_cluster) and see [Enabling clustering](/connect/reference/configuration/cluster#enabling-clustering).
 :::
 
 ### 4. Verify your setup

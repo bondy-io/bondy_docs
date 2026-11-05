@@ -23,7 +23,7 @@ A deployment that runs a 1.0.0 release candidate has more to change: configurati
 
 ### Action required
 
-- **A node refuses to start on a key that it does not read.** This covers a renamed key, a removed key and a typo. The error names each such key and the closest key that the release knows. Earlier releases ignored such a key, so its setting stayed at the default without a message. Run `scripts/migrate_conf.escript check <path>/bondy.conf` before you upgrade.
+- **A node refuses to start on a key that it does not read.** This covers a renamed key, a removed key and a typo. The error names each such key and up to three similar keys that the release knows. The node also refuses to start on a value that it cannot parse. Earlier releases ignored such a key, so its setting stayed at the default without a message. Run `scripts/migrate_conf.escript check <path>/bondy.conf` before you upgrade.
 - **The `db.*` keys are grouped by the component they configure.** Most of them have a new name. For example, `db.aae.*` is `db.oplog.aae.*` and `db.wal.*` is `db.oplog.wal.*`. Values, units and defaults do not change. `scripts/migrate_conf.escript migrate` writes the converted file. [Storage and anti-entropy keys](/connect/guides/deployment/migrating_from_a_release_candidate#storage-and-anti-entropy-keys) lists every rename.
 
 ### New features
@@ -34,14 +34,14 @@ A deployment that runs a 1.0.0 release candidate has more to change: configurati
 
 ### Fixes
 
-- **Anti-entropy tree pages are reclaimed as writes grow.** Release 1.0.1 reclaimed them at most once an hour, and never in a node's first hour. A burst of writes, such as a restore, could fill the data volume first. Reclamation now also runs when a shard's tree has doubled since the last run. See [Pack Collection](/connect/reference/configuration/data_storage#pack-collection).
+- **Anti-entropy tree pages are reclaimed as writes grow.** Release 1.0.1 reclaimed them at most once an hour, and never in a node's first hour. A burst of writes, such as a restore, could fill the data volume first. Reclamation now also runs when the sealed records of a shard's tree reach twice the count that the last run left, counted from at least 10,000 records. See [Pack Collection](/connect/reference/configuration/data_storage#pack-collection).
 
 ## 1.0.1
 
 ### Action required
 
-- **The Admin HTTP API needs a bearer token.** Every listener that carries `admin_api` needs an OAuth2 access token from the master realm. A request without one gets `401`. The internal socket needs no token. See [Authenticating to the Admin API](/connect/reference/configuration/listeners#authenticating-to-the-admin-api).
-- **Update procedures refuse credentials.** `bondy.user.update`, `bondy.oauth2.client.update` and `bondy.oauth2.resource_owner.update`, and their `PUT` routes, refuse a `password` or `client_secret`. Use [`bondy.user.change_password`](/connect/reference/wamp_api/user#change-the-user-password).
+- **The Admin HTTP API needs a bearer token.** Every listener that carries `admin_api` needs an OAuth2 access token from the master realm on each request other than `OPTIONS`. A request without one gets `401`. The internal socket needs no token. See [Authenticating to the Admin API](/connect/reference/configuration/listeners#authenticating-to-the-admin-api).
+- **Update procedures refuse credentials.** `bondy.user.update`, `bondy.oauth2.client.update` and `bondy.oauth2.resource_owner.update`, and their `PUT` routes, refuse a `password`. The client procedure and route also refuse a `client_secret`. Use [`bondy.user.change_password`](/connect/reference/wamp_api/user#change-the-user-password).
 - **`cookie` and `oidcrp` are separate methods.** `cookie` admits a credential that arrives in a cookie. `oidcrp` admits a ticket from the OIDC login flow. A realm that uses OIDC needs both in its `authmethods`, each with a source that allows it.
 - **Sources apply to OIDC users without a user record.** Add sources assigned to `all` for `oidcrp` and `cookie`, for the networks your users connect from.
 - **The verify route applies the realm's methods and sources.** See [Verify route](/connect/reference/api_gateway/specification#verify-route).
@@ -68,4 +68,4 @@ The fixes that change a result your clients can see:
 - `bondy.user.remove_alias` removes only an alias that the user holds.
 - An API Gateway path with the `basic` or `api_key` scheme answers `401`, not `500`.
 - A bearer value that is not a JWT gets `401`, not `400`.
-- With `security.rate_limit` on, Bondy charges a request before authentication, so a flood of refused requests gets `429`. See [Rate Limiting](/connect/reference/configuration/security#rate-limiting).
+- With `security.rate_limit` on, Bondy charges API Gateway, Admin API and OAuth2 token-endpoint requests before authentication, so a flood of refused requests gets `429`. See [Rate Limiting](/connect/reference/configuration/security#rate-limiting).
