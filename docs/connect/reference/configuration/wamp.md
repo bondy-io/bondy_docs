@@ -4,7 +4,7 @@
 
 @[config](wamp.uri.strictness,loose|strict,loose,v1.0.0-rc.1)
 
-The validation applied to every WAMP URI Bondy accepts, in realm names, procedure and topic registrations, and calls. `loose` allows any non-empty dot-separated component; `strict` additionally restricts each component to the WAMP specification's stricter character set. Set to `strict` to catch malformed URIs from a client early, at the router, rather than downstream in application code.
+The validation applied to every WAMP URI Bondy accepts, in realm names, procedure and topic registrations, and calls. A URI is non-empty components separated by single dots. With `loose`, a component holds any bytes except `.`, `#`, DEL (0x7F) and the bytes from 0x00 to 0x20, which include every whitespace and control character. With `strict`, a component holds only lower-case letters, digits and `_`, the WAMP specification's stricter character set. Under both, a prefix registration or subscription may end in `.`, and a wildcard one may have empty components. Set to `strict` to catch malformed URIs from a client early, at the router, rather than downstream in application code.
 
 ## Call Timeout
 
