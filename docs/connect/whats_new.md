@@ -11,13 +11,22 @@ related:
       description: "Move your data from a release candidate to a new cluster."
 ---
 
-# What's New in 1.1
+# What's New in 1.2
 
-This page lists the changes between Bondy Connect 1.0.0 and 1.1. It covers releases 1.0.1, 1.0.2 and 1.1.0. Each section starts with the changes that need action from you.
+This page lists the changes between Bondy Connect 1.0.0 and 1.2. It covers releases 1.0.1, 1.0.2, 1.1.0 and 1.2.0. Each section starts with the changes that need action from you.
 
 ::: tip Coming from a release candidate?
 A deployment that runs a 1.0.0 release candidate has more to change: configuration keys, the WAMP and HTTP APIs, and the realm authentication rules. Follow [Migrating from a Release Candidate](/connect/guides/deployment/migrating_from_a_release_candidate). It includes every change on this page.
 :::
+
+## 1.2.0
+
+### Fixes
+
+- **A RawSocket client gets no message longer than the length it announces.** Bondy ignored this length, and a client that enforces it closed the connection. Bondy now drops an `EVENT` for that subscriber only, and counts the drop in `bondy_wamp_dropped_total`. A caller gets `ERROR` with `wamp.error.payload_size_exceeded` when its `RESULT` is too long for it, or its `INVOCATION` too long for the callee. A progressive call ends, and Bondy interrupts its callee. WebSocket and HTTP clients announce no length, so nothing changes for them. See [RawSocket message length](/connect/reference/protocols/wamp#rawsocket-message-length).
+- **A refused `bondy.*` call names the realm it received.** A call whose realm argument was not the session's realm got `wamp.error.not_authorized`, and the description named the session's realm instead. A realm sent as an Erlang charlist (`"com.example"`) rather than a binary therefore looked like a correct call. The description now shows the realm received as an Erlang term, so its type is visible, and the error's `details` carry it as `requested_realm_uri`.
+- **A missing or malformed bearer token gets `bondy.error.token_invalid`.** On the Admin API and on API Gateway `oauth2` paths, a request without an `Authorization: Bearer` header, or with a bearer value that is not a JWT, got `401` with an `internal_error` body. The body now names the refusal. See [OAuth2 Authentication](/connect/reference/api_gateway/specification#oauth2-authentication).
+- **The `WWW-Authenticate: Bearer` challenge follows RFC 6750.** This covers the Admin API, API Gateway `oauth2` paths, the credential-verification endpoints and the MCP endpoint. A request with no bearer token gets `Bearer realm="<realm>"`, and a refused token adds `error="invalid_token"`. Before, the API Gateway sent Bondy's own error code and extra parameters, and the MCP endpoint sent a bare `Bearer`. A client that read Bondy's error code from the header reads it from the response body instead. The `Cookie`, `Basic` and `ApiKey` challenges do not change.
 
 ## 1.1.0
 

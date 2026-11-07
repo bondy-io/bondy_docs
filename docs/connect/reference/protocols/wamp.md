@@ -11,7 +11,7 @@ Each table has two status columns. **Announced** is what Bondy states in the `ro
 |Feature|Implemented|Notes|
 |---|---|---|
 |WebSocket transport|Yes||
-|RawSocket transport (TCP and TLS)|Yes|Also over a Unix domain socket listener.|
+|RawSocket transport (TCP and TLS)|Yes|Also over a Unix domain socket listener. See [RawSocket message length](#rawsocket-message-length).|
 |HTTP long-poll transport|Yes|JSON only. See [WAMP HTTP Transports](/connect/concepts/http_transports).|
 |HTTP Server-Sent Events transport|Yes|JSON only. Bondy-specific; not part of the specification.|
 |Batched WebSocket transport|No|Bondy accepts the batched subprotocols (`wamp.2.json.batched` and others) during the WebSocket handshake, but cannot decode their messages, so the session fails on the first message. Do not use them.|
@@ -22,6 +22,23 @@ Each table has two status columns. **Announced** is what Bondy states in the `ro
 |BERT serialization|No|Refused on every transport, because its decoder can create atoms before the session authenticates.|
 
 See [Serialization](/connect/reference/serialization) for how each serializer maps WAMP types.
+
+### RawSocket message length
+
+In the RawSocket handshake, each peer announces the largest message it accepts. This length is 2<sup>9+N</sup> octets, from 512 octets to 16 MiB. It applies to the TCP, TLS and Unix domain socket listeners. WebSocket and HTTP clients announce no length.
+
+Bondy replies with the client's length as its own limit, capped at 4 MiB, the limit of the other transports. When a client sends a message longer than that limit, Bondy closes the connection without an `ABORT`.
+
+Bondy never sends a client a message longer than the length the client announced. Bondy measures each message after it serializes it, so the limit applies to the size in the client's serializer. When an outgoing message is too long, Bondy does the following, and the connection stays open:
+
+|Message|What Bondy does|
+|---|---|
+|`EVENT`|Drops the event for that subscriber only. Other subscribers receive it. The drop counts in [`bondy_wamp_dropped_total`](/connect/reference/metrics#wamp-messaging-rpc) with `reason="payload_size_exceeded"` and `family="event"`.|
+|`RESULT`, or a callee's `ERROR`|Sends the caller `ERROR` with `wamp.error.payload_size_exceeded` for the call instead.|
+|Progressive `RESULT`|Ends the call. The caller receives the results before it, then `ERROR` with `wamp.error.payload_size_exceeded`, and nothing after it. Bondy interrupts the callee.|
+|`INVOCATION`|Does not send it. The caller receives `ERROR` with `wamp.error.payload_size_exceeded`. When the callee already has earlier input of a progressive call, Bondy interrupts it, and the callee receives none of the later input.|
+
+The specification forbids the router to send such a message, and leaves the handling to the router. Bondy drops an event rather than refusing the publication, because one subscriber's limit then does not stop delivery to the others.
 
 ### Sessions and messages
 
@@ -123,6 +140,7 @@ The table lists how the router replies to a message that it cannot accept. An `A
 |An option or detail with an invalid value, such as a `HELLO` with no roles|`ABORT` with reason `wamp.error.protocol_violation`|
 |Over the `erl` serialization, a term outside the WAMP data model, such as a tuple or an improper list|`ABORT` with reason `wamp.error.protocol_violation`|
 |A URI that is not valid under [`wamp.uri.strictness`](/connect/reference/configuration/wamp#wamp.uri.strictness)|`ERROR` with `wamp.error.invalid_uri`. The session stays open.|
+|Over RawSocket, a message longer than the limit in Bondy's handshake reply|No reply. Bondy closes the connection. See [RawSocket message length](#rawsocket-message-length).|
 
 Bondy checks that the payload of every JSON and CBOR message decodes when the message arrives. A malformed payload therefore aborts the sender's session and never reaches a receiver.
 

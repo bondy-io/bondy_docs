@@ -1,7 +1,7 @@
 ---
 outline: [2,3]
 related:
-    - text: "What's New in 1.1"
+    - text: "What's New in 1.2"
       type: "Overview"
       link: "/connect/whats_new"
       description: "What changed between 1.0.0 and this release."
@@ -380,7 +380,7 @@ Your configuration passes `migrate_conf.escript check`, and your clients call pr
 
 ## See also
 
-- [What's New in 1.1](/connect/whats_new) — the changes between 1.0.0 and this release.
+- [What's New in 1.2](/connect/whats_new) — the changes between 1.0.0 and this release.
 - [Upgrading to 1.0.0](/connect/guides/deployment/upgrading_to_1_0_0) — move your data from a release candidate.
 - [Network Listeners](/connect/reference/configuration/listeners) — every `listeners.$name.*` key.
 - [WAMP Administration API](/connect/reference/wamp_api/index) — the arguments of every procedure.
