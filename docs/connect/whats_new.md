@@ -21,6 +21,10 @@ A deployment that runs a 1.0.0 release candidate has more to change: configurati
 
 ## 1.2.0
 
+### Action required
+
+- **A node that runs 1.2 cannot go back to an earlier release.** 1.2 upgrades the storage engine, and from its first start a node writes stored data in a format that earlier releases cannot read. Before you upgrade, take a [logical export](/connect/guides/administration/backup_and_restore#export-the-database). To go back, deploy a new cluster on the earlier release and [import the export](/connect/guides/administration/backup_and_restore#import-an-export); it holds nothing written after you took it.
+
 ### Fixes
 
 - **A RawSocket client gets no message longer than the length it announces.** Bondy ignored this length, and a client that enforces it closed the connection. Bondy now drops an `EVENT` for that subscriber only, and counts the drop in `bondy_wamp_dropped_total`. A caller gets `ERROR` with `wamp.error.payload_size_exceeded` when its `RESULT` is too long for it, or its `INVOCATION` too long for the callee. A progressive call ends, and Bondy interrupts its callee. WebSocket and HTTP clients announce no length, so nothing changes for them. See [RawSocket message length](/connect/reference/protocols/wamp#rawsocket-message-length).
