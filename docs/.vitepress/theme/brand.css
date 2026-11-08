@@ -550,3 +550,34 @@ table.property-table > tbody > tr > td {
    same 16% into the page colour gives the identical tint, opaque. */
 .vp-doc .pf-node.acc rect,.vp-doc .pf-node.acc circle,.vp-doc .pf-node.acc path{fill:color-mix(in srgb,var(--acc-l) 16%,var(--vp-c-bg))}
 .vp-doc .pf-chip.acc rect{fill:color-mix(in srgb,var(--acc-l) 16%,var(--vp-c-bg))}
+
+/* ---------------------------------------------------------------------------
+ * No ligatures in code
+ *
+ * JetBrains Mono turns on contextual ligatures (`calt`) by default, so `|>`,
+ * `->`, `=>`, `!=`, `>=`, `===` render as single glyphs (▷ → ⇒ ≠ ≥ ≡). In
+ * code that misstates what the reader must type.
+ *
+ * The mono face is used far beyond <code>: config macros, data-tree types,
+ * headings, the chrome's labels, diagram labels. A selector list would trail
+ * every new use of the face, so ligatures are turned off at the root and
+ * inherited everywhere. For Inter prose the only effect is that `->` is no
+ * longer drawn as an arrow. A rule that sets font-feature-settings for its
+ * own reason (e.g. "tnum") must repeat "liga" 0, "calt" 0, or it turns
+ * them back on.
+ *
+ * Checked by a probe that scans every element whose computed font is
+ * JetBrains Mono on a sample of pages covering code blocks, inline code,
+ * config macros, data trees, diagrams and the chrome, and finds none with
+ * ligatures left on.
+ * ------------------------------------------------------------------------ */
+:root {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0, "dlig" 0;
+}
+/* form controls do not inherit font properties from the UA stylesheet (the
+   version picker is a <button> set in the mono face) */
+button, input, select, textarea {
+  font-variant-ligatures: inherit;
+  font-feature-settings: inherit;
+}
