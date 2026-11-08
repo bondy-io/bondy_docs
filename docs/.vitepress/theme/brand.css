@@ -484,3 +484,69 @@ table.property-table > tbody > tr > td {
 .medium-zoom-image--opened {
   z-index: 101 !important;
 }
+
+/* ---------------------------------------------------------------------------
+ * Diagrams — bondy.io's post figures (blog.css, `.torso .postfig` and the
+ * `.pf-*` classes), ported verbatim onto the docs scope `.vp-doc`. Each
+ * diagram is a Vue component in ./diagrams, registered globally by index.js
+ * and placed in the markdown as a tag (e.g. <WampRolesDiagram />).
+ *
+ * Everything is drawn from the shared palette tokens, which html.dark
+ * redefines, so a figure follows the theme with no per-theme markup.
+ *
+ * Additions the website does not need, all marked "docs:" below:
+ *   .pf-code   literal paths, URIs and payloads: mono like .pf-msg but NOT
+ *              upper-cased, because URIs and paths are case-sensitive.
+ *   .pf-zone-l a zone's label (the website writes it with .pf-msg).
+ *   .pf-chip   a pill inside a zone — a stored object such as a realm entry.
+ *   .pf-sess   a WAMP session band between a client and a realm.
+ * ------------------------------------------------------------------------ */
+.vp-doc .postfig{margin:32px 0}
+.vp-doc .postfig svg{width:100%;height:auto;display:block;overflow:visible}
+.vp-doc .postfig-cap{margin-top:12px;font-family:var(--m);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);text-align:center}
+.vp-doc .pf-line{stroke:var(--line);stroke-width:1.4;fill:none}
+.vp-doc .pf-node rect,.vp-doc .pf-node circle,.vp-doc .pf-node path{fill:var(--paper-2);stroke:var(--line);stroke-width:1.3}
+.vp-doc .pf-node .pf-l{fill:var(--ink);font-family:var(--f);font-weight:500;font-size:15px}
+.vp-doc .pf-node .pf-s{fill:var(--ink-3);font-family:var(--m);font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.vp-doc .pf-node.acc rect,.vp-doc .pf-node.acc circle,.vp-doc .pf-node.acc path{fill:var(--soft);stroke:var(--blue);stroke-width:1.6}
+.vp-doc .pf-node.acc .pf-l{fill:var(--blue)}
+.vp-doc .pf-node.acc .pf-s{fill:var(--blue)}
+.vp-doc .pf-node.dim{opacity:.55}
+.vp-doc .pf-life{stroke:var(--line);stroke-width:1;stroke-dasharray:3 4}
+.vp-doc .pf-wall{stroke:var(--ink-3);stroke-width:1.2;stroke-dasharray:8 5;opacity:.6}
+.vp-doc .pf-msgline{stroke:var(--ink-3);stroke-width:1.3;fill:none}
+.vp-doc .pf-msgline.acc{stroke:var(--blue);stroke-width:1.6}
+.vp-doc .pf-arrow{fill:var(--ink-3)}
+.vp-doc .pf-arrow.acc{fill:var(--blue)}
+.vp-doc .pf-msg{fill:var(--ink-3);font-family:var(--m);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.vp-doc .pf-msg.acc{fill:var(--blue)}
+.vp-doc .pf-zone{fill:none;stroke:var(--line);stroke-width:1.2;stroke-dasharray:2 4}
+.vp-doc .pf-band{fill:none;stroke:var(--soft);stroke-width:14;stroke-linecap:round}
+.vp-doc .pf-lane{fill:none;stroke-width:1.6;stroke-dasharray:3 7;stroke-linecap:round}
+.vp-doc .pf-lane.out{stroke:var(--ink-3);animation:pf-flow 1.4s linear infinite}
+.vp-doc .pf-lane.in{stroke:var(--blue);animation:pf-flow 1.4s linear infinite reverse}
+.vp-doc .pf-origin{fill:var(--blue)}
+@keyframes pf-flow{to{stroke-dashoffset:-20}}
+@media(prefers-reduced-motion:reduce){.vp-doc .pf-lane{animation:none}}
+/* docs: */
+.vp-doc .pf-code{fill:var(--ink-2);font-family:var(--m);font-size:10.5px}
+.vp-doc .pf-code.acc{fill:var(--blue)}
+.vp-doc .pf-zone-l{fill:var(--ink-3);font-family:var(--m);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.vp-doc .pf-chip rect{fill:var(--paper);stroke:var(--line);stroke-width:1.2}
+.vp-doc .pf-chip.ref rect{stroke-dasharray:4 3}
+.vp-doc .pf-chip.acc rect{fill:var(--soft);stroke:var(--blue)}
+.vp-doc .pf-chip text{fill:var(--ink);font-family:var(--m);font-size:10.5px}
+.vp-doc .pf-chip.acc text{fill:var(--blue)}
+.vp-doc .pf-sess{fill:var(--soft);stroke:none}
+/* docs: a label that may cross a line or lifeline is knocked out of it by a
+   stroke in the page colour painted under its fill. */
+.vp-doc .pf-halo{paint-order:stroke;stroke:var(--vp-c-bg);stroke-width:5px;stroke-linejoin:round}
+/* docs: a node whose title is an identifier (a state, a module) sets it in
+   mono with .pf-code; inside a node it takes the node's title ink. */
+.vp-doc .pf-node .pf-code{fill:var(--ink)}
+.vp-doc .pf-node.acc .pf-code{fill:var(--blue)}
+/* docs: the website's accent fill is --soft, a translucent spruce, so a line
+   drawn under an accent node shows through it. Mixing the same spruce at the
+   same 16% into the page colour gives the identical tint, opaque. */
+.vp-doc .pf-node.acc rect,.vp-doc .pf-node.acc circle,.vp-doc .pf-node.acc path{fill:color-mix(in srgb,var(--acc-l) 16%,var(--vp-c-bg))}
+.vp-doc .pf-chip.acc rect{fill:color-mix(in srgb,var(--acc-l) 16%,var(--vp-c-bg))}

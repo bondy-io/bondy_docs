@@ -44,18 +44,7 @@ This becomes unwieldy as the number of realms grows, especially in microservices
 
 Bondy Same Sign-On addresses this by centralizing credential storage in a dedicated SSO realm:
 
-```
-SSO Realm: "com.example.sso"
-  └─> Stores credentials for Alice, Bob, Carol
-
-User Realms:
-  - "com.example.app1" → Links to SSO realm
-  - "com.example.app2" → Links to SSO realm
-  - "com.example.app3" → Links to SSO realm
-
-Alice authenticates to any realm using the same credentials
-stored in the SSO realm
-```
+<SsoRealmsDiagram />
 
 The SSO realm acts as a centralized identity provider, while user realms maintain their own independent authorization rules (what users can do within that realm).
 
@@ -189,32 +178,7 @@ Notice the user realm record doesn't contain credentials—only a link to the SS
 
 When Alice connects to `com.example.app1`:
 
-```
-1. Alice → Bondy: HELLO to "com.example.app1"
-   └─> Includes username "alice@example.com"
-
-2. Bondy checks realm configuration
-   └─> Sees sso_realm_uri = "com.example.sso"
-
-3. Bondy looks up Alice in "com.example.app1"
-   └─> Finds user record with SSO link
-
-4. Bondy looks up Alice in "com.example.sso"
-   └─> Retrieves credentials
-
-5. Bondy → Alice: CHALLENGE
-   └─> Using credentials from SSO realm
-
-6. Alice → Bondy: AUTHENTICATE
-   └─> Provides password or signature
-
-7. Bondy validates credentials
-   └─> Against credentials in SSO realm
-
-8. If valid, Bondy → Alice: WELCOME
-   └─> Session created in "com.example.app1"
-   └─> Authorization from "com.example.app1" applied
-```
+<SsoAuthFlowDiagram />
 
 The same credentials work for `com.example.app2`, `com.example.app3`, or any other realm linked to the same SSO realm.
 

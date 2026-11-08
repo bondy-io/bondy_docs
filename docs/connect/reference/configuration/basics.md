@@ -10,7 +10,7 @@ The complete behaviour of Bondy is defined by the combination of 3 types of "con
 
 The following diagram shows the scopes and mechanism for managing each configuration type:
 
-<ZoomImg src="/assets/configuration_scopes.png"/>
+<ConfigScopesDiagram />
 
 ::: tip Documentation Scope
 This reference documentation covers only the **Bondy node runtime configuration** using environment variables and the `bondy.conf` file.

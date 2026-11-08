@@ -43,7 +43,7 @@ Subsequently one or more realms can use the newly created SSO Realm by respectiv
 
 In the following diagram both realms `com.example.realm.1` and `com.example.realm.2` have their property `sso_realm_uri` set to `com.example.sso`.
 
-<ZoomImg src="/assets/sso.png"/>
+<SameSignOnDiagram />
 
 This allows the user `Linda` to authenticate to both realms using a single set of credentials stored in SSO realm `com.example.sso`.
 

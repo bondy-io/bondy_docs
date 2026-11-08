@@ -43,22 +43,7 @@ Caller <-----> Router (Dealer) <-----> Callee
 
 ### Basic Flow
 
-```
-1. Callee registers procedure "com.myapp.add"
-   → Router tracks registration
-
-2. Caller calls "com.myapp.add" with arguments [2, 3]
-   → Router receives CALL message
-
-3. Router routes to appropriate Callee
-   → Callee receives INVOCATION message
-
-4. Callee executes procedure and returns result 5
-   → Router receives YIELD message
-
-5. Router returns result to Caller
-   → Caller receives RESULT message
-```
+<RpcBasicFlowDiagram />
 
 ### WAMP Messages
 

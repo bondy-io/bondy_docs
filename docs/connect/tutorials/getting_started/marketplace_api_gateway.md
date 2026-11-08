@@ -34,7 +34,7 @@ An API Gateway Specification is a document, a JSON data structure, that _declara
 
 The architecture remains the same as the one discussed in [Marketplace tutorial](/connect/tutorials/getting_started/marketplace#marketplace-architecture) with the exception that we will now have the HTTP API Gateway and an HTTP client which are shown in the updated view below.
 
-<ZoomImg src="/assets/tutorials/marketplace_api_gateway/marketplace.png"/>
+<MarketplaceDiagram gateway />
 
 The [Marketplace](/connect/tutorials/getting_started/marketplace) offers the following WAMP API procedures registered on the `com.market.demo` realm:
 

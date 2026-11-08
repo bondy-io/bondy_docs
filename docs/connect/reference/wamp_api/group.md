@@ -11,7 +11,7 @@ You can use user groups to specify permissions for a collection of users, which 
 The following names are reserved and Bondy will not allow them to be used as a value for the group's `name` property: `all`, `anonymous`, `any`, `from`, `on`, `to`.
 :::
 
-<ZoomImg src="/assets/rbac.png"/>
+<RbacDiagram />
 
 ## Types
 ### input_data(){.datatype}

@@ -117,11 +117,7 @@ status(Conn) -> connecting | establishing | established | reconnecting | down.
 
 Reports where the connection is in its lifecycle:
 
-```
-connecting → establishing → established
-                  ▲              │ (link drops)
-                  └── reconnecting ◀┘     … → down (gave up, or closed)
-```
+<SdkStatusDiagram />
 
 `down` is also what you get if `Conn` resolves to no live process at all (for example, a name that was never connected, or a connection that has fully terminated).
 

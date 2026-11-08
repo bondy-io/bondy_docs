@@ -44,34 +44,7 @@ The Longpoll transport uses the `wamp.2.json` sub-protocol. All WAMP messages ar
 
 ### Session Lifecycle
 
-```
-Client                          Bondy
-  │                               │
-  │  POST /wamp/longpoll/open     │
-  │  {"protocols":["wamp.2.json"]}│
-  │──────────────────────────────>│
-  │  200 {"transport":"<id>"}     │
-  │<──────────────────────────────│
-  │                               │
-  │  POST /<id>/send              │
-  │  [HELLO, ...]                 │
-  │──────────────────────────────>│
-  │  202 Accepted                 │
-  │<──────────────────────────────│
-  │                               │
-  │  POST /<id>/receive           │
-  │  (blocks until message ready) │
-  │──────────────────────────────>│
-  │  200 [WELCOME, ...]           │
-  │<──────────────────────────────│
-  │                               │
-  │  ... send/receive cycle ...   │
-  │                               │
-  │  POST /<id>/close             │
-  │──────────────────────────────>│
-  │  202 Accepted                 │
-  │<──────────────────────────────│
-```
+<LongPollLifecycleDiagram />
 
 ### Endpoints
 
@@ -150,37 +123,7 @@ The SSE transport uses the `wamp.2.json.sse` sub-protocol.
 
 ### Session Lifecycle
 
-```
-Client                          Bondy
-  │                               │
-  │  POST /wamp/sse/open          │
-  │  {"protocols":["wamp.2.json.sse"]}
-  │──────────────────────────────>│
-  │  200 {"transport":"<id>"}     │
-  │<──────────────────────────────│
-  │                               │
-  │  GET /<id>/receive            │
-  │──────────────────────────────>│
-  │  200 text/event-stream        │
-  │<──────────── SSE stream ──────│
-  │                               │
-  │  POST /<id>/send              │
-  │  [HELLO, ...]                 │
-  │──────────────────────────────>│
-  │  202 Accepted                 │
-  │<──────────────────────────────│
-  │                               │
-  │  event: wamp                  │
-  │  data: [WELCOME, ...]         │
-  │<──────────────────────────────│
-  │                               │
-  │  ... send/receive cycle ...   │
-  │                               │
-  │  POST /<id>/close             │
-  │──────────────────────────────>│
-  │  202 Accepted                 │
-  │<──────────────────────────────│
-```
+<SseLifecycleDiagram />
 
 ### Endpoints
 

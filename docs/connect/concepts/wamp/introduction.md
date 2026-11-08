@@ -8,7 +8,7 @@ A **peer** is a program that speaks WAMP. WAMP has two kinds of peer: clients an
 
 A **client** is an application component: a browser app, a mobile app, a backend service, a device. A **router** is the peer that clients connect to. Bondy is a router. Clients never connect to each other. Each client holds one connection to the router, and the router moves every message between clients.
 
-<ZoomImg src="/assets/wamp_routing.png"/>
+<WampRoutingDiagram />
 
 This is what makes WAMP *routed*. A client addresses a message to a name, not to another client. The router decides which clients receive it. So a client does not need to know where the other clients run, how many there are, or whether any exist.
 
@@ -24,7 +24,7 @@ A realm is a name, not a piece of infrastructure. Creating one does not need a n
 
 In Bondy, a realm exists on every node of a cluster. A client connected to any node reaches the procedures and topics of its realm on every other node.
 
-<ZoomImg src="/assets/wamp_roles.png"/>
+<WampRolesDiagram />
 
 ## Sessions
 

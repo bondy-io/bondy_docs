@@ -46,7 +46,7 @@ Choosing convergence is not choosing to ignore correctness. Bondy's storage laye
 
 A Bondy node is three layers: the **router** that speaks WAMP and HTTP to clients, a **storage and replication layer** that gives every subsystem a replicated, convergent place to keep state, and **clustering** that connects nodes into a mesh with no leader.
 
-<ZoomImg src="/assets/bondy_container_diagram.png" alt="Bondy container diagram"/>
+<ContainerDiagram />
 
 ### The Router
 
@@ -64,7 +64,7 @@ Because convergence never blocks on a majority round-trip, an isolated node can 
 
 Nodes connect over [Partisan](https://partisan.dev), a high-performance Distributed Erlang replacement supporting multiple network topologies and larger clusters than standard Distributed Erlang. Partisan carries Bondy's traffic on separate channels. Calls and events routed between nodes travel on `wamp_relay`. Anti-entropy sync sessions travel on a dedicated `bondy_aae` channel, so that state repair does not compete with WAMP traffic. The `wamp_relay`, `data`, `control_plane` and `default` channels each have their own connection parallelism and compression settings; see the [Cluster Configuration Reference](/connect/reference/configuration/cluster). See [Clustering](/connect/concepts/clustering) for cluster formation, peer discovery, and the security of the peer plane: a node with peer discovery enabled refuses to start unless the peer plane uses TLS with certificate verification, because an insecure peer plane can leak replicated credentials and signing keys.
 
-<ZoomImg src="/assets/bondy_architecture.png" alt="Bondy architecture diagram"/>
+<ArchitectureDiagram />
 
 ## Consistency in Practice
 

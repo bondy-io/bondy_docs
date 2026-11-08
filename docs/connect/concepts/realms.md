@@ -22,7 +22,7 @@ All resources in Bondy belong to a realm. Messages are routed separately for eac
 
 It is the equivalent of a domain in computer networks.
 
-<ZoomImg src="/assets/realm_diagram.png"/>
+<RealmsDiagram />
 
 ## The Realm object
 

@@ -33,15 +33,7 @@ WAMP simplifies this by providing **both patterns in a single protocol**, routed
 
 RPC enables synchronous request-response communication where a Caller invokes a procedure implemented by a Callee, receiving a result or error in return.
 
-```
-Caller                Router (Dealer)           Callee
-  |                          |                     |
-  |------- CALL --------->   |                     |
-  |                          |------ INVOCATION -->|
-  |                          |                     | (process)
-  |                          |<----- YIELD --------|
-  |<----- RESULT ---------|  |                     |
-```
+<RpcSequenceDiagram />
 
 ### Key Features
 
@@ -73,15 +65,7 @@ Caller                Router (Dealer)           Callee
 
 PubSub enables asynchronous one-to-many communication where Publishers send events to topics, and all Subscribers to those topics receive the events.
 
-```
-Publisher             Router (Broker)          Subscribers
-  |                          |                  |    |    |
-  |------ PUBLISH ------>    |                  |    |    |
-  |                          |------ EVENT ---->|    |    |
-  |                          |------ EVENT ---------->|    |
-  |                          |------ EVENT ---------------->|
-  |<---- PUBLISHED ------|   |                  |    |    |
-```
+<PubSubSequenceDiagram />
 
 ### Key Features
 
@@ -124,24 +108,7 @@ The real power of WAMP comes from using both patterns together in the same appli
 
 ### Example: E-commerce Order Processing
 
-```
-1. User clicks "Place Order" (browser)
-   → RPC CALL to `com.shop.order.create`
-
-2. Order Service (Callee) processes order
-   → Returns order ID to browser
-
-3. Order Service publishes event
-   → PUBLISH to `com.shop.order.created`
-
-4. Multiple services receive event:
-   - Inventory Service → Updates stock
-   - Email Service → Sends confirmation
-   - Analytics Service → Records metrics
-   - User's browser → Shows confirmation
-
-All over one protocol, one connection!
-```
+<OrderProcessingDiagram />
 
 ### Workflow Orchestration
 

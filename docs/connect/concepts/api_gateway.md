@@ -42,15 +42,7 @@ The API Gateway allows you to define a complete HTTP/REST API declaratively usin
 
 Bondy provides two subsystems that work in opposite directions — an ingress **gateway** and an egress **connector**:
 
-```
-                   HTTP API Gateway
-External  ───HTTP Request──>  Bondy  ───WAMP Call──>  WAMP Service
-Client    <──HTTP Response──         <──WAMP Result──
-
-                    HTTP Connector
-WAMP      ───WAMP Call──>     Bondy  ───HTTP Request──>  External
-Client    <──WAMP Result──           <──HTTP Response──   REST API
-```
+<GatewayConnectorDiagram />
 
 | | HTTP API Gateway | [HTTP Connector](/connect/concepts/http_connector) |
 |:---|:---|:---|
@@ -89,36 +81,11 @@ An API Gateway Specification is effectively a declarative Finite State Machine (
 
 ### Object Tree
 
-```
-API Object
- └── Version Object(s)
-      └── Path Object(s)
-           └── HTTP Method (GET, POST, PUT, ...)
-                └── Operation Object
-                     ├── Action Object (wamp_call | wamp_publish | forward | static)
-                     └── Response Object
-```
+<ApiObjectTreeDiagram />
 
 ### Request Flow
 
-```
-HTTP Client                     Bondy API Gateway                    WAMP Service
-    │                                 │                                   │
-    │  GET /v1.0/invoices/42          │                                   │
-    │────────────────────────────────>│                                   │
-    │                                 │  Match path + method              │
-    │                                 │  Evaluate expressions             │
-    │                                 │  Build API Context                │
-    │                                 │                                   │
-    │                                 │  WAMP Call: com.billing.get(42)   │
-    │                                 │──────────────────────────────────>│
-    │                                 │  WAMP Result: {id: 42, ...}      │
-    │                                 │<──────────────────────────────────│
-    │                                 │                                   │
-    │                                 │  Apply response transformation    │
-    │  200 {"id": 42, ...}            │                                   │
-    │<────────────────────────────────│                                   │
-```
+<ApiGatewayRequestFlowDiagram />
 
 
 ## Action Types

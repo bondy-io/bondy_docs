@@ -15,7 +15,7 @@ When you create a user, you then have to grant it permissions by making it a mem
 The following names are reserved and Bondy will not allow them to be used as a value for the user's username property: `all`, `anonymous`, `any`, `from`, `on`, `to`.
 :::
 
-<ZoomImg src="/assets/rbac.png"/>
+<RbacDiagram />
 
 ### Aliasing
 Provides the ability for a user to authenticate using different usernames (authid).

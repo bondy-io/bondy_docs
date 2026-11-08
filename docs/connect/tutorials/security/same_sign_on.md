@@ -183,7 +183,7 @@ We need to repeat the step again to add `Linda` to realms 2 and 3. Notice that w
 
 The following diagram shows the end result:
 
-<ZoomImg src="/assets/sso_example.png"/>
+<SameSignOnExampleDiagram />
 
 Now `Linda` can authenticate to all three realms using a single set of credentials. Moreover, performing a password change on any of the three realms will actually change it in the SSO realm, having immediate effect across all associated realms.
 

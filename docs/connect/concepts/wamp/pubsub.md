@@ -31,16 +31,7 @@ This decoupling provides several benefits:
 
 ### Basic Flow
 
-```
-1. Subscriber subscribes to topic "com.myapp.events.user.login"
-   → Router tracks subscription
-
-2. Publisher publishes event to "com.myapp.events.user.login"
-   → Router receives event
-
-3. Router delivers event to all subscribers
-   → Each subscriber receives event independently
-```
+<PubSubBasicFlowDiagram />
 
 ### WAMP Messages
 

@@ -46,7 +46,7 @@ The API Gateway Specification document has a structure represented by the follow
 
 The following diagram shows the object tree in detail, including all properties and types.
 
-<ZoomImg src="/assets/api_gateway_spec.png"/>
+<ApiGatewaySpecDiagram />
 
 The properties of the objects in the object tree can contain static values and/or dynamically evaluated values via [expressions](#expression-language) that are resolved against the HTTP request data at runtime.
 

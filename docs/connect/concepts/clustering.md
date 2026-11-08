@@ -237,19 +237,10 @@ bondy@localhost
 ```
 
 **Small Production** (3-node cluster)
-```
-bondy1@host1 ←→ bondy2@host2
-       ↖     ↙
-      bondy3@host3
-```
+<ClusterSmallDiagram />
 
 **Multi-Region** (5-node cluster)
-```
-Region A          Region B
-bondy1 ←→ bondy2  bondy4 ←→ bondy5
-   ↖         ↙  ↘    ↙
-      bondy3 (core region)
-```
+<ClusterMultiRegionDiagram />
 
 ## See Also
 

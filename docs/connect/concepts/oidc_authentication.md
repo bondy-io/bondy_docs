@@ -34,37 +34,7 @@ OIDC authentication in Bondy bridges the gap between web-based single sign-on an
 
 The following diagram shows the end-to-end flow from browser login to an authenticated WAMP session:
 
-```
-Browser              Bondy                    IdP
-  │                    │                       │
-  │  GET /oidc/login   │                       │
-  │───────────────────>│                       │
-  │                    │  (generate state,     │
-  │                    │   nonce, PKCE)        │
-  │  302 ──────────────│───────────────────────>│
-  │                    │                       │
-  │  (user authenticates at IdP)               │
-  │                    │                       │
-  │  GET /oidc/<provider>/callback?code=...    │
-  │<───────────────────│<──────────────────────│
-  │───────────────────>│                       │
-  │                    │  exchange code for     │
-  │                    │  tokens, fetch         │
-  │                    │  userinfo              │
-  │                    │                       │
-  │                    │  issue bondy_ticket    │
-  │  302 + Set-Cookie  │                       │
-  │<───────────────────│                       │
-  │  (bondy_ticket_<realm> cookie)             │
-  │  (bondy_csrf_<realm> cookie)               │
-  │                    │                       │
-  │  POST /wamp/longpoll/open (with cookie)    │
-  │───────────────────>│                       │
-  │                    │  verify ticket,        │
-  │                    │  open WAMP session     │
-  │  200 {transport}   │                       │
-  │<───────────────────│                       │
-```
+<OidcLoginFlowDiagram />
 
 ### Step-by-step
 

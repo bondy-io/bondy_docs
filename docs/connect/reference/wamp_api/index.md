@@ -24,7 +24,7 @@ Additionally, Bondy offers WAMP Meta procedures and events (as defined by the WA
 ::: details Context Diagram
 The following diagram shows how the WAMP APIs described in this reference fit within the overall configuration and management landscape:
 
-<ZoomImg src="/assets/configuration_scopes.png"/>
+<ConfigScopesDiagram />
 :::
 
 ::: tip HTTP/REST API

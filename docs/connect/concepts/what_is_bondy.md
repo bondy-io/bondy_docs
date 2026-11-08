@@ -25,10 +25,7 @@ At its core, Bondy creates an application network — a dynamic overlay network 
 An application network is a dynamic [overlay network](https://en.wikipedia.org/wiki/Overlay_network) formed by a set of Bondy nodes that interconnects different types of applications and devices, ranging from web and mobile apps to IoT devices and backend microservices.
 :::
 
-<ZoomImg
-  src="/assets/bondy_diagram.png"
-  caption="Bondy application network"
-  width="600"/>
+<BondyHubDiagram />
 
 Bondy implements the [Web Application Messaging Protocol (WAMP)](/connect/concepts/wamp/what_is_wamp), an open standard that provides:
 

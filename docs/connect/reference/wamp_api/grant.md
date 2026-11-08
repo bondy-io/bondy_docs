@@ -11,7 +11,7 @@ It is an essential element in RBAC systems for defining and managing permissions
 
 To check what a grant actually allows — without performing the action it would gate — see [`bondy.rbac.authorize`](/connect/reference/wamp_api/rbac#check-an-authorization).
 
-<ZoomImg src="/assets/rbac.png"/>
+<RbacDiagram />
 
 ## Types
 ### grant(){.datatype}

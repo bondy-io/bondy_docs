@@ -103,7 +103,7 @@ Routing everything through one component gives:
 - **Load balancing** — multiple components can implement the same procedure, with the router distributing calls across them.
 - **Centralized security** — authentication and fine-grained authorization live at the routing layer, not duplicated in every component.
 
-<ZoomImg src="/assets/wamp_flows.png" width="600"/>
+<WampFlowsDiagram />
 
 ## RPC and Pub/Sub as routed patterns
 
@@ -145,7 +145,7 @@ A WAMP Router organizes clients into realms — isolated routing and administrat
 - **Independent permissions** — each realm has its own authorization rules.
 - **No added infrastructure** — a realm is virtual; creating one does not require provisioning anything.
 
-<ZoomImg src="/assets/realm_diagram.png"/>
+<RealmsDiagram />
 
 Realms support URI-based permissions with exact, prefix, or wildcard matching, so which procedures and topics a client can reach is controlled at the routing layer rather than in application code.
 

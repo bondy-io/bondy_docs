@@ -28,7 +28,7 @@ A typical distributed application assembles:
 
 Each component brings its own protocol, client libraries, operational model, and failure modes.
 
-<ZoomImg src="/assets/accidental_complexity.png"/>
+<AccidentalComplexityDiagram />
 
 Fred Brooks distinguishes *essential* complexity — inherent to the problem — from *accidental* complexity, which engineers create and can remove[^fbrooks]. The complexity of integrating six separately-designed protocols and infrastructure components to cover one application's messaging needs falls into the second category: it comes from the tools chosen, not from the problem itself.
 
@@ -43,7 +43,7 @@ Most of these protocols were designed as vertical solutions for one use case —
 - **More to operate**, running and monitoring several infrastructure components instead of one.
 - **More points of failure**, one per component in the chain.
 
-<ZoomImg src="/assets/without_with.png"/>
+<WithoutWithDiagram />
 
 ## What a single protocol buys back
 
@@ -65,19 +65,11 @@ The same properties that make WAMP suit distributed applications generally — R
 
 Instead of:
 
-```
-Web App → API Gateway → gRPC → Service A → Kafka → Service B
-                ↓                          ↓
-          Load Balancer            Message Queue
-                ↓                          ↓
-          Service Mesh             More Services
-```
+<StackBeforeDiagram />
 
 Every component connects directly to Bondy:
 
-```
-Web App → Bondy ← Services
-```
+<StackAfterDiagram />
 
 Every component uses the same protocol and gets RPC, Pub/Sub, authentication, authorization, service discovery, and load balancing from it, without an adapter or translation layer between components that speak different protocols.
 

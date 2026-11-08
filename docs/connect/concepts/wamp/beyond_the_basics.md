@@ -69,14 +69,7 @@ Bondy supports multiple invocation policies:
 
 Round robin ensures even distribution:
 
-```
-Call 1 → Instance 1
-Call 2 → Instance 2
-Call 3 → Instance 3
-Call 4 → Instance 1  (wraps around)
-Call 5 → Instance 2
-...
-```
+<RoundRobinDiagram />
 
 Perfect for stateless services where any instance can handle any request.
 
@@ -148,21 +141,7 @@ wampy.register('com.myapp.api.process', {
 
 Combine registration with Bondy clustering for geographic load balancing:
 
-```
-US-East Cluster:
-  - Instance 1 registers procedure
-  - Instance 2 registers procedure
-
-US-West Cluster:
-  - Instance 3 registers procedure
-  - Instance 4 registers procedure
-
-Clients in US-East connect to US-East cluster
-  → Calls distributed to Instances 1 & 2
-
-Clients in US-West connect to US-West cluster
-  → Calls distributed to Instances 3 & 4
-```
+<GeoDistributionDiagram />
 
 Each cluster handles its local clients, reducing latency and improving fault tolerance.
 

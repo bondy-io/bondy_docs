@@ -33,6 +33,12 @@ import DocsPortal from './DocsPortal.vue'
 import './docs-home.css'
 import './brand.css'
 
+// Diagrams: one theme-adaptive SVG component per figure, in the style of
+// bondy.io's post figures (see the "Diagrams" section of brand.css). Each is
+// registered under its file name, so ./diagrams/WampRolesDiagram.vue is
+// placed in markdown as <WampRolesDiagram />.
+const diagrams = import.meta.glob('./diagrams/*.vue', { eager: true })
+
 export default {
   extends: Theme,
   Layout,
@@ -40,5 +46,8 @@ export default {
     app.component('Badge', Badge)
     app.component('DocsSet', DocsSet)
     app.component('DocsPortal', DocsPortal)
+    for (const [path, mod] of Object.entries(diagrams)) {
+      app.component(path.slice('./diagrams/'.length, -'.vue'.length), mod.default)
+    }
   }
 }

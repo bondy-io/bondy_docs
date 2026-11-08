@@ -37,14 +37,7 @@ The handle is opaque so that its representation can change without an API break.
 
 Each connection runs in its own small supervision tree:
 
-```
-bondy_connect_sup                 (one_for_one)
-├── bondy_connect_manager         names and lifecycle
-└── bondy_connect_connections_sup one child per connection
-    └── bondy_connect_conn_sup    (one_for_all)
-        ├── handler_sup           your handler workers
-        └── connection            gen_statem: transport, session, correlation
-```
+<SdkSupervisionDiagram />
 
 The per-connection supervisor is the unit of fate-sharing. The connection process and the supervisor of its handler workers live and die together, so a connection never outlives the workers it dispatched, and workers never outlive their connection.
 
@@ -89,13 +82,7 @@ A local session is opened **anonymous**: code in the same node is already inside
 
 The connection process moves through these states:
 
-```
-connecting --> handshaking --> establishing --> established
-    ^                                               |
-    +-----------------------------------------------+   (drop -> reconnect)
-    |
-waiting_for_network
-```
+<SdkConnectionStatesDiagram />
 
 `status/1` reports a simpler view: `connecting`, `establishing`, `established`, `reconnecting` (back in `connecting` after a session was up, or waiting for the network), or `down`.
 

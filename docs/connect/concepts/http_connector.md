@@ -36,20 +36,7 @@ The HTTP Connector is the **inverse** of the [HTTP API Gateway](/connect/referen
 
 ## How It Works
 
-```
-WAMP Call(KWArgs)
-  │
-  ├─ 1. Extract custom headers from KWArgs["_headers"]
-  ├─ 2. Interpolate path template variables (consumed from KWArgs)
-  ├─ 3. Route remaining KWArgs by HTTP method:
-  │       GET / DELETE / HEAD  → query parameters
-  │       POST / PUT / PATCH   → JSON request body
-  ├─ 4. Acquire auth token (via token cache)
-  ├─ 5. Apply auth to headers/URL
-  └─ 6. HTTP request (with retries + auth retry on 401/403)
-          │
-          └─ HTTP Response → WAMP Result / Error
-```
+<ConnectorPipelineDiagram />
 
 ### Step-by-step
 

@@ -39,27 +39,7 @@ Bondy implements two routing patterns that cover all distributed application com
 
 When a client wants to call a remote procedure:
 
-```
-1. Callee registers procedure "com.myapp.calculate"
-   └─> Bondy stores registration in routing table
-
-2. Caller invokes "com.myapp.calculate" with arguments
-   └─> Bondy receives CALL message
-
-3. Bondy looks up procedure in routing table
-   └─> Finds registered Callee(s)
-   └─> Applies invocation policy (single, roundrobin, random, etc.)
-   └─> Selects target Callee
-
-4. Bondy forwards INVOCATION to selected Callee
-   └─> Includes call arguments and caller details (if authorized)
-
-5. Callee processes request and returns result
-   └─> Sends YIELD message to Bondy
-
-6. Bondy forwards RESULT back to original Caller
-   └─> Includes returned values or error information
-```
+<RpcRoutingStepsDiagram />
 
 This routed approach provides several advantages:
 
@@ -72,20 +52,7 @@ This routed approach provides several advantages:
 
 When a client wants to publish events or subscribe to topics:
 
-```
-1. Subscribers express interest in "com.myapp.events.user.login"
-   └─> Bondy stores subscriptions in routing table
-
-2. Publisher publishes event to "com.myapp.events.user.login"
-   └─> Bondy receives PUBLISH message with event data
-
-3. Bondy looks up subscriptions in routing table
-   └─> Finds all matching subscribers
-   └─> Applies filtering rules (eligibility, exclusions)
-
-4. Bondy delivers EVENT message to each subscriber
-   └─> Includes event payload and publisher details (if authorized)
-```
+<PubSubRoutingStepsDiagram />
 
 Pub/Sub benefits:
 
@@ -131,17 +98,7 @@ Because AAE re-derives divergence directly from tree state rather than waiting f
 
 Registrations and subscriptions themselves are **not** replicated — only a compact summary of what each node can serve is (its Routing Information Base, or RIB — see [Registry Routing (RIB)](/connect/concepts/registry_routing)). When a client connected to Node A calls a procedure whose only callee is registered on Node B:
 
-```
-1. Client → Node A: CALL message
-2. Node A consults its merged RIB summary
-3. Summary indicates Node B serves this procedure
-4. Node A → Node B: Forward CALL, node-addressed
-5. Node B re-selects the callee among its own live local registrations
-6. Node B → Callee: Deliver INVOCATION
-7. Callee → Node B: Return YIELD
-8. Node B → Node A: Forward RESULT
-9. Node A → Client: Deliver RESULT
-```
+<ClusterCallForwardingDiagram />
 
 Step 5 matters: Node B decides the final callee from its own current, authoritative local state rather than acting on Node A's possibly momentarily-stale summary. If Node A's summary turns out to be stale (the procedure was just unregistered on Node B), a bounded retry reroutes to another candidate before the call fails. A progressive call invocation is the exception: its later chunks follow the first one to Node B, so a miss there is final.
 

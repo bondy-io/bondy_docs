@@ -15,10 +15,7 @@ A distributed application carries two kinds of traffic.
 - **North-South** traffic crosses the boundary of the system: web apps, mobile apps, devices and external API clients talking to the services inside.
 - **East-West** traffic stays inside: services talking to each other.
 
-<ZoomImg
-  src="/assets/application_network_traffic.png"
-  caption="An application network carries both kinds of traffic"
-  width="600"/>
+<NetworkTrafficDiagram />
 
 Most systems use different machinery for each. North-South traffic goes through an API gateway over HTTP. East-West traffic goes through a service mesh, a message broker, or direct gRPC calls. Each piece has its own protocol, its own client libraries, its own security model and its own place to look when something fails. The split usually comes from history and tooling, not from a difference in what the traffic needs: in both directions, one component wants to ask another to do something, or tell others that something happened.
 

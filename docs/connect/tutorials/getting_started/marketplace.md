@@ -47,7 +47,7 @@ Bid
 ### Technical View
 The architecture design of the example application is depicted in the following diagram.
 
-<ZoomImg src="/assets/tutorials/marketplace/marketplace.png"/>
+<MarketplaceDiagram />
 <br>
 The diagram shows the following components:
 
