@@ -581,3 +581,17 @@ button, input, select, textarea {
   font-variant-ligatures: inherit;
   font-feature-settings: inherit;
 }
+
+/* ---------------------------------------------------------------------------
+ * ZoomSvg on the page background
+ *
+ * The shared template paints the ZoomSvg frame, and its fullscreen view,
+ * white — made for diagrams that carried their own white page. The docs'
+ * zoomable diagrams (load_regulation_*.svg) draw from the theme tokens and
+ * have no background of their own, so on white their dark-theme ink
+ * vanished. The frame takes the page colour instead.
+ * ------------------------------------------------------------------------ */
+.zoom-svg__frame,
+.zoom-svg:fullscreen {
+  background: var(--vp-c-bg);
+}
