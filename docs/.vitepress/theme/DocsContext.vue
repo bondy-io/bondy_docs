@@ -1,7 +1,7 @@
 <!-- The documentation context row, rendered in SiteNav's #context slot.
 
-     Names the documentation set being read, its four Diataxis sections with
-     the current one marked, and the version. These stay true on every page
+     Names the documentation set being read, its sections (the four Diataxis
+     ones and SDKs) with the current one marked, and the version. These stay true on every page
      of a set, so they belong in the header, which keeps them in view, rather
      than above each page's H1. The page's own position within a section is
      the sidebar's job.

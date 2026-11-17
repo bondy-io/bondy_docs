@@ -30,6 +30,10 @@ import DocsSet from './DocsSet.vue'
 // The portal index (developer.bondy.io/), used by docs/index.md.
 import DocsPortal from './DocsPortal.vue'
 
+// The Bondy Connect SDK gallery, one card per language, used by the SDK home
+// page, docs/connect/sdk/index.md.
+import SdkGallery from './SdkGallery.vue'
+
 import './docs-home.css'
 import './brand.css'
 
@@ -46,6 +50,7 @@ export default {
     app.component('Badge', Badge)
     app.component('DocsSet', DocsSet)
     app.component('DocsPortal', DocsPortal)
+    app.component('SdkGallery', SdkGallery)
     for (const [path, mod] of Object.entries(diagrams)) {
       app.component(path.slice('./diagrams/'.length, -'.vue'.length), mod.default)
     }

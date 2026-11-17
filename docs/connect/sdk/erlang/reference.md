@@ -1,9 +1,9 @@
 ---
 outline: [2,3]
 related:
-    - text: Getting Started with Bondy Connect SDK
+    - text: Getting Started with the Bondy Connect SDK for Erlang
       type: Tutorial
-      link: /connect/tutorials/wamp/bondy_connect_sdk
+      link: /connect/sdk/erlang/tutorial
       description: A hands-on introduction — connect, register and call a procedure, then publish and subscribe.
     - text: Advanced RPC
       type: Concepts
@@ -19,13 +19,13 @@ related:
       description: How Bondy negotiates progressive_call_results and progressive_call_invocations with each session.
 ---
 
-# Bondy Connect SDK
+# Bondy Connect SDK for Erlang
 
 Bondy's Erlang-based WAMP client for the BEAM (Bondy, Erlang, Elixir, Gleam). One connection is one WAMP session on one realm; a process opens as many connections as it needs, each running its own supervised process tree. 
 
 The `bondy_connect_sdk` application has no dependency on the Bondy router application, so it embeds in any BEAM service. It supports all four WAMP client roles (Caller, Callee, Publisher, Subscriber), the transports listed under [Opening a connection](#opening-a-connection), and the four WAMP authentication methods listed under [Authenticating](#authenticating).
 
-This page documents the complete public API, grouped by what you use it to do. For a guided first run, see the [tutorial](/connect/tutorials/wamp/bondy_connect_sdk).
+This page documents the complete public API, grouped by what you use it to do. For a guided first run, see the [tutorial](/connect/sdk/erlang/tutorial).
 
 ::: definition Connection handle (`conn()`)
 `connect/1,2` returns an **opaque** handle: `{bondy_connect_client, pid() | atom()}`. Treat it as a token — pass it back to the API, never pattern-match on or otherwise depend on its shape. The handle stays valid across the connection's own internal reconnects; you do not get (or need) a new one when a dropped link re-establishes.

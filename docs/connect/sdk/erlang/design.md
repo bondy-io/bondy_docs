@@ -1,13 +1,13 @@
 ---
 outline: [2,3]
 related:
-    - text: Bondy Connect SDK
+    - text: Bondy Connect SDK for Erlang
       type: Reference
-      link: /connect/reference/clients/bondy_connect_sdk
+      link: /connect/sdk/erlang/reference
       description: The complete, task-grouped API reference — every function, option, and error shape.
-    - text: Getting Started with Bondy Connect SDK
+    - text: Getting Started with the Bondy Connect SDK for Erlang
       type: Tutorial
-      link: /connect/tutorials/wamp/bondy_connect_sdk
+      link: /connect/sdk/erlang/tutorial
       description: Connect, register and call a procedure, then publish and subscribe.
     - text: Connections and Sessions
       type: Concepts
@@ -19,11 +19,11 @@ related:
       description: Metrics, trace-context propagation, and the spans Bondy reports.
 ---
 
-# The Bondy Connect SDK
+# The Bondy Connect SDK for Erlang
 
 `bondy_connect_sdk` is Bondy's own WAMP client for the BEAM. Its design follows from one decision: **a connection is a supervised process that owns one WAMP session and keeps it alive**. Your code holds a handle to that process. The process does the rest: it speaks the transport, runs the handshake, correlates requests with replies, runs your handlers in workers of their own, and re-establishes the session when the link drops.
 
-This page explains that model and the choices that follow from it. For the functions and options, see the [reference](/connect/reference/clients/bondy_connect_sdk). For a first run, see the [tutorial](/connect/tutorials/wamp/bondy_connect_sdk).
+This page explains that model and the choices that follow from it. For the functions and options, see the [reference](/connect/sdk/erlang/reference). For a first run, see the [tutorial](/connect/sdk/erlang/tutorial).
 
 ## A connection is a process
 
@@ -183,8 +183,8 @@ The event carries the duration, the procedure URI, the outcome (`success` or `er
 
 ## See also
 
-- [Bondy Connect SDK reference](/connect/reference/clients/bondy_connect_sdk) — every function and option, including [resilience settings](/connect/reference/clients/bondy_connect_sdk#resilience), [load regulation](/connect/reference/clients/bondy_connect_sdk#load-regulation) and the [error table](/connect/reference/clients/bondy_connect_sdk#errors).
-- [Getting Started with Bondy Connect SDK](/connect/tutorials/wamp/bondy_connect_sdk) — the model in use.
+- [Bondy Connect SDK reference](/connect/sdk/erlang/reference) — every function and option, including [resilience settings](/connect/sdk/erlang/reference#resilience), [load regulation](/connect/sdk/erlang/reference#load-regulation) and the [error table](/connect/sdk/erlang/reference#errors).
+- [Getting Started with Bondy Connect SDK](/connect/sdk/erlang/tutorial) — the model in use.
 - [Connections and Sessions](/connect/concepts/wamp/sessions) — the WAMP session the connection maintains.
 - [WAMP HTTP Transports](/connect/concepts/http_transports) — the server side of `longpoll` and `sse`.
 - [Advanced RPC](/connect/concepts/wamp/advanced/rpc) — the WAMP model behind progressive calls and results.

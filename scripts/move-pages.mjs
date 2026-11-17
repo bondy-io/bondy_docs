@@ -124,6 +124,8 @@ function run() {
 # Every path here was once served by developer.bondy.io. They are indexed and
 # linked from outside, so each moved page keeps a permanent redirect to its
 # current home.
+#
+# Paths under /router are left out on purpose: they are no longer redirected.
 
 `
   const body =

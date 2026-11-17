@@ -1292,7 +1292,7 @@ Receive().
 
 :::
 
-This holds across the cluster too: when caller and callee are on different nodes, progressive results are relayed between nodes and still arrive in yield order. `CALL.Options.timeout` is the inactivity window between results — each one restarts it — so a healthy, slowly-dripping stream is not cut off; the Bondy extension `CALL.Options._deadline` (milliseconds) additionally caps the whole call regardless of activity. Cancellation works mid-stream, including across nodes. See [Progressive Call Results](/connect/reference/clients/bondy_connect_sdk) in the `bondy_connect` reference for the Erlang API.
+This holds across the cluster too: when caller and callee are on different nodes, progressive results are relayed between nodes and still arrive in yield order. `CALL.Options.timeout` is the inactivity window between results — each one restarts it — so a healthy, slowly-dripping stream is not cut off; the Bondy extension `CALL.Options._deadline` (milliseconds) additionally caps the whole call regardless of activity. Cancellation works mid-stream, including across nodes. See [Progressive Call Results](/connect/sdk/erlang/reference) in the `bondy_connect` reference for the Erlang API.
 
 ### Use Cases
 
@@ -1404,7 +1404,7 @@ end,
 
 :::
 
-Chunks reach the callee in send order, including across cluster nodes and to a callee behind a bridge relay that ends on the caller's router. Timeout and cancellation semantics match progressive results: `CALL.Options.timeout` is the inactivity window between chunks, `CALL.Options._deadline` caps the whole call, and cancelling mid-stream works across nodes. See [Progressive Call Invocations](/connect/reference/clients/bondy_connect_sdk) in the `bondy_connect` reference for the Erlang API, including the exact `call_stream/5`/`send_input/4`/`finish_input/4` client functions.
+Chunks reach the callee in send order, including across cluster nodes and to a callee behind a bridge relay that ends on the caller's router. Timeout and cancellation semantics match progressive results: `CALL.Options.timeout` is the inactivity window between chunks, `CALL.Options._deadline` caps the whole call, and cancelling mid-stream works across nodes. See [Progressive Call Invocations](/connect/sdk/erlang/reference) in the `bondy_connect` reference for the Erlang API, including the exact `call_stream/5`/`send_input/4`/`finish_input/4` client functions.
 
 ::: warning Mixed-version clusters
 Use either feature only once every node in the cluster runs a Bondy release that implements it — a node running an older release settles a call on its first progressive result (or cannot continue a caller's argument stream), truncating it.

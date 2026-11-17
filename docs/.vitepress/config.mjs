@@ -364,10 +364,10 @@ export default withThemeDefaults(
 //               on this deploy).
 //   sidebars()  the left-hand navigation, keyed by path prefix.
 //
-// And one that is not a surface of its own but is fed by the second: seven
+// And one that is not a surface of its own but is fed by the second: eight
 // section index pages render themselves FROM their sidebar.
-// docs/connect/{tutorials,guides,concepts}/index.md and the four reference
-// manuals' index.md read `theme.sidebar[<key>]` and, for each group, emit the
+// docs/connect/{tutorials,guides,concepts,reference}/index.md and the four
+// reference manuals' index.md read `theme.sidebar[<key>]` and, for each group, emit the
 // group's `text` as an H2, its `description` as the lead paragraph, and a card
 // for every item carrying `isFeature: true`, subtitled with that item's
 // `description`. Two consequences, both of which this file must respect:
@@ -473,6 +473,14 @@ function sidebars() {
     '/connect/guides/': guidesSidebar(),
     '/connect/concepts/': conceptsSidebar(),
 
+    // The SDKs are a section of their own, outside the four Diataxis ones:
+    // everything about one SDK lives under /connect/sdk/<id>/ and has its own
+    // sidebar, so an SDK adds nothing to the other sections. The catalogue is
+    // theme/sdks.js. By the rule above, the five-segment per-SDK key is
+    // matched before the four-segment home key.
+    '/connect/sdk/erlang/': erlangSdkSidebar(),
+    '/connect/sdk/': sdkSidebar(),
+
     // Reference is a set of manuals, so each gets its own sidebar, and the hub
     // plus the standalone pages get one of their own. See the note above on
     // why the last key has no trailing slash.
@@ -484,6 +492,42 @@ function sidebars() {
   }
 }
 
+
+/* ===========================================================================
+ * Bondy Connect — SDKs
+ *
+ * The home lists the published SDKs. Each SDK's sidebar is its own pages and
+ * a way back to the home.
+ * ======================================================================== */
+function sdkSidebar() {
+  return [
+    {
+      text: 'SDKs',
+      items: [
+        { text: 'Overview', link: '/connect/sdk/index' },
+        { text: 'Erlang', link: '/connect/sdk/erlang/index' }
+      ]
+    }
+  ]
+}
+
+function erlangSdkSidebar() {
+  return [
+    {
+      text: 'Bondy Connect SDK for Erlang',
+      items: [
+        { text: 'Overview', link: '/connect/sdk/erlang/index' },
+        { text: 'Tutorial', link: '/connect/sdk/erlang/tutorial' },
+        { text: 'Reference', link: '/connect/sdk/erlang/reference' },
+        { text: 'Design', link: '/connect/sdk/erlang/design' }
+      ]
+    },
+    {
+      text: 'SDKs',
+      items: [{ text: 'All SDKs', link: '/connect/sdk/index' }]
+    }
+  ]
+}
 
 /* ===========================================================================
  * Bondy Connect — Tutorials
@@ -534,10 +578,10 @@ function tutorialsSidebar() {
           description: 'Connect, call and subscribe from Python.'
         },
         {
-          text: 'Bondy Connect SDK (Erlang/Elixir)',
-          link: '/connect/tutorials/wamp/bondy_connect_sdk',
+          text: 'Bondy Connect SDKs',
+          link: '/connect/sdk/index',
           isFeature: true,
-          description: 'Connect, call and subscribe from Erlang or Elixir.'
+          description: "Bondy's own client library. Each SDK has a tutorial of its own."
         }
       ]
     },
@@ -934,10 +978,10 @@ function conceptsSidebar() {
           description: 'Pattern-based subscriptions, event retention and subscriber allow/deny lists.'
         },
         {
-          text: 'The Bondy Connect SDK',
-          link: '/connect/concepts/bondy_connect_sdk',
+          text: 'Bondy Connect SDKs',
+          link: '/connect/sdk/index',
           isFeature: true,
-          description: "How Bondy's Erlang/Elixir client is built: a supervised connection, one API across transports, reconnect and replay, isolated handlers, and errors that say whether to retry."
+          description: "Bondy's own client library. Each SDK has a page that explains its design."
         }
       ]
     },
@@ -1140,45 +1184,121 @@ function conceptsSidebar() {
  * because every sidebar key was a manual's prefix.
  * ======================================================================== */
 function referenceSidebar() {
+  // The Reference index page (docs/connect/reference/index.md) renders a card
+  // for each `isFeature` item, like the other section indexes. Overview is
+  // that page itself, so it is the one item without a card.
   return [
     {
       text: 'Reference',
       description: 'Material to consult while working, not to read start to end.',
-      items: [
-        { text: 'Overview', link: '/connect/reference/index' },
-        { text: 'Glossary', link: '/connect/reference/glossary' }
-      ]
+      items: [{ text: 'Overview', link: '/connect/reference/index' }]
     },
     {
       text: 'Manuals',
       description: 'Each surface documented once, in full.',
       items: [
-        { text: 'Configuration', link: '/connect/reference/configuration/index' },
-        { text: 'WAMP API', link: '/connect/reference/wamp_api/index' },
-        { text: 'HTTP API', link: '/connect/reference/http_api/index' },
-        { text: 'HTTP API Gateway', link: '/connect/reference/api_gateway/index' },
-        { text: 'Client Libraries', link: '/connect/reference/clients/index' },
-        { text: 'Bondy Connect SDK', link: '/connect/reference/clients/bondy_connect_sdk' }
+        {
+          text: 'Configuration',
+          link: '/connect/reference/configuration/index',
+          isFeature: true,
+          description: 'Every bondy.conf key, grouped by subsystem.'
+        },
+        {
+          text: 'WAMP API',
+          link: '/connect/reference/wamp_api/index',
+          isFeature: true,
+          description: 'The administrative WAMP procedures and topics: realms, users, groups, sources, grants, sessions, tickets and the API Gateway.'
+        },
+        {
+          text: 'HTTP API',
+          link: '/connect/reference/http_api/index',
+          isFeature: true,
+          description: 'The HTTP equivalents of the administrative API, and the OIDC endpoints.'
+        },
+        {
+          text: 'HTTP API Gateway',
+          link: '/connect/reference/api_gateway/index',
+          isFeature: true,
+          description: 'The JSON specification format that exposes WAMP procedures as HTTP endpoints, and its expression language.'
+        },
+        {
+          text: 'Client Libraries',
+          link: '/connect/reference/clients/index',
+          isFeature: true,
+          description: 'The WAMP client libraries known to work with Bondy, by language.'
+        },
+        {
+          text: 'Bondy Connect SDKs',
+          link: '/connect/sdk/index',
+          isFeature: true,
+          description: "Bondy's own client library. Each SDK has an API reference of its own."
+        },
+        {
+          text: 'Glossary',
+          link: '/connect/reference/glossary',
+          isFeature: true,
+          description: 'The Bondy and WAMP terms used on this site, each defined once.'
+        }
       ]
     },
     {
       text: 'Protocols',
       description: 'What Bondy Connect implements of each protocol it speaks, and how it encodes payloads.',
       items: [
-        { text: 'WAMP Compliance', link: '/connect/reference/protocols/wamp' },
-        { text: 'Call Routing and Retry Options', link: '/connect/reference/protocols/wamp_call_options' },
-        { text: 'MCP Compliance', link: '/connect/reference/protocols/mcp' },
-        { text: 'Serialization', link: '/connect/reference/serialization' }
+        {
+          text: 'WAMP Compliance',
+          link: '/connect/reference/protocols/wamp',
+          isFeature: true,
+          description: 'The parts of the WAMP Basic and Advanced Profiles that Bondy implements, and where it departs from the specification.'
+        },
+        {
+          text: 'Call Routing and Retry Options',
+          link: '/connect/reference/protocols/wamp_call_options',
+          isFeature: true,
+          description: 'The options that bound how long a call lasts, whether Bondy tries it again, and how many cluster nodes it is routed to.'
+        },
+        {
+          text: 'MCP Compliance',
+          link: '/connect/reference/protocols/mcp',
+          isFeature: true,
+          description: 'The Model Context Protocol revisions and methods that the MCP endpoint implements, and where it departs from the specification.'
+        },
+        {
+          text: 'Serialization',
+          link: '/connect/reference/serialization',
+          isFeature: true,
+          description: 'Text and byte strings on MessagePack and CBOR, extension types, and Payload Passthru Mode.'
+        }
       ]
     },
     {
       text: 'Operations',
       description: 'What a running node emits, and what it returns when a request fails.',
       items: [
-        { text: 'Metrics', link: '/connect/reference/metrics' },
-        { text: 'Alarms', link: '/connect/reference/alarms' },
-        { text: 'Logging', link: '/connect/reference/logging' },
-        { text: 'Errors', link: '/connect/reference/errors' }
+        {
+          text: 'Metrics',
+          link: '/connect/reference/metrics',
+          isFeature: true,
+          description: 'Every metric family on the Admin API /metrics endpoint.'
+        },
+        {
+          text: 'Alarms',
+          link: '/connect/reference/alarms',
+          isFeature: true,
+          description: 'Every condition this build of Bondy can raise.'
+        },
+        {
+          text: 'Logging',
+          link: '/connect/reference/logging',
+          isFeature: true,
+          description: 'The log levels, and how to change them.'
+        },
+        {
+          text: 'Errors',
+          link: '/connect/reference/errors',
+          isFeature: true,
+          description: 'The payload Bondy returns when a request fails, and every error URI it can carry.'
+        }
       ]
     }
   ]

@@ -3,6 +3,8 @@
 # Every path here was once served by developer.bondy.io. They are indexed and
 # linked from outside, so each moved page keeps a permanent redirect to its
 # current home.
+#
+# Paths under /router are left out on purpose: they are no longer redirected.
 
 /concepts/api_gateway  /connect/concepts/api_gateway  301!
 /concepts/application_networks  /connect/concepts/application_networks  301!
@@ -38,6 +40,9 @@
 /concepts/what_is_bondy  /connect/concepts/what_is_bondy  301!
 /concepts/what_is_wamp  /connect/concepts/wamp/what_is_wamp  301!
 /concepts/why_bondy  /connect/concepts/why_bondy  301!
+/connect/concepts/bondy_connect_sdk  /connect/sdk/erlang/design  301!
+/connect/reference/clients/bondy_connect_sdk  /connect/sdk/erlang/reference  301!
+/connect/tutorials/wamp/bondy_connect_sdk  /connect/sdk/erlang/tutorial  301!
 /guides/administration/backup_and_restore  /connect/guides/administration/backup_and_restore  301!
 /guides/administration/configuring_mail_relays  /connect/guides/administration/configuring_mail_relays  301!
 /guides/administration/load_regulation_and_rate_limiting  /connect/guides/administration/load_regulation_and_rate_limiting  301!
@@ -152,9 +157,9 @@
 /reference/wamp_api/subscription  /connect/reference/wamp_api/subscription  301!
 /reference/wamp_api/ticket  /connect/reference/wamp_api/ticket  301!
 /reference/wamp_api/user  /connect/reference/wamp_api/user  301!
-/reference/wamp_clients/bondy_connect  /connect/reference/clients/bondy_connect_sdk  301!
+/reference/wamp_clients/bondy_connect  /connect/sdk/erlang/reference  301!
 /reference/wamp_clients/index  /connect/reference/clients/index  301!
-/tutorials/getting_started/bondy_connect  /connect/tutorials/wamp/bondy_connect_sdk  301!
+/tutorials/getting_started/bondy_connect  /connect/sdk/erlang/tutorial  301!
 /tutorials/getting_started/get_bondy  /connect/tutorials/getting_started/get_bondy  301!
 /tutorials/getting_started/marketplace  /connect/tutorials/getting_started/marketplace  301!
 /tutorials/getting_started/marketplace_api_gateway  /connect/tutorials/getting_started/marketplace_api_gateway  301!
@@ -181,9 +186,9 @@
 /wamp/guides/programming/general  /connect/guides/programming/wamp/general  301!
 /wamp/guides/programming/pub_sub  /connect/guides/programming/wamp/pub_sub  301!
 /wamp/guides/programming/rpc  /connect/guides/programming/wamp/rpc  301!
-/wamp/reference/clients/bondy_connect_sdk  /connect/reference/clients/bondy_connect_sdk  301!
+/wamp/reference/clients/bondy_connect_sdk  /connect/sdk/erlang/reference  301!
 /wamp/reference/clients/index  /connect/reference/clients/index  301!
 /wamp/reference/index  /connect/reference/index  301!
-/wamp/tutorials/bondy_connect_sdk  /connect/tutorials/wamp/bondy_connect_sdk  301!
+/wamp/tutorials/bondy_connect_sdk  /connect/sdk/erlang/tutorial  301!
 /wamp/tutorials/index  /connect/tutorials/index  301!
 /wamp/tutorials/wampy  /connect/tutorials/wamp/wampy  301!

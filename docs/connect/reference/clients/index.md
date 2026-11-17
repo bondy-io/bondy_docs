@@ -8,13 +8,7 @@ Any library that implements the WAMP specification can connect to Bondy, as long
 
 ## Bondy Connect SDK
 
-The [Bondy Connect SDK](/connect/reference/clients/bondy_connect_sdk) is Bondy's own client, for Erlang and Elixir.
-
-- **Transports.** WebSocket, RawSocket over TCP, TLS and Unix domain sockets, HTTP long-poll and Server-Sent Events.
-- **Authentication.** `anonymous`, `ticket`, `wampcra` and `cryptosign`.
-- **Roles.** Caller, callee, publisher and subscriber, with progressive calls and progressive call results.
-
-To start, follow the [Bondy Connect SDK tutorial](/connect/tutorials/wamp/bondy_connect_sdk).
+The Bondy Connect SDK is Bondy's own client library, with one SDK for each language. [Bondy Connect SDKs](/connect/sdk/index) lists them.
 
 ## Community libraries
 

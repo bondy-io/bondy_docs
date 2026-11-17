@@ -56,7 +56,7 @@ description: Build on, deploy and operate Bondy Connect, whichever protocol your
         { text: 'Configuration Reference', href: '/connect/reference/configuration/index' },
         { text: 'HTTP API Reference', href: '/connect/reference/http_api/index' },
         { text: 'WAMP Administration API', href: '/connect/reference/wamp_api/index' },
-        { text: 'Bondy Connect SDK', href: '/connect/reference/clients/bondy_connect_sdk' },
+        { text: 'Bondy Connect SDKs', href: '/connect/sdk/index' },
         { text: 'Glossary', href: '/connect/reference/glossary' }
       ]
     },

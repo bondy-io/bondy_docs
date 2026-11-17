@@ -16,7 +16,7 @@ This guide shows how to program RPC against Bondy in Python and in Erlang. It as
 ## Requirements
 
 - **Python:** Python 3.7+ (3.10 recommended) and the [Autobahn|Python](https://github.com/crossbario/autobahn-python) WAMP client library.
-- **Erlang:** Erlang/OTP 29 or later and the Bondy Connect SDK. [Getting Started with Bondy Connect SDK](/connect/tutorials/wamp/bondy_connect_sdk) shows how to add the dependency.
+- **Erlang:** Erlang/OTP 29 or later and the Bondy Connect SDK. [Getting Started with Bondy Connect SDK](/connect/sdk/erlang/tutorial) shows how to add the dependency.
 
 ## Establishing a connection
 
@@ -330,7 +330,7 @@ Result = Receive().
 
 :::
 
-Bondy always offers this feature and negotiates it silently. The feature is active only when the caller announced `progressive_call_results` and the callee announced both `progressive_call_results` and `call_canceling`. Otherwise the callee sees a plain call and returns once. See [Progressive Call Results](/connect/concepts/wamp/advanced/rpc#progressive-call-results) for the cluster-wide ordering and timeout semantics, and the [Bondy Connect SDK reference](/connect/reference/clients/bondy_connect_sdk#progressive-calls-and-results) for the Erlang messages in full. In Erlang, only `call_async/5` accepts `receive_progress`; `call/5` rejects it.
+Bondy always offers this feature and negotiates it silently. The feature is active only when the caller announced `progressive_call_results` and the callee announced both `progressive_call_results` and `call_canceling`. Otherwise the callee sees a plain call and returns once. See [Progressive Call Results](/connect/concepts/wamp/advanced/rpc#progressive-call-results) for the cluster-wide ordering and timeout semantics, and the [Bondy Connect SDK reference](/connect/sdk/erlang/reference#progressive-calls-and-results) for the Erlang messages in full. In Erlang, only `call_async/5` accepts `receive_progress`; `call/5` rejects it.
 
 ## Pattern-based Registrations
 

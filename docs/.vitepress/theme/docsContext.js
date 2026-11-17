@@ -13,7 +13,10 @@ const SECTIONS = [
   { id: 'tutorials', text: 'Tutorials' },
   { id: 'guides', text: 'How-to Guides' },
   { id: 'reference', text: 'Reference' },
-  { id: 'concepts', text: 'Concepts' }
+  { id: 'concepts', text: 'Concepts' },
+  // Not a Diataxis section: the home of the Bondy Connect SDKs, where each
+  // SDK keeps its own tutorial, reference and design pages.
+  { id: 'sdk', text: 'SDKs' }
 ]
 
 const SETS = {

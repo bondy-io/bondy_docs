@@ -1,9 +1,9 @@
 ---
 outline: [2,3]
 related:
-    - text: Bondy Connect SDK
+    - text: Bondy Connect SDK for Erlang
       type: Reference
-      link: /connect/reference/clients/bondy_connect_sdk
+      link: /connect/sdk/erlang/reference
       description: The complete, task-grouped API reference for bondy_connect — every function, option, and error shape.
     - text: Connections and Sessions
       type: Concepts
@@ -19,7 +19,7 @@ related:
       description: The Publisher/Subscriber event pattern that publishing and subscribing implement.
 ---
 
-# Getting Started with Bondy Connect SDK
+# Getting Started with the Bondy Connect SDK for Erlang
 
 Bondy Connect SDK (`bondy_connect`) is Bondy's own WAMP client for the BEAM — the same client Bondy itself would use if it were talking to another Bondy. By the end of this tutorial you will have a small Erlang program that connects to a Bondy router, serves a procedure and calls it, and publishes and receives an event, using nothing but the public `bondy_connect` API.
 
@@ -68,7 +68,7 @@ It is an ordinary OTP application, so start it (and the applications it depends 
 }).
 ```
 
-> **You should see:** `{ok, {bondy_connect_client, <0.xxx.0>}}`. Treat `Conn` as a token — pass it back to every other `bondy_connect` call, but never pattern-match on or otherwise depend on its internal shape. It stays valid across reconnects; you don't get a new handle when the underlying link drops and re-establishes. For now, anonymous authentication is enough — the full set of authentication methods is in the [reference](/connect/reference/clients/bondy_connect_sdk#authenticating).
+> **You should see:** `{ok, {bondy_connect_client, <0.xxx.0>}}`. Treat `Conn` as a token — pass it back to every other `bondy_connect` call, but never pattern-match on or otherwise depend on its internal shape. It stays valid across reconnects; you don't get a new handle when the underlying link drops and re-establishes. For now, anonymous authentication is enough — the full set of authentication methods is in the [reference](/connect/sdk/erlang/reference#authenticating).
 
 Confirm the session is up:
 
@@ -114,7 +114,7 @@ A call to a URI nobody has registered fails cleanly rather than hanging:
     bondy_connect_client:call(Conn, <<"com.example.does_not_exist">>, []).
 ```
 
-We define the handler as a plain fun here for the shortest possible example; the [reference](/connect/reference/clients/bondy_connect_sdk#handlers) covers the other two handler shapes (`{Module, Function}` and `{Module, Function, Extra}`), which are what you'll reach for once a handler needs to be a named, testable function.
+We define the handler as a plain fun here for the shortest possible example; the [reference](/connect/sdk/erlang/reference#handlers) covers the other two handler shapes (`{Module, Function}` and `{Module, Function, Extra}`), which are what you'll reach for once a handler needs to be a named, testable function.
 
 ## Step 4 — Publish and subscribe
 
@@ -148,7 +148,7 @@ after 5000 ->
 end.
 ```
 
-> **You should see:** `[<<"tock">>]`. If you need to know the event actually reached the router before moving on, use `publish_ack/5` instead, which returns `{ok, PublicationId}` — the [reference](/connect/reference/clients/bondy_connect_sdk#publishing-events) covers the acknowledged form and the rest of the publish options (excluding or targeting specific recipients, retained events).
+> **You should see:** `[<<"tock">>]`. If you need to know the event actually reached the router before moving on, use `publish_ack/5` instead, which returns `{ok, PublicationId}` — the [reference](/connect/sdk/erlang/reference#publishing-events) covers the acknowledged form and the rest of the publish options (excluding or targeting specific recipients, retained events).
 
 ## What you built
 
@@ -195,10 +195,10 @@ Collect().
 
 > **You should see:** three `progress: [N]` lines counting down, followed by `final: [<<"liftoff">>]`.
 
-That's one half of the feature. The other half — **progressive calls**, where the *caller* streams its arguments to the callee in chunks via `call_stream/5`, `send_input/4` and `finish_input/4` — works the same way in reverse, and both directions share the same opt-in rule: nothing streams unless the caller explicitly asks for it. The full contract for both, including every message shape and failure mode, is in [Progressive calls and results](/connect/reference/clients/bondy_connect_sdk#progressive-calls-and-results) in the reference.
+That's one half of the feature. The other half — **progressive calls**, where the *caller* streams its arguments to the callee in chunks via `call_stream/5`, `send_input/4` and `finish_input/4` — works the same way in reverse, and both directions share the same opt-in rule: nothing streams unless the caller explicitly asks for it. The full contract for both, including every message shape and failure mode, is in [Progressive calls and results](/connect/sdk/erlang/reference#progressive-calls-and-results) in the reference.
 
 ## Next steps
 
-- Read the [Bondy Connect SDK reference](/connect/reference/clients/bondy_connect_sdk) for the complete API: every function, every option map, and every error shape.
-- If your client needs to authenticate with real credentials rather than `anonymous`, see [Authenticating](/connect/reference/clients/bondy_connect_sdk#authenticating) for WAMP-CRA, Cryptosign, and ticket auth.
-- For production deployments, see [Resilience](/connect/reference/clients/bondy_connect_sdk#resilience) (reconnect and keepalive), [Securing the transport](/connect/reference/clients/bondy_connect_sdk#securing-the-transport-tls) (TLS and mutual TLS), and [Load regulation](/connect/reference/clients/bondy_connect_sdk#load-regulation) (bounding how much work a callee accepts at once).
+- Read the [Bondy Connect SDK reference](/connect/sdk/erlang/reference) for the complete API: every function, every option map, and every error shape.
+- If your client needs to authenticate with real credentials rather than `anonymous`, see [Authenticating](/connect/sdk/erlang/reference#authenticating) for WAMP-CRA, Cryptosign, and ticket auth.
+- For production deployments, see [Resilience](/connect/sdk/erlang/reference#resilience) (reconnect and keepalive), [Securing the transport](/connect/sdk/erlang/reference#securing-the-transport-tls) (TLS and mutual TLS), and [Load regulation](/connect/sdk/erlang/reference#load-regulation) (bounding how much work a callee accepts at once).
