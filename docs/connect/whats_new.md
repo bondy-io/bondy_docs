@@ -21,7 +21,15 @@ A deployment that runs a 1.0.0 release candidate has more to change: configurati
 
 ## 1.2.1
 
-This release needs no action from you. It adds two configuration options, and both have defaults.
+This release makes a cluster recover faster when one of its nodes restarts while the cluster carries traffic. It changes nothing in the routing of a healthy cluster, or on a single node.
+
+- **A node that restarts routes correctly sooner.** A node rebuilds its routing table from its peers after a restart. Under load that step could take minutes, and for that time calls through the node to procedures on other nodes failed with `wamp.error.no_such_procedure`. The node now rebuilds the table as its first work.
+- **A restart costs the other nodes less.** A node that restarted repeated the rebuild many times and replicated the result each time, which kept every node busy for minutes. The node now does that work once.
+- **A planned restart is shorter.** A node that stops no longer waits for the whole grace period when its clients have already left.
+- **Several nodes can recover at once.** Each node limits the recovery work it does for its peers at one time, so recovering nodes do not all load the same node.
+- **Two metrics report the real value.** The count of timed-out calls and the load gauge of the anti-entropy scheduler were misleading.
+
+This release needs no action from you. It adds two configuration options, and both have defaults. The fixes below give the detail.
 
 ### Fixes
 
