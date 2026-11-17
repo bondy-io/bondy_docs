@@ -36,19 +36,48 @@ This decoupling provides several benefits:
 ### WAMP Messages
 
 **Subscribe**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.subscribe('com.myapp.sensor.temperature', function(args, kwargs, details) {
     console.log('Temperature:', args[0]);
 });
 ```
 
+```erlang [Erlang]
+OnTemperature = fun([Temperature], _KWArgs, _Details) ->
+    io:format("Temperature: ~p~n", [Temperature])
+end,
+
+{ok, _SubscriptionId} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.sensor.temperature">>, OnTemperature
+).
+```
+
+:::
+
 **Publish**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.sensor.temperature', [25.5], {
     unit: 'celsius',
     sensor_id: 'temp_01'
 });
 ```
+
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.sensor.temperature">>, [25.5], #{
+        <<"unit">> => <<"celsius">>,
+        <<"sensor_id">> => <<"temp_01">>
+    }
+).
+```
+
+:::
 
 ## Topics
 
@@ -62,7 +91,10 @@ Topics are identified by URIs using dot-notation:
 WAMP supports three matching policies:
 
 **Exact Match** (default)
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // Subscribe
 wampy.subscribe('com.myapp.user.created', handler);
 
@@ -71,8 +103,24 @@ wampy.subscribe('com.myapp.user.created', handler);
 // com.myapp.user.updated ✗
 ```
 
+```erlang [Erlang]
+%% Subscribe
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.user.created">>, Handler
+).
+
+%% Receives only exact matches
+%% com.myapp.user.created ✓
+%% com.myapp.user.updated ✗
+```
+
+:::
+
 **Prefix Match**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // Subscribe with prefix
 wampy.subscribe('com.myapp.user.', {
     onEvent: handler,
@@ -85,8 +133,25 @@ wampy.subscribe('com.myapp.user.', {
 // com.myapp.user.deleted ✓
 ```
 
+```erlang [Erlang]
+%% Subscribe with prefix
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.user.">>, Handler, #{match => <<"prefix">>}
+).
+
+%% Receives all matching prefix
+%% com.myapp.user.created ✓
+%% com.myapp.user.updated ✓
+%% com.myapp.user.deleted ✓
+```
+
+:::
+
 **Wildcard Match**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // Subscribe with wildcard
 wampy.subscribe('com.myapp..created', {
     onEvent: handler,
@@ -99,17 +164,43 @@ wampy.subscribe('com.myapp..created', {
 // com.myapp.product.created ✓
 ```
 
+```erlang [Erlang]
+%% Subscribe with wildcard
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp..created">>, Handler, #{match => <<"wildcard">>}
+).
+
+%% Receives wildcard matches
+%% com.myapp.user.created ✓
+%% com.myapp.order.created ✓
+%% com.myapp.product.created ✓
+```
+
+:::
+
 ## Publishing
 
 ### Simple Publish
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.notification', ['Hello World']);
 ```
 
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.notification">>, [<<"Hello World">>]
+).
+```
+
+:::
+
 ### Publish with Keyword Arguments
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.user.created', null, {
     user_id: 123,
     username: 'alice',
@@ -117,9 +208,23 @@ wampy.publish('com.myapp.user.created', null, {
 });
 ```
 
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.user.created">>, [], #{
+        <<"user_id">> => 123,
+        <<"username">> => <<"alice">>,
+        <<"email">> => <<"alice@example.com">>
+    }
+).
+```
+
+:::
+
 ### Publish Options
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.event', ['data'], {}, {
     acknowledge: true,  // Get confirmation of publish
     exclude_me: false,  // Receive own publications
@@ -128,11 +233,26 @@ wampy.publish('com.myapp.event', ['data'], {}, {
 });
 ```
 
+```erlang [Erlang]
+%% publish_ack/5 waits for the router's confirmation of the publish
+{ok, _PublicationId} = bondy_connect_client:publish_ack(
+    Conn, <<"com.myapp.event">>, [<<"data">>], #{}, #{
+        exclude_me => false,     %% Receive own publications
+        exclude => [SessionId],  %% Exclude specific sessions
+        eligible => [SessionId]  %% Only send to specific sessions
+    }
+).
+```
+
+:::
+
 ## Subscribing
 
 ### Basic Subscription
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 function onEvent(args, kwargs, details) {
     console.log('Event received:', args, kwargs);
     console.log('Publisher:', details.publisher);
@@ -141,9 +261,24 @@ function onEvent(args, kwargs, details) {
 wampy.subscribe('com.myapp.events', onEvent);
 ```
 
+```erlang [Erlang]
+OnEvent = fun(Args, KWArgs, Details) ->
+    io:format("Event received: ~p ~p~n", [Args, KWArgs]),
+    io:format("Publisher: ~p~n", [maps:get(publisher, Details)])
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.events">>, OnEvent
+).
+```
+
+:::
+
 ### Subscription Options
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.subscribe('com.myapp.events', {
     onEvent: onEvent,
     match: 'exact',  // exact | prefix | wildcard
@@ -151,9 +286,22 @@ wampy.subscribe('com.myapp.events', {
 });
 ```
 
+```erlang [Erlang]
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.events">>, OnEvent, #{
+        match => <<"exact">>,  %% exact | prefix | wildcard
+        get_retained => true   %% Retrieve retained events
+    }
+).
+```
+
+:::
+
 ### Unsubscribing
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Subscribe and store reference
 wampy.subscribe('com.myapp.events', onEvent);
 
@@ -164,13 +312,30 @@ wampy.unsubscribe('com.myapp.events');
 wampy.unsubscribe('com.myapp.events', onEvent);
 ```
 
+```erlang [Erlang]
+%% Subscribe and keep the subscription id
+{ok, SubscriptionId} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.events">>, OnEvent
+),
+
+%% Later, unsubscribe by topic
+ok = bondy_connect_client:unsubscribe(Conn, <<"com.myapp.events">>).
+
+%% Or unsubscribe by subscription id:
+%% ok = bondy_connect_client:unsubscribe(Conn, SubscriptionId).
+```
+
+:::
+
 ## Use Cases
 
 ### Real-Time Updates
 
 Broadcasting state changes to all connected clients:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Backend publishes order status
 wampy.publish('com.shop.order.status_changed', null, {
     order_id: 12345,
@@ -181,11 +346,28 @@ wampy.publish('com.shop.order.status_changed', null, {
 // All interested clients receive update
 ```
 
+```erlang [Erlang]
+%% Backend publishes order status
+ok = bondy_connect_client:publish(
+    Conn, <<"com.shop.order.status_changed">>, [], #{
+        <<"order_id">> => 12345,
+        <<"status">> => <<"shipped">>,
+        <<"tracking_number">> => <<"ABC123">>
+    }
+).
+
+%% All interested clients receive update
+```
+
+:::
+
 ### Event Notifications
 
 Notifying systems of important events:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // User service publishes
 wampy.publish('com.myapp.user.registered', null, {
     user_id: 789,
@@ -198,11 +380,30 @@ wampy.publish('com.myapp.user.registered', null, {
 // - CRM system creates record
 ```
 
+```erlang [Erlang]
+%% User service publishes
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.user.registered">>, [], #{
+        <<"user_id">> => 789,
+        <<"timestamp">> => erlang:system_time(millisecond)
+    }
+).
+
+%% Multiple services subscribe:
+%% - Email service sends welcome email
+%% - Analytics service tracks signup
+%% - CRM system creates record
+```
+
+:::
+
 ### Live Data Feeds
 
 Streaming sensor data or market data:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // IoT device publishes readings
 setInterval(() => {
     wampy.publish('com.iot.sensor.temperature', [getCurrentTemp()]);
@@ -212,11 +413,29 @@ setInterval(() => {
 wampy.subscribe('com.iot.sensor.temperature', updateChart);
 ```
 
+```erlang [Erlang]
+%% IoT device publishes readings
+{ok, _Timer} = timer:apply_interval(1000, fun() ->
+    bondy_connect_client:publish(
+        Conn, <<"com.iot.sensor.temperature">>, [get_current_temp()]
+    )
+end),
+
+%% Dashboard subscribes and displays
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.iot.sensor.temperature">>, UpdateChart
+).
+```
+
+:::
+
 ### Activity Streams
 
 Broadcasting user activities:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Publish user action
 wampy.publish('com.app.activity.user_logged_in', null, {
     user: 'alice',
@@ -225,6 +444,20 @@ wampy.publish('com.app.activity.user_logged_in', null, {
 
 // Admin dashboard subscribes to monitor activity
 ```
+
+```erlang [Erlang]
+%% Publish user action
+ok = bondy_connect_client:publish(
+    Conn, <<"com.app.activity.user_logged_in">>, [], #{
+        <<"user">> => <<"alice">>,
+        <<"ip">> => <<"192.168.1.10">>
+    }
+).
+
+%% Admin dashboard subscribes to monitor activity
+```
+
+:::
 
 ## Delivery Guarantees
 
@@ -270,13 +503,28 @@ order.shipped (not order.ship)
 ```
 
 **Include relevant context:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.order.created', null, {
     order_id: 123,
     user_id: 456,
     timestamp: Date.now()
 });
 ```
+
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.order.created">>, [], #{
+        <<"order_id">> => 123,
+        <<"user_id">> => 456,
+        <<"timestamp">> => erlang:system_time(millisecond)
+    }
+).
+```
+
+:::
 
 ### Subscribing
 
@@ -290,7 +538,10 @@ com.myapp.
 ```
 
 **Handle subscription errors:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.subscribe('com.myapp.events', {
     onEvent: handler,
     onSuccess: function() { console.log('Subscribed'); },
@@ -298,11 +549,32 @@ wampy.subscribe('com.myapp.events', {
 });
 ```
 
+```erlang [Erlang]
+case bondy_connect_client:subscribe(Conn, <<"com.myapp.events">>, Handler) of
+    {ok, _SubscriptionId} ->
+        io:format("Subscribed~n");
+    {error, Error} ->
+        io:format("Subscription failed: ~p~n", [Error])
+end.
+```
+
+:::
+
 **Clean up subscriptions:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // Unsubscribe when no longer needed
 wampy.unsubscribe('com.myapp.events', handler);
 ```
+
+```erlang [Erlang]
+%% Unsubscribe when no longer needed
+ok = bondy_connect_client:unsubscribe(Conn, <<"com.myapp.events">>).
+```
+
+:::
 
 ## Comparison with Message Queues
 

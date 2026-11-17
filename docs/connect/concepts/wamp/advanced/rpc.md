@@ -22,7 +22,9 @@ Cancel in-flight RPC calls when results are no longer needed. This prevents wast
 
 Request cancellation of an outstanding call:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Start a long-running operation
 const callId = wampy.call('com.myapp.process_large_file', [fileData], {
     onSuccess: function(result) {
@@ -44,11 +46,34 @@ document.getElementById('cancel-button').addEventListener('click', function() {
 });
 ```
 
+```erlang [Erlang]
+%% Start a long-running operation
+{ok, Token} = bondy_connect_client:call_async(
+    Conn, <<"com.myapp.process_large_file">>, [FileData]
+),
+
+%% The user cancels the operation: ask the callee to abort immediately
+ok = bondy_connect_client:cancel(Conn, Token, kill),
+
+%% The reply to the call still arrives as a message
+receive
+    {bondy_connect_client, Token, {ok, Result}} ->
+        io:format("Processing complete: ~p~n", [Result]);
+    {bondy_connect_client, Token,
+        {error, #{kind := wamp, uri := <<"wamp.error.canceled">>}}} ->
+        io:format("Operation was cancelled~n")
+end.
+```
+
+:::
+
 ### Cancellation Modes
 
 The `mode` option of `CANCEL` controls how far the cancellation goes:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Skip mode - don't interrupt callee, just ignore result
 wampy.cancel(callId, {mode: 'skip'});
 
@@ -58,6 +83,20 @@ wampy.cancel(callId, {mode: 'kill'});
 // Killnowait mode - ask callee to abort, don't wait for its answer
 wampy.cancel(callId, {mode: 'killnowait'});
 ```
+
+```erlang [Erlang]
+%% Skip mode - don't interrupt callee, just ignore result
+bondy_connect_client:cancel(Conn, Token, skip),
+
+%% Kill mode - ask callee to abort and wait for its answer
+bondy_connect_client:cancel(Conn, Token, kill),
+
+%% Killnowait mode - ask callee to abort, don't wait for its answer.
+%% cancel/2 uses this mode.
+bondy_connect_client:cancel(Conn, Token, killnowait).
+```
+
+:::
 
 Bondy handles each mode as follows:
 
@@ -71,7 +110,9 @@ The caller must be authorized for the `wamp.cancel` action on the procedure. Bon
 
 A callee learns of a `kill` or `killnowait` cancellation through an `INTERRUPT` message. How a client library exposes `INTERRUPT` varies; this example assumes it aborts a signal:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.process_large_file', {
     rpc: function(args, kwargs, details) {
         const abortController = new AbortController();
@@ -95,6 +136,21 @@ async function processFileWithAbort(fileData, signal) {
 }
 ```
 
+```erlang [Erlang]
+%% The SDK runs each invocation in its own worker process. On INTERRUPT it
+%% kills that worker, so the handler needs no abort check of its own.
+ProcessLargeFile = fun([FileData], _KWArgs, _Details) ->
+    lists:foreach(fun process_chunk/1, maps:get(<<"chunks">>, FileData)),
+    {ok, #{args => [#{<<"processed">> => true}]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.process_large_file">>, ProcessLargeFile
+).
+```
+
+:::
+
 ### Use Cases
 
 - **User-initiated cancellation** - Cancel operations when user navigates away
@@ -103,7 +159,10 @@ async function processFileWithAbort(fileData, signal) {
 - **Search optimization** - Cancel outdated searches when new query arrives
 
 **Example: Search with automatic cancellation**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 let lastSearchCall = null;
 
 function performSearch(query) {
@@ -133,6 +192,35 @@ searchInput.addEventListener('input', function(e) {
 });
 ```
 
+```erlang [Erlang]
+%% Cancels the previous search, if any is still running, and starts a new
+%% one. Returns the token of the new search; keep it for the next call.
+PerformSearch = fun(Query, LastSearch) ->
+    case LastSearch of
+        undefined -> ok;
+        _ -> bondy_connect_client:cancel(Conn, LastSearch, kill)
+    end,
+    {ok, Token} = bondy_connect_client:call_async(
+        Conn, <<"com.myapp.search">>, [Query]
+    ),
+    Token
+end,
+
+%% As the user types, only the latest search completes. The process that
+%% called PerformSearch receives the replies.
+HandleReply = fun
+    ({bondy_connect_client, _Token, {ok, #{args := [Results]}}}) ->
+        display_results(Results);
+    ({bondy_connect_client, _Token,
+        {error, #{kind := wamp, uri := <<"wamp.error.canceled">>}}}) ->
+        ok;
+    ({bondy_connect_client, _Token, {error, Error}}) ->
+        io:format("Search failed: ~p~n", [Error])
+end.
+```
+
+:::
+
 ## Call Timeouts
 
 A call timeout bounds how long a caller waits for a result. Bondy enforces it in the router: when the time is up, Bondy sends the caller an `ERROR` with `wamp.error.timeout`. Bondy does not send `INTERRUPT` to the callee, and it discards any result the callee sends later.
@@ -147,7 +235,9 @@ Bondy never runs a call without a limit. The WAMP specification reads a missing 
 
 Set timeout in milliseconds:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.external_api', [data], {
     timeout: 5000,  // 5 second timeout
     onSuccess: function(result) {
@@ -163,11 +253,34 @@ wampy.call('com.myapp.external_api', [data], {
 });
 ```
 
+```erlang [Erlang]
+case
+    bondy_connect_client:call(
+        Conn, <<"com.myapp.external_api">>, [Data], #{},
+        #{timeout => 5000}  %% 5 second timeout
+    )
+of
+    {ok, Result} ->
+        io:format("Call completed: ~p~n", [Result]);
+    {error, #{kind := wamp, uri := <<"wamp.error.timeout">>}} ->
+        io:format("Call timed out~n");
+    {error, #{kind := client, reason := timeout}} ->
+        %% The SDK's own timer fired before the router answered
+        io:format("Call timed out~n");
+    {error, Error} ->
+        io:format("Call failed: ~p~n", [Error])
+end.
+```
+
+:::
+
 ### Different Timeouts for Different Operations
 
 Adjust timeouts based on expected operation duration:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Fast operations - short timeout
 wampy.call('com.myapp.cache.get', [key], {
     timeout: 1000  // 1 second
@@ -184,11 +297,35 @@ wampy.call('com.myapp.report.generate', [params], {
 });
 ```
 
+```erlang [Erlang]
+%% Fast operations - short timeout
+bondy_connect_client:call(
+    Conn, <<"com.myapp.cache.get">>, [Key], #{},
+    #{timeout => 1000}  %% 1 second
+),
+
+%% Medium operations - moderate timeout
+bondy_connect_client:call(
+    Conn, <<"com.myapp.db.query">>, [Sql], #{},
+    #{timeout => 10000}  %% 10 seconds
+),
+
+%% Long operations - extended timeout
+bondy_connect_client:call(
+    Conn, <<"com.myapp.report.generate">>, [Params], #{},
+    #{timeout => 60000}  %% 60 seconds
+).
+```
+
+:::
+
 ### Timeout with Retry
 
 Combine timeouts with retry logic:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 async function callWithTimeout(procedure, args, timeout, maxRetries = 3) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -220,6 +357,42 @@ try {
 }
 ```
 
+```erlang [Erlang]
+IsTimeout = fun
+    (#{kind := wamp, uri := <<"wamp.error.timeout">>}) -> true;
+    (#{kind := client, reason := timeout}) -> true;
+    (_) -> false
+end,
+
+CallWithTimeout = fun Retry(Procedure, Args, Timeout, Attempt, MaxRetries) ->
+    Options = #{timeout => Timeout},
+    case bondy_connect_client:call(Conn, Procedure, Args, #{}, Options) of
+        {ok, Result} ->
+            {ok, Result};
+        {error, Error} ->
+            case IsTimeout(Error) andalso Attempt < MaxRetries of
+                true ->
+                    io:format("Timeout on attempt ~p, retrying...~n", [Attempt]),
+                    %% Exponential backoff
+                    timer:sleep(trunc(math:pow(2, Attempt)) * 100),
+                    Retry(Procedure, Args, Timeout, Attempt + 1, MaxRetries);
+                false ->
+                    {error, Error}
+            end
+    end
+end,
+
+%% Usage
+case CallWithTimeout(<<"com.myapp.api">>, [Data], 5000, 1, 3) of
+    {ok, Result} ->
+        io:format("Success: ~p~n", [Result]);
+    {error, Error} ->
+        io:format("Failed after retries: ~p~n", [Error])
+end.
+```
+
+:::
+
 ### Use Cases
 
 - **External APIs** - Prevent hanging on slow third-party services
@@ -244,7 +417,9 @@ When Bondy discloses the caller, it adds these attributes to `INVOCATION.Details
 - `caller_authrole` — the caller's authentication role.
 - `x_caller_guid` — Bondy's internal session identifier for the caller. This is a Bondy extension.
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.sensitive.operation', {
     rpc: function(args, kwargs, details) {
         console.log('Called by session:', details.caller);
@@ -267,17 +442,58 @@ wampy.register('com.myapp.sensitive.operation', {
 });
 ```
 
+```erlang [Erlang]
+SensitiveOperation = fun(Args, KWArgs, Details) ->
+    #{caller := Caller, caller_authid := Authid} = Details,
+    io:format("Called by session: ~p~n", [Caller]),
+    io:format("Authenticated as: ~s~n", [Authid]),
+
+    %% Additional authorization
+    case is_authorized(Authid) of
+        false ->
+            {error, #{uri => <<"com.myapp.error.unauthorized">>}};
+        true ->
+            %% Audit logging
+            audit_log(#{
+                operation => <<"sensitive.operation">>,
+                caller => Authid,
+                timestamp => erlang:system_time(millisecond)
+            }),
+            {ok, #{args => [perform_operation(Args, KWArgs)]}}
+    end
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.sensitive.operation">>, SensitiveOperation
+).
+```
+
+:::
+
 ### When Bondy Discloses the Caller
 
 Two options govern disclosure: `disclose_caller` on the callee's `REGISTER`, and `disclose_me` on the caller's `CALL`. Both default to `true`. Bondy discloses the caller unless **both** are `false`. Either side alone can request disclosure; neither side alone can prevent it.
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Caller opts out. The caller is still disclosed unless the
 // registration also set disclose_caller: false.
 wampy.call('com.myapp.sensitive.operation', [data], {
     disclose_me: false
 });
 ```
+
+```erlang [Erlang]
+%% Caller opts out. The caller is still disclosed unless the
+%% registration also set disclose_caller to false.
+bondy_connect_client:call(
+    Conn, <<"com.myapp.sensitive.operation">>, [Data], #{},
+    #{disclose_me => false}
+).
+```
+
+:::
 
 The WAMP specification makes disclosure opt-in. Bondy makes it opt-out.
 
@@ -287,7 +503,9 @@ Bondy never discloses a caller that is internal to Bondy itself.
 
 Use caller identification for rate limiting:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 const callCounts = new Map();
 
 wampy.register('com.myapp.api.search', {
@@ -316,11 +534,43 @@ wampy.register('com.myapp.api.search', {
 });
 ```
 
+```erlang [Erlang]
+%% Each invocation runs in its own process, so the handler keeps the call
+%% times in a public ETS table rather than in its own state.
+CallTimes = ets:new(call_times, [public, duplicate_bag]),
+
+Search = fun([Query], _KWArgs, #{caller := Caller}) ->
+    Now = erlang:monotonic_time(millisecond),
+    Cutoff = Now - 60000,
+
+    %% Remove calls older than 1 minute
+    ets:select_delete(
+        CallTimes, [{{Caller, '$1'}, [{'<', '$1', Cutoff}], [true]}]
+    ),
+
+    case ets:select_count(CallTimes, [{{Caller, '_'}, [], [true]}]) of
+        Count when Count >= 100 ->
+            {error, #{uri => <<"com.myapp.error.rate_limit_exceeded">>}};
+        _ ->
+            ets:insert(CallTimes, {Caller, Now}),
+            {ok, #{args => [perform_search(Query)]}}
+    end
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.api.search">>, Search
+).
+```
+
+:::
+
 ### Authorization Based on Caller
 
 Implement fine-grained access control:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 const userPermissions = new Map();
 
 wampy.register('com.myapp.admin.delete_user', {
@@ -336,6 +586,26 @@ wampy.register('com.myapp.admin.delete_user', {
     }
 });
 ```
+
+```erlang [Erlang]
+DeleteUser = fun([UserId], _KWArgs, #{caller_authid := Authid}) ->
+    %% Look up the caller's permissions by its authentication ID
+    Permissions = get_user_permissions(Authid),
+
+    case lists:member(<<"user.delete">>, Permissions) of
+        true ->
+            {ok, #{args => [delete_user(UserId)]}};
+        false ->
+            {error, #{uri => <<"com.myapp.error.insufficient_permissions">>}}
+    end
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.admin.delete_user">>, DeleteUser
+).
+```
+
+:::
 
 ### Use Cases
 
@@ -353,7 +623,9 @@ Register procedures using URI patterns instead of exact URIs, enabling flexible,
 
 Handle all procedures under a namespace:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.users.', {
     rpc: function(args, kwargs, details) {
         // details.procedure contains exact URI called
@@ -383,11 +655,51 @@ wampy.call('com.myapp.users.list', null, {limit: 10});
 wampy.call('com.myapp.users.create', null, {name: 'Alice'});
 ```
 
+```erlang [Erlang]
+Users = fun(Args, KWArgs, #{procedure := Procedure}) ->
+    %% The procedure detail contains the exact URI called
+    case lists:last(binary:split(Procedure, <<".">>, [global])) of
+        <<"get">> ->
+            {ok, #{args => [get_user(hd(Args))]}};
+        <<"list">> ->
+            {ok, #{args => [list_users(KWArgs)]}};
+        <<"create">> ->
+            {ok, #{args => [create_user(KWArgs)]}};
+        <<"update">> ->
+            {ok, #{args => [update_user(hd(Args), KWArgs)]}};
+        <<"delete">> ->
+            {ok, #{args => [delete_user(hd(Args))]}};
+        Operation ->
+            {error, #{
+                uri => <<"com.myapp.error.unknown_operation">>,
+                args => [Operation]
+            }}
+    end
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.users.">>, Users, #{match => <<"prefix">>}
+),
+
+%% All these calls route to the same handler
+bondy_connect_client:call(Conn, <<"com.myapp.users.get">>, [123]),
+bondy_connect_client:call(
+    Conn, <<"com.myapp.users.list">>, [], #{<<"limit">> => 10}
+),
+bondy_connect_client:call(
+    Conn, <<"com.myapp.users.create">>, [], #{<<"name">> => <<"Alice">>}
+).
+```
+
+:::
+
 ### Wildcard Matching
 
 Implement cross-cutting concerns:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Logging middleware for all operations
 wampy.register('com.myapp..log', {
     rpc: function(args, kwargs, details) {
@@ -410,11 +722,44 @@ wampy.register('com.myapp..log', {
 // com.myapp.products.log
 ```
 
+```erlang [Erlang]
+%% Logging middleware for all operations
+Log = fun(Args, KWArgs, #{procedure := Procedure, caller := Caller}) ->
+    io:format("Logged operation: ~p~n", [#{
+        procedure => Procedure,
+        caller => Caller,
+        timestamp => erlang:system_time(millisecond)
+    }]),
+
+    %% Forward to actual handler
+    Actual = binary:replace(Procedure, <<".log">>, <<>>),
+    case bondy_connect_client:call(Conn, Actual, Args, KWArgs) of
+        {ok, #{args := ResultArgs, kwargs := ResultKWArgs}} ->
+            {ok, #{args => ResultArgs, kwargs => ResultKWArgs}};
+        {error, #{kind := wamp, uri := Uri}} ->
+            {error, #{uri => Uri}}
+    end
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp..log">>, Log, #{match => <<"wildcard">>}
+).
+
+%% Matches:
+%% com.myapp.users.log
+%% com.myapp.orders.log
+%% com.myapp.products.log
+```
+
+:::
+
 ### RESTful Resource Handlers
 
 Build RESTful services with pattern matching:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.api.', {
     rpc: function(args, kwargs, details) {
         const parts = details.procedure.split('.');
@@ -447,11 +792,50 @@ async function handleResourceOperation(resource, operation, args, kwargs) {
 // com.myapp.api.products.update
 ```
 
+```erlang [Erlang]
+%% Handlers maps a resource to its operations, for example
+%% #{<<"users">> => #{<<"get">> => fun get_user/2}}
+Api = fun(Args, KWArgs, #{procedure := Procedure}) ->
+    %% com.myapp.api.<resource>.<operation>
+    [_, _, _, Resource, Operation] =
+        binary:split(Procedure, <<".">>, [global]),
+
+    case Handlers of
+        #{Resource := #{Operation := Method}} ->
+            Method(Args, KWArgs);
+        #{Resource := _} ->
+            {error, #{
+                uri => <<"com.myapp.error.unknown_operation">>,
+                args => [Operation]
+            }};
+        _ ->
+            {error, #{
+                uri => <<"com.myapp.error.unknown_resource">>,
+                args => [Resource]
+            }}
+    end
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.api.">>, Api, #{match => <<"prefix">>}
+).
+
+%% Single registration handles all:
+%% com.myapp.api.users.get
+%% com.myapp.api.users.list
+%% com.myapp.api.orders.create
+%% com.myapp.api.products.update
+```
+
+:::
+
 ### Dynamic Routing Based on Content
 
 Route to different implementations based on arguments:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.payment.', {
     rpc: function(args, kwargs, details) {
         const method = details.procedure.split('.').pop();
@@ -471,6 +855,31 @@ wampy.register('com.myapp.payment.', {
 });
 ```
 
+```erlang [Erlang]
+Payment = fun(Args, KWArgs, #{procedure := Procedure}) ->
+    Method = lists:last(binary:split(Procedure, <<".">>, [global])),
+
+    %% Route to provider-specific handler
+    case maps:get(<<"payment_provider">>, KWArgs, undefined) of
+        <<"stripe">> ->
+            handle_stripe_payment(Method, Args, KWArgs);
+        <<"paypal">> ->
+            handle_paypal_payment(Method, Args, KWArgs);
+        Provider ->
+            {error, #{
+                uri => <<"com.myapp.error.unsupported_provider">>,
+                args => [Provider]
+            }}
+    end
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.payment.">>, Payment, #{match => <<"prefix">>}
+).
+```
+
+:::
+
 ### Use Cases
 
 - **Resource-based APIs** - Single handler for CRUD operations
@@ -489,7 +898,9 @@ The `invoke` option of `REGISTER` sets the invocation policy. Bondy accepts the 
 
 A registration with a policy other than `single` requires the callee to announce `shared_registration` in `HELLO`. The first registration of a URI fixes its policy. Bondy refuses a later registration of the same URI with `wamp.error.procedure_already_exists` when the existing policy is `single`, or when the later registration asks for a different policy. A node checks and records each registration in one step, so when two callees on the same node register a URI with `single` at the same time, exactly one succeeds.
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Round robin - distribute evenly
 wampy.register('com.myapp.process', {
     rpc: processHandler,
@@ -521,11 +932,47 @@ wampy.register('com.myapp.process', {
 });
 ```
 
+```erlang [Erlang]
+%% Round robin - distribute evenly
+bondy_connect_client:register(
+    Conn, <<"com.myapp.process">>, ProcessHandler,
+    #{invoke => <<"roundrobin">>}
+),
+
+%% Random - statistical distribution
+bondy_connect_client:register(
+    Conn, <<"com.myapp.process">>, ProcessHandler,
+    #{invoke => <<"random">>}
+),
+
+%% First - always use first registered
+bondy_connect_client:register(
+    Conn, <<"com.myapp.process">>, ProcessHandler,
+    #{invoke => <<"first">>}
+),
+
+%% Last - always use last registered
+bondy_connect_client:register(
+    Conn, <<"com.myapp.process">>, ProcessHandler,
+    #{invoke => <<"last">>}
+),
+
+%% Single - only one registration allowed
+bondy_connect_client:register(
+    Conn, <<"com.myapp.process">>, ProcessHandler,
+    #{invoke => <<"single">>}
+).
+```
+
+:::
+
 ### Round Robin Load Balancing
 
 Distribute load evenly across service instances:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Instance 1
 wampy.register('com.myapp.image.process', {
     rpc: function(args, kwargs) {
@@ -557,13 +1004,47 @@ wampy.register('com.myapp.image.process', {
 // Call 4 → Instance 1 (wraps around)
 ```
 
+```erlang [Erlang]
+ProcessOn = fun(Instance) ->
+    fun([Image], _KWArgs, _Details) ->
+        {ok, #{args => [process_image(Image, Instance)]}}
+    end
+end,
+RoundRobin = #{invoke => <<"roundrobin">>},
+
+%% Instance 1
+{ok, _} = bondy_connect_client:register(
+    Conn1, <<"com.myapp.image.process">>, ProcessOn(instance_1), RoundRobin
+),
+
+%% Instance 2
+{ok, _} = bondy_connect_client:register(
+    Conn2, <<"com.myapp.image.process">>, ProcessOn(instance_2), RoundRobin
+),
+
+%% Instance 3
+{ok, _} = bondy_connect_client:register(
+    Conn3, <<"com.myapp.image.process">>, ProcessOn(instance_3), RoundRobin
+).
+
+%% Callers automatically load balanced
+%% Call 1 → Instance 1
+%% Call 2 → Instance 2
+%% Call 3 → Instance 3
+%% Call 4 → Instance 1 (wraps around)
+```
+
+:::
+
 Each Bondy node keeps its own round-robin position; Bondy does not replicate load-balancing state across the cluster. When callers are connected to several nodes, the rotation holds per node, not cluster-wide.
 
 ### Primary/Backup Pattern
 
 Use `first` policy for active/standby:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Primary instance (registered first)
 wampy.register('com.myapp.cache.get', {
     rpc: getCacheFromPrimary,
@@ -578,11 +1059,30 @@ wampy.register('com.myapp.cache.get', {
 });
 ```
 
+```erlang [Erlang]
+%% Primary instance (registered first)
+{ok, _} = bondy_connect_client:register(
+    Conn1, <<"com.myapp.cache.get">>, GetCacheFromPrimary,
+    #{invoke => <<"first">>}
+),
+
+%% Backup instance (registered second)
+%% Only receives calls if primary unregisters
+{ok, _} = bondy_connect_client:register(
+    Conn2, <<"com.myapp.cache.get">>, GetCacheFromBackup,
+    #{invoke => <<"first">>}
+).
+```
+
+:::
+
 ### Canary Deployment
 
 Use `last` policy to route to newest version:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Existing v1 instances
 wampy.register('com.myapp.api.process', {
     rpc: processV1,
@@ -599,6 +1099,24 @@ wampy.register('com.myapp.api.process', {
 // If v2 works well, deploy more v2 instances
 // If v2 has issues, unregister and traffic returns to v1
 ```
+
+```erlang [Erlang]
+%% Existing v1 instances
+{ok, _} = bondy_connect_client:register(
+    Conn1, <<"com.myapp.api.process">>, ProcessV1, #{invoke => <<"last">>}
+),
+
+%% Deploy canary v2 instance
+%% All new calls go to v2
+{ok, _} = bondy_connect_client:register(
+    Conn2, <<"com.myapp.api.process">>, ProcessV2, #{invoke => <<"last">>}
+).
+
+%% If v2 works well, deploy more v2 instances
+%% If v2 has issues, unregister and traffic returns to v1
+```
+
+:::
 
 ### Automatic Failover
 
@@ -640,7 +1158,9 @@ A message is in Payload Passthru Mode when its options carry `ppt_scheme`. Four 
 | `ppt_cipher` | The encryption algorithm, when the payload is encrypted. |
 | `ppt_keyid` | The ID of the key used to encrypt the payload. |
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.process_video_frame', [encryptedFrame], {
     ppt_scheme: 'x_myapp',
     ppt_serializer: 'cbor',
@@ -648,6 +1168,8 @@ wampy.call('com.myapp.process_video_frame', [encryptedFrame], {
     ppt_keyid: 'key-2024-07'
 });
 ```
+
+:::
 
 Bondy copies the `ppt_*` options of a `CALL` into `INVOCATION.Details`, and the options of a `YIELD` into `RESULT.Details`, so the receiving peer knows how to decode the payload.
 
@@ -667,7 +1189,9 @@ Bondy always offers the feature; it has no configuration setting. It negotiates 
 
 Callees send partial results:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.large_query', {
     rpc: async function(args, kwargs, details) {
         const results = [];
@@ -686,9 +1210,47 @@ wampy.register('com.myapp.large_query', {
 });
 ```
 
+```erlang [Erlang]
+LargeQuery = fun([Query], _KWArgs, Details) ->
+    Rows = execute_query(Query),
+
+    %% Only present when the caller requested progressive results.
+    case Details of
+        #{progress := Progress} ->
+            lists:foldl(
+                fun(Row, Count) ->
+                    ok = Progress([#{
+                        <<"rows_processed">> => Count + 1,
+                        <<"current_row">> => Row
+                    }], #{}),
+                    Count + 1
+                end,
+                0,
+                Rows
+            );
+        _ ->
+            ok
+    end,
+
+    %% Final result either way.
+    {ok, #{args => [#{
+        <<"total_rows">> => length(Rows),
+        <<"results">> => Rows
+    }]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.large_query">>, LargeQuery
+).
+```
+
+:::
+
 Callers opt in with `receive_progress` and receive each progressive result before the single terminal one:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.large_query', [query], {
     receive_progress: true,
     onSuccess: function(finalResult) {
@@ -701,6 +1263,34 @@ wampy.call('com.myapp.large_query', [query], {
     }
 });
 ```
+
+```erlang [Erlang]
+{ok, Token} = bondy_connect_client:call_async(
+    Conn, <<"com.myapp.large_query">>, [Query], #{},
+    #{receive_progress => true}
+),
+
+Receive = fun Loop() ->
+    receive
+        {bondy_connect_client, Token, {progress, #{args := [Progress]}}} ->
+            %% One message per progressive result, in order, before the
+            %% final result.
+            io:format("Progress: ~p~n", [
+                maps:get(<<"rows_processed">>, Progress)
+            ]),
+            update_ui(maps:get(<<"current_row">>, Progress)),
+            Loop();
+        {bondy_connect_client, Token, {ok, #{args := [FinalResult]}}} ->
+            io:format("Query complete: ~p~n", [FinalResult]);
+        {bondy_connect_client, Token, {error, Error}} ->
+            io:format("Query failed: ~p~n", [Error])
+    end
+end,
+
+Receive().
+```
+
+:::
 
 This holds across the cluster too: when caller and callee are on different nodes, progressive results are relayed between nodes and still arrive in yield order. `CALL.Options.timeout` is the inactivity window between results — each one restarts it — so a healthy, slowly-dripping stream is not cut off; the Bondy extension `CALL.Options._deadline` (milliseconds) additionally caps the whole call regardless of activity. Cancellation works mid-stream, including across nodes. See [Progressive Call Results](/connect/reference/clients/bondy_connect_sdk) in the `bondy_connect` reference for the Erlang API.
 
@@ -719,7 +1309,9 @@ Bondy always offers the feature; it has no configuration setting. Unlike progres
 
 Callers send arguments progressively, reusing one request across chunks:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 const call = wampy.call('com.myapp.process_stream', [firstChunk], {
     onSuccess: function(result) {
         console.log('Stream processing complete:', result);
@@ -736,9 +1328,35 @@ for (const chunk of remainingChunks) {
 call.complete(lastChunk);
 ```
 
+```erlang [Erlang]
+{ok, Token} = bondy_connect_client:call_stream(
+    Conn, <<"com.myapp.process_stream">>, [FirstChunk], #{}, #{}
+),
+
+%% Send further chunks under the same call.
+lists:foreach(
+    fun(Chunk) ->
+        ok = bondy_connect_client:send_input(Conn, Token, [Chunk], #{})
+    end,
+    RemainingChunks
+),
+
+%% Final chunk closes the input stream.
+ok = bondy_connect_client:finish_input(Conn, Token, [LastChunk], #{}),
+
+receive
+    {bondy_connect_client, Token, {ok, #{args := [Result]}}} ->
+        io:format("Stream processing complete: ~p~n", [Result])
+end.
+```
+
+:::
+
 Callees pull chunks as they arrive:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.process_stream', {
     rpc: async function(firstChunk, kwargs, details) {
         let total = processChunk(firstChunk);
@@ -754,6 +1372,37 @@ wampy.register('com.myapp.process_stream', {
     }
 });
 ```
+
+```erlang [Erlang]
+ProcessStream = fun([FirstChunk], _KWArgs, Details) ->
+    First = process_chunk(FirstChunk),
+
+    %% Only present when the caller opened a progressive call.
+    Total =
+        case Details of
+            #{input := Input} ->
+                Pull = fun Next(Acc) ->
+                    case Input() of
+                        {more, [Chunk], _} ->
+                            Next(Acc + process_chunk(Chunk));
+                        {last, [Chunk], _} ->
+                            Acc + process_chunk(Chunk)
+                    end
+                end,
+                Pull(First);
+            _ ->
+                First
+        end,
+
+    {ok, #{args => [#{<<"total_processed">> => Total}]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.process_stream">>, ProcessStream
+).
+```
+
+:::
 
 Chunks reach the callee in send order, including across cluster nodes and to a callee behind a bridge relay that ends on the caller's router. Timeout and cancellation semantics match progressive results: `CALL.Options.timeout` is the inactivity window between chunks, `CALL.Options._deadline` caps the whole call, and cancelling mid-stream works across nodes. See [Progressive Call Invocations](/connect/reference/clients/bondy_connect_sdk) in the `bondy_connect` reference for the Erlang API, including the exact `call_stream/5`/`send_input/4`/`finish_input/4` client functions.
 
@@ -785,13 +1434,27 @@ Bondy accepts the following options in addition to those of the WAMP specificati
 
 `CALL.Options._deadline` caps the total duration of a call, in milliseconds. `timeout` measures inactivity: for a progressive call, each progressive result or argument chunk restarts it. `_deadline` does not restart: when it expires, the call ends with `wamp.error.timeout`, however active the call is. A call that sets both ends at whichever limit comes first.
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.large_query', [query], {
     receive_progress: true,
     timeout: 5000,     // at most 5 s between results
     _deadline: 60000   // at most 60 s in total
 });
 ```
+
+```erlang [Erlang]
+{ok, Token} = bondy_connect_client:call_async(
+    Conn, <<"com.myapp.large_query">>, [Query], #{}, #{
+        receive_progress => true,
+        timeout => 5000,      %% at most 5 s between results
+        '_deadline' => 60000  %% at most 60 s in total
+    }
+).
+```
+
+:::
 
 ### Call Retries
 
@@ -804,7 +1467,9 @@ Bondy retries a call in two cases:
 
 Each attempt counts against `_retries`. Bondy starts no attempt after the call's `_deadline`. Without a `_deadline`, a call can last `_retries + 1` call timeouts. Bondy does not retry a progressive call, in either direction, because the caller may already hold part of its results.
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Callee: running this procedure twice is safe
 wampy.register('com.myapp.inventory.get', {
     rpc: getInventory,
@@ -819,6 +1484,25 @@ wampy.call('com.myapp.inventory.get', [sku], {
 });
 ```
 
+```erlang [Erlang]
+%% Callee: running this procedure twice is safe
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.inventory.get">>, GetInventory,
+    #{'_idempotent' => true}
+),
+
+%% Caller: at most two more attempts, within 10 s in total
+bondy_connect_client:call(
+    Conn, <<"com.myapp.inventory.get">>, [Sku], #{}, #{
+        timeout => 3000,
+        '_retries' => 2,
+        '_deadline' => 10000
+    }
+).
+```
+
+:::
+
 A retry selects a callee from what the caller's node knows when the attempt starts. It does not ask another node whether that node serves the procedure. On a cluster, a retry therefore helps when the registration, or the news of it, arrives within the call's deadline. See [When the routing view is behind](/connect/concepts/registry_routing#when-the-routing-view-is-behind).
 
 ### Cluster Failover
@@ -829,12 +1513,24 @@ When the callee is on another node, the caller's node forwards the call there, a
 
 A miss happens before Bondy sends any `INVOCATION`, so moving the call cannot run the procedure twice. That is why failover between nodes needs neither `_retries` nor `_idempotent`, and why Bondy does it by default. The attempts share one call timeout: trying a second node does not give the call more time.
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Try up to three nodes before the call fails
 wampy.call('com.myapp.inventory.get', [sku], {
     _routing_max_candidates: 3
 });
 ```
+
+```erlang [Erlang]
+%% Try up to three nodes before the call fails
+bondy_connect_client:call(
+    Conn, <<"com.myapp.inventory.get">>, [Sku], #{},
+    #{'_routing_max_candidates' => 3}
+).
+```
+
+:::
 
 When every node Bondy tries has no callee, the call fails with `wamp.error.no_eligible_callee`. Raise the value when several nodes can lose their callees at once, for example during a deployment that restarts callees node by node.
 
@@ -844,12 +1540,25 @@ The [Call Routing and Retry Options](/connect/reference/protocols/wamp_call_opti
 
 A partitioned call sends all calls that carry the same key to the same callee of a shared registration. Set `runmode` to `partition` and `rkey` to the key:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.order.process', [orderData], {
     runmode: 'partition',
     rkey: orderData.customer_id
 });
 ```
+
+```erlang [Erlang]
+bondy_connect_client:call(
+    Conn, <<"com.myapp.order.process">>, [OrderData], #{}, #{
+        runmode => <<"partition">>,
+        rkey => maps:get(<<"customer_id">>, OrderData)
+    }
+).
+```
+
+:::
 
 Bondy maps the key to a callee with jump consistent hashing. The same key reaches the same callee as long as the set of callees does not change. A partitioned call overrides the registration's invocation policy for that call. Bondy refuses a partitioned call without `rkey` with `wamp.error.invalid_argument`.
 
@@ -861,7 +1570,9 @@ Partitioning is a property of the call, not of the registration. `REGISTER.Optio
 
 Match the policy to your use case:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Stateless services - use roundrobin
 wampy.register('com.myapp.calculate', {
     rpc: handler,
@@ -881,11 +1592,35 @@ wampy.register('com.myapp.cache', {
 });
 ```
 
+```erlang [Erlang]
+%% Stateless services - use roundrobin
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.calculate">>, Handler,
+    #{invoke => <<"roundrobin">>}  %% Even distribution
+),
+
+%% Singleton services - use single
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.leader.election">>, Handler,
+    #{invoke => <<"single">>}  %% Only one instance allowed
+),
+
+%% Active/standby - use first
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.cache">>, Handler,
+    #{invoke => <<"first">>}  %% Primary/backup pattern
+).
+```
+
+:::
+
 ### Set Timeouts That Fit the Procedure
 
 A call without `timeout` gets the node-wide `wamp.call_timeout`, which suits no procedure in particular. Set a timeout that matches what the procedure does:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Node default applies (30 s unless configured otherwise)
 wampy.call('com.myapp.api', [data]);
 
@@ -895,11 +1630,27 @@ wampy.call('com.myapp.api', [data], {
 });
 ```
 
+```erlang [Erlang]
+%% Node default applies (30 s unless configured otherwise).
+%% The SDK's own timer also waits 30 s.
+bondy_connect_client:call(Conn, <<"com.myapp.api">>, [Data]),
+
+%% Timeout chosen for this procedure
+bondy_connect_client:call(
+    Conn, <<"com.myapp.api">>, [Data], #{},
+    #{timeout => 10000}  %% 10 seconds
+).
+```
+
+:::
+
 ### Use Cancellation Appropriately
 
 Cancel operations that are no longer needed:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Search-as-you-type - cancel previous searches
 let currentSearch = null;
 
@@ -911,11 +1662,30 @@ function search(query) {
 }
 ```
 
+```erlang [Erlang]
+%% Search-as-you-type - cancel previous searches.
+%% CurrentSearch is the token of the search in flight, or undefined.
+Search = fun(Query, CurrentSearch) ->
+    case CurrentSearch of
+        undefined -> ok;
+        _ -> bondy_connect_client:cancel(Conn, CurrentSearch, kill)
+    end,
+    {ok, Token} = bondy_connect_client:call_async(
+        Conn, <<"com.myapp.search">>, [Query]
+    ),
+    Token
+end.
+```
+
+:::
+
 ### Pattern Registration Strategy
 
 Use the most specific pattern possible:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Too broad - handles everything
 wampy.register('com.myapp.', {rpc: handler, match: 'prefix'});
 
@@ -926,11 +1696,30 @@ wampy.register('com.myapp.users.', {rpc: handler, match: 'prefix'});
 wampy.register('com.myapp.users.get', {rpc: handler});
 ```
 
+```erlang [Erlang]
+%% Too broad - handles everything
+bondy_connect_client:register(
+    Conn, <<"com.myapp.">>, Handler, #{match => <<"prefix">>}
+),
+
+%% Better - specific domain
+bondy_connect_client:register(
+    Conn, <<"com.myapp.users.">>, Handler, #{match => <<"prefix">>}
+),
+
+%% Best - exact when possible
+bondy_connect_client:register(Conn, <<"com.myapp.users.get">>, Handler).
+```
+
+:::
+
 ### Opt Out of Caller Disclosure Deliberately
 
 Bondy discloses the caller by default. To keep a caller's identity from a callee, both sides must opt out:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Callee: do not ask for the caller's identity
 wampy.register('com.myapp.anonymous.feedback', {
     rpc: handler,
@@ -942,6 +1731,22 @@ wampy.call('com.myapp.anonymous.feedback', [text], {
     disclose_me: false
 });
 ```
+
+```erlang [Erlang]
+%% Callee: do not ask for the caller's identity
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.anonymous.feedback">>, Handler,
+    #{disclose_caller => false}
+),
+
+%% Caller: do not offer it
+bondy_connect_client:call(
+    Conn, <<"com.myapp.anonymous.feedback">>, [Text], #{},
+    #{disclose_me => false}
+).
+```
+
+:::
 
 ## Summary
 

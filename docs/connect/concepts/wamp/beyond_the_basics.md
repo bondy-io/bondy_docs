@@ -30,7 +30,9 @@ In production systems, you often need multiple instances of a service for capaci
 
 Multiple callees can register the same procedure URI. When a call arrives, the router selects one callee using a configured invocation policy:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Service Instance 1
 wampy.register('com.myapp.process_order', {
     rpc: function(args, kwargs) {
@@ -53,6 +55,38 @@ wampy.register('com.myapp.process_order', {
 wampy.call('com.myapp.process_order', null, {order_id: 123});
 ```
 
+```erlang [Erlang]
+ProcessOrderOn = fun(Instance) ->
+    fun(_Args, #{<<"order_id">> := OrderId}, _Details) ->
+        %% Process order logic
+        {ok, #{args => [#{
+            <<"order_id">> => OrderId,
+            <<"processed_by">> => Instance
+        }]}}
+    end
+end,
+RoundRobin = #{invoke => <<"roundrobin">>},  %% Load balancing policy
+
+%% Service Instance 1
+{ok, _} = bondy_connect_client:register(
+    Conn1, <<"com.myapp.process_order">>,
+    ProcessOrderOn(<<"instance_1">>), RoundRobin
+),
+
+%% Service Instance 2: same logic, same policy
+{ok, _} = bondy_connect_client:register(
+    Conn2, <<"com.myapp.process_order">>,
+    ProcessOrderOn(<<"instance_2">>), RoundRobin
+),
+
+%% Callers don't know or care which instance handles the call
+bondy_connect_client:call(
+    Conn, <<"com.myapp.process_order">>, [], #{<<"order_id">> => 123}
+).
+```
+
+:::
+
 ### Invocation Policies
 
 Bondy supports multiple invocation policies:
@@ -74,7 +108,10 @@ Round robin ensures even distribution:
 Perfect for stateless services where any instance can handle any request.
 
 **Example use case:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // Image processing service with 5 instances
 // All register with roundrobin policy
 wampy.register('com.myapp.process_image', {
@@ -87,16 +124,42 @@ wampy.register('com.myapp.process_image', {
 wampy.call('com.myapp.process_image', [imageData]);
 ```
 
+```erlang [Erlang]
+%% Image processing service with 5 instances
+%% All register with roundrobin policy
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.process_image">>, ProcessImage,
+    #{invoke => <<"roundrobin">>}
+),
+
+%% Clients call normally
+%% Bondy automatically distributes across instances
+bondy_connect_client:call(Conn, <<"com.myapp.process_image">>, [ImageData]).
+```
+
+:::
+
 ### Random Distribution
 
 Random selection provides statistical distribution without tracking state:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.analytics.track', {
     rpc: trackEvent,
     invoke: 'random'  // Random distribution
 });
 ```
+
+```erlang [Erlang]
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.analytics.track">>, TrackEvent,
+    #{invoke => <<"random">>}  %% Random distribution
+).
+```
+
+:::
 
 Good for fire-and-forget operations where exact distribution doesn't matter.
 
@@ -105,7 +168,10 @@ Good for fire-and-forget operations where exact distribution doesn't matter.
 Use `first` or `last` for primary/backup or canary deployment patterns:
 
 **Primary/Backup Pattern:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // Primary instance (registered first)
 wampy.register('com.myapp.cache.get', {
     rpc: getCacheValue,
@@ -120,8 +186,28 @@ wampy.register('com.myapp.cache.get', {
 });
 ```
 
+```erlang [Erlang]
+%% Primary instance (registered first)
+{ok, _} = bondy_connect_client:register(
+    Conn1, <<"com.myapp.cache.get">>, GetCacheValue,
+    #{invoke => <<"first">>}
+),
+
+%% Backup instance (registered second)
+%% Only receives calls if primary unregisters
+{ok, _} = bondy_connect_client:register(
+    Conn2, <<"com.myapp.cache.get">>, GetCacheValue,
+    #{invoke => <<"first">>}
+).
+```
+
+:::
+
 **Canary Deployment:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // Existing version (multiple instances)
 wampy.register('com.myapp.api.process', {
     rpc: processV1,
@@ -136,6 +222,22 @@ wampy.register('com.myapp.api.process', {
 // All new calls go to canary
 // If it works, deploy more v2 instances
 ```
+
+```erlang [Erlang]
+%% Existing version (multiple instances)
+{ok, _} = bondy_connect_client:register(
+    Conn1, <<"com.myapp.api.process">>, ProcessV1, #{invoke => <<"last">>}
+),
+
+%% New version (canary instance)
+{ok, _} = bondy_connect_client:register(
+    Conn2, <<"com.myapp.api.process">>, ProcessV2, #{invoke => <<"last">>}
+).
+%% All new calls go to canary
+%% If it works, deploy more v2 instances
+```
+
+:::
 
 ### Geographic Distribution
 
@@ -170,7 +272,9 @@ No manual intervention required. The router adapts automatically. A call the dep
 
 Implement client-side retry for transient failures:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 async function callWithRetry(procedure, args, options = {}, maxRetries = 3) {
     let lastError;
 
@@ -206,11 +310,38 @@ try {
 }
 ```
 
+```erlang [Erlang]
+CallWithRetry = fun Retry(Procedure, Args, Options, Attempt, MaxRetries) ->
+    case bondy_connect_client:call(Conn, Procedure, Args, #{}, Options) of
+        {ok, Result} ->
+            {ok, Result};
+        {error, _} when Attempt < MaxRetries ->
+            %% Exponential backoff
+            timer:sleep(trunc(math:pow(2, Attempt)) * 100),
+            Retry(Procedure, Args, Options, Attempt + 1, MaxRetries);
+        {error, LastError} ->
+            {error, LastError}
+    end
+end,
+
+%% Usage
+case CallWithRetry(<<"com.myapp.api.process">>, [Data], #{}, 1, 3) of
+    {ok, Result} ->
+        io:format("Success: ~p~n", [Result]);
+    {error, Error} ->
+        io:format("Failed after retries: ~p~n", [Error])
+end.
+```
+
+:::
+
 ### Health Checks
 
 Implement health check procedures for monitoring:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Service registers health check
 wampy.register('com.myapp.service.health', {
     rpc: function() {
@@ -235,11 +366,43 @@ setInterval(async () => {
 }, 30000);  // Check every 30 seconds
 ```
 
+```erlang [Erlang]
+%% Service registers health check
+Health = fun(_Args, _KWArgs, _Details) ->
+    {Uptime, _} = erlang:statistics(wall_clock),
+    {ok, #{args => [#{
+        <<"status">> => <<"healthy">>,
+        <<"timestamp">> => erlang:system_time(millisecond),
+        <<"version">> => <<"1.2.3">>,
+        <<"uptime">> => Uptime div 1000
+    }]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.service.health">>, Health
+),
+
+%% Monitor calls health checks
+{ok, _Timer} = timer:apply_interval(30000, fun() ->  %% Every 30 seconds
+    case CallWithRetry(<<"com.myapp.service.health">>, [], #{}, 1, 1) of
+        {ok, #{args := [Status]}} ->
+            io:format("Service healthy: ~p~n", [Status]);
+        {error, Error} ->
+            io:format("Service unhealthy: ~p~n", [Error])
+            %% Alert operations team
+    end
+end).
+```
+
+:::
+
 ### Circuit Breaker Pattern
 
 Prevent cascading failures with circuit breakers:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 class CircuitBreaker {
     constructor(procedure, threshold = 5, timeout = 60000) {
         this.procedure = procedure;
@@ -297,6 +460,71 @@ try {
 }
 ```
 
+```erlang [Erlang]
+%% The breaker is a map that the caller keeps between calls.
+%% state is closed, open or half_open.
+NewBreaker = fun(Procedure, Threshold, Timeout) ->
+    #{
+        procedure => Procedure,
+        threshold => Threshold,
+        timeout => Timeout,
+        failures => 0,
+        state => closed,
+        next_attempt => undefined
+    }
+end,
+
+%% Returns the outcome of the call and the breaker to use for the next one.
+BreakerCall = fun(Breaker0, Args, KWArgs) ->
+    Now = erlang:monotonic_time(millisecond),
+    case Breaker0 of
+        #{state := open, next_attempt := NextAttempt} when Now < NextAttempt ->
+            {{error, circuit_open}, Breaker0};
+        _ ->
+            Breaker =
+                case Breaker0 of
+                    #{state := open} -> Breaker0#{state := half_open};
+                    _ -> Breaker0
+                end,
+            #{
+                procedure := Procedure,
+                threshold := Threshold,
+                timeout := Timeout,
+                failures := Failures,
+                state := State
+            } = Breaker,
+            case bondy_connect_client:call(Conn, Procedure, Args, KWArgs) of
+                {ok, _} = Result when State =:= half_open ->
+                    %% Success: close the circuit
+                    {Result, Breaker#{state := closed, failures := 0}};
+                {ok, _} = Result ->
+                    {Result, Breaker};
+                {error, _} = Error when Failures + 1 >= Threshold ->
+                    {Error, Breaker#{
+                        failures := Failures + 1,
+                        state := open,
+                        next_attempt := Now + Timeout
+                    }};
+                {error, _} = Error ->
+                    {Error, Breaker#{failures := Failures + 1}}
+            end
+    end
+end,
+
+%% Usage
+Breaker0 = NewBreaker(<<"com.myapp.external.api">>, 5, 60000),
+
+{Outcome, Breaker1} = BreakerCall(Breaker0, [Data], #{}),
+case Outcome of
+    {ok, Result} ->
+        io:format("Success: ~p~n", [Result]);
+    {error, Error} ->
+        io:format("Call failed or circuit open: ~p~n", [Error])
+end.
+```
+
+:::
+
 ## Pattern-Based Registration
 
 Register procedures using URI patterns instead of exact URIs, enabling dynamic, flexible service implementations.
@@ -305,7 +533,9 @@ Register procedures using URI patterns instead of exact URIs, enabling dynamic, 
 
 Handle all procedures under a namespace:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.users.', {
     rpc: function(args, kwargs, details) {
         // details.procedure contains exact URI called
@@ -334,11 +564,45 @@ wampy.call('com.myapp.users.create', null, {name: 'Alice'});
 wampy.call('com.myapp.users.delete', [123]);
 ```
 
+```erlang [Erlang]
+Users = fun(Args, KWArgs, #{procedure := Procedure}) ->
+    %% The procedure detail contains the exact URI called
+    case lists:last(binary:split(Procedure, <<".">>, [global])) of
+        <<"get">> ->
+            {ok, #{args => [get_user(hd(Args))]}};
+        <<"list">> ->
+            {ok, #{args => [list_users(KWArgs)]}};
+        <<"create">> ->
+            {ok, #{args => [create_user(KWArgs)]}};
+        <<"delete">> ->
+            {ok, #{args => [delete_user(hd(Args))]}};
+        _ ->
+            {error, #{uri => <<"com.myapp.error.unknown_operation">>}}
+    end
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.users.">>, Users, #{match => <<"prefix">>}
+),
+
+%% All these calls route to the same handler
+bondy_connect_client:call(Conn, <<"com.myapp.users.get">>, [123]),
+bondy_connect_client:call(Conn, <<"com.myapp.users.list">>),
+bondy_connect_client:call(
+    Conn, <<"com.myapp.users.create">>, [], #{<<"name">> => <<"Alice">>}
+),
+bondy_connect_client:call(Conn, <<"com.myapp.users.delete">>, [123]).
+```
+
+:::
+
 ### Wildcard Matching
 
 Implement cross-cutting concerns:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Logging middleware using wildcard
 wampy.register('com.myapp..audit', {
     rpc: function(args, kwargs, details) {
@@ -361,6 +625,37 @@ wampy.register('com.myapp..audit', {
 // com.myapp.products.audit
 ```
 
+```erlang [Erlang]
+%% Logging middleware using wildcard
+Audit = fun(Args, KWArgs, #{procedure := Procedure, caller := Caller}) ->
+    io:format("Audit called: ~p~n", [#{
+        procedure => Procedure,
+        caller => Caller,
+        timestamp => erlang:system_time(millisecond)
+    }]),
+
+    %% Forward to actual handler
+    Actual = binary:replace(Procedure, <<".audit">>, <<>>),
+    case bondy_connect_client:call(Conn, Actual, Args, KWArgs) of
+        {ok, #{args := ResultArgs, kwargs := ResultKWArgs}} ->
+            {ok, #{args => ResultArgs, kwargs => ResultKWArgs}};
+        {error, #{kind := wamp, uri := Uri}} ->
+            {error, #{uri => Uri}}
+    end
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp..audit">>, Audit, #{match => <<"wildcard">>}
+).
+
+%% Matches:
+%% com.myapp.users.audit
+%% com.myapp.orders.audit
+%% com.myapp.products.audit
+```
+
+:::
+
 ## Event Filtering
 
 Control which subscribers receive which events based on filters and rules.
@@ -369,7 +664,9 @@ Control which subscribers receive which events based on filters and rules.
 
 Don't receive your own publications:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.chat.message', ['Hello everyone!'], {}, {
     exclude_me: true  // Don't receive this event
 });
@@ -380,11 +677,31 @@ wampy.subscribe('com.myapp.chat.message', function(args) {
 });
 ```
 
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.chat.message">>, [<<"Hello everyone!">>], #{},
+    #{exclude_me => true}  %% Don't receive this event
+),
+
+OnMessage = fun([Message], _KWArgs, _Details) ->
+    %% Won't receive messages published by this session
+    io:format("Message from someone else: ~s~n", [Message])
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.chat.message">>, OnMessage
+).
+```
+
+:::
+
 ### Subscriber Filtering
 
 Control event delivery to specific sessions:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Only send to specific sessions
 wampy.publish('com.myapp.admin.alert', ['System issue'], {}, {
     eligible: [session_id_1, session_id_2]  // Only these sessions receive
@@ -396,11 +713,29 @@ wampy.publish('com.myapp.broadcast', ['Update'], {}, {
 });
 ```
 
+```erlang [Erlang]
+%% Only send to specific sessions
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.admin.alert">>, [<<"System issue">>], #{},
+    #{eligible => [SessionId1, SessionId2]}  %% Only these sessions receive
+),
+
+%% Exclude specific sessions
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.broadcast">>, [<<"Update">>], #{},
+    #{exclude => [SessionId3]}  %% Everyone except this session
+).
+```
+
+:::
+
 ### Pattern-Based Subscriptions
 
 Subscribe to multiple topics with patterns:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Subscribe to all user events with prefix
 wampy.subscribe('com.myapp.users.', {
     onEvent: function(args, kwargs, details) {
@@ -415,11 +750,31 @@ wampy.subscribe('com.myapp.users.', {
 // com.myapp.users.deleted
 ```
 
+```erlang [Erlang]
+%% Subscribe to all user events with prefix
+OnUserEvent = fun(Args, _KWArgs, #{topic := Topic}) ->
+    io:format("User event: ~s ~p~n", [Topic, Args])
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.users.">>, OnUserEvent, #{match => <<"prefix">>}
+).
+
+%% Receives events from:
+%% com.myapp.users.created
+%% com.myapp.users.updated
+%% com.myapp.users.deleted
+```
+
+:::
+
 ## Call Timeouts
 
 Prevent indefinite waiting with timeouts:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.slow_operation', [data], {
     timeout: 5000,  // 5 second timeout
     onSuccess: function(result) {
@@ -435,13 +790,36 @@ wampy.call('com.myapp.slow_operation', [data], {
 });
 ```
 
+```erlang [Erlang]
+case
+    bondy_connect_client:call(
+        Conn, <<"com.myapp.slow_operation">>, [Data], #{},
+        #{timeout => 5000}  %% 5 second timeout
+    )
+of
+    {ok, Result} ->
+        io:format("Completed: ~p~n", [Result]);
+    {error, #{kind := wamp, uri := <<"wamp.error.timeout">>}} ->
+        io:format("Operation timed out~n");
+    {error, #{kind := client, reason := timeout}} ->
+        %% The SDK's own timer fired before the router answered
+        io:format("Operation timed out~n");
+    {error, Error} ->
+        io:format("Operation failed: ~p~n", [Error])
+end.
+```
+
+:::
+
 Timeouts ensure callers don't wait indefinitely for unresponsive services.
 
 ## Caller Identification
 
 Know who's calling your procedures:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.restricted.operation', {
     rpc: function(args, kwargs, details) {
         // details.caller contains caller's session ID
@@ -456,6 +834,25 @@ wampy.register('com.myapp.restricted.operation', {
 });
 ```
 
+```erlang [Erlang]
+RestrictedOperation = fun(Args, KWArgs, #{caller := Caller}) ->
+    %% The caller detail contains the caller's session ID
+    io:format("Called by session: ~p~n", [Caller]),
+
+    %% Can look up caller identity
+    %% Check additional authorization
+    %% Log for audit purposes
+
+    {ok, #{args => [perform_operation(Args, KWArgs)]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.restricted.operation">>, RestrictedOperation
+).
+```
+
+:::
+
 Bondy discloses the caller by default. It omits the caller only when the registration sets `disclose_caller: false` and the call sets `disclose_me: false`. See [Caller Identification](/connect/concepts/wamp/advanced/rpc#caller-identification).
 
 Useful for:
@@ -468,7 +865,9 @@ Useful for:
 
 Know who published events:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.subscribe('com.myapp.events', {
     onEvent: function(args, kwargs, details) {
         // details.publisher contains publisher's session ID
@@ -477,6 +876,20 @@ wampy.subscribe('com.myapp.events', {
     }
 });
 ```
+
+```erlang [Erlang]
+OnEvent = fun(Args, KWArgs, #{publisher := Publisher}) ->
+    %% The publisher detail contains the publisher's session ID
+    io:format("Published by session: ~p~n", [Publisher]),
+    io:format("Event data: ~p ~p~n", [Args, KWArgs])
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.events">>, OnEvent
+).
+```
+
+:::
 
 The subscriber does not ask for this information. Bondy discloses the publisher unless the publisher sets `disclose_me: false`. See [Publisher Identification](/connect/concepts/wamp/advanced/pubsub#publisher-identification).
 
@@ -494,20 +907,42 @@ Assume services will fail:
 
 Begin with exact registrations and single instances:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Start simple
 wampy.register('com.myapp.process', {rpc: handler});
 ```
 
+```erlang [Erlang]
+%% Start simple
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.process">>, Handler
+).
+```
+
+:::
+
 Add complexity only when needed:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Scale to multiple instances
 wampy.register('com.myapp.process', {
     rpc: handler,
     invoke: 'roundrobin'
 });
 ```
+
+```erlang [Erlang]
+%% Scale to multiple instances
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.process">>, Handler, #{invoke => <<"roundrobin">>}
+).
+```
+
+:::
 
 ### Monitor and Measure
 
@@ -519,7 +954,9 @@ Track key metrics:
 
 Use WAMP meta events to build monitoring. Bondy publishes `wamp.registration.on_register` and `wamp.registration.on_unregister`, but not `on_create` or `on_delete`:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Subscribe to registration changes
 wampy.subscribe('wamp.registration.on_register', function(args, kwargs) {
     console.log('New registration:', kwargs);
@@ -529,6 +966,25 @@ wampy.subscribe('wamp.registration.on_unregister', function(args, kwargs) {
     console.log('Registration removed:', kwargs);
 });
 ```
+
+```erlang [Erlang]
+%% Subscribe to registration changes
+OnRegister = fun(Args, KWArgs, _Details) ->
+    io:format("New registration: ~p ~p~n", [Args, KWArgs])
+end,
+OnUnregister = fun(Args, KWArgs, _Details) ->
+    io:format("Registration removed: ~p ~p~n", [Args, KWArgs])
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"wamp.registration.on_register">>, OnRegister
+),
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"wamp.registration.on_unregister">>, OnUnregister
+).
+```
+
+:::
 
 ### Test Failure Scenarios
 
@@ -543,7 +999,9 @@ Don't wait for production to test failover:
 
 Make registration policies explicit in service documentation:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 /**
  * Process Order API
  *
@@ -557,6 +1015,21 @@ wampy.register('com.myapp.order.process', {
     invoke: 'roundrobin'
 });
 ```
+
+```erlang [Erlang]
+%% Process Order API
+%%
+%% Procedure: com.myapp.order.process
+%% Invocation: roundrobin (multiple instances)
+%% Timeout: 30 seconds recommended
+%% Idempotent: Yes (safe to retry)
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.order.process">>, ProcessOrder,
+    #{invoke => <<"roundrobin">>}
+).
+```
+
+:::
 
 ## Summary
 

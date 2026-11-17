@@ -48,7 +48,10 @@ Caller <-----> Router (Dealer) <-----> Callee
 ### WAMP Messages
 
 **Register** (Callee)
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 function add(args, kwargs, details) {
     return args[0] + args[1];
 }
@@ -61,8 +64,24 @@ wampy.register('com.myapp.add', {
 });
 ```
 
+```erlang [Erlang]
+Add = fun([A, B], _KWArgs, _Details) ->
+    {ok, #{args => [A + B]}}
+end,
+
+{ok, _RegistrationId} = bondy_connect_client:register(
+    Conn, <<"com.myapp.add">>, Add
+),
+io:format("Procedure registered~n").
+```
+
+:::
+
 **Call** (Caller)
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.add', [2, 3], {
     onSuccess: function(result) {
         console.log('Result:', result);  // 5
@@ -73,11 +92,24 @@ wampy.call('com.myapp.add', [2, 3], {
 });
 ```
 
+```erlang [Erlang]
+case bondy_connect_client:call(Conn, <<"com.myapp.add">>, [2, 3]) of
+    {ok, #{args := [Result]}} ->
+        io:format("Result: ~p~n", [Result]);  %% 5
+    {error, Error} ->
+        io:format("Call failed: ~p~n", [Error])
+end.
+```
+
+:::
+
 ## Registration
 
 ### Simple Registration
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.get_user', {
     rpc: function(args) {
         const userId = args[0];
@@ -86,9 +118,23 @@ wampy.register('com.myapp.get_user', {
 });
 ```
 
+```erlang [Erlang]
+GetUser = fun([UserId], _KWArgs, _Details) ->
+    {ok, #{args => [#{<<"id">> => UserId, <<"name">> => <<"Alice">>}]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.get_user">>, GetUser
+).
+```
+
+:::
+
 ### With Keyword Arguments
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.create_order', {
     rpc: function(args, kwargs) {
         return {
@@ -100,9 +146,28 @@ wampy.register('com.myapp.create_order', {
 });
 ```
 
+```erlang [Erlang]
+CreateOrder = fun(_Args, KWArgs, _Details) ->
+    #{<<"items">> := Items, <<"total">> := Total} = KWArgs,
+    {ok, #{args => [#{
+        <<"order_id">> => 123,
+        <<"items">> => Items,
+        <<"total">> => Total
+    }]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.create_order">>, CreateOrder
+).
+```
+
+:::
+
 ### Registration Options
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.procedure', {
     rpc: handler,
     match: 'exact',  // exact | prefix | wildcard
@@ -110,11 +175,24 @@ wampy.register('com.myapp.procedure', {
 });
 ```
 
+```erlang [Erlang]
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.procedure">>, Handler, #{
+        match => <<"exact">>,   %% exact | prefix | wildcard
+        invoke => <<"single">>  %% single | roundrobin | random | first | last
+    }
+).
+```
+
+:::
+
 ### Multiple Callees
 
 Multiple sessions can register the same procedure:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Service Instance 1
 wampy.register('com.myapp.process', {
     rpc: handler,
@@ -130,9 +208,27 @@ wampy.register('com.myapp.process', {
 // Calls distributed across both instances
 ```
 
+```erlang [Erlang]
+%% Service Instance 1
+{ok, _} = bondy_connect_client:register(
+    Conn1, <<"com.myapp.process">>, Handler, #{invoke => <<"roundrobin">>}
+),
+
+%% Service Instance 2
+{ok, _} = bondy_connect_client:register(
+    Conn2, <<"com.myapp.process">>, Handler, #{invoke => <<"roundrobin">>}
+).
+
+%% Calls distributed across both instances
+```
+
+:::
+
 ### Unregistering
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Register procedure
 wampy.register('com.myapp.temp', { rpc: handler });
 
@@ -140,11 +236,25 @@ wampy.register('com.myapp.temp', { rpc: handler });
 wampy.unregister('com.myapp.temp');
 ```
 
+```erlang [Erlang]
+%% Register procedure
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.temp">>, Handler
+),
+
+%% Later, unregister by URI
+ok = bondy_connect_client:unregister(Conn, <<"com.myapp.temp">>).
+```
+
+:::
+
 ## Calling Procedures
 
 ### Simple Call
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.get_time', null, {
     onSuccess: function(time) {
         console.log('Server time:', time);
@@ -152,9 +262,20 @@ wampy.call('com.myapp.get_time', null, {
 });
 ```
 
+```erlang [Erlang]
+{ok, #{args := [Time]}} = bondy_connect_client:call(
+    Conn, <<"com.myapp.get_time">>
+),
+io:format("Server time: ~p~n", [Time]).
+```
+
+:::
+
 ### With Positional Arguments
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.multiply', [4, 5], {
     onSuccess: function(result) {
         console.log('4 * 5 =', result);  // 20
@@ -162,9 +283,20 @@ wampy.call('com.myapp.multiply', [4, 5], {
 });
 ```
 
+```erlang [Erlang]
+{ok, #{args := [Result]}} = bondy_connect_client:call(
+    Conn, <<"com.myapp.multiply">>, [4, 5]
+),
+io:format("4 * 5 = ~p~n", [Result]).  %% 20
+```
+
+:::
+
 ### With Keyword Arguments
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.create_user', null, {
     username: 'bob',
     email: 'bob@example.com',
@@ -176,9 +308,24 @@ wampy.call('com.myapp.create_user', null, {
 });
 ```
 
+```erlang [Erlang]
+{ok, #{args := [User]}} = bondy_connect_client:call(
+    Conn, <<"com.myapp.create_user">>, [], #{
+        <<"username">> => <<"bob">>,
+        <<"email">> => <<"bob@example.com">>,
+        <<"age">> => 30
+    }
+),
+io:format("Created user: ~p~n", [maps:get(<<"id">>, User)]).
+```
+
+:::
+
 ### Call Options
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.slow_operation', null, null, {
     timeout: 5000,  // 5 second timeout
     receive_progress: true,  // Enable progressive results
@@ -191,11 +338,36 @@ wampy.call('com.myapp.slow_operation', null, null, {
 });
 ```
 
+```erlang [Erlang]
+%% 5 second timeout
+case
+    bondy_connect_client:call(
+        Conn, <<"com.myapp.slow_operation">>, [], #{}, #{timeout => 5000}
+    )
+of
+    {ok, #{args := [Result]}} ->
+        io:format("Final result: ~p~n", [Result]);
+    {error, Error} ->
+        io:format("Call failed: ~p~n", [Error])
+end,
+
+%% Progressive results need the asynchronous call. Each one arrives as a
+%% message, before the final result.
+{ok, Token} = bondy_connect_client:call_async(
+    Conn, <<"com.myapp.slow_operation">>, [], #{},
+    #{timeout => 5000, receive_progress => true}
+).
+```
+
+:::
+
 ## Error Handling
 
 ### Returning Errors (Callee)
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.divide', {
     rpc: function(args) {
         const [a, b] = args;
@@ -209,11 +381,28 @@ wampy.register('com.myapp.divide', {
 });
 ```
 
+```erlang [Erlang]
+Divide = fun
+    ([_A, B], _KWArgs, _Details) when B == 0 ->
+        {error, #{uri => <<"com.myapp.error.division_by_zero">>}};
+    ([A, B], _KWArgs, _Details) ->
+        {ok, #{args => [A / B]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.divide">>, Divide
+).
+```
+
+:::
+
 Name application errors under your own URI prefix, as for procedures and topics. The specification reserves the `wamp.` prefix for errors the protocol itself defines.
 
 ### Handling Errors (Caller)
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.divide', [10, 0], {
     onSuccess: function(result) {
         console.log('Result:', result);
@@ -226,20 +415,51 @@ wampy.call('com.myapp.divide', [10, 0], {
 });
 ```
 
+```erlang [Erlang]
+case bondy_connect_client:call(Conn, <<"com.myapp.divide">>, [10, 0]) of
+    {ok, #{args := [Result]}} ->
+        io:format("Result: ~p~n", [Result]);
+    {error, #{kind := wamp, uri := Uri, args := Args, kwargs := KWArgs}} ->
+        io:format("Error URI: ~s~n", [Uri]),
+        io:format("Error args: ~p~n", [Args]),
+        io:format("Error kwargs: ~p~n", [KWArgs]);
+    {error, #{kind := client, reason := Reason}} ->
+        %% A local failure, such as a timeout or a dropped connection
+        io:format("Call failed: ~p~n", [Reason])
+end.
+```
+
+:::
+
 ## Pattern Matching
 
 ### Exact Match (Default)
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.users.get', { rpc: handler });
 
 // Matches only
 wampy.call('com.myapp.users.get', [123]);
 ```
 
+```erlang [Erlang]
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.users.get">>, Handler
+),
+
+%% Matches only
+bondy_connect_client:call(Conn, <<"com.myapp.users.get">>, [123]).
+```
+
+:::
+
 ### Prefix Match
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.users.', {
     rpc: handler,
     match: 'prefix'
@@ -251,9 +471,24 @@ wampy.call('com.myapp.users.list', []);
 wampy.call('com.myapp.users.delete', [123]);
 ```
 
+```erlang [Erlang]
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.users.">>, Handler, #{match => <<"prefix">>}
+),
+
+%% Matches all with prefix
+bondy_connect_client:call(Conn, <<"com.myapp.users.get">>, [123]),
+bondy_connect_client:call(Conn, <<"com.myapp.users.list">>, []),
+bondy_connect_client:call(Conn, <<"com.myapp.users.delete">>, [123]).
+```
+
+:::
+
 ### Wildcard Match
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp..get', {
     rpc: handler,
     match: 'wildcard'
@@ -264,6 +499,19 @@ wampy.call('com.myapp.users.get', [123]);
 wampy.call('com.myapp.orders.get', [456]);
 wampy.call('com.myapp.products.get', [789]);
 ```
+
+```erlang [Erlang]
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp..get">>, Handler, #{match => <<"wildcard">>}
+),
+
+%% Matches pattern
+bondy_connect_client:call(Conn, <<"com.myapp.users.get">>, [123]),
+bondy_connect_client:call(Conn, <<"com.myapp.orders.get">>, [456]),
+bondy_connect_client:call(Conn, <<"com.myapp.products.get">>, [789]).
+```
+
+:::
 
 ## Invocation Policies
 
@@ -277,7 +525,9 @@ When multiple Callees register the same procedure, the Router uses the invocatio
 | **first** | First registered Callee |
 | **last** | Last registered Callee |
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Enable load balancing
 wampy.register('com.myapp.api.process', {
     rpc: handler,
@@ -285,13 +535,25 @@ wampy.register('com.myapp.api.process', {
 });
 ```
 
+```erlang [Erlang]
+%% Enable load balancing
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.api.process">>, Handler,
+    #{invoke => <<"roundrobin">>}
+).
+```
+
+:::
+
 ## Use Cases
 
 ### Microservice APIs
 
 Exposing service operations:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Order Service
 wampy.register('com.shop.orders.create', {
     rpc: async function(args, kwargs) {
@@ -307,11 +569,36 @@ wampy.call('com.shop.orders.create', null, {
 });
 ```
 
+```erlang [Erlang]
+%% Order Service
+CreateOrder = fun(_Args, KWArgs, _Details) ->
+    #{id := OrderId} = create_order(KWArgs),
+    {ok, #{args => [#{
+        <<"order_id">> => OrderId,
+        <<"status">> => <<"created">>
+    }]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.shop.orders.create">>, CreateOrder
+),
+
+%% Frontend calls
+bondy_connect_client:call(Conn, <<"com.shop.orders.create">>, [], #{
+    <<"user_id">> => 123,
+    <<"items">> => [#{<<"product_id">> => 1, <<"quantity">> => 2}]
+}).
+```
+
+:::
+
 ### Distributed Computation
 
 Offloading heavy processing:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Worker registers
 wampy.register('com.app.process_image', {
     rpc: async function(args) {
@@ -325,11 +612,32 @@ wampy.register('com.app.process_image', {
 wampy.call('com.app.process_image', ['https://example.com/photo.jpg']);
 ```
 
+```erlang [Erlang]
+%% Worker registers
+ProcessImage = fun([ImageUrl], _KWArgs, _Details) ->
+    #{url := Url} = heavy_image_processing(ImageUrl),
+    {ok, #{args => [#{<<"url">> => Url}]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.app.process_image">>, ProcessImage
+),
+
+%% Client calls
+bondy_connect_client:call(
+    Conn, <<"com.app.process_image">>, [<<"https://example.com/photo.jpg">>]
+).
+```
+
+:::
+
 ### Device Control
 
 IoT device control:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Device service registers one handler for every device.
 // details.procedure carries the concrete URI, e.g.
 // com.iot.device.livingroom.set_temperature
@@ -346,11 +654,36 @@ wampy.register('com.iot.device..set_temperature', {
 wampy.call('com.iot.device.livingroom.set_temperature', [22]);
 ```
 
+```erlang [Erlang]
+%% Device service registers one handler for every device.
+%% The procedure detail carries the concrete URI, e.g.
+%% com.iot.device.livingroom.set_temperature
+SetTemperature = fun([Value], _KWArgs, #{procedure := Procedure}) ->
+    DeviceId = lists:nth(4, binary:split(Procedure, <<".">>, [global])),
+    ok = set_temperature(DeviceId, Value),
+    {ok, #{args => [#{<<"status">> => <<"ok">>, <<"value">> => Value}]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.iot.device..set_temperature">>, SetTemperature,
+    #{match => <<"wildcard">>}
+),
+
+%% Controller calls
+bondy_connect_client:call(
+    Conn, <<"com.iot.device.livingroom.set_temperature">>, [22]
+).
+```
+
+:::
+
 ### Real-Time Queries
 
 Data retrieval:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Database service
 wampy.register('com.db.users.search', {
     rpc: function(args, kwargs) {
@@ -364,6 +697,25 @@ wampy.call('com.db.users.search', null, {
     limit: 10
 });
 ```
+
+```erlang [Erlang]
+%% Database service
+Search = fun(_Args, #{<<"query">> := Query}, _Details) ->
+    {ok, #{args => [database:search(users, Query)]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.db.users.search">>, Search
+),
+
+%% Application calls
+bondy_connect_client:call(Conn, <<"com.db.users.search">>, [], #{
+    <<"query">> => #{<<"age">> => #{<<"$gt">> => 18}},
+    <<"limit">> => 10
+}).
+```
+
+:::
 
 ## Best Practices
 
@@ -382,7 +734,10 @@ com.myapp.products.product.search
 - Important for network reliability
 
 **Return structured data:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // Good
 return {status: 'success', user_id: 123, created_at: Date.now()};
 
@@ -390,10 +745,27 @@ return {status: 'success', user_id: 123, created_at: Date.now()};
 return 123;  // Unclear what this number means
 ```
 
+```erlang [Erlang]
+%% Good
+Good = {ok, #{args => [#{
+    <<"status">> => <<"success">>,
+    <<"user_id">> => 123,
+    <<"created_at">> => erlang:system_time(millisecond)
+}]}},
+
+%% Avoid: unclear what this number means
+Avoid = {ok, #{args => [123]}}.
+```
+
+:::
+
 ### Error Handling
 
 **Use descriptive error URIs:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // In RPC handler
 throw {
     error: 'com.myapp.error.invalid_input',
@@ -402,8 +774,22 @@ throw {
 };
 ```
 
+```erlang [Erlang]
+%% In the handler
+{error, #{
+    uri => <<"com.myapp.error.invalid_input">>,
+    args => [<<"Invalid email format">>],
+    kwargs => #{<<"field">> => <<"email">>, <<"value">> => Email}
+}}.
+```
+
+:::
+
 **Handle timeouts:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.myapp.slow_op', null, null, {
     timeout: 10000,
     onSuccess: result => console.log(result),
@@ -415,6 +801,26 @@ wampy.call('com.myapp.slow_op', null, null, {
 });
 ```
 
+```erlang [Erlang]
+case
+    bondy_connect_client:call(
+        Conn, <<"com.myapp.slow_op">>, [], #{}, #{timeout => 10000}
+    )
+of
+    {ok, Result} ->
+        io:format("~p~n", [Result]);
+    {error, #{kind := wamp, uri := <<"wamp.error.timeout">>}} ->
+        io:format("Operation timed out~n");
+    {error, #{kind := client, reason := timeout}} ->
+        %% The SDK's own timer fired before the router answered
+        io:format("Operation timed out~n");
+    {error, Error} ->
+        io:format("Call failed: ~p~n", [Error])
+end.
+```
+
+:::
+
 ### Performance
 
 **Keep procedures fast:**
@@ -423,13 +829,30 @@ wampy.call('com.myapp.slow_op', null, null, {
 - Use progressive results for long operations
 
 **Keep registration references:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // Register and keep reference for later unregistration
 wampy.register('com.myapp.proc', { rpc: handler });
 ```
 
+```erlang [Erlang]
+%% Register and keep the id for later unregistration
+{ok, RegistrationId} = bondy_connect_client:register(
+    Conn, <<"com.myapp.proc">>, Handler
+),
+
+ok = bondy_connect_client:unregister(Conn, RegistrationId).
+```
+
+:::
+
 **Batch related calls:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // Instead of multiple calls
 wampy.call('com.myapp.get', [1]);
 wampy.call('com.myapp.get', [2]);
@@ -438,6 +861,18 @@ wampy.call('com.myapp.get', [3]);
 // Consider single batch call
 wampy.call('com.myapp.get_batch', [[1, 2, 3]]);
 ```
+
+```erlang [Erlang]
+%% Instead of multiple calls
+bondy_connect_client:call(Conn, <<"com.myapp.get">>, [1]),
+bondy_connect_client:call(Conn, <<"com.myapp.get">>, [2]),
+bondy_connect_client:call(Conn, <<"com.myapp.get">>, [3]),
+
+%% Consider single batch call
+bondy_connect_client:call(Conn, <<"com.myapp.get_batch">>, [[1, 2, 3]]).
+```
+
+:::
 
 ## Security
 
@@ -460,7 +895,9 @@ com.myapp.public.
 
 Always validate inputs:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.myapp.create_user', {
     rpc: function(args, kwargs) {
         if (!kwargs.email || !isValidEmail(kwargs.email)) {
@@ -471,6 +908,25 @@ wampy.register('com.myapp.create_user', {
     }
 });
 ```
+
+```erlang [Erlang]
+CreateUser = fun(_Args, KWArgs, _Details) ->
+    Email = maps:get(<<"email">>, KWArgs, undefined),
+    case is_valid_email(Email) of
+        true ->
+            %% Process valid input
+            {ok, #{}};
+        false ->
+            {error, #{uri => <<"com.myapp.error.invalid_email">>}}
+    end
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"com.myapp.create_user">>, CreateUser
+).
+```
+
+:::
 
 ## Comparison with Other RPC Systems
 

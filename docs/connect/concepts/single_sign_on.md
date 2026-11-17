@@ -76,7 +76,9 @@ The user realm gets to decide what the user can do (authorization), but the SSO 
 
 An SSO realm is created with special properties:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('bondy.realm.create', [{
     uri: 'com.example.sso',
     is_sso_realm: true,           // Mark as SSO realm
@@ -85,6 +87,18 @@ wampy.call('bondy.realm.create', [{
     authmethods: []                // No auth methods needed
 }]);
 ```
+
+```erlang [Erlang]
+bondy_connect_client:call(Conn, <<"bondy.realm.create">>, [#{
+    <<"uri">> => <<"com.example.sso">>,
+    <<"is_sso_realm">> => true,        %% Mark as SSO realm
+    <<"allow_connections">> => false,  %% No direct connections
+    <<"security_enabled">> => true,
+    <<"authmethods">> => []            %% No auth methods needed
+}]).
+```
+
+:::
 
 Key characteristics:
 
@@ -98,7 +112,9 @@ The SSO realm exists solely to store and manage credentials. Users never connect
 
 User realms are configured to delegate authentication:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('bondy.realm.create', [{
     uri: 'com.example.app1',
     is_sso_realm: false,
@@ -110,6 +126,20 @@ wampy.call('bondy.realm.create', [{
 }]);
 ```
 
+```erlang [Erlang]
+bondy_connect_client:call(Conn, <<"bondy.realm.create">>, [#{
+    <<"uri">> => <<"com.example.app1">>,
+    <<"is_sso_realm">> => false,
+    <<"sso_realm_uri">> => <<"com.example.sso">>,  %% Link to SSO realm
+    <<"allow_connections">> => true,
+    <<"security_enabled">> => true,
+    <<"authmethods">> => [<<"wampcra">>, <<"password">>]
+    %% ... other configuration
+}]).
+```
+
+:::
+
 The `sso_realm_uri` property links this realm to the SSO realm for credential lookup.
 
 ### User Record Creation
@@ -118,7 +148,9 @@ When adding a user to a realm configured with Same Sign-On:
 
 **Option 1: Create in SSO realm first**
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // 1. Create user in SSO realm (with credentials)
 wampy.call('bondy.user.add', ['com.example.sso', {
     username: 'alice@example.com',
@@ -134,9 +166,35 @@ wampy.call('bondy.user.add', ['com.example.app1', {
 }]);
 ```
 
+```erlang [Erlang]
+%% 1. Create user in SSO realm (with credentials)
+bondy_connect_client:call(Conn, <<"bondy.user.add">>, [
+    <<"com.example.sso">>,
+    #{
+        <<"username">> => <<"alice@example.com">>,
+        <<"password">> => <<"secure_password">>,
+        <<"groups">> => []
+    }
+]),
+
+%% 2. Create user in user realm (without credentials)
+bondy_connect_client:call(Conn, <<"bondy.user.add">>, [
+    <<"com.example.app1">>,
+    #{
+        <<"username">> => <<"alice@example.com">>,
+        <<"sso_realm_uri">> => <<"com.example.sso">>,
+        <<"groups">> => [<<"app1_user">>]
+    }
+]).
+```
+
+:::
+
 **Option 2: Create in user realm (automatic SSO creation)**
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Create user in user realm with credentials
 // Bondy automatically creates user in SSO realm
 wampy.call('bondy.user.add', ['com.example.app1', {
@@ -146,6 +204,22 @@ wampy.call('bondy.user.add', ['com.example.app1', {
     groups: ['app1_user']
 }]);
 ```
+
+```erlang [Erlang]
+%% Create user in user realm with credentials
+%% Bondy automatically creates user in SSO realm
+bondy_connect_client:call(Conn, <<"bondy.user.add">>, [
+    <<"com.example.app1">>,
+    #{
+        <<"username">> => <<"alice@example.com">>,
+        <<"password">> => <<"secure_password">>,
+        <<"sso_realm_uri">> => <<"com.example.sso">>,
+        <<"groups">> => [<<"app1_user">>]
+    }
+]).
+```
+
+:::
 
 If the user doesn't exist in the SSO realm, Bondy creates them there automatically. If they already exist, the credentials in the SSO realm are used.
 
@@ -210,7 +284,9 @@ This separation allows:
 
 Changing a password affects all linked realms:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Can change from any linked realm: realm, username, new password, old password
 wampy.call('bondy.user.change_password', [
     'com.example.app1', 'alice@example.com', 'new_secure_password', 'secure_password'
@@ -220,13 +296,30 @@ wampy.call('bondy.user.change_password', [
 // The new password works for all linked realms
 ```
 
+```erlang [Erlang]
+%% Can change from any linked realm: realm, username, new password, old password
+bondy_connect_client:call(Conn, <<"bondy.user.change_password">>, [
+    <<"com.example.app1">>,
+    <<"alice@example.com">>,
+    <<"new_secure_password">>,
+    <<"secure_password">>
+]).
+
+%% Bondy changes the password in the SSO realm
+%% The new password works for all linked realms
+```
+
+:::
+
 `bondy.user.change_password` forwards the change of a linked user to the SSO realm, so the change affects authentication across all linked user realms. `bondy.user.update` does not change a password.
 
 ### Adding Users to Additional Realms
 
 To give Alice access to another realm:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('bondy.user.add', ['com.example.app3', {
     username: 'alice@example.com',
     sso_realm_uri: 'com.example.sso',  // Same SSO realm
@@ -234,13 +327,28 @@ wampy.call('bondy.user.add', ['com.example.app3', {
 }]);
 ```
 
+```erlang [Erlang]
+bondy_connect_client:call(Conn, <<"bondy.user.add">>, [
+    <<"com.example.app3">>,
+    #{
+        <<"username">> => <<"alice@example.com">>,
+        <<"sso_realm_uri">> => <<"com.example.sso">>,  %% Same SSO realm
+        <<"groups">> => [<<"app3_guest">>]
+    }
+]).
+```
+
+:::
+
 No password needed—Alice's existing credentials from the SSO realm will work.
 
 ### Local (Non-SSO) Users
 
 Realms can have both SSO users and local users:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Local user (credentials stored in realm)
 wampy.call('bondy.user.add', ['com.example.app1', {
     username: 'local_user@example.com',
@@ -249,6 +357,21 @@ wampy.call('bondy.user.add', ['com.example.app1', {
     groups: ['app1_user']
 }]);
 ```
+
+```erlang [Erlang]
+%% Local user (credentials stored in realm)
+bondy_connect_client:call(Conn, <<"bondy.user.add">>, [
+    <<"com.example.app1">>,
+    #{
+        <<"username">> => <<"local_user@example.com">>,
+        <<"password">> => <<"local_password">>,
+        <<"sso_realm_uri">> => null,  %% No SSO link
+        <<"groups">> => [<<"app1_user">>]
+    }
+]).
+```
+
+:::
 
 Local users authenticate directly against the user realm without SSO involvement.
 

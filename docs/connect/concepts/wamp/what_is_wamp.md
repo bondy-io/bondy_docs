@@ -50,7 +50,9 @@ WAMP does not distinguish client and server roles: every connected agent can reg
 
 ### Example: two agents coordinating over RPC and Pub/Sub
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Agent registers its capability
 wampy.register('ai.agent.vision.analyze', {
     rpc: async function(args, kwargs) {
@@ -78,6 +80,43 @@ wampy.call('ai.agent.vision.analyze', null, {
     image_id: 'img_123'
 });
 ```
+
+```erlang [Erlang]
+%% Agent registers its capability
+Analyze = fun(_Args, KWArgs, _Details) ->
+    #{<<"image">> := Image, <<"image_id">> := ImageId} = KWArgs,
+    Analysis = analyze_image(Image),
+
+    %% Publish result as event for interested agents
+    ok = bondy_connect_client:publish(
+        Conn, <<"ai.agent.vision.analysis_complete">>, [],
+        #{<<"image_id">> => ImageId, <<"analysis">> => Analysis}
+    ),
+
+    {ok, #{args => [Analysis]}}
+end,
+
+{ok, _} = bondy_connect_client:register(
+    Conn, <<"ai.agent.vision.analyze">>, Analyze
+),
+
+%% Another agent invokes it and subscribes to results
+OnAnalysis = fun(_Args, #{<<"analysis">> := Analysis}, _Details) ->
+    io:format("Analysis ready: ~p~n", [Analysis])
+    %% Coordinate next steps
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"ai.agent.vision.analysis_complete">>, OnAnalysis
+),
+
+bondy_connect_client:call(Conn, <<"ai.agent.vision.analyze">>, [], #{
+    <<"image">> => ImageData,
+    <<"image_id">> => <<"img_123">>
+}).
+```
+
+:::
 
 One protocol and one connection cover both the function call and the event notification.
 
@@ -183,7 +222,9 @@ A WAMP session follows:
 
 **Register a procedure:**
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.register('com.example.add', {
     rpc: function(args) {
         return args[0] + args[1];
@@ -199,9 +240,27 @@ wampy.register('com.example.add', {
 });
 ```
 
+```erlang [Erlang]
+Add = fun([A, B], _KWArgs, _Details) ->
+    {ok, #{args => [A + B]}}
+end,
+Options = #{invoke => <<"single">>, match => <<"exact">>},
+
+case bondy_connect_client:register(Conn, <<"com.example.add">>, Add, Options) of
+    {ok, _RegistrationId} ->
+        io:format("Procedure registered successfully~n");
+    {error, Error} ->
+        io:format("Registration failed: ~p~n", [Error])
+end.
+```
+
+:::
+
 **Call a procedure:**
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.call('com.example.add', [3, 4], {
     onSuccess: function(result) {
         console.log('Result:', result); // Result: 7
@@ -212,23 +271,59 @@ wampy.call('com.example.add', [3, 4], {
 });
 ```
 
+```erlang [Erlang]
+case bondy_connect_client:call(Conn, <<"com.example.add">>, [3, 4]) of
+    {ok, #{args := [Result]}} ->
+        io:format("Result: ~p~n", [Result]);  %% Result: 7
+    {error, Error} ->
+        io:format("Call failed: ~p~n", [Error])
+end.
+```
+
+:::
+
 ### Pub/Sub
 
 **Subscribe to a topic:**
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.subscribe('com.example.events', function(args, kwargs, details) {
     console.log('Event received:', args);
 });
 ```
 
+```erlang [Erlang]
+OnEvent = fun(Args, _KWArgs, _Details) ->
+    io:format("Event received: ~p~n", [Args])
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.example.events">>, OnEvent
+).
+```
+
+:::
+
 **Publish an event:**
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.example.events', ['Hello World'], {
     acknowledge: true
 });
 ```
+
+```erlang [Erlang]
+%% publish_ack/3 waits for the router's acknowledgement
+{ok, _PublicationId} = bondy_connect_client:publish_ack(
+    Conn, <<"com.example.events">>, [<<"Hello World">>]
+).
+```
+
+:::
 
 ## What distinguishes WAMP
 

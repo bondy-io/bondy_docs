@@ -24,15 +24,28 @@ A realm holds at most one retained event per topic. A new retained publication r
 
 The publisher asks Bondy to retain an event with the `retain` option:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.events.important', [eventData], {}, {
     retain: true
 });
 ```
 
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.events.important">>, [EventData], #{},
+    #{retain => true}
+).
+```
+
+:::
+
 A retained event lives until it is replaced or expires. The publisher sets its lifetime in seconds with the Bondy-specific `_retained_ttl` option. Without it, Bondy applies `wamp.message_retention.default_ttl`; a value of `0` means the event never expires. An event larger than `wamp.message_retention.max_message_size` is delivered to current subscribers but not retained. See [message retention](/connect/reference/configuration/wamp) for these settings.
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.service.status', null, {
     status: 'operational',
     version: '2.1.0'
@@ -42,11 +55,26 @@ wampy.publish('com.myapp.service.status', null, {
 });
 ```
 
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.service.status">>, [],
+    #{<<"status">> => <<"operational">>, <<"version">> => <<"2.1.0">>},
+    #{
+        retain => true,
+        '_retained_ttl' => 3600  %% Expires after one hour
+    }
+).
+```
+
+:::
+
 ### Receiving Retained Events
 
 The subscriber asks for retained events with the `get_retained` option:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.subscribe('com.myapp.service.status', {
     onEvent: function(args, kwargs, details) {
         if (details.retained) {
@@ -57,6 +85,25 @@ wampy.subscribe('com.myapp.service.status', {
     get_retained: true
 });
 ```
+
+```erlang [Erlang]
+OnStatus = fun(_Args, KWArgs, Details) ->
+    case Details of
+        #{retained := true} ->
+            io:format("Last known status: ~p~n", [KWArgs]);
+        _ ->
+            ok
+    end,
+    update_dashboard(KWArgs)
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.service.status">>, OnStatus,
+    #{get_retained => true}
+).
+```
+
+:::
 
 When Bondy creates the subscription, it sends the retained event at once, followed by new events as they are published. A repeated `SUBSCRIBE` that returns the existing subscription does not send the retained event again. A retained event carries `retained: true` in its details, so the subscriber can tell it apart from a live event.
 
@@ -82,7 +129,9 @@ A subscription can match many topics by giving a URI pattern and a matching poli
 
 Receive events from all topics with a given prefix:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Subscribe to all user events
 wampy.subscribe('com.myapp.users.', {
     onEvent: function(args, kwargs, details) {
@@ -100,11 +149,34 @@ wampy.subscribe('com.myapp.users.', {
 // etc.
 ```
 
+```erlang [Erlang]
+%% Subscribe to all user events
+OnUserEvent = fun(Args, KWArgs, #{topic := Topic}) ->
+    io:format("User event on topic: ~s~n", [Topic]),
+    io:format("Event data: ~p ~p~n", [Args, KWArgs])
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.users.">>, OnUserEvent, #{match => <<"prefix">>}
+).
+
+%% Receives events from:
+%% com.myapp.users.created
+%% com.myapp.users.updated
+%% com.myapp.users.deleted
+%% com.myapp.users.login
+%% etc.
+```
+
+:::
+
 ### Wildcard Matching
 
 An empty URI component in the pattern matches any single component:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Subscribe to all "created" events across resources
 wampy.subscribe('com.myapp..created', {
     onEvent: function(args, kwargs, details) {
@@ -121,11 +193,33 @@ wampy.subscribe('com.myapp..created', {
 // com.myapp.products.created
 ```
 
+```erlang [Erlang]
+%% Subscribe to all "created" events across resources
+OnCreated = fun(_Args, KWArgs, #{topic := Topic}) ->
+    %% users, orders, products, etc.
+    Resource = lists:nth(3, binary:split(Topic, <<".">>, [global])),
+    io:format("~s created: ~p~n", [Resource, KWArgs])
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp..created">>, OnCreated, #{match => <<"wildcard">>}
+).
+
+%% Receives events from:
+%% com.myapp.users.created
+%% com.myapp.orders.created
+%% com.myapp.products.created
+```
+
+:::
+
 ### Multiple Pattern Subscriptions
 
 One session can hold several pattern subscriptions:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Monitor all critical system events
 wampy.subscribe('com.myapp..error', {
     onEvent: handleError,
@@ -144,6 +238,25 @@ wampy.subscribe('com.myapp.services.', {
 });
 ```
 
+```erlang [Erlang]
+%% Monitor all critical system events
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp..error">>, HandleError, #{match => <<"wildcard">>}
+),
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp..alert">>, HandleAlert, #{match => <<"wildcard">>}
+),
+
+%% Aggregate metrics from all services
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.services.">>, AggregateMetrics,
+    #{match => <<"prefix">>}
+).
+```
+
+:::
+
 ## Publication Trust Levels
 
 Bondy does not implement publication trust levels. See [WAMP](/connect/reference/protocols/wamp).
@@ -156,7 +269,9 @@ By default a publisher does not receive its own event, even when it is subscribe
 
 Omit `exclude_me`, or set it to `true`:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.chat.message', ['Hello!']);
 
 // This session's own subscription does not receive the event
@@ -168,15 +283,43 @@ wampy.subscribe('com.myapp.chat.message', {
 });
 ```
 
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.chat.message">>, [<<"Hello!">>]
+),
+
+%% This session's own subscription does not receive the event
+OnMessage = fun([Message], _KWArgs, _Details) ->
+    %% Only receives messages from other sessions
+    io:format("Message from others: ~s~n", [Message])
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.chat.message">>, OnMessage
+).
+```
+
+:::
+
 ### Including the Publisher
 
 Set `exclude_me` to `false` to receive your own publication:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.updates', [data], {}, {
     exclude_me: false
 });
 ```
+
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.updates">>, [Data], #{}, #{exclude_me => false}
+).
+```
+
+:::
 
 ### Use Cases
 
@@ -194,7 +337,9 @@ An event can tell the subscriber who published it. The publisher controls disclo
 
 The subscriber does not need to ask for this information.
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.subscribe('com.myapp.events', {
     onEvent: function(args, kwargs, details) {
         if (details.publisher) {
@@ -205,13 +350,41 @@ wampy.subscribe('com.myapp.events', {
 });
 ```
 
+```erlang [Erlang]
+OnEvent = fun(_Args, _KWArgs, Details) ->
+    case Details of
+        #{publisher := Publisher, publisher_authid := Authid} ->
+            io:format("Published by session: ~p~n", [Publisher]),
+            io:format("authid: ~s~n", [Authid]);
+        _ ->
+            ok
+    end
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.events">>, OnEvent
+).
+```
+
+:::
+
 A publisher that wants to stay anonymous opts out:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.events', [data], {}, {
     disclose_me: false
 });
 ```
+
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.events">>, [Data], #{}, #{disclose_me => false}
+).
+```
+
+:::
 
 ### Use Cases
 
@@ -236,37 +409,82 @@ The lists apply to every subscription, whatever its match policy. Bondy applies 
 
 ### Eligible List (Whitelist)
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.admin.command', [command], {}, {
     eligible: [session_id_1, session_id_2]  // Only these sessions
 });
 ```
 
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.admin.command">>, [Command], #{},
+    #{eligible => [SessionId1, SessionId2]}  %% Only these sessions
+).
+```
+
+:::
+
 Other subscribers to `com.myapp.admin.command` do not receive this event.
 
 ### Exclude List (Blacklist)
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.broadcast', [announcement], {}, {
     exclude: [session_id_3, session_id_4]  // Everyone except these
 });
 ```
 
+```erlang [Erlang]
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.broadcast">>, [Announcement], #{},
+    #{exclude => [SessionId3, SessionId4]}  %% Everyone except these
+).
+```
+
+:::
+
 ### Combining with Publisher Exclusion
 
 When `exclude_me` is `true`, which is the default, Bondy adds the publisher's own session to the exclude list. A session that appears in both `eligible` and the exclude list does not receive the event.
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.updates', [data], {}, {
     exclude: [session_id_5]  // Excludes session_id_5 and, by default, the publisher
 });
 ```
 
-```javascript
+```erlang [Erlang]
+%% Excludes SessionId5 and, by default, the publisher
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.updates">>, [Data], #{}, #{exclude => [SessionId5]}
+).
+```
+
+:::
+
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.ops.alert', [alert], {}, {
     eligible_authrole: ['operator']  // Only sessions holding the operator role
 });
 ```
+
+```erlang [Erlang]
+%% Only sessions holding the operator role
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.ops.alert">>, [Alert], #{},
+    #{eligible_authrole => [<<"operator">>]}
+).
+```
+
+:::
 
 ### Use Cases
 
@@ -290,7 +508,9 @@ A publisher turns on Payload Passthru Mode by setting `ppt_scheme` in the `PUBLI
 
 Bondy copies the `ppt_*` options into the details of each `EVENT`, so the subscriber learns how to decode the payload.
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 wampy.publish('com.myapp.sensor.frame', [encryptedFrame], {}, {
     ppt_scheme: 'x_myapp_keys',
     ppt_serializer: 'cbor',
@@ -298,6 +518,8 @@ wampy.publish('com.myapp.sensor.frame', [encryptedFrame], {}, {
     ppt_keyid: 'key-2026-10'
 });
 ```
+
+:::
 
 ### Tradeoffs
 
@@ -322,7 +544,10 @@ Bondy implements the WAMP topic reflection procedures `wamp.reflection.topic.lis
 ### Event Design
 
 **Keep events focused:**
-```javascript
+
+::: code-group sdk
+
+```javascript [JavaScript]
 // Good - specific, focused event
 wampy.publish('com.myapp.order.payment_received', null, {
     order_id: '123',
@@ -338,11 +563,36 @@ wampy.publish('com.myapp.order.updated', null, {
 });
 ```
 
+```erlang [Erlang]
+%% Good - specific, focused event
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.order.payment_received">>, [], #{
+        <<"order_id">> => <<"123">>,
+        <<"amount">> => 99.99,
+        <<"timestamp">> => erlang:system_time(millisecond)
+    }
+),
+
+%% Avoid - generic event requiring conditionals
+ok = bondy_connect_client:publish(
+    Conn, <<"com.myapp.order.updated">>, [], #{
+        <<"order_id">> => <<"123">>,
+        %% Subscribers must check type
+        <<"update_type">> => <<"payment_received">>,
+        <<"data">> => Data
+    }
+).
+```
+
+:::
+
 ### Pattern Subscription Strategy
 
 Use the most specific pattern possible:
 
-```javascript
+::: code-group sdk
+
+```javascript [JavaScript]
 // Too broad - receives everything
 wampy.subscribe('com.myapp.', {..., match: 'prefix'});
 
@@ -352,6 +602,25 @@ wampy.subscribe('com.myapp.orders.', {..., match: 'prefix'});
 // Best - exact when possible
 wampy.subscribe('com.myapp.orders.completed', {...});
 ```
+
+```erlang [Erlang]
+%% Too broad - receives everything
+bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.">>, Handler, #{match => <<"prefix">>}
+),
+
+%% Better - specific domain
+bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.orders.">>, Handler, #{match => <<"prefix">>}
+),
+
+%% Best - exact when possible
+bondy_connect_client:subscribe(
+    Conn, <<"com.myapp.orders.completed">>, Handler
+).
+```
+
+:::
 
 ### Retention Guidelines
 
