@@ -26,8 +26,9 @@ Registering or subscribing with a `prefix` or `wildcard` match policy relaxes th
 
 Every session's lifecycle is observable by any other session on the same realm, and a session can retrieve its own or another session's details on demand — see the [Session WAMP API Reference](/connect/reference/wamp_api/session) for the full contract. In practice:
 
-::: code-group
-```Python
+::: code-group sdk
+
+```python [Python]
 # Observe sessions joining and leaving the realm
 await self._session.subscribe(self.on_session_join, "wamp.session.on_join")
 await self._session.subscribe(self.on_session_leave, "wamp.session.on_leave")
@@ -48,6 +49,34 @@ other_session = await self._session.call(
     "wamp.session.get", session_id
 )
 ```
+
+```erlang [Erlang]
+%% Observe sessions joining and leaving the realm
+OnSessionJoin = fun([Session], _KWArgs, _Details) ->
+    io:format("Session joined: ~p~n", [maps:get(<<"session">>, Session)])
+end,
+OnSessionLeave = fun([SessionId, Authid, Authrole], _KWArgs, _Details) ->
+    io:format("Session left: ~p ~s ~s~n", [SessionId, Authid, Authrole])
+end,
+
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"wamp.session.on_join">>, OnSessionJoin
+),
+{ok, _} = bondy_connect_client:subscribe(
+    Conn, <<"wamp.session.on_leave">>, OnSessionLeave
+),
+
+%% Retrieve this session's own details
+{ok, #{args := [OwnSession]}} = bondy_connect_client:call(
+    Conn, <<"bondy.session.self">>
+),
+
+%% Retrieve a specific session by id (routed cluster-wide)
+{ok, #{args := [OtherSession]}} = bondy_connect_client:call(
+    Conn, <<"wamp.session.get">>, [SessionId]
+).
+```
+
 :::
 
 `bondy.session.self` is the cheaper call when you only need your own session — it never leaves the node, unlike `wamp.session.get`, which Bondy routes to whichever node the target session actually lives on.
