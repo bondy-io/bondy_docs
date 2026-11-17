@@ -30,13 +30,11 @@ const DOCS = 'docs'
 const DRY = process.argv.includes('--dry-run')
 
 /**
- * The Bondy Connect set is served under the product's name, /connect, not
- * under /router. Earlier moves (the WAMP set folded into Bondy Connect) are
- * carried by the existing redirects, whose targets pass through this table.
+ * No move is pending. Add a [from, to] pair of URL prefixes here to move a
+ * set of pages. Earlier moves are carried by the existing redirects, whose
+ * targets pass through this table.
  */
-const MOVES = [
-  ['/router', '/connect']
-]
+const MOVES = []
 
 const RETIRE = []
 
