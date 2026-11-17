@@ -13,11 +13,29 @@ related:
 
 # What's New in 1.2
 
-This page lists the changes between Bondy Connect 1.0.0 and 1.2. It covers releases 1.0.1, 1.0.2, 1.1.0 and 1.2.0. Each section starts with the changes that need action from you.
+This page lists the changes between Bondy Connect 1.0.0 and 1.2. It covers releases 1.0.1, 1.0.2, 1.1.0, 1.2.0 and 1.2.1. Each section starts with the changes that need action from you.
 
 ::: tip Coming from a release candidate?
 A deployment that runs a 1.0.0 release candidate has more to change: configuration keys, the WAMP and HTTP APIs, and the realm authentication rules. Follow [Migrating from a Release Candidate](/connect/guides/deployment/migrating_from_a_release_candidate). It includes every change on this page.
 :::
+
+## 1.2.1
+
+This release needs no action from you. It adds two configuration options, and both have defaults.
+
+### Fixes
+
+- **A node that restarts while its peers are busy rebuilds its routing table without delay.** Such a node could take minutes, and for that time it reported ready and answered calls to procedures registered on other nodes with `wamp.error.no_such_procedure`. The bootstraps that rebuild the table had to fit under [`db.oplog.aae.max_concurrency`](/connect/reference/configuration/data_storage#db.oplog.aae.max_concurrency), and live sync sessions kept that limit full. Bootstraps now have their own limit, the new option [`db.oplog.aae.bootstrap.max_concurrency`](/connect/reference/configuration/data_storage#db.oplog.aae.bootstrap.max_concurrency) (default `4`). A node that recovers can therefore run up to that many sync sessions above `db.oplog.aae.max_concurrency`. The `[bondy_oplog, sync_scheduler, bootstrap_capped]` telemetry event no longer carries the `node_current` and `node_cap` measurements.
+- **A node that restarts rebuilds its routing table once per shard.** It rebuilt the table once for every batch of 64 entries it received, and on each pass it wrote again every routing entry it owns. Those writes replicated to the other nodes, and the node applied routing changes from its peers late for as long as the passes lasted. A bootstrap now announces each table once, when the whole transfer for a shard is written.
+- **Load yielding no longer stops bootstraps.** With [`db.oplog.aae.load_adaptive`](/connect/reference/configuration/data_storage#db.oplog.aae.load_adaptive) on, a node whose load was at or above the threshold started no bootstrap, so a node that restarted while busy rebuilt no routing table for as long as the load lasted. The setting no longer defers bootstraps. The `[bondy_oplog, sync_scheduler, bootstrap_load_deferred]` telemetry event and the `bootstrap_load_deferred` value of `bondy_oplog_sync_scheduler_events_total` are gone.
+- **A node limits the bootstraps it serves.** A node served every bootstrap its peers asked for, so many nodes that recovered at once could all load the same node. A node now serves at most [`db.oplog.aae.bootstrap.serve.max_concurrency`](/connect/reference/configuration/data_storage#db.oplog.aae.bootstrap.serve.max_concurrency) at a time (new option, default `8`). It refuses the next one, and the asking node asks again after its retry backoff. The new metric [`bondy_oplog_bootstrap_serve_refused_total`](/connect/reference/metrics#anti-entropy-sync-bootstrap-frontier-convergence) counts the refusals. A node whose bootstrap fails now tells the serving node at once, so the serving node no longer keeps that bootstrap open for 60 seconds.
+- **A graceful stop ends when the clients have left.** A node waited for the whole of [`shutdown.grace_period`](/connect/reference/configuration/startup_shutdown#shutdown.grace_period) (default `30s`), also when it had no client connected. The node now ends the wait when the last client connection closes and, in a cluster, the nodes it is connected to hold the removal of its registrations and subscriptions. `shutdown.grace_period` is the longest it waits. See [Shutdown](/connect/concepts/node_lifecycle#shutdown).
+- **`bondy_rpc_promise_timeouts_total` counts only the calls that end with `wamp.error.timeout`.** It also counted every expiry that Bondy answers with a new attempt for a call that set `_retries`, and each wait of such a call that found no callee. On a workload that uses `_retries`, the counter was higher than the number of timeouts callers received.
+- **`bondy_oplog_sync_scheduler_load` reports the load with load yielding off.** The gauge read `0` while `db.oplog.aae.load_adaptive` was off, which is the default. The scheduler now samples the load on every tick, so the gauge shows how close a node runs to [`db.oplog.aae.load_run_queue_threshold`](/connect/reference/configuration/data_storage#db.oplog.aae.load_run_queue_threshold) before you turn the setting on.
+
+### Known limitation
+
+Every shard that a Bondy node starts backs the authentication freshness fence, and the scheduler does not throttle, defer or cap the live syncs of such a shard. On a Bondy node `db.oplog.aae.live_sync`, `db.oplog.aae.live_sync.max` and `db.oplog.aae.load_adaptive` therefore have no effect. `db.oplog.aae.max_concurrency` does not limit how many live syncs run; it only sets the size of the batch each session pulls. The bootstrap limits and `db.oplog.aae.max_pages_in_flight` apply as described.
 
 ## 1.2.0
 

@@ -202,31 +202,54 @@ Interval between sync scheduler ticks. Each tick, the scheduler asks the peer so
 
 @[config](db.oplog.aae.live_sync,on|off,on,v1.1.0)
 
-Adaptively throttles live (post-bootstrap) syncs. A converged shard only re-syncs to discover divergence; once its data has settled it has nothing to pull, yet a naive scheduler would still dispatch a session against every peer every tick — the dominant steady-state cost of running anti-entropy across many shards. When on, each shard syncs at the tick interval while its data is actively changing, and backs off geometrically up to `db.oplog.aae.live_sync.max` once it goes quiescent, resetting to the fast cadence the moment its data moves again. Shards backing the authentication freshness fence are exempt and always sync every tick, so this never affects auth availability. When off, every live shard syncs every peer every tick (the historical behaviour).
+Slows the live syncs of a shard whose data has settled. A live sync is the sync of a shard that already holds data; it pulls only the pages the shard is missing. When this option is on, a shard syncs at the tick interval while its data changes. Once its data settles, the scheduler doubles the interval between its syncs, up to `db.oplog.aae.live_sync.max`. The first change resets the shard to the tick interval. When this option is off, every live shard syncs on every tick. A shard that backs the authentication freshness fence always syncs on every tick, so this option never delays authentication.
+
+**Known limitation.** Every shard that a Bondy node starts backs the authentication freshness fence. On a Bondy node this option therefore has no effect: the scheduler starts a live sync for every shard on every tick.
 
 @[config](db.oplog.aae.live_sync.max,duration_time_units,5s,v1.1.0)
 
-Upper bound on the adaptive live-sync poll interval: once a shard goes quiescent, its sync cadence doubles each round up to this cap. Because `bondy_db` propagates changes pull-only (no eager push), this cap is also the steady-state cross-node convergence latency for a quiescent shard — set it below the convergence SLA you need. The first poll that pulls anything resets the shard to the fast cadence. Only relevant when `db.oplog.aae` and `db.oplog.aae.live_sync` are both on.
+The longest interval between the live syncs of a shard whose data has settled. Changes propagate by pull only, so this value is also the longest time such a shard takes to learn of a change on a peer. Set it below the convergence time you need. Only relevant when `db.oplog.aae` and `db.oplog.aae.live_sync` are both on. On a Bondy node this option has no effect; see the known limitation of `db.oplog.aae.live_sync`.
 
 ### Concurrency and Memory
 
 @[config](db.oplog.aae.max_concurrency,integer,3,v1.1.0)
 
-Maximum number of anti-entropy sync sessions allowed to run concurrently on this node. Anti-entropy is background work subordinate to routing — this cap keeps it from saturating the node. It governs speed and fairness, never the memory ceiling: the per-round page batch is `db.oplog.aae.max_pages_in_flight` divided by this value, so raising concurrency shrinks each session's batch while the node-wide page budget stays fixed. More concurrency means more peers/shards make progress at once — no shard starves behind a single serial sync — each running slower, not using more RAM. `1` serialises anti-entropy entirely.
+The number of live sync sessions that can run at once on this node. Two kinds of session are outside this limit:
+
+- Bootstraps, which have their own limit, [`db.oplog.aae.bootstrap.max_concurrency`](#db.oplog.aae.bootstrap.max_concurrency).
+- The live syncs of a shard that backs the authentication freshness fence, which start on every tick.
+
+The value also sets the size of a round. A session pulls `db.oplog.aae.max_pages_in_flight` divided by this value pages in each round, so a higher value makes each round smaller.
+
+**Known limitation.** Every shard that a Bondy node starts backs the authentication freshness fence. On a Bondy node this option therefore does not limit how many live syncs run. It only sets the size of a round.
 
 @[config](db.oplog.aae.max_pages_in_flight,integer,2048,v1.1.0)
 
-Node-wide budget, in MST pages, for anti-entropy reconciliation in flight at any instant. This is the lever that bounds anti-entropy's peak memory: a sync session pulls missing pages in bounded rounds of `max_pages_in_flight / max_concurrency` pages, so total in-flight pages stay near this budget regardless of dataset size or concurrency. Larger means faster sync with a higher peak; smaller is gentler on RAM but slower.
+Budget, in MST pages, for anti-entropy reconciliation in flight. This option bounds the memory that anti-entropy uses: a session pulls missing pages in rounds of `max_pages_in_flight / max_concurrency` pages, whatever the size of the dataset. The sessions that `db.oplog.aae.max_concurrency` limits hold about this many pages between them. Each session outside that limit can add one more round of that size. A larger value syncs faster and uses more memory at the peak.
+
+### Bootstraps
+
+A **bootstrap** is the snapshot transfer that brings a shard to the state of a peer. A shard needs one when it holds no data, or when it cannot catch up from the history its peers still keep. A node that restarts bootstraps the shards of the in-memory registry, which holds the routing table.
+
+@[config](db.oplog.aae.bootstrap.max_concurrency,integer,4,v1.2.1)
+
+The number of bootstraps that can run at once on this node. `db.oplog.aae.max_concurrency` does not apply to bootstraps, so a node that recovers can run up to this many sessions above that limit. A higher value rebuilds the routing table sooner, and puts more snapshot work on the peers that serve it. `0` stops new bootstraps.
+
+@[config](db.oplog.aae.bootstrap.serve.max_concurrency,integer,8,v1.2.1)
+
+The number of bootstraps this node serves to other nodes at once. The node refuses a request above this number, and the asking node asks again after its retry backoff. The serving node counts each refusal in [`bondy_oplog_bootstrap_serve_refused_total`](/connect/reference/metrics#anti-entropy-sync-bootstrap-frontier-convergence). A bootstrap whose asking node stopped counts until it expires, 60 seconds after its last request. `0` serves none.
 
 ### Load-Adaptive Yielding
 
 @[config](db.oplog.aae.load_adaptive,on|off,off,v1.1.0)
 
-Yields anti-entropy's throttleable dispatches while the node is busy. The concurrency cap bounds anti-entropy in aggregate; this adds a temporal dimension — even within the cap, a routing load spike transiently defers anti-entropy so background reconciliation never steals scheduler time from the node's real job. When on, the scheduler samples a node-load signal each tick and, while the node is backlogged past `db.oplog.aae.load_run_queue_threshold`, skips throttleable dispatches (bootstrap snapshot ships and non-fence live syncs) for that tick — in-flight sessions are never aborted, and deferred shards retry on the next quiet tick. Shards backing the authentication freshness fence are exempt and always sync, so this can never affect auth availability, only convergence latency under load. Off by default, since the concurrency cap and live-sync throttle already keep anti-entropy subordinate; enable it where routing latency is sensitive to anti-entropy scheduler pressure under load.
+Makes the scheduler yield to node load. On every tick the scheduler compares a load signal with `db.oplog.aae.load_run_queue_threshold`. While the signal is at or above the threshold, the scheduler does not start the live syncs of a shard that does not back the authentication freshness fence. It starts bootstraps and the live syncs of fence-backing shards as usual, and it does not stop a session that runs. It starts the deferred syncs on the next tick below the threshold.
+
+**Known limitation.** Every shard that a Bondy node starts backs the authentication freshness fence. On a Bondy node this option therefore defers nothing. `bondy_oplog_sync_scheduler_yielding` still reports when the load is at or above the threshold.
 
 @[config](db.oplog.aae.load_run_queue_threshold,float,2.0,v1.1.0)
 
-Run-queue length per online scheduler — EWMA-smoothed across ticks — at or above which anti-entropy yields its throttleable dispatches (only consulted when `db.oplog.aae.load_adaptive` is also on). The signal is `erlang:statistics(run_queue)` divided by the online scheduler count: the average number of ready processes queued per scheduler. A healthy node hovers near 0–1; a sustained 2 or more means work is queuing faster than the schedulers drain it. Lower yields anti-entropy sooner (more protective of routing latency, slower convergence under load); higher lets it work closer to saturation.
+Run-queue length per online scheduler, smoothed across ticks, at or above which the scheduler yields. The scheduler yields only when `db.oplog.aae.load_adaptive` is on. The signal is `erlang:statistics(run_queue)` divided by the online scheduler count: the average number of ready processes queued per scheduler. A healthy node stays near 0–1. A sustained 2 or more means that work queues faster than the schedulers drain it. [`bondy_oplog_sync_scheduler_load`](/connect/reference/metrics#anti-entropy-sync-bootstrap-frontier-convergence) exports the signal whether or not the option is on.
 
 ### Peer Sampling
 

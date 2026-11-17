@@ -264,10 +264,8 @@ Convergence is not instantaneous and Bondy does not pretend otherwise. After a
 node returns from a fault, the path back has a shape you can reason about:
 
 - Ordinary lag closes on the **next round that instance gets** — the scheduler
-  ticks every `db.oplog.aae.interval`, but `db.oplog.aae.max_concurrency` caps how many
-  sessions run at once, and instances rotate for the free slots so none is
-  starved. On a node with many shards, a given instance is reached every few
-  ticks rather than every tick.
+  ticks every `db.oplog.aae.interval` and starts a live sync for every instance
+  on every tick, unless the previous session with that peer still runs.
 - A gap needing the remedy costs the **two-strike detection delay** first: two
   complete rounds against that peer, plus the settle between them.
 - The re-bootstrap itself then costs a **full projection transfer** for the

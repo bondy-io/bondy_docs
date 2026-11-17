@@ -206,7 +206,7 @@ stages, and each costs more than the one before it:
 
 | Situation | What has to happen | Roughly bounded by |
 |---|---|---|
-| Ordinary lag | One sync round for that instance | `db.oplog.aae.interval`, times how many ticks the instance waits for a slot under `db.oplog.aae.max_concurrency`, + transfer |
+| Ordinary lag | One sync round for that instance | `db.oplog.aae.interval`, + the session that still runs with that peer, + transfer |
 | Standing gap | Two complete rounds to strike twice, then the remedy | Two rounds + settle |
 | Re-bootstrap | Full projection transfer for the instance | Size of the instance |
 

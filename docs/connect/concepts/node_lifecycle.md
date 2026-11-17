@@ -131,12 +131,13 @@ A node shuts down in an order that lets clients leave cleanly while the orchestr
 
 1. The node marks itself shutting down, so `/ready` answers `503` from here on, and stops accepting connections on its normal listeners. Existing connections continue. The early listeners keep answering `/ping`, `/ready` and `/metrics`, so an orchestrator does not read the draining node as dead and kill it.
 2. It sends `GOODBYE` to every client session.
-3. It waits for [`shutdown.grace_period`](/connect/reference/configuration/startup_shutdown). The wait is a fixed sleep: the node waits the full period even when every client has already left.
-4. It leaves the cluster if [`cluster.automatic_leave`](/connect/reference/configuration/cluster#cluster.automatic_leave) is on.
-5. It stops the normal listeners, which closes every remaining connection. When a connection ends, the node removes its session together with the session's registrations and subscriptions.
-6. Last, it stops the early listeners.
+3. It waits until the last client connection closes. [`shutdown.grace_period`](/connect/reference/configuration/startup_shutdown) is the longest it waits, so a node with no client left does not sit idle for the whole period.
+4. In a cluster, it waits within the same period until the nodes it is connected to hold the removal of its registrations and subscriptions. Those nodes then stop routing calls and events to it before it goes down.
+5. It leaves the cluster if [`cluster.automatic_leave`](/connect/reference/configuration/cluster#cluster.automatic_leave) is on.
+6. It stops the normal listeners, which closes every remaining connection. When a connection ends, the node removes its session together with the session's registrations and subscriptions.
+7. Last, it stops the early listeners.
 
-Because the grace period is a fixed sleep, a process supervisor must allow longer than it before killing the node.
+The grace period bounds both waits, so a process supervisor must allow longer than it before killing the node.
 
 A shutdown does not need to flush storage to be safe. Every acknowledged write is already in the log, and the next boot recovers from it as it would after a crash.
 

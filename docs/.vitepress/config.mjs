@@ -818,6 +818,30 @@ function guidesSidebar() {
           description: 'Serve a realm to AI agents: declare the listener, publish interface metadata, connect a client.'
         }
       ]
+    },
+    {
+      text: 'Troubleshooting',
+      description: 'Start from a symptom and use the metrics to find its cause.',
+      items: [
+        {
+          text: 'Diagnosing Calls That Find No Callee',
+          link: '/connect/guides/troubleshooting/calls_that_find_no_callee',
+          isFeature: true,
+          description: 'Tell a missing registration from a routing view that is behind, and choose between retries and failover.'
+        },
+        {
+          text: 'Diagnosing Events That Do Not Reach Subscribers on Another Node',
+          link: '/connect/guides/troubleshooting/events_not_reaching_remote_subscribers',
+          isFeature: true,
+          description: 'Find the hop where an event published on one node stops before a subscriber on another.'
+        },
+        {
+          text: 'Diagnosing a Node That Is Slow to Catch Up',
+          link: '/connect/guides/troubleshooting/node_slow_to_catch_up',
+          isFeature: true,
+          description: 'Find what holds anti-entropy back after a restart or a partition: the bootstrap limits, failing sessions, or a saturated node.'
+        }
+      ]
     }
   ]
 }
@@ -1142,6 +1166,7 @@ function referenceSidebar() {
       description: 'What Bondy Connect implements of each protocol it speaks, and how it encodes payloads.',
       items: [
         { text: 'WAMP Compliance', link: '/connect/reference/protocols/wamp' },
+        { text: 'Call Routing and Retry Options', link: '/connect/reference/protocols/wamp_call_options' },
         { text: 'MCP Compliance', link: '/connect/reference/protocols/mcp' },
         { text: 'Serialization', link: '/connect/reference/serialization' }
       ]

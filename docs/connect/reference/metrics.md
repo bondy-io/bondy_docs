@@ -63,18 +63,25 @@ These families instrument the replicated storage layer described in [Architectur
 
 | Metric family | Type | Covers |
 |---|---|---|
-| `bondy_oplog_sync_sessions_total`, `_sync_duration_microseconds` | Counter / Histogram | AAE sync session outcomes and duration, by `peer` and `outcome`. |
-| `bondy_oplog_bootstrap_sessions_total`, `_bootstrap_duration_microseconds`, `_bootstrap_cells_total` | Counter / Histogram | Catalogue bootstrap (new or recovering node) sessions and cell-transfer outcomes. |
-| `bondy_oplog_sync_scheduler_events_total` | Counter | Sync scheduler activity, by `event` (dispatch, backoff, capped, load-deferred, and similar). |
+| `bondy_oplog_sync_sessions_total` | Counter | Finished sync sessions, by `instance_id`, `peer` and `outcome` (`ok`, `error`). One session is one pull of one instance from one peer. `ok` means the session ended without a failure; it does not by itself mean the node caught up, because a session pulls a bounded number of pages. `error` includes a peer the node could not reach. For whether a pair is caught up, read `bondy_oplog_peer_last_sync_age_seconds`. |
+| `bondy_oplog_sync_duration_microseconds` | Histogram | Duration of a sync session, by `outcome`. The duration grows with the number of pages the node is missing, and with the load on either node. |
+| `bondy_oplog_bootstrap_sessions_total`, `_bootstrap_duration_microseconds`, `_bootstrap_cells_total` | Counter / Histogram | Finished bootstrap sessions on the node that asks, by `instance_id`, `peer` and `outcome`, with their duration and the outcomes of the cells they transfer. `outcome` is `ok`, `error` or `busy`. `busy` is a bootstrap that the peer refused because it was at [`db.oplog.aae.bootstrap.serve.max_concurrency`](/connect/reference/configuration/data_storage#db.oplog.aae.bootstrap.serve.max_concurrency); the node asks again after its retry backoff. |
+| `bondy_oplog_bootstrap_serve_refused_total` | Counter | Bootstraps this node refused to serve because it already served [`db.oplog.aae.bootstrap.serve.max_concurrency`](/connect/reference/configuration/data_storage#db.oplog.aae.bootstrap.serve.max_concurrency) of them, by `instance_id`. Each refusal shows as `outcome="busy"` in `bondy_oplog_bootstrap_sessions_total` on the node that asked. A sustained rate while other nodes recover means that this limit holds their recovery back. |
+| `bondy_oplog_sync_scheduler_events_total` | Counter | Sync scheduler decisions, by `event`. Each value is one decision the scheduler took for one instance on one tick; see [Sync scheduler events](#sync-scheduler-events) for every value. |
 | `bondy_oplog_gc_scheduler_events_total` | Counter | Compaction and reclamation scheduler activity, by `scheduler` and `event`. `scheduler` is `bondy_oplog_gc_scheduler` (compaction) or `bondy_oplog_reclaim_scheduler` (reclamation). Each trigger run counts one `trigger_<outcome>` event, for example `trigger_ok`, `trigger_unconfirmed` or `trigger_no_members`. A query that selects by `event` alone returns one series per scheduler. |
-| `bondy_oplog_sync_scheduler_enabled`, `_interval_milliseconds`, `_load`, `_yielding`, `_inflight` | Gauge | Live scheduler state: on/off, tick interval, run-queue load sample, load-yielding flag, in-flight sync/bootstrap sessions. |
+| `bondy_oplog_sync_scheduler_enabled`, `_interval_milliseconds` | Gauge | `1` when the sync scheduler runs, and its tick interval ([`db.oplog.aae.interval`](/connect/reference/configuration/data_storage#db.oplog.aae.interval)). |
+| `bondy_oplog_sync_scheduler_load` | Gauge | The smoothed node-load signal the scheduler compares with [`db.oplog.aae.load_run_queue_threshold`](/connect/reference/configuration/data_storage#db.oplog.aae.load_run_queue_threshold): ready processes queued per online scheduler. The scheduler samples the load on every tick, whether or not [`db.oplog.aae.load_adaptive`](/connect/reference/configuration/data_storage#db.oplog.aae.load_adaptive) is on. With it off, read this gauge under normal traffic to choose a threshold before you turn it on. |
+| `bondy_oplog_sync_scheduler_yielding` | Gauge | `1` while [`db.oplog.aae.load_adaptive`](/connect/reference/configuration/data_storage#db.oplog.aae.load_adaptive) is on and the load is at or above the threshold. Always `0` with the option off. At `1` the scheduler does not start the live syncs of instances that do not back the authentication fence. It starts bootstraps and fence-backing live syncs as usual. On a Bondy node every instance backs the fence, so the scheduler defers nothing at `1`. |
+| `bondy_oplog_sync_scheduler_inflight` | Gauge | Sync sessions running now, by `kind`: `total` (live syncs and bootstraps together) and `bootstrap`. [`db.oplog.aae.bootstrap.max_concurrency`](/connect/reference/configuration/data_storage#db.oplog.aae.bootstrap.max_concurrency) limits `bootstrap`. A `bootstrap` value that stays at that limit means instances wait for a bootstrap slot. No setting limits `total` on a Bondy node; see the known limitation of [`db.oplog.aae.max_concurrency`](/connect/reference/configuration/data_storage#db.oplog.aae.max_concurrency). |
 | `bondy_oplog_aae_enabled` | Gauge | `1` when AAE is enabled on this node. |
 | `bondy_oplog_instance_frontier_hash`, `_frontier_origins`, `_frontier_seq_total` | Gauge | The per-instance applied-frontier version vector: a stable hash for cross-node convergence comparison (`count_values` in PromQL &mdash; no scrape-time cross-node calls), its origin count, and its summed sequence number (monotone; a cross-node gap shows replication lag). |
 | `bondy_oplog_instance_frontier_holes` | Gauge | Per-origin contiguity holes the instance carries now, by `instance_id`: sequence runs this replica never received, with later sequences of the same origin already folded above them. `0` on a healthy replica. A standing hole holds the applied frontier below it, so peers keep re-offering the origin and the MST cannot truncate past it; the `bondy_oplog_frontier_hole` alarm fires on the age of this condition. |
 | `bondy_oplog_instance_frontier_pending_seqs` | Gauge | Sequence numbers the instance has folded but cannot yet claim in its frontier because they sit above a hole, by `instance_id`. Nothing is lost or re-fetched; they are reported to peers once the hole closes. This grows with traffic behind a stuck hole while the hole count stays flat. |
 | `bondy_oplog_sync_oversized_item_total` | Counter | Sync items whose serialized size alone exceeds the sync response ceiling (derived from Partisan's `max_message_size`), by `kind`. A `page` is left out of the response, so the instance makes no anti-entropy progress until `cluster.max_message_size` is raised; a `cell` (catalogue bootstrap) is shipped in parts and still converges, at the cost of extra rounds. Both series are present at `0` from boot. While the count grows, the `bondy_oplog_sync_oversized_items` alarm is raised. |
 | `bondy_oplog_sync_oversized_item_last_bytes` | Gauge | Serialized size in bytes of the most recent oversized sync item, by `kind` &mdash; how high `cluster.max_message_size` must go. Use `max_over_time` for the worst case. |
-| `bondy_oplog_peer_last_sync_age_seconds`, `_peer_last_seen_age_seconds`, `_peer_state_entries` | Gauge | Per-(instance, peer) sync recency, and the row count of the peer sync-state table. |
+| `bondy_oplog_peer_last_sync_age_seconds` | Gauge | Seconds since this node last completed a sync round with a peer, by `instance_id` and `peer`. A completed round is one in which the node held everything the peer offered, so a low value means the pair is caught up for that instance. The record is kept in memory: after a restart a pair has no series until its first completed round, so an *absent* series on a recently restarted node means "not caught up yet", not "healthy". |
+| `bondy_oplog_peer_last_seen_age_seconds` | Gauge | Seconds since this node last heard from a peer at all, by `instance_id` and `peer`. A low value here with a high `last_sync_age` means the two nodes are talking and the rounds are not completing. |
+| `bondy_oplog_peer_state_entries` | Gauge | Row count of the peer sync-state table: one row per `(instance, peer)` pair that has synced. |
 | `bondy_oplog_doored_events_total` | Counter | Never-applied peer operations at or below the local watermark that the **watermark door** accepted instead of discarding &mdash; folded into the projection inline, or held for the applier's replay, by `action`. A steady rate under write load is the door doing its job; see [Convergence](/connect/concepts/convergence#the-watermark-door). |
 | `bondy_oplog_frontier_gap_verdicts_total` | Counter | Completed sync rounds that left the peer's applied frontier strictly ahead of ours after settle, by `peer`. A single verdict per (instance, peer) is a benign transient that heals on the next round; repeats trip the re-bootstrap remedy. |
 | `bondy_oplog_rebootstraps_scheduled_total` | Counter | Catalogue re-bootstraps scheduled, by `peer` &mdash; because a peer reclaimed pages this replica needs, or because a frontier gap struck twice. Streams the peer's whole projection, so a climbing count for one pair means the remedy is not fixing the cause. |
@@ -84,6 +91,33 @@ These families instrument the replicated storage layer described in [Architectur
 | `bondy_oplog_events_held_total` | Counter | Operations a replay held because an earlier operation from the same origin is missing. A burst on a node rejoining after truncation is the mechanism working; a sustained rate on a healthy cluster means a gap is not filling &mdash; see [Per-Origin Prefix Closure](/connect/concepts/prefix_closure). |
 | `bondy_oplog_prefix_holes_total` | Counter | Contiguity gaps that *materialised* into a fold. Only transient own-origin gaps from concurrent local commit reordering should register; exclude those before alerting. Any remote-origin count warrants investigation. |
 | `bondy_oplog_seqs_burned_total`, `_seqs_filled_total` | Counter | Sequence numbers a rejected write-ahead append could not return to the counter, and the burned seqs whose no-op backfill landed durably. Healthy operation keeps the two equal; a persistent shortfall is a permanent gap that converts into a catalogue rebootstrap on peers. |
+
+#### Sync scheduler events {#sync-scheduler-events}
+
+Every tick, the sync scheduler visits each instance and decides whether to start a session for it. `bondy_oplog_sync_scheduler_events_total` counts those decisions in its `event` label. The counter carries no `instance_id`: it says what the scheduler is doing on the node, not which instance it did it to.
+
+An instance is in one of two states, and each state has its own events. A **bootstrapping** instance holds no data yet and copies a peer's whole snapshot. A **live** instance pulls only the pages it is missing.
+
+| `event` | Meaning |
+|---|---|
+| `tick` | The scheduler ran one tick. The rate is `1 / db.oplog.aae.interval`; a lower rate means the scheduler process itself is starved. |
+| `load_yield` | A tick on which `db.oplog.aae.load_adaptive` was on and the load signal was at or above the threshold. One per such tick. On such a tick the scheduler defers the live syncs of instances that do not back the authentication fence, and nothing else. |
+| `live_started` | A live sync session started for one instance against one peer. |
+| `live_ended` | A live sync session ended, with any outcome. |
+| `live_capped` | A live sync was due and did not start, because `db.oplog.aae.max_concurrency` sessions were already running. The instance waits for a later tick. |
+| `live_load_deferred` | A live sync was due and did not start, because the scheduler was yielding to load. |
+| `live_sync_poll` | A quiescent instance reached the end of its back-off window and polled its peers. |
+| `live_sync_skipped` | A quiescent instance was inside its back-off window, so the scheduler skipped it. A high rate on a converged cluster is the live-sync throttle saving work. |
+| `dispatch_bootstrap` | The scheduler chose a peer and dispatched a snapshot bootstrap for an instance. |
+| `bootstrap_started` | A bootstrap session started. |
+| `bootstrap_ended` | A bootstrap session ended, with any outcome. |
+| `bootstrap_capped` | A bootstrap was due and did not start, because `db.oplog.aae.bootstrap.max_concurrency` bootstraps were already running. The instance waits for a later tick. |
+| `bootstrap_retry_scheduled` | A bootstrap session failed or was refused, and the scheduler set a back-off before the next attempt for that instance. |
+| `bootstrap_backoff_deferred` | A bootstrap was due and did not start, because the instance was inside that back-off. |
+
+Read the events as a ratio. `bootstrap_capped` against `bootstrap_started` says how often a due bootstrap found no slot. `load_yield` against `tick` says on what share of ticks the load was at or above the threshold.
+
+An instance that backs the authentication fence is outside the cap, the live-sync throttle and load yielding. It counts `live_started` and `live_ended`, and never `live_capped`, `live_load_deferred`, `live_sync_poll` or `live_sync_skipped`. On a Bondy node every instance backs the fence, so a Bondy node does not count those four events.
 
 ### MST & page store
 
@@ -171,7 +205,7 @@ These families track cluster membership and inter-node connectivity &mdash; the 
 | `bondy_wamp_dropped_total` | Counter | Messages or events Bondy declined to deliver, by `reason` and `family` (the class of dropped work). `reason` is `shed` for load shedding, `admission` for a `HELLO` the session admission gate refused, or `payload_size_exceeded` for an `EVENT` longer than a RawSocket subscriber's [message length](/connect/reference/protocols/wamp#rawsocket-message-length). |
 | `bondy_wamp_call_latency_milliseconds`, `_invocation_latency_milliseconds` | Histogram | Routed RPC latency, by `procedure_uri`. The call family measures the full round trip (dealer receipt of `CALL` to first `RESULT`/`ERROR`); the invocation family measures only the `INVOCATION`&rarr;`YIELD`/`ERROR` leg. The difference between the two is router overhead. |
 | `bondy_rpc_promises_inflight`, `bondy_rpc_inflight_invocations` | Gauge | Pending RPC promises awaiting a yield or error, in aggregate and per `procedure_uri` &mdash; a rising value means callee saturation. |
-| `bondy_rpc_promise_timeouts_total` | Counter | RPC promises evicted on expiry (the caller received a WAMP timeout), by `type`. |
+| `bondy_rpc_promise_timeouts_total` | Counter | Calls that Bondy ended with `wamp.error.timeout` because a pending wait expired, by `type`: `call` for the caller's side of a call, `invocation` for an `INVOCATION` a callee did not answer. An expiry that Bondy answers with a new attempt, for a call that set [`_retries`](/connect/reference/protocols/wamp_call_options#retries), is not counted, and neither is a wait of a call that found no callee. |
 | `bondy_registry_events_total` | Counter | Registration and subscription lifecycle events, by `realm`, `type` and `action`. |
 | `bondy_registry_size`, `bondy_registry_memory` | Gauge | Registry substrate size (approximate entry count) and memory. |
 | `bondy_registry_ptrie_cas_retries_total` | Counter | Pattern-index (ptrie) write rounds that lost the root compare-and-swap to a concurrent writer and were retried, by `node`. All pattern writes of a realm contend on one root per (type, match policy), so a sustained rate means pattern registrations or subscriptions are contending. Zero when writes do not overlap. |
@@ -204,16 +238,21 @@ These histograms measure each hop a published event takes, so a slow delivery ca
 | `bondy_wamp_egress_queue_depth` | Histogram | Mailbox depth of a subscriber's connection process at the moment it dequeued an outbound WAMP message, by `transport`. This is the last hop before the wire; depth &times; service time estimates the wait of every message behind this one. |
 | `bondy_wamp_egress_service_microseconds` | Histogram | In-process time a subscriber's connection process spent handling one outbound WAMP message, by `transport`. For WebSocket this is the encode only, because the socket write happens after the handler returns; for a transport whose handler writes to the socket itself, the write is included. Compare across transports accordingly. |
 
-### Registry RIB &mdash; cross-node routing
+### Registry RIB &mdash; cross-node routing {#registry-rib}
 
 Backs [Registry Routing (RIB)](/connect/concepts/registry_routing): the compact per-`(realm, match policy, URI, node)` routing summaries that let cross-node call and event routing scale without replicating every registration and subscription to every node.
 
+The two gauges describe what a node knows. The two counters describe what happened to calls that crossed nodes, and each is counted on a different node: completions on the node that received the call, retries on the caller's node.
+
 | Metric family | Type | Covers |
 |---|---|---|
-| `bondy_registry_rib_members`, `_stub_cells` | Gauge | Live local registry entries feeding this node's routing summaries, and remote routing-summary stubs held by this node, by registry type. |
-| `bondy_registry_rib_divergences` | Gauge | Keys where the routing summaries disagree with the registry's own ground truth, as of the last periodic consistency sweep (`registry.rib.check_interval`). |
-| `bondy_rpc_rib_retries_total` | Counter | Pre-invocation retries of cluster calls after an owner-side completion miss, by `outcome` (node / local / exhausted). |
-| `bondy_rpc_rib_completions_total` | Counter | Owner-side completions of node-addressed cluster calls, by `outcome` (ok / miss). |
+| `bondy_registry_rib_members` | Gauge | Live local registrations and subscriptions that feed this node's summary cells. No labels. It rises and falls with the registrations and subscriptions of the sessions connected to this node. |
+| `bondy_registry_rib_stub_cells` | Gauge | Summary cells of *other* nodes that this node holds and routes from, by `type` (`registration`, `subscription`). This gauge is the size of the node's view of the rest of the cluster. A node that restarts begins at `0` and climbs as anti-entropy delivers cells. A node whose value stays well below its peers' is routing from an incomplete view. |
+| `bondy_registry_rib_divergences` | Gauge | Keys where this node's summary cells disagree with its own registry, as of the last consistency sweep ([`registry.rib.check_interval`](/connect/reference/configuration/cluster#registry.rib.check_interval)). `0` in steady state. It compares a node with itself, so it says nothing about whether the node's view of its peers is current. |
+| `bondy_rpc_rib_completions_total` | Counter | Calls that another node forwarded to this node, by `outcome`. `ok`: this node found a live local callee and invoked it. `miss`: this node had no live callee for the procedure, so it answered the caller's node before any `INVOCATION` was sent. A `miss` means the *caller's node* held a summary cell that was out of date. |
+| `bondy_rpc_rib_retries_total` | Counter | What the caller's node did after a `miss`, by `outcome`. `node`: it routed the call to another node. `local`: one of its own registrations took the call. `exhausted`: no untried node, no time, or no budget was left, and the caller received `wamp.error.no_eligible_callee`. The budget is [`CALL.Options._routing_max_candidates`](/connect/reference/protocols/wamp_call_options#routing-max-candidates). |
+
+Neither counter moves when a node knows of no callee at all. That call fails on the caller's node with `wamp.error.no_such_procedure` and is visible only in `bondy_wamp_error_messages_total{error_uri="wamp.error.no_such_procedure"}`.
 
 ### Rate limiting & inbound protection
 

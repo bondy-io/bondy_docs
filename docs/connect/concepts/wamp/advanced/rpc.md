@@ -819,6 +819,27 @@ wampy.call('com.myapp.inventory.get', [sku], {
 });
 ```
 
+A retry selects a callee from what the caller's node knows when the attempt starts. It does not ask another node whether that node serves the procedure. On a cluster, a retry therefore helps when the registration, or the news of it, arrives within the call's deadline. See [When the routing view is behind](/connect/concepts/registry_routing#when-the-routing-view-is-behind).
+
+### Cluster Failover
+
+`CALL.Options._routing_max_candidates` sets how many distinct cluster nodes Bondy routes a call to. Its default is `2`: the node Bondy selects first, and one more.
+
+When the callee is on another node, the caller's node forwards the call there, and that node selects the callee among its own registrations. The caller's node can be wrong about that node: the callee might have left a moment ago. In that case the node answers with a miss, and the caller's node selects again among the nodes it has not tried.
+
+A miss happens before Bondy sends any `INVOCATION`, so moving the call cannot run the procedure twice. That is why failover between nodes needs neither `_retries` nor `_idempotent`, and why Bondy does it by default. The attempts share one call timeout: trying a second node does not give the call more time.
+
+```javascript
+// Try up to three nodes before the call fails
+wampy.call('com.myapp.inventory.get', [sku], {
+    _routing_max_candidates: 3
+});
+```
+
+When every node Bondy tries has no callee, the call fails with `wamp.error.no_eligible_callee`. Raise the value when several nodes can lose their callees at once, for example during a deployment that restarts callees node by node.
+
+The [Call Routing and Retry Options](/connect/reference/protocols/wamp_call_options) reference gives the exact contract of each option in this section.
+
 ### Partitioned Calls
 
 A partitioned call sends all calls that carry the same key to the same callee of a shared registration. Set `runmode` to `partition` and `rkey` to the key:

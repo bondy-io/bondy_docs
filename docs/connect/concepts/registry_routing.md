@@ -58,6 +58,44 @@ nothing to configure to turn it on.
 Local calls and events never leave the node — they resolve against the local
 registry directly.
 
+## When the routing view is behind
+
+A node routes from its own stub view, and that view is only as current as the
+last anti-entropy round that fed it. Summary cells replicate in the
+background, so there is always a window in which a node's view differs from
+the truth. The window is normally short. It is long on a node that has just
+restarted, or that has just rejoined after a network partition, because that
+node has a whole view to pull while it also serves traffic.
+
+A view can be wrong in two directions, and Bondy treats them differently.
+
+**The view lists a node that no longer serves the URI.** The node forwards the
+call there, the receiving node finds no live registration, and it answers with
+a miss. No `INVOCATION` was sent, so the caller's node can safely select
+another node. `CALL.Options._routing_max_candidates` bounds how many nodes it
+tries, and defaults to `2`. When every node misses, the call fails with
+`wamp.error.no_eligible_callee`.
+
+**The view does not list a node that does serve the URI.** The node has no
+candidate to forward to, so the call fails with
+`wamp.error.no_such_procedure`. The node does not ask its peers whether they
+know of a callee, and `_routing_max_candidates` has no effect, because there
+is no candidate to count. A caller that prefers to wait sets
+`CALL.Options._retries`. Bondy then holds the call and routes it again after
+a pause, so the call succeeds if the cell arrives within the call's deadline.
+
+Events follow the same view, with one difference that matters. A `PUBLISH` on
+a node whose view lacks a subscriber node is not relayed to that node, and
+nothing fails: the publication succeeds, and the subscribers on the missing
+node receive nothing. There is no error to retry on.
+
+Both directions heal on their own as anti-entropy catches up. How long that
+takes depends on how much the node has to pull and on how much room
+anti-entropy has to run; see
+[Diagnosing a Node That Is Slow to Catch Up](/connect/guides/troubleshooting/node_slow_to_catch_up).
+The options named here are specified in
+[Call Routing and Retry Options](/connect/reference/protocols/wamp_call_options).
+
 ## Restarts and clocks
 
 A summary cell carries its node's latest *reading* of how many live entries it
